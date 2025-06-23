@@ -1,0 +1,279 @@
+/* OrderDetails.css */
+
+/* --- Page Layout & Containers --- */
+.order-details-page-container {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.order-details-max-width-wrapper {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .order-details-max-width-wrapper {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .order-details-max-width-wrapper {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.order-details-card {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+/* --- Loading State --- */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 16rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 9999px;
+  height: 3rem;
+  width: 3rem;
+  border-bottom: 2px solid #4f46e5;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Not Found State --- */
+.not-found-center-text {
+  text-align: center;
+}
+
+.not-found-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+/* --- Order Header --- */
+.order-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.order-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-id-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.order-status-badges {
+  display: flex;
+  gap: 1rem;
+}
+
+.order-status-badge,
+.payment-status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Status specific colors */
+.status-delivered {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-shipped {
+  background-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.status-approved {
+  background-color: #fef9c3;
+  color: #854d09;
+}
+
+.status-denied {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-default {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* Payment Status specific colors */
+.payment-completed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.payment-failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.payment-pending {
+  background-color: #fef9c3;
+  color: #854d09;
+}
+
+.order-placed-date {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+/* --- Information Sections (Shipping & Payment) --- */
+.info-section {
+  padding: 1rem 1.5rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.info-heading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 1rem;
+}
+
+.info-details-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-details-group p {
+  line-height: 1.5;
+}
+
+.info-details-group .font-medium {
+  font-weight: 500;
+}
+
+/* --- Order Items Section --- */
+.order-items-section {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.order-item-details {
+  display: flex;
+  align-items: center;
+}
+
+.product-image {
+  width: 4rem;
+  height: 4rem;
+  object-fit: cover;
+  border-radius: 0.375rem;
+}
+
+.product-image-placeholder {
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+}
+
+.product-info {
+  margin-left: 1rem;
+}
+
+.product-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1a202c;
+}
+
+.product-quantity {
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.item-total-price {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1a202c;
+}
+
+/* --- Order Summary Section --- */
+.order-summary-section {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.order-summary-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-heading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.total-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+}

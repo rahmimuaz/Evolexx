@@ -1,0 +1,35 @@
+/* App.css */
+
+body {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  background-color: #f9fafb;
+  color: #1f2937;
+  margin: 0;
+}
+
+.main-content {
+  flex: 1;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* Simulates shadow-inner */
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+    padding: 2.5rem;
+  }
+}
+
+.max-width-container {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+}

@@ -1,0 +1,29 @@
+.app-container {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+.main-content-padding {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.max-width-wrapper {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .max-width-wrapper {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .max-width-wrapper {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
