@@ -1,14 +1,4 @@
-/* Reset and base */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-body, html {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f9fafb;
-  color: #333;
-}
+
 
 /* Loader */
 .loader {
@@ -25,8 +15,7 @@ body, html {
 
 /* Home container */
 .home {
-  padding: 20px;
-  max-width: 1200px;
+  width: 100%;
   margin: auto;
 }
 

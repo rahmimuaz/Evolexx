@@ -24,7 +24,6 @@ function App() {
         <CartProvider>
           <div className="app">
             <Navbar />
-            <main className="content">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
@@ -36,7 +35,6 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
               </Routes>
-            </main>
             <ToastContainer position="top-right" autoClose={3000} />
           </div>
         </CartProvider>

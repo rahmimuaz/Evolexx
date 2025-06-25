@@ -1,37 +1,12 @@
-/* Reset and base */
-* {
-  box-sizing: border-box;
-}
-
-body, html, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f9fafb;
-  color: #333;
-}
-
 /* App container */
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
-
-/* Navbar styling handled inside Navbar component */
-
-/* Main content area */
-.content {
-  flex-grow: 1;
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 0 15px;
   width: 100%;
-  box-sizing: border-box;
+  background-color: aqua;
 }
 
-/* Toastify overrides (optional, you can customize) */
 .Toastify__toast-container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 0.9rem;
