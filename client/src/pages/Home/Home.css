@@ -1,6 +1,3 @@
-
-
-/* Loader */
 .loader {
   height: 100vh;
   display: flex;
@@ -15,8 +12,9 @@
 
 /* Home container */
 .home {
-  width: 100%;
+  width: 95%;
   margin: auto;
+  
 }
 
 /* Header */
@@ -82,7 +80,6 @@
 }
 .feature {
   flex: 1;
-  background-color: #fff;
   padding: 20px;
   text-align: center;
   border-radius: 8px;

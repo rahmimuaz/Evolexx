@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCart } from '../../context/CartContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Cart.css';
 
 const Cart = () => {
@@ -25,9 +25,7 @@ const Cart = () => {
 
   const getImageUrl = (path) => {
     if (!path) return '';
-
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
-
     return path.startsWith('/') 
       ? `http://localhost:5001${path}` 
       : `http://localhost:5001/${path}`;
@@ -137,7 +135,7 @@ const Cart = () => {
           </div>
           <p className="brand-tagline">Experience the future with our top-notch gadgets and devices.</p>
           <nav className="social-links">
-            {/* Put your social icons here as links */}
+            {/* Add social icons here */}
           </nav>
         </section>
 
@@ -145,19 +143,19 @@ const Cart = () => {
           <div>
             <h3>About Us</h3>
             <ul>
-              <li><a href="#">Contact</a></li>
-              <li><a href="#">Address</a></li>
-              <li><a href="#">FAQ's</a></li>
+              <li><Link to="/contact">Contact</Link></li>
+              <li><Link to="/address">Address</Link></li>
+              <li><Link to="/faqs">FAQ's</Link></li>
             </ul>
           </div>
           <div>
             <h3>Customer Service</h3>
             <ul>
-              <li><a href="#">Terms and Conditions</a></li>
-              <li><a href="#">Help Center</a></li>
-              <li><a href="#">Returns & Refunds</a></li>
-              <li><a href="#">Shipping & Delivery</a></li>
-              <li><a href="#">Warranty Information</a></li>
+              <li><Link to="/terms">Terms and Conditions</Link></li>
+              <li><Link to="/help">Help Center</Link></li>
+              <li><Link to="/returns">Returns & Refunds</Link></li>
+              <li><Link to="/shipping">Shipping & Delivery</Link></li>
+              <li><Link to="/warranty">Warranty Information</Link></li>
             </ul>
           </div>
         </section>
