@@ -16,6 +16,7 @@ import Navbar from './components/Navbar/Navbar';
 import CardPaymentPage from './pages/Payment/CardPaymentPage';
 import { UserProvider } from './context/UserContext';
 import { CartProvider } from './context/CartContext';
+import Homepage from './pages/Home/Homepage';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/order/:id" element={<OrderDetails />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/homepage" element={<Homepage />} />
               </Routes>
             <ToastContainer position="top-right" autoClose={3000} />
           </div>
