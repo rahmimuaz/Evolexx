@@ -1,79 +1,108 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Homepage.css';
+import axios from 'axios';
+// Import icons from react-icons
+import { FaShippingFast, FaRedoAlt, FaCertificate } from 'react-icons/fa';
+import { HiShieldCheck } from 'react-icons/hi'; // Add this
+
 
 const Homepage = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Replace with actual fetch logic
-    setProducts([
-      {
-        _id: '1',
-        name: 'iPhone 14',
-        description: 'Powerful and sleek',
-        price: 999.99,
-        images: ['https://via.placeholder.com/150'],
-      },
-      {
-        _id: '2',
-        name: 'AirPods Pro',
-        description: 'Crystal clear sound',
-        price: 199.99,
-        images: ['https://via.placeholder.com/150'],
-      },
-    ]);
+    fetchProducts();
   }, []);
 
-  const generateImageUrl = (product) => {
-    return product.images?.[0] || '/logo512.png';
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('http://localhost:5001/api/products');
+      setProducts(response.data);
+      setLoading(false);
+    } catch (error) {
+      setError('Error fetching products');
+      setLoading(false);
+    }
   };
+
+  const generateImageUrl = (product) => {
+    if (product.images && product.images.length > 0) {
+      return product.images[0].startsWith('http')
+        ? product.images[0]
+        : `http://localhost:5001/${product.images[0].replace(/^\//, '')}`;
+    }
+    return '/logo192.png';
+  };
+
+  if (loading) return <div className="loader"></div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="home">
-     <header className="header">
-  <div className="header-row">
-    <div className="nav-buttons">
-      <button>Phone</button>
-      <button>Accessories</button>
-      <button>New Deals</button>
-      <button>Popular</button>
-    </div>
+      <header className="header">
+        <div className="header-row">
+          <div className="nav-buttons">
+            <button>Phone</button>
+            <button>Accessories</button>
+            <button>New Deals</button>
+            <button>Popular</button>
+          </div>
 
-    <div className="search">
-      <input type="text" placeholder="Search" />
-      <svg className="search-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-    </div>
+          <div className="search">
+            <input type="text" placeholder="Search" />
+            <svg
+              className="search-icon"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              fill="none"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
 
-    <div className="nav-info">
-      <button>About</button>
-      <button>FAQ's</button>
-    </div>
-  </div>
-</header>
-
+          <div className="nav-info">
+            <button>About</button>
+            <button>FAQ's</button>
+          </div>
+        </div>
+      </header>
 
       <section className="banner">
         <img src="/logo512.png" alt="Hero Banner" />
       </section>
 
+      {/* Features section with icons */}
       <section className="features">
-        <div className="feature">
-          <h3>Fast & Free Shipping</h3>
-          <p>Every single order ships for free.</p>
-        </div>
-        <div className="feature">
-          <h3>30 Days Returns</h3>
-          <p>Product returns accepted within 30 days.</p>
-        </div>
-        <div className="feature">
-          <h3>Top Quality</h3>
-          <p>We always provide high quality products.</p>
-        </div>
-      </section>
+  <div className="feature">
+    <FaShippingFast />
+    <div className="feature-text">
+      <h3>Fast & Free Shipping</h3>
+      <p>Every single order ships for free.</p>
+    </div>
+  </div>
+  <div className="feature">
+    <FaRedoAlt />
+    <div className="feature-text">
+      <h3>30 Days Returns</h3>
+      <p>Product returns accepted within 30 days.</p>
+    </div>
+  </div>
+ <div className="feature">
+  <HiShieldCheck />
+  <div className="feature-text">
+    <h3>Top Quality Products</h3>
+    <p>We always provide high quality products.</p>
+  </div>
+</div>
+
+</section>
 
       <section className="product-section">
         <h2>Explore Products</h2>

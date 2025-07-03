@@ -71,7 +71,7 @@ const Home = () => {
           <p>Product returns accepted within 30 days.</p>
         </div>
         <div className="feature">
-          <h3>Top Quality</h3>
+          <h3>Top Quality </h3>
           <p>We always provide high quality products.</p>
         </div>
       </section>
