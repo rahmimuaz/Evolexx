@@ -9,7 +9,6 @@ import ProductDetail from './pages/ProductDetails/ProductDetail';
 import Cart from './pages/CartPage/Cart';
 import Checkout from './pages/CheckOut/Checkout';
 import OrderDetails from './components/OrderDetails/OrderDetails';
-import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
 import Register from './pages/Login/Register';
 import Navbar from './components/Navbar/Navbar';

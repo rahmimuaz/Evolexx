@@ -103,27 +103,93 @@ const Homepage = () => {
 </div>
 
 </section>
-
+<section className="explore-section">
+  <h2>Explore Products</h2>
+  <div className="explore-grid">
+    <div className="explore-large">
+      {/* Large featured product */}
+      <Link to={`/products/${products[0]?._id || ''}`} className="explore-card">
+        <img src={generateImageUrl(products[0] || {})} alt="Featured" />
+      </Link>
+    </div>
+    <div className="explore-small">
+      {/* Top right smaller product */}
+      <Link to={`/products/${products[1]?._id || ''}`} className="explore-card">
+        <img src={generateImageUrl(products[1] || {})} alt="Secondary 1" />
+      </Link>
+      {/* Bottom right smaller product */}
+      <Link to={`/products/${products[2]?._id || ''}`} className="explore-card">
+        <img src={generateImageUrl(products[2] || {})} alt="Secondary 2" />
+      </Link>
+    </div>
+  </div>
+</section>
       <section className="product-section">
-        <h2>Explore Products</h2>
+        <h2>All Products</h2>
         <div className="product-grid">
           {products.map((product) => {
             const imageUrl = generateImageUrl(product);
             return (
-              <Link to={`/products/${product._id}`} className="product-card" key={product._id}>
-                <img
-                  src={imageUrl}
-                  alt={product.name}
-                  onError={(e) => (e.target.src = '/logo192.png')}
-                />
-                <h3>{product.name}</h3>
-                <p>{product.description}</p>
-                <p className="price">${product.price?.toFixed(2) || 'N/A'}</p>
-              </Link>
+<Link to={`/products/${product._id}`} className="product-card" key={product._id}>
+  <img
+    src={imageUrl}
+    alt={product.name}
+    onError={(e) => (e.target.src = '/logo192.png')}
+  />
+  <h3>{product.name}</h3>
+  <p>{product.description}</p>
+  <div className="card-footer">
+    <p className="price">Rs. {product.price?.toFixed(2) || 'N/A'}</p>
+    <button className="view-more-btn">View More</button>
+  </div>
+</Link>
+
             );
           })}
         </div>
       </section>
+      <footer className="footer">
+  <div className="footer-top">
+    <div className="footer-brand">
+      <div className="logo">
+        <span className="logo-icon">⚡</span>
+        <span className="logo-text">EVOLEXX</span>
+      </div>
+      <p>Experience the future with our top-notch gadgets and devices.</p>
+      <div className="social-icons">
+        <a href="#"><i className="fab fa-instagram"></i></a>
+        <a href="#"><i className="fab fa-facebook-f"></i></a>
+        <a href="#"><i className="fab fa-whatsapp"></i></a>
+      </div>
+    </div>
+
+    <div className="footer-links">
+      <h4>About Us</h4>
+      <ul>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">FAQ’s</a></li>
+      </ul>
+    </div>
+
+    <div className="footer-links">
+      <h4>Customer service</h4>
+      <ul>
+        <li><a href="#">Terms and Conditions</a></li>
+        <li><a href="#">Help Center</a></li>
+        <li><a href="#">Returns & Refunds</a></li>
+        <li><a href="#">Shipping & Delivery</a></li>
+        <li><a href="#">Warranty Information</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <hr />
+  <div className="footer-bottom">
+    <p>© 2025 Evolexx. All rights reserved.</p>
+  </div>
+</footer>
+
     </div>
   );
 };
