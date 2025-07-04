@@ -54,7 +54,6 @@ const Homepage = () => {
             <button>Phone</button>
             <button>Accessories</button>
             <button>New Deals</button>
-            <button>Popular</button>
           </div>
 
           <div className="search">
