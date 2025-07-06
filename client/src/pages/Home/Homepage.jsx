@@ -143,7 +143,7 @@ const Homepage = () => {
             <h3>30 Days Returns</h3>
             <p>Product returns accepted within 30 days.</p>
           </div>
-        </div>
+        </div> 
         <div className="feature">
           <HiShieldCheck />
           <div className="feature-text">
