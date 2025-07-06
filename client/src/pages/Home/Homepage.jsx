@@ -48,32 +48,6 @@ const Homepage = () => {
 
   return (
     <div className="home">
-      <header className="header">
-        <div className="header-row">
-          <div className="nav-buttons">
-            <button>Phone</button>
-            <button>Accessories</button>
-            <button>New Deals</button>
-          </div>
-
-          <div className="search">
-            <input type="text" placeholder="Search" />
-            <svg className="search-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-
-          <div className="nav-info">
-            <button>About</button>
-            <button>FAQ's</button>
-          </div>
-        </div>
-      </header>
 
       <section className="banner">
         <img src="/logo512.png" alt="Hero Banner" />
