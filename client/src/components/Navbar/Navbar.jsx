@@ -20,9 +20,11 @@ const Navbar = () => {
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
   const toggleSearch = () => setSearchOpen(!searchOpen);
+  const toggleMenu = () => setMenuOpen(!menuOpen);
 
   return (
     <nav className="navbar">
@@ -33,8 +35,13 @@ const Navbar = () => {
           <Link to="/" className="navbar-brand">EVOLEXX</Link>
         </div>
 
+        {/* Hamburger (mobile) */}
+        <button className="hamburger-button" onClick={toggleMenu}>
+          <FaBars />
+        </button>
+
         {/* Center Section */}
-        <div className="navbar-center">
+        <div className={`navbar-center ${menuOpen ? 'open' : ''}`}>
           <div className="navbar-links">
             <Link to="/" className={`navbar-link ${location.pathname === '/' ? 'active-link' : ''}`}>Home</Link>
             <Link to="/phones" className={`navbar-link ${location.pathname === '/phones' ? 'active-link' : ''}`}>Phones</Link>
@@ -42,6 +49,7 @@ const Navbar = () => {
             <Link to="/newdeals" className={`navbar-link ${location.pathname === '/newdeals' ? 'active-link' : ''}`}>New Deals</Link>
           </div>
         </div>
+
         <div className="navbar-divider" />
 
         {/* Right Section */}
