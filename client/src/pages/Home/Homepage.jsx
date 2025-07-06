@@ -152,31 +152,29 @@ const Homepage = () => {
           </div>
         </div>
       </section>
+      {/* ============ CATEGORY SECTION ============ */}
+<section className="category-section">
+  <h2>Shop by Category</h2>
+  <div className="category-grid">
+    <Link to="/category/brand-new" className="category-card">
+      <img src="/category-brandnew.jpg" alt="Brand New" />
+      <h3>Brand New Phones</h3>
+    </Link>
+    <Link to="/category/pre-owned" className="category-card">
+      <img src="/category-preowned.jpg" alt="Pre-Owned" />
+      <h3>Pre-Owned Phones</h3>
+    </Link>
+    <Link to="/category/accessories" className="category-card">
+      <img src="/category-accessories.jpg" alt="Accessories" />
+      <h3>Accessories</h3>
+    </Link>
+    <Link to="/category/laptops" className="category-card">
+      <img src="/category-laptops.jpg" alt="Laptops" />
+      <h3>Laptops</h3>
+    </Link>
+  </div>
+</section>
 
-      <section className="explore-section">
-        <h2>Explore Products</h2>
-        <div className="explore-grid">
-          <div className="explore-large">
-            {products[0] && (
-              <Link to={`/products/${products[0]._id}`} className="explore-card">
-                <img src={generateImageUrl(products[0])} alt={products[0].name} />
-              </Link>
-            )}
-          </div>
-          <div className="explore-small">
-            {products[1] && (
-              <Link to={`/products/${products[1]._id}`} className="explore-card">
-                <img src={generateImageUrl(products[1])} alt={products[1].name} />
-              </Link>
-            )}
-            {products[2] && (
-              <Link to={`/products/${products[2]._id}`} className="explore-card">
-                <img src={generateImageUrl(products[2])} alt={products[2].name} />
-              </Link>
-            )}
-          </div>
-        </div>
-      </section>
 
       <section className="product-section">
         <h2>All Products</h2>
