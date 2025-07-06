@@ -10,9 +10,63 @@ const Homepage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Original banner images
+  const originalBannerImages = [
+    '/banner1.jpg',
+    '/banner2.jpg',
+    '/banner3.jpg',
+  ];
+
+  // Modified bannerImages array for infinite loop effect
+  // We append the first image to the end
+  const bannerImages = [...originalBannerImages, originalBannerImages[0]];
+
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true); // New state to control transition
+
   useEffect(() => {
     fetchProducts();
-  }, []);
+
+    const bannerInterval = setInterval(() => {
+      // Allow transition for normal slides
+      setIsTransitioning(true);
+
+      setCurrentBannerIndex((prevIndex) => {
+        // If we are at the last (duplicated) image
+        if (prevIndex === bannerImages.length - 1) {
+          // Immediately jump back to the true first image without transition
+          setIsTransitioning(false); // Disable transition
+          return 0; // Go to the very first image
+        } else {
+          return prevIndex + 1; // Normal slide to the next image
+        }
+      });
+    }, 4000); // Change image every 4 seconds
+
+    // A separate effect to handle the instant jump back from duplicated image
+    // This effect runs whenever currentBannerIndex or isTransitioning changes
+    const transitionEndHandler = () => {
+        if (!isTransitioning && currentBannerIndex === 0) {
+            // After the instant jump, re-enable transition for the next slide
+            setTimeout(() => {
+                setIsTransitioning(true);
+            }, 50); // Small delay to ensure CSS re-applies
+        }
+    };
+
+    const bannerSlider = document.querySelector('.banner-slider');
+    if (bannerSlider) {
+        bannerSlider.addEventListener('transitionend', transitionEndHandler);
+    }
+
+
+    return () => {
+        clearInterval(bannerInterval);
+        if (bannerSlider) {
+            bannerSlider.removeEventListener('transitionend', transitionEndHandler);
+        }
+    };
+  }, [bannerImages.length, isTransitioning, currentBannerIndex]); // Add dependencies for useEffect
 
   const fetchProducts = async () => {
     try {
@@ -20,7 +74,8 @@ const Homepage = () => {
       setProducts(response.data);
       setLoading(false);
     } catch (error) {
-      setError('Error fetching products');
+      console.error('Error fetching products:', error);
+      setError('Error fetching products. Please try again later.');
       setLoading(false);
     }
   };
@@ -43,17 +98,37 @@ const Homepage = () => {
   const handleShippingClick = () => alert('Shipping Clicked');
   const handleWarrantyClick = () => alert('Warranty Clicked');
 
-  if (loading) return <div className="loader"></div>;
-  if (error) return <div className="error">{error}</div>;
+  if (loading) {
+    return <div className="loader">Loading products...</div>;
+  }
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
 
   return (
     <div className="home">
-
-
+      {/* ============ BANNER SECTION ============ */}
       <section className="banner">
-        <img src="/logo512.png" alt="Hero Banner" />
+        <div
+          className="banner-slider"
+          // Conditionally apply transition based on isTransitioning state
+          style={{
+            transform: `translateX(-${currentBannerIndex * 100}%)`,
+            transition: isTransitioning ? 'transform 1s ease-in-out' : 'none',
+          }}
+        >
+          {bannerImages.map((image, index) => (
+            <img
+              key={index} // Using index as key is acceptable here since items are static
+              src={image}
+              alt={`Hero Banner ${index + 1}`}
+              className="banner-image"
+            />
+          ))}
+        </div>
       </section>
 
+      {/* Rest of your existing JSX for features, explore-section, product-section, and footer */}
       <section className="features">
         <div className="feature">
           <FaShippingFast />
@@ -82,17 +157,23 @@ const Homepage = () => {
         <h2>Explore Products</h2>
         <div className="explore-grid">
           <div className="explore-large">
-            <Link to={`/products/${products[0]?._id || ''}`} className="explore-card">
-              <img src={generateImageUrl(products[0] || {})} alt="Featured" />
-            </Link>
+            {products[0] && (
+              <Link to={`/products/${products[0]._id}`} className="explore-card">
+                <img src={generateImageUrl(products[0])} alt={products[0].name} />
+              </Link>
+            )}
           </div>
           <div className="explore-small">
-            <Link to={`/products/${products[1]?._id || ''}`} className="explore-card">
-              <img src={generateImageUrl(products[1] || {})} alt="Secondary 1" />
-            </Link>
-            <Link to={`/products/${products[2]?._id || ''}`} className="explore-card">
-              <img src={generateImageUrl(products[2] || {})} alt="Secondary 2" />
-            </Link>
+            {products[1] && (
+              <Link to={`/products/${products[1]._id}`} className="explore-card">
+                <img src={generateImageUrl(products[1])} alt={products[1].name} />
+              </Link>
+            )}
+            {products[2] && (
+              <Link to={`/products/${products[2]._id}`} className="explore-card">
+                <img src={generateImageUrl(products[2])} alt={products[2].name} />
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -119,7 +200,7 @@ const Homepage = () => {
             );
           })}
         </div>
-        <hr/>
+        <hr />
       </section>
 
       <footer className="footer">
@@ -131,37 +212,75 @@ const Homepage = () => {
             </div>
             <p>Experience the future with our top-notch gadgets and devices.</p>
             <div className="social-icons">
-              <button aria-label="Instagram" className="footer-link-btn">Instagram</button>
-              <button aria-label="Facebook" className="footer-link-btn">Facebook</button>
-              <button aria-label="WhatsApp" className="footer-link-btn">WhatsApp</button>
+              <button aria-label="Instagram" className="footer-link-btn">
+                Instagram
+              </button>
+              <button aria-label="Facebook" className="footer-link-btn">
+                Facebook
+              </button>
+              <button aria-label="WhatsApp" className="footer-link-btn">
+                WhatsApp
+              </button>
             </div>
           </div>
 
           <div className="footer-links">
             <h4>About Us</h4>
             <ul>
-              <li><button onClick={handleContactClick} className="footer-link-btn">Contact</button></li>
-              <li><button onClick={handleAddressClick} className="footer-link-btn">Address</button></li>
-              <li><button onClick={handleFaqClick} className="footer-link-btn">FAQ’s</button></li>
+              <li>
+                <button onClick={handleContactClick} className="footer-link-btn">
+                  Contact
+                </button>
+              </li>
+              <li>
+                <button onClick={handleAddressClick} className="footer-link-btn">
+                  Address
+                </button>
+              </li>
+              <li>
+                <button onClick={handleFaqClick} className="footer-link-btn">
+                  FAQ’s
+                </button>
+              </li>
             </ul>
           </div>
 
           <div className="footer-links">
             <h4>Customer Service</h4>
             <ul>
-              <li><button onClick={handleTermsClick} className="footer-link-btn">Terms and Conditions</button></li>
-              <li><button onClick={handleHelpClick} className="footer-link-btn">Help Center</button></li>
-              <li><button onClick={handleReturnsClick} className="footer-link-btn">Returns & Refunds</button></li>
-              <li><button onClick={handleShippingClick} className="footer-link-btn">Shipping & Delivery</button></li>
-              <li><button onClick={handleWarrantyClick} className="footer-link-btn">Warranty Information</button></li>
+              <li>
+                <button onClick={handleTermsClick} className="footer-link-btn">
+                  Terms and Conditions
+                </button>
+              </li>
+              <li>
+                <button onClick={handleHelpClick} className="footer-link-btn">
+                  Help Center
+                </button>
+              </li>
+              <li>
+                <button onClick={handleReturnsClick} className="footer-link-btn">
+                  Returns & Refunds
+                </button>
+              </li>
+              <li>
+                <button onClick={handleShippingClick} className="footer-link-btn">
+                  Shipping & Delivery
+                </button>
+              </li>
+              <li>
+                <button onClick={handleWarrantyClick} className="footer-link-btn">
+                  Warranty Information
+                </button>
+              </li>
             </ul>
           </div>
         </div>
       </footer>
       <hr className="footer-divider" />
       <div className="footer-bottom">
-          <p>© 2025 Evolexx. All rights reserved.</p>
-        </div>
+        <p>© 2025 Evolexx. All rights reserved.</p>
+      </div>
     </div>
   );
 };

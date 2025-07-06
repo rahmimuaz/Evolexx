@@ -8,15 +8,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: 1.2rem;
+  color: #333;
 }
 
 .error {
   color: red;
   text-align: center;
   margin-top: 20px;
+  font-size: 1.2rem;
 }
 
-/* ============ HEADER ============ */
+/* ============ HEADER (No changes needed based on previous discussion) ============ */
 .header {
   display: flex;
   flex-wrap: wrap;
@@ -129,11 +132,29 @@
   background-color: #dcdcdc;
 }
 
-/* ============ HERO BANNER ============ */
-.banner img {
+/* ============ HERO BANNER - SLIDING ANIMATION ============ */
+.banner {
+  position: relative;
   width: 100%;
-  max-height: 75vh;
+  max-height: 78vh; /* Keeps your chosen max-height */
+  height: 78vh; /* ADDED: Ensure .banner has a defined height */
+  overflow: hidden; /* Crucial: Hides images that are off-screen */
+}
+
+.banner-slider {
+  display: flex; /* Arranges images side-by-side */
+  width: 100%; /* Initially 100% width, but content inside will exceed this */
+  height: 100%; /* Inherit height from .banner */
+  transition: transform 1s ease-in-out; /* Smooth transition for sliding */
+  /* The width will effectively be (number of images * 100%) as each image is 100% width */
+}
+
+.banner-image {
+  flex-shrink: 0; /* Prevents images from shrinking */
+  width: 100%; /* Each image takes up 100% of the .banner's width */
+  height: 100%; /* Ensure image fills the height of the slider */
   object-fit: cover;
+  display: block;
 }
 
 /* ============ FEATURES ============ */
@@ -144,7 +165,6 @@
   background-color: #ffffff;
   gap: 5rem;
   flex-wrap: wrap;
-    padding: 25px;
 }
 
 .feature {
@@ -219,6 +239,7 @@
   display: block;
   background-color: #e2e8f0;
   overflow: hidden;
+  height: 100%;
 }
 
 .explore-card img {
@@ -384,6 +405,13 @@
   line-height: 1.5;
 }
 
+.social-icons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: flex-start;
+}
+
 .footer-links {
   display: flex;
   flex-direction: column;
@@ -505,7 +533,7 @@
   }
 
   .explore-card img {
-    height: 200px !important;
+    height: 200px;
     border-radius: 12px;
   }
 
@@ -531,5 +559,9 @@
   .product-section hr {
     margin: 40px 0;
     border-top: 1px solid #e5e7eb;
+  }
+
+  .social-icons {
+    justify-content: center;
   }
 }
