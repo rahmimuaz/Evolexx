@@ -239,7 +239,6 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 12px;
   transition: transform 0.3s ease;
 }
 
@@ -251,8 +250,7 @@
   font-size: 1.2rem;
   font-weight: bold;
   padding: 8px 16px;
-  border-radius: 6px;
-  color: #ffffff;
+  color: oklch(100% 0.00011 271.152);
   z-index: 2;
 }
 
