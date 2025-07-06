@@ -153,27 +153,41 @@ const Homepage = () => {
         </div>
       </section>
       {/* ============ CATEGORY SECTION ============ */}
+
 <section className="category-section">
   <h2>Shop by Category</h2>
-  <div className="category-grid">
-    <Link to="/category/brand-new" className="category-card">
-      <img src="/category-brandnew.jpg" alt="Brand New" />
-      <h3>Brand New Phones</h3>
+  <div className="category-grid-custom">
+    <Link to="/category/sound" className="category-card tall">
+      <img src="/category-accessories.jpg" alt="Sound System" />
+      <div className="overlay-text bottom">
+        <p>Sound System</p>
+
+      </div>
     </Link>
-    <Link to="/category/pre-owned" className="category-card">
-      <img src="/category-preowned.jpg" alt="Pre-Owned" />
-      <h3>Pre-Owned Phones</h3>
+
+    <Link to="/category/watch" className="category-card square">
+      <img src="/category-accessories.jpg" alt="Smart Watch" />
+      <div className="overlay-text bottom">
+        <p>Smart Watch</p>
+      </div>
     </Link>
-    <Link to="/category/accessories" className="category-card">
-      <img src="/category-accessories.jpg" alt="Accessories" />
-      <h3>Accessories</h3>
+
+    <Link to="/category/tablet" className="category-card square">
+      <img src="/category-accessories.jpg" alt="Tablet" />
+      <div className="overlay-text bottom">
+        <p>Tablet Computer</p>
+      </div>
     </Link>
-    <Link to="/category/laptops" className="category-card">
-      <img src="/category-laptops.jpg" alt="Laptops" />
-      <h3>Laptops</h3>
+
+    <Link to="/category/game" className="category-card wide">
+      <img src="/category-accessories.jpg" alt="Game Controller" />
+      <div className="overlay-text bottom">
+        <p>Game Controller</p>
+      </div>
     </Link>
   </div>
 </section>
+
 
 
       <section className="product-section">
