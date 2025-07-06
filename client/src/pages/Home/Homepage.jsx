@@ -49,6 +49,7 @@ const Homepage = () => {
   return (
     <div className="home">
 
+
       <section className="banner">
         <img src="/logo512.png" alt="Hero Banner" />
       </section>

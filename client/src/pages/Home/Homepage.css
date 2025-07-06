@@ -132,7 +132,7 @@
 /* ============ HERO BANNER ============ */
 .banner img {
   width: 100%;
-  max-height: 65vh;
+  max-height: 75vh;
   object-fit: cover;
 }
 

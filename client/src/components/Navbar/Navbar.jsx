@@ -36,17 +36,17 @@ const Navbar = () => {
         </div>
 
         {/* Hamburger (mobile) */}
-        <button className="hamburger-button" onClick={toggleMenu}>
+        <button className="hamburger-button" onClick={toggleMenu} aria-label="Toggle menu">
           <FaBars />
         </button>
 
         {/* Center Section */}
         <div className={`navbar-center ${menuOpen ? 'open' : ''}`}>
           <div className="navbar-links">
-            <Link to="/" className={`navbar-link ${location.pathname === '/' ? 'active-link' : ''}`}>Home</Link>
-            <Link to="/phones" className={`navbar-link ${location.pathname === '/phones' ? 'active-link' : ''}`}>Phones</Link>
-            <Link to="/accessories" className={`navbar-link ${location.pathname === '/accessories' ? 'active-link' : ''}`}>Accessories</Link>
-            <Link to="/newdeals" className={`navbar-link ${location.pathname === '/newdeals' ? 'active-link' : ''}`}>New Deals</Link>
+            <Link to="/" className={`navbar-link ${location.pathname === '/' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link to="/phones" className={`navbar-link ${location.pathname === '/phones' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Phones</Link>
+            <Link to="/accessories" className={`navbar-link ${location.pathname === '/accessories' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Accessories</Link>
+            <Link to="/newdeals" className={`navbar-link ${location.pathname === '/newdeals' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>New Deals</Link>
           </div>
         </div>
 
@@ -63,7 +63,7 @@ const Navbar = () => {
 
           {/* Search */}
           <div className="search-wrapper">
-            <button className="search-icon-button" onClick={toggleSearch}>
+            <button className="search-icon-button" onClick={toggleSearch} aria-label="Toggle search">
               <FaSearch size={18} />
             </button>
             {searchOpen && (
@@ -71,13 +71,14 @@ const Navbar = () => {
                 type="text"
                 placeholder="Search..."
                 className="search-input-navbar"
+                autoFocus
               />
             )}
           </div>
 
-          {/* Dropdown */}
+          {/* Profile Dropdown */}
           <div className="profile-dropdown-wrapper">
-            <button className="profile-icon-button" onClick={toggleDropdown}>
+            <button className="profile-icon-button" onClick={toggleDropdown} aria-label="Toggle profile menu">
               <FaUserCircle size={22} />
             </button>
 
