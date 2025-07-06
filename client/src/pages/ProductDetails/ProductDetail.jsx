@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import './ProductDetail.css';
+import Footer from '../../components/Footer/Footer';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -192,6 +193,7 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
