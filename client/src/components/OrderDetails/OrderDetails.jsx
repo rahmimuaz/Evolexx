@@ -100,7 +100,7 @@ const OrderDetails = () => {
           {/* Order Header */}
           <div className="order-header">
             <div className="order-header-content">
-              <h1 className="order-id-title">Order #{order._id}</h1>
+              <h1 className="order-id-title">Order : ORD {order._id}</h1>
               <div className="order-status-badges">
                 <span className={`order-status-badge ${
                   order.status === 'delivered' ? 'status-delivered' :

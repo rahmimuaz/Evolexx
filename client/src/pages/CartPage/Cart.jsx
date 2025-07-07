@@ -2,6 +2,7 @@ import React from 'react';
 import { useCart } from '../../context/CartContext';
 import { useNavigate, Link } from 'react-router-dom';
 import './Cart.css';
+import Footer from '../../components/Footer/Footer';
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart } = useCart();
@@ -38,9 +39,8 @@ const Cart = () => {
 
   return (
     <div className="cart">
+      <h1 className="cart-title">Shopping Cart</h1>
       <main className="cart-content max-width">
-        <h1 className="cart-title">Shopping Cart</h1>
-
         <section className="cart-items">
           {cartItems.length === 0 ? (
             <p className="empty-message">Your cart is empty.</p>
@@ -124,6 +124,7 @@ const Cart = () => {
           </button>
         </aside>
       </main>
+      <Footer />
   </div>
   );
 };
