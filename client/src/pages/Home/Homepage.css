@@ -307,7 +307,7 @@
 .product-section {
   margin-left: 10px;
   margin-top: 30px;
-  padding: 0rem 1rem;
+  padding: 0rem 2rem;
   text-align: center;
   background-color: #ffffff;
 }
@@ -330,13 +330,16 @@
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem 2rem;
+  gap: 3rem 2rem;
 }
 
 .product-card {
   background-color: #ffffff;
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px;
+
+
 }
 
 .product-card:hover {
@@ -348,8 +351,8 @@
   width: 100%;
   height: 300px;
   object-fit: cover;
-  background-color: #ededed;
-  border-radius: 12px;
+  background-color: #f0f0f094;
+  border-radius: 8px;
 }
 
 .product-card h3 {
@@ -369,12 +372,49 @@
 }
 
 .product-card .price {
-  text-align: center;
-  padding: 1.2rem 0.5rem;
+  text-align: left;
   font-size: 1rem;
   color: #080808;
   font-weight: 300;
+  margin-top: 20px;
 }
+.card-footer .koko-pay {
+  display: flex;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  color: #a9afb9;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.card-footer .koko-logo {
+  background-color: #fff;
+  width: 17%;
+  height: 16px;
+  margin-left: 20px;
+  border-radius: 0px;
+
+}
+
+.star-rating {
+  color: #f7c948; /* gold color */
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+.koko-pay {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.koko-logo {
+  height: 16px;
+  margin-left: 5px;
+}
+
 
 
 /* ============ MEDIA QUERIES ============ */

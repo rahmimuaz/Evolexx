@@ -189,29 +189,57 @@ const Homepage = () => {
 
 
 
-      <section className="product-section">
-        <h2>All Products</h2>
-        <div className="product-grid">
-          {products.map((product) => {
-            const imageUrl = generateImageUrl(product);
-            return (
-              <Link to={`/products/${product._id}`} className="product-card" key={product._id}>
-                <img
-                  src={imageUrl}
-                  alt={product.name}
-                  onError={(e) => (e.target.src = '/logo192.png')}
-                />
-                <h3>{product.name}</h3>
-                <p>{product.description}</p>
-                <div className="card-footer">
-                  <p className="price">Rs. {product.price?.toFixed(2) || 'N/A'}</p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-        <hr />
-      </section>
+<section className="product-section">
+  <h2>All Products</h2>
+  <div className="product-grid">
+    {products.map((product) => {
+      const imageUrl = generateImageUrl(product);
+      const fullPrice = product.price || 0;
+      const kokoTotal = fullPrice * 1.12;
+      const kokoInstallment = kokoTotal / 3;
+
+      return (
+        <Link to={`/products/${product._id}`} className="product-card" key={product._id}>
+          <img
+            src={imageUrl}
+            alt={product.name}
+            onError={(e) => (e.target.src = '/logo192.png')}
+          />
+          <h3>{product.name}</h3>
+          <p>{product.description}</p>
+
+          {/* ⭐ Rating Stars */}
+          <div className="star-rating">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span key={star}>
+                {product.rating >= star ? '★' : '☆'}
+              </span>
+            ))}
+          </div>
+
+          <div className="card-footer">
+            <p className="price">
+              Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+            </p>
+            {product.price && (
+              <p className="koko-pay">
+                or pay in 3 × Rs.{" "}
+                {kokoInstallment.toLocaleString("en-LK", {
+                  minimumFractionDigits: 2,
+                })}{" "}
+                 with<img src="/koko.webp" alt="Koko" className="koko-logo" />
+              </p>
+            )}
+          </div>
+        </Link>
+      );
+    })}
+  </div>
+  <hr />
+</section>
+
+
+
     </div>
   );
 };
