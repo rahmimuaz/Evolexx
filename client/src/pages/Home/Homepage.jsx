@@ -4,6 +4,7 @@ import './Homepage.css';
 import axios from 'axios';
 import { FaShippingFast, FaRedoAlt } from 'react-icons/fa';
 import { HiShieldCheck } from 'react-icons/hi';
+import Footer from '../../components/Footer/Footer'; // Import the Footer component
 
 const Homepage = () => {
   const [products, setProducts] = useState([]);
@@ -89,14 +90,7 @@ const Homepage = () => {
     return '/logo192.png';
   };
 
-  const handleContactClick = () => alert('Contact Clicked');
-  const handleAddressClick = () => alert('Address Clicked');
-  const handleFaqClick = () => alert('FAQ Clicked');
-  const handleTermsClick = () => alert('Terms Clicked');
-  const handleHelpClick = () => alert('Help Clicked');
-  const handleReturnsClick = () => alert('Returns Clicked');
-  const handleShippingClick = () => alert('Shipping Clicked');
-  const handleWarrantyClick = () => alert('Warranty Clicked');
+
 
   if (loading) {
     return <div className="loader">Loading products...</div>;
@@ -235,9 +229,9 @@ const Homepage = () => {
       );
     })}
   </div>
-  <hr />
-</section>
 
+</section>
+< Footer />
 
 
     </div>

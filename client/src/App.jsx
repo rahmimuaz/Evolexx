@@ -15,6 +15,7 @@ import CardPaymentPage from './pages/Payment/CardPaymentPage';
 import { UserProvider } from './context/UserContext';
 import { CartProvider } from './context/CartContext';
 import Homepage from './pages/Home/Homepage';
+import Footer from './components/Footer/Footer'; // Uncomment if you want to use Footer
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/homepage" element={<Homepage />} />
+                <Route path="/footer" element={<Footer/>} />
               </Routes>
             <ToastContainer position="top-right" autoClose={3000} />
           </div>

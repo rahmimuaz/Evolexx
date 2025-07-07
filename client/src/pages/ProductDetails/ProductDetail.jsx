@@ -75,6 +75,7 @@ const ProductDetail = () => {
 
   return (
     <div className="product-detail-page-container">
+      <h1></h1>
       <div className="product-detail-main-content">
         <div className="image-gallery-section">
           <div className="main-image-container">

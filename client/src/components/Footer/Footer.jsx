@@ -1,8 +1,7 @@
 import React from 'react';
-import './Footer.css'; // Ensure you have the correct path to your CSS file
+import './Footer.css';
 
 const Footer = () => {
-  // Placeholder handlers (replace with real navigation/actions)
   const handleContactClick = () => alert('Contact us section');
   const handleAddressClick = () => alert('Address section');
   const handleFaqClick = () => alert('FAQ section');

@@ -124,47 +124,7 @@ const Cart = () => {
           </button>
         </aside>
       </main>
-
-      <footer className="footer max-width">
-        <section className="footer-brand">
-          <div className="brand-logo">
-            <svg viewBox="0 0 20 20" fill="currentColor" className="logo-icon">
-              <path fillRule="evenodd" clipRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v2.172a1 1 0 01.387.973l.67 2.378a1 1 0 00.916.634h3.292a1 1 0 01.95 1.282l-.67 2.378a1 1 0 00-.387.973V18a1 1 0 01-1 1h-2.172a1 1 0 01-.973-.387l-2.378-.67a1 1 0 00-.634-.916H2a1 1 0 01-1-1v-2.172a1 1 0 01-.387-.973l.67-2.378a1 1 0 00.916-.634H18a1 1 0 011 1v2.172a1 1 0 01.387.973l-.67 2.378a1 1 0 00-.916.634H2a1 1 0 01-1-1V2a1 1 0 011-1h9.3z"/>
-            </svg>
-            EVOLEXX
-          </div>
-          <p className="brand-tagline">Experience the future with our top-notch gadgets and devices.</p>
-          <nav className="social-links">
-            {/* Add social icons here */}
-          </nav>
-        </section>
-
-        <section className="footer-links">
-          <div>
-            <h3>About Us</h3>
-            <ul>
-              <li><Link to="/contact">Contact</Link></li>
-              <li><Link to="/address">Address</Link></li>
-              <li><Link to="/faqs">FAQ's</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3>Customer Service</h3>
-            <ul>
-              <li><Link to="/terms">Terms and Conditions</Link></li>
-              <li><Link to="/help">Help Center</Link></li>
-              <li><Link to="/returns">Returns & Refunds</Link></li>
-              <li><Link to="/shipping">Shipping & Delivery</Link></li>
-              <li><Link to="/warranty">Warranty Information</Link></li>
-            </ul>
-          </div>
-        </section>
-
-        <div className="copyright">
-          © 2025 Evolexx. All rights reserved.
-        </div>
-      </footer>
-    </div>
+  </div>
   );
 };
 
