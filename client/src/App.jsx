@@ -4,7 +4,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css';
 
-import Products from './pages/ProductList/Products';
 import ProductDetail from './pages/ProductDetails/ProductDetail';
 import Cart from './pages/CartPage/Cart';
 import Checkout from './pages/CheckOut/Checkout';
@@ -26,7 +25,6 @@ function App() {
             <Navbar />
               <Routes>
                 <Route path="/" element={<Homepage />} />
-                <Route path="/products" element={<Products />} />
                 <Route path="/products/:id" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />

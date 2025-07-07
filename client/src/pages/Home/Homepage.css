@@ -1,6 +1,6 @@
 /* ============ GENERAL STYLES ============ */
 .home {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   width: 100%;
 }
 
@@ -206,15 +206,9 @@
 
 /* ============ UPDATED CATEGORY SECTION ============ */
 .category-section {
-  padding: 0px 30px;
+  padding: 0px 20px;
   background-color: #ffffff;
   text-align: center;
-}
-
-.category-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 30px;
-  font-weight: bold;
 }
 
 .category-grid-custom {
@@ -311,14 +305,15 @@
 
 /* ============ PRODUCT SECTION ============ */
 .product-section {
-  margin-top: 80px;
+  margin-left: 10px;
+  margin-top: 30px;
   padding: 0rem 1rem;
   text-align: center;
   background-color: #ffffff;
 }
 
 .product-section hr {
-  width: 100%;
+  width: 99%;
   margin: 40px 0;
   border-top: 1px solid #e5e7eb;
 }
@@ -340,10 +335,7 @@
 
 .product-card {
   background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
   text-decoration: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -356,13 +348,12 @@
   width: 100%;
   height: 300px;
   object-fit: cover;
-  border-radius: 10px;
-  background-color: #ffffff;
-  border-bottom: #e5e7eb 1px solid;
+  background-color: #ededed;
+  border-radius: 12px;
 }
 
 .product-card h3 {
-  text-align: left;
+  text-align: center;
   padding: 0.5rem 0.5rem;
   font-size: 1rem;
   color: #111827;
@@ -370,7 +361,7 @@
 }
 
 .product-card p {
-  text-align: left;
+  text-align: center;
   padding: 0.2rem 0.5rem;
   font-size: 0.9rem;
   color: #6b7280;
@@ -378,50 +369,13 @@
 }
 
 .product-card .price {
-  text-align: left;
-  padding: 1rem 0.5rem;
+  text-align: center;
+  padding: 1.2rem 0.5rem;
   font-size: 1rem;
   color: #080808;
-  font-weight: 700;
+  font-weight: 300;
 }
 
-.card-footer {
-  margin-top: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0px 0.4rem;
-}
-
-.view-more-btn {
-  padding: 0.4rem 0.75rem;
-  background-color: #fefefe;
-  color: #000000;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.view-more-btn:hover {
-  background-color: #d1cfcf;
-}
-
-/* ============ FOOTER ============ */
-.footer {
-  background-color: #ffffff;
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #000000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 0 auto;
-  max-width: 100%;
-}
 
 /* ============ MEDIA QUERIES ============ */
 @media (max-width: 768px) {
