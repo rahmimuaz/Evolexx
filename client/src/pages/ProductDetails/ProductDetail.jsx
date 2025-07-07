@@ -74,6 +74,8 @@ const ProductDetail = () => {
   if (!product) return <div className="not-found-message">Product not found.</div>;
 
   return (
+    <div className="all">
+
     <div className="product-detail-page-container">
       <h1></h1>
       <div className="product-detail-main-content">
@@ -194,8 +196,10 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
-      <Footer />
+
     </div>
+        <Footer />
+      </div>
   );
 };
 
