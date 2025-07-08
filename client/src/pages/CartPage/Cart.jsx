@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCart } from '../../context/CartContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './Cart.css';
 import Footer from '../../components/Footer/Footer';
 
@@ -74,6 +74,9 @@ const Cart = () => {
                 <div className="details">
                   <h2 className="product-name">{item.product?.name || 'N/A'}</h2>
                   <p className="product-desc">{item.product?.description || 'N/A'}</p>
+                  {item.selectedColor && (
+                    <p className="product-color">Color: {item.selectedColor}</p>
+                  )}
 
                   <div className="quantity-controls">
                     <button

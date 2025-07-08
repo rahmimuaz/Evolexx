@@ -11,7 +11,7 @@ const CardPaymentPage = () => {
   const [cardHolderName, setCardHolderName] = useState('');
   const [saveCard, setSaveCard] = useState(false);
 
-  const [savedCards, setSavedCards] = useState([
+  const [savedCards] = useState([
     { id: '1', last4: '1234', brand: 'Visa', expiry: '12/25' },
     { id: '2', last4: '5678', brand: 'MasterCard', expiry: '07/26' },
   ]);

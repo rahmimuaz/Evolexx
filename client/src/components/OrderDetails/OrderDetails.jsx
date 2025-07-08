@@ -182,6 +182,9 @@ const OrderDetails = () => {
                     )}
                     <div className="product-info">
                       <h3 className="product-name">{item.product.name}</h3>
+                      {item.selectedColor && (
+                        <p className="product-color">Color: {item.selectedColor}</p>
+                      )}
                       <p className="product-quantity">Quantity: {item.quantity}</p>
                     </div>
                   </div>

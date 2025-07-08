@@ -28,7 +28,7 @@ export const getProduct = async (req, res) => {
 // Create new product
 export const createProduct = async (req, res) => {
   try {
-    const { name, category, price, description, stock, details } = req.body;
+    const { name, category, price, description, longDescription, stock, details, warrantyPeriod, discountPrice } = req.body;
 
     // Check if files were uploaded
     if (!req.files || req.files.length === 0) {
@@ -82,9 +82,12 @@ export const createProduct = async (req, res) => {
       category,
       price: parseFloat(price),
       description,
+      longDescription,
       images,
       stock: parseInt(stock) || 0,
-      details: parsedDetails
+      details: parsedDetails,
+      warrantyPeriod: warrantyPeriod || 'No Warranty',
+      discountPrice: discountPrice ? parseFloat(discountPrice) : undefined
     });
 
     const savedProduct = await newProduct.save();
@@ -117,7 +120,7 @@ export const createProduct = async (req, res) => {
 // Update product
 export const updateProduct = async (req, res) => {
   try {
-    const { name, category, price, description, stock, details } = req.body;
+    const { name, category, price, description, longDescription, stock, details, warrantyPeriod, discountPrice } = req.body;
     const parsedDetails = typeof details === 'string' ? JSON.parse(details) : details;
 
     // Get the current product to compare images
@@ -178,9 +181,12 @@ export const updateProduct = async (req, res) => {
         category,
         price: parseFloat(price),
         description,
+        longDescription,
         images: updatedImages,
         stock: parseInt(stock) || 0,
-        details: parsedDetails
+        details: parsedDetails,
+        warrantyPeriod: warrantyPeriod || 'No Warranty',
+        discountPrice: discountPrice ? parseFloat(discountPrice) : undefined
       },
       { new: true }
     );
@@ -241,6 +247,41 @@ export const getProductsByCategory = async (req, res) => {
   try {
     const products = await Product.find({ category: req.params.category });
     res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add a review to a product
+export const addReview = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    const review = {
+      user: req.user ? req.user._id : null, // If you have auth, otherwise set to null
+      rating,
+      comment,
+      date: new Date()
+    };
+    product.reviews.push(review);
+    await product.save();
+    res.status(201).json({ message: 'Review added', review });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get all reviews for a product
+export const getReviews = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).select('reviews');
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.status(200).json(product.reviews);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

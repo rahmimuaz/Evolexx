@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import './ProductDetail.css';
 import Footer from '../../components/Footer/Footer';
+import { useUser } from '../../context/UserContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -13,6 +14,13 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState('');
   const { addToCart } = useCart();
+  const { user } = useUser();
+  const [reviews, setReviews] = useState([]);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState(null);
+  const [selectedColor, setSelectedColor] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -37,6 +45,20 @@ const ProductDetail = () => {
     }
   }, [product, mainImage]);
 
+  useEffect(() => {
+    if (product) {
+      axios.get(`http://localhost:5001/api/products/${id}/reviews`)
+        .then(res => setReviews(res.data))
+        .catch(() => setReviews([]));
+    }
+  }, [product, id]);
+
+  useEffect(() => {
+    if (product && Array.isArray(product.details?.color) && product.details.color.length > 0) {
+      setSelectedColor(product.details.color[0]);
+    }
+  }, [product]);
+
   const handleQuantityChange = (type) => {
     setQuantity(prev => {
       if (type === 'increment') return prev + 1;
@@ -47,7 +69,8 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product, quantity);
+      // Optionally, you can pass selectedColor to the cart logic if needed
+      addToCart({ ...product, selectedColor }, quantity);
     }
   };
 
@@ -69,6 +92,27 @@ const ProductDetail = () => {
 
   const currentMainImageUrl = cleanImagePath(mainImage);
 
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    setReviewSubmitting(true);
+    setReviewError(null);
+    try {
+      await axios.post(`http://localhost:5001/api/products/${id}/reviews`, {
+        rating: reviewRating,
+        comment: reviewComment
+      });
+      setReviewComment('');
+      setReviewRating(5);
+      // Refresh reviews
+      const res = await axios.get(`http://localhost:5001/api/products/${id}/reviews`);
+      setReviews(res.data);
+    } catch (err) {
+      setReviewError('Failed to submit review.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
   if (loading) return <div className="loading-spinner-container"><div className="loading-spinner"></div></div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!product) return <div className="not-found-message">Product not found.</div>;
@@ -77,7 +121,7 @@ const ProductDetail = () => {
     <div className="all">
 
     <div className="product-detail-page-container">
-      <h1></h1>
+      <h1>Product Details</h1>
       <div className="product-detail-main-content">
         <div className="image-gallery-section">
           <div className="main-image-container">
@@ -108,7 +152,7 @@ const ProductDetail = () => {
 
         <div className="product-info-section">
           <h1 className="product-name-section">{product.name}</h1>
-          <p className="product-tagline">We always provide high quality Products.</p>
+          <p className="product-tagline">{product.description || 'We always provide high quality Products.'}</p>
 
           <div className="product-ratings">
             {[...Array(5)].map((_, i) => (
@@ -120,17 +164,47 @@ const ProductDetail = () => {
           </div>
               <hr className="section-divider" />
           <div className="price-section">
-            <p className="product-price">Rs. {product.price?.toLocaleString() ?? 'N/A'}</p>
+            {product.discountPrice ? (
+              <>
+                <span className="product-price" style={{ textDecoration: 'line-through', color: '#888', marginRight: 8 }}>
+                  Rs. {product.price?.toLocaleString() ?? 'N/A'}
+                </span>
+                <span className="product-price" style={{ color: '#e53935', fontWeight: 'bold' }}>
+                  Rs. {product.discountPrice?.toLocaleString()}
+                </span>
+              </>
+            ) : (
+              <p className="product-price">Rs. {product.price?.toLocaleString() ?? 'N/A'}</p>
+            )}
           </div>
           <hr className="section-divider" />
           {/* Flex container for color + quantity */}
           <div className="color-and-quantity-section">
             <div className="color-options-section">
               <p className="color-options-title">Color family</p>
-              <div className="color-swatches">
-                <div className="color-swatch red"></div>
-                <div className="color-swatch black"></div>
-                <div className="color-swatch gray"></div>
+              <div className="color-names">
+                {Array.isArray(product.details?.color) && product.details.color.length > 0 ? (
+                  <>
+                    <span>{product.details.color.join(', ')}</span>
+                    {product.details.color.length > 1 && (
+                      <div style={{ marginTop: 8 }}>
+                        <label htmlFor="color-select">Select color: </label>
+                        <select
+                          id="color-select"
+                          value={selectedColor}
+                          onChange={e => setSelectedColor(e.target.value)}
+                          style={{ marginLeft: 8 }}
+                        >
+                          {product.details.color.map((color, idx) => (
+                            <option key={idx} value={color}>{color}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <span>No color options</span>
+                )}
               </div>
             </div>
 
@@ -190,11 +264,66 @@ const ProductDetail = () => {
                 <svg className="h-6 w-6 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" />
                 </svg>
-                <p className="font-semibold">6 Months Seller Warranty</p>
+                <p className="font-semibold">{product.warrantyPeriod || 'No Warranty'}</p>
               </div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="product-description-section">
+            <h2>Description</h2>
+            <p>{product.description}</p>
+            {product.longDescription && (
+              <>
+                <h3 style={{ marginTop: 12 }}>More Details</h3>
+                <p>{product.longDescription}</p>
+              </>
+            )}
+          </div>
+            
+      {/* Reviews Section */}
+      <div className="product-reviews-section">
+        <h2>Customer Reviews</h2>
+        {reviews.length === 0 && <p>No reviews yet.</p>}
+        {reviews.map((review, idx) => (
+          <div key={idx} className="review-item">
+            <div className="review-rating">
+              {[...Array(5)].map((_, i) => (
+                <span key={i} style={{ color: i < review.rating ? '#FFD700' : '#ccc' }}>★</span>
+              ))}
+            </div>
+            <div className="review-comment">{review.comment}</div>
+            <div className="review-meta">
+              <span>{review.date ? new Date(review.date).toLocaleDateString() : ''}</span>
+            </div>
+          </div>
+        ))}
+        {user && (
+          <form onSubmit={handleReviewSubmit} className="review-form">
+            <h3>Write a Review</h3>
+            <div className="review-form-rating">
+              <label>Rating: </label>
+              <select value={reviewRating} onChange={e => setReviewRating(Number(e.target.value))}>
+                {[5,4,3,2,1].map(val => (
+                  <option key={val} value={val}>{val}</option>
+                ))}
+              </select>
+            </div>
+            <textarea
+              value={reviewComment}
+              onChange={e => setReviewComment(e.target.value)}
+              placeholder="Write your review here..."
+              required
+              rows={3}
+            />
+            <button type="submit" disabled={reviewSubmitting} className="submit-review-btn">
+              {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+            </button>
+            {reviewError && <div className="review-error">{reviewError}</div>}
+          </form>
+        )}
+        {!user && <p style={{ marginTop: 12 }}>Please log in to write a review.</p>}
       </div>
 
     </div>
