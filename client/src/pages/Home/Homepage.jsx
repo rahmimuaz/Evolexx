@@ -13,7 +13,9 @@ const Homepage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [animationDirection, setAnimationDirection] = useState('');
   const productsPerPage = 12;
-  const productSectionRef = useRef(null); // NEW
+
+  const productSectionRef = useRef(null);
+  const headingRef = useRef(null);
 
   const originalBannerImages = ['/banner1.jpg', '/banner2.jpg', '/banner3.jpg'];
   const bannerImages = [...originalBannerImages, originalBannerImages[0]];
@@ -83,7 +85,12 @@ const Homepage = () => {
       setTimeout(() => {
         setCurrentPage(pageNumber);
         setAnimationDirection('');
-        productSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); // FIXED SCROLL TARGET
+
+        if (headingRef.current) {
+          const topPos = headingRef.current.getBoundingClientRect().top + window.pageYOffset;
+          const offset = 80; // Adjust this value to your fixed header height
+          window.scrollTo({ top: topPos - offset, behavior: 'smooth' });
+        }
       }, 400);
     }
   };
@@ -157,7 +164,7 @@ const Homepage = () => {
 
       {/* PRODUCTS */}
       <section className="product-section" ref={productSectionRef}>
-        <h2>All Products</h2>
+        <h2 ref={headingRef}>All Products</h2>
         <div className={`product-grid-container ${animationDirection}`}>
           <div className="product-grid">
             {currentProducts.map((product) => {
