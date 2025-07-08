@@ -4,6 +4,7 @@
   background-color: #fff;
   font-family: 'Segoe UI', sans-serif;
   align-items: center;
+  padding: 20px 0px;
 }
 .product-detail-main-content {
   display: flex;

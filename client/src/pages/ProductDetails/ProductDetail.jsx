@@ -125,7 +125,6 @@ const ProductDetail = () => {
   return (
     <div className="all">
       <div className="product-detail-page-container">
-        <h1>Product Details</h1>
         <div className="product-detail-main-content">
           <div className="image-gallery-section">
             <div className="main-image-container">
