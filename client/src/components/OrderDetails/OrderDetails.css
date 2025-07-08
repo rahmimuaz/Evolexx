@@ -254,11 +254,7 @@
   color: #1a202c;
 }
 
-/* --- Order Summary Section --- */
-.order-summary-section {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
-}
+
 
 .order-summary-content {
   display: flex;

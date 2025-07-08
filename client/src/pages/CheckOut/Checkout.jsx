@@ -193,7 +193,6 @@ const Checkout = () => {
     <div className="checkout-page-container">
       <div className="checkout-max-width-wrapper">
         <h1 className="checkout-title">Checkout</h1>
-
         <div className="checkout-grid">
           <div className="shipping-info-section">
             <div className="checkout-card">
@@ -237,24 +236,24 @@ const Checkout = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="address" className="form-label">Address</label>
-                    <input
-                      type="text"
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      className="form-input"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
                     <label htmlFor="city" className="form-label">City</label>
                     <input
                       type="text"
                       id="city"
                       name="city"
                       value={formData.city}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="address" className="form-label">Address</label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      value={formData.address}
                       onChange={handleInputChange}
                       className="form-input"
                       required
