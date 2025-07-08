@@ -218,12 +218,20 @@ const ProductDetail = () => {
             </div>
           </div>
 
+          <div className="stock-status-section" style={{ margin: '10px 0' }}>
+            {product.stock > 0 ? (
+              <span className="in-stock" style={{ color: 'green', fontWeight: 'bold' }}>In Stock</span>
+            ) : (
+              <span className="out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>Out of Stock</span>
+            )}
+          </div>
+
           <div className="purchase-section">
             <div className="action-buttons-container">
-              <button onClick={handleAddToCart} className="action-button add-to-cart-button">
+              <button onClick={handleAddToCart} className="action-button add-to-cart-button" disabled={product.stock <= 0}>
                 ADD TO CART
               </button>
-              <button onClick={handleBuyNow} className="action-button buy-now-button">
+              <button onClick={handleBuyNow} className="action-button buy-now-button" disabled={product.stock <= 0}>
                 BUY NOW
               </button>
             </div>

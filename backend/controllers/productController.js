@@ -281,7 +281,27 @@ export const getReviews = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    res.status(200).json(product.reviews);
+    res.status(200).json(Array.isArray(product.reviews) ? product.reviews : []);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get low-stock products (stock < 5)
+export const getLowStockProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ stock: { $gt: 0, $lt: 5 } });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get out-of-stock products (stock = 0)
+export const getOutOfStockProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ stock: 0 });
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

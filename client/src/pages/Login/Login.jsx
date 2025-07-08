@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import './Login.css';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -20,48 +22,70 @@ const Login = () => {
     }
   };
 
+  const clientId = '235074436580-tqrft13a5lddfr16sq1qth0quficpu5k.apps.googleusercontent.com';
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const res = await axios.post('http://localhost:5001/api/users/google-login', {
+        token: credentialResponse.credential,
+      });
+      localStorage.setItem('userInfo', JSON.stringify(res.data));
+      window.location.href = '/'; // Or use your navigation logic
+    } catch (err) {
+      alert('Google login failed');
+    }
+  };
+
   return (
-    <div className="login-page-container">
-      <div className="login-card">
-        <h2 className="login-title">Login</h2>
-        <form onSubmit={submitHandler}>
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              className="form-input"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+    <GoogleOAuthProvider clientId={clientId}>
+      <div className="login-page-container">
+        <div className="login-card">
+          <h2 className="login-title">Login</h2>
+          <form onSubmit={submitHandler}>
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                className="form-input"
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group password">
+              <label htmlFor="password" className="form-label">Password</label>
+              <input
+                type="password"
+                id="password"
+                className="form-input password-input"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="login-button"
+            >
+              Login
+            </button>
+          </form>
+          <div style={{ margin: '16px 0' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => alert('Google Login Failed')}
             />
           </div>
-          <div className="form-group password">
-            <label htmlFor="password" className="form-label">Password</label>
-            <input
-              type="password"
-              id="password"
-              className="form-input password-input"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="login-button"
-          >
-            Login
-          </button>
-        </form>
-        <p className="register-text">
-          New Customer? 
-          <Link to="/register" className="register-link">Register</Link>
-        </p>
+          <p className="register-text">
+            New Customer? 
+            <Link to="/register" className="register-link">Register</Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </GoogleOAuthProvider>
   );
 };
 

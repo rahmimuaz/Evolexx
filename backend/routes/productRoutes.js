@@ -8,7 +8,9 @@ import {
   deleteProduct,
   getProductsByCategory,
   addReview,
-  getReviews
+  getReviews,
+  getLowStockProducts,
+  getOutOfStockProducts
 } from '../controller/productController.js';
 
 const router = express.Router();
@@ -35,5 +37,10 @@ router.delete('/:id', deleteProduct);
 router.post('/:id/reviews', addReview);
 // Get all reviews for a product
 router.get('/:id/reviews', getReviews);
+
+// Get low-stock products
+router.get('/admin/low-stock', getLowStockProducts);
+// Get out-of-stock products
+router.get('/admin/out-of-stock', getOutOfStockProducts);
 
 export default router;

@@ -1,7 +1,10 @@
 import asyncHandler from 'express-async-handler';
 import User from '../models/userModel.js';
 import Product from '../models/Product.js';
+import { OAuth2Client } from 'google-auth-library';
 import generateToken from '../utils/generateToken.js';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @desc    Auth user & get token
 // @route   POST /api/users/login
@@ -178,5 +181,37 @@ const clearUserCart = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: 'Cart cleared successfully' });
 });
+
+export const googleLogin = async (req, res) => {
+  const { token } = req.body;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub, email, name } = payload;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        googleId: sub,
+        password: Math.random().toString(36), // random password, not used
+      });
+    }
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id),
+    });
+  } catch (err) {
+    res.status(401).json({ message: 'Google login failed' });
+  }
+};
 
 export { authUser, registerUser, addToCart, updateCartItemQuantity, removeFromUserCart, getUserCart, clearUserCart }; 

@@ -11,6 +11,8 @@ import LoginForm from './pages/AdminLogin/LoginForm';
 import RegisterForm from './pages/AdminLogin/RegisterForm';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './index.css';
+import LowStockProducts from './pages/Inventory/LowStockProducts';
+import OutOfStockProducts from './pages/Inventory/OutOfStockProducts';
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -79,6 +81,22 @@ function AppContent() {
                 element={
                   <PrivateRoute>
                     <ToBeShippedList />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/low-stock"
+                element={
+                  <PrivateRoute>
+                    <LowStockProducts />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/out-of-stock"
+                element={
+                  <PrivateRoute>
+                    <OutOfStockProducts />
                   </PrivateRoute>
                 }
               />

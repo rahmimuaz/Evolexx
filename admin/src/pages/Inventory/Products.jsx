@@ -52,11 +52,10 @@ const Products = () => {
 
   return (
     <div className="products-container">
-      <div className="products-header-wrapper">
-        <div className="products-header-content">
-          <h1 className="products-title">Products</h1>
-          <p className="products-description">A list of all products in your store.</p>
-        </div>
+      <h1 className="products-title">All Products</h1>
+      <div style={{ marginBottom: 16 }}>
+        <button onClick={() => navigate('/admin/low-stock')} style={{ marginRight: 8 }}>Low Stock</button>
+        <button onClick={() => navigate('/admin/out-of-stock')}>Out of Stock</button>
       </div>
 
       <div className="table-outer-wrapper">
@@ -90,7 +89,15 @@ const Products = () => {
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           ${product.price?.toFixed(2) || 'N/A'}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{product.stock}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {product.stock === 0 ? (
+                            <span style={{ color: 'white', background: 'red', padding: '2px 8px', borderRadius: 4, fontWeight: 'bold' }}>Out of Stock</span>
+                          ) : product.stock < 5 ? (
+                            <span style={{ color: 'black', background: 'yellow', padding: '2px 8px', borderRadius: 4, fontWeight: 'bold' }}>Low Stock ({product.stock})</span>
+                          ) : (
+                            product.stock
+                          )}
+                        </td>
                         <td className="whitespace-nowrap py-4 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
                             onClick={() => handleEdit(product._id)}

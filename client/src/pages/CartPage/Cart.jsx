@@ -37,6 +37,8 @@ const Cart = () => {
     e.target.nextSibling.style.display = 'flex';
   };
 
+  const anyOutOfStock = cartItems.some(item => item.product?.stock <= 0);
+
   return (
     <div className="cart">
       <h1 className="cart-title">Shopping Cart</h1>
@@ -76,6 +78,9 @@ const Cart = () => {
                   <p className="product-desc">{item.product?.description || 'N/A'}</p>
                   {item.selectedColor && (
                     <p className="product-color">Color: {item.selectedColor}</p>
+                  )}
+                  {item.product?.stock <= 0 && (
+                    <p className="cart-out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>Out of Stock</p>
                   )}
 
                   <div className="quantity-controls">
@@ -122,7 +127,7 @@ const Cart = () => {
 
           <p className="taxes-note">Taxes and shipping free</p>
 
-          <button className="checkout-btn" onClick={() => navigate('/checkout')}>
+          <button className="checkout-btn" onClick={() => navigate('/checkout')} disabled={anyOutOfStock}>
             Check Out
           </button>
         </aside>
