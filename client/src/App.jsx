@@ -36,7 +36,6 @@ function App() {
                 <Route path="/homepage" element={<Homepage />} />
                 <Route path="/footer" element={<Footer/>} />
               </Routes>
-            <ToastContainer position="top-right" autoClose={3000} />
           </div>
         </CartProvider>
       </UserProvider>

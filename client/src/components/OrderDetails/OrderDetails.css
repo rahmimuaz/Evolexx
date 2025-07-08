@@ -1,275 +1,260 @@
-/* OrderDetails.css */
-
-/* --- Page Layout & Containers --- */
+/* === General Container Styling === */
 .order-details-page-container {
-  min-height: 100vh;
-  background-color: #f3f4f6;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding: 30px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.order-details-max-width-wrapper {
-  max-width: 80rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-@media (min-width: 640px) {
-  .order-details-max-width-wrapper {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .order-details-max-width-wrapper {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
 
 .order-details-card {
-  background-color: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-
-/* --- Loading State --- */
-.loading-container {
+  background-color: #f9f9f9;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 16rem;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
-  border-radius: 9999px;
-  height: 3rem;
-  width: 3rem;
-  border-bottom: 2px solid #4f46e5;
+/* === Header === */
+.order-header {
+  text-align: center;
 }
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* --- Not Found State --- */
-.not-found-center-text {
+.back-home-button-wrapper {
+  margin-top: 20px;
   text-align: center;
 }
 
-.not-found-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1a202c;
+.back-home-btn {
+  background-color: #28a745; /* primary green */
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* --- Order Header --- */
-.order-header {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+.back-home-btn:hover {
+  background-color: #218838; /* darker green on hover */
 }
 
-.order-header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
 .order-id-title {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #1a202c;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.order-placed-date {
+  font-size: 0.9rem;
+  color: #777;
 }
 
 .order-status-badges {
   display: flex;
-  gap: 1rem;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
 .order-status-badge,
 .payment-status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
   font-weight: 500;
+  color: #fff;
+  text-transform: capitalize;
 }
 
-/* Status specific colors */
-.status-delivered {
-  background-color: #d1fae5;
-  color: #065f46;
-}
+.status-delivered { background-color: #28a745; }
+.status-shipped { background-color: #17a2b8; }
+.status-approved { background-color: #ffc107; color: #000; }
+.status-denied { background-color: #dc3545; }
+.status-default { background-color: #6c757d; }
 
-.status-shipped {
-  background-color: #bfdbfe;
-  color: #1e40af;
-}
+.payment-completed { background-color: #28a745; }
+.payment-failed { background-color: #dc3545; }
+.payment-pending { background-color: #ffc107; color: #000; }
 
-.status-approved {
-  background-color: #fef9c3;
-  color: #854d09;
-}
-
-.status-denied {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.status-default {
-  background-color: #f3f4f6;
-  color: #374151;
-}
-
-/* Payment Status specific colors */
-.payment-completed {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.payment-failed {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.payment-pending {
-  background-color: #fef9c3;
-  color: #854d09;
-}
-
-.order-placed-date {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #4a5568;
-}
-
-/* --- Information Sections (Shipping & Payment) --- */
 .info-section {
-  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
 }
 
-@media (min-width: 768px) {
-  .info-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.info-card {
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 20px 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .info-heading {
-  font-size: 1.125rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  color: #1a202c;
-  margin-bottom: 1rem;
+  color: #222;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.info-details-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.info-heading::before {
+  font-size: 1.2rem;
 }
 
 .info-details-group p {
-  line-height: 1.5;
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.info-details-group .font-medium {
+.info-details-group p::before {
+  content: "•";
+  color: #999;
+  font-size: 1.2rem;
+}
+
+.font-medium {
   font-weight: 500;
+  color: #111;
 }
 
-/* --- Order Items Section --- */
+
+/* === Order Items Section === */
 .order-items-section {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  margin-top: 10px;
 }
 
 .order-items-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 20px;
 }
 
 .order-item {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
 .order-item-details {
   display: flex;
-  align-items: center;
+  gap: 15px;
+  align-items: flex-start;
 }
 
 .product-image {
-  width: 4rem;
-  height: 4rem;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-  border-radius: 0.375rem;
-}
-
-.product-image-placeholder {
-  width: 4rem;
-  height: 4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f3f4f6;
-  border-radius: 0.375rem;
-  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid #ddd;
 }
 
 .product-info {
-  margin-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.product-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #1a202c;
-}
-
+.product-color,
 .product-quantity {
-  font-size: 0.875rem;
-  color: #4a5568;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .item-total-price {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #1a202c;
+  font-weight: 600;
+  font-size: 1rem;
+  align-self: center;
 }
 
 
 
 .order-summary-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: right;
 }
 
 .summary-heading {
-  font-size: 1.125rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  color: #1a202c;
+  margin-bottom: 5px;
 }
 
 .total-price {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #1a202c;
+  font-weight: bold;
+  color: #000;
+}
+
+/* === Loading and Not Found === */
+.loading-container,
+.not-found-center-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ddd;
+  border-top: 4px solid #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.not-found-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #555;
+}
+
+/* === Responsive Adjustments === */
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .order-summary-section {
+    justify-content: center;
+  }
+
+  .summary-heading,
+  .total-price {
+    text-align: center;
+  }
 }

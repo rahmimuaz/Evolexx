@@ -2,27 +2,36 @@
 .checkout-page-container {
   display: flex;
   justify-content: center;
-  background-color: #f9f9f9;
-  padding: 40px 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
 }
-
+/* === Title Styling === */
+.checkout-title {
+  margin-top: 20px;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 60px;
+  text-align: center;
+  color: #333;
+}
 .checkout-max-width-wrapper {
   width: 100%;
+
 }
 
 /* === Main Grid Layout === */
 .checkout-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 40px;
+  gap: 30px;
+  margin-bottom: 120px;
+  padding: 10px 40px;
 }
 
 /* === Card Styling === */
 .checkout-card {
-  background-color: #ffffff;
+  background-color: #f9f9f9;
   padding: 30px;
-  border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -30,7 +39,7 @@
 .section-heading {
   font-size: 1.3rem;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 
 }
 
@@ -93,9 +102,8 @@
 }
 
 .radio-input:checked + .radio-label {
-  background-color: #007bff;
+  background-color: #000000;
   color: white;
-  border-color: #0056b3;
 }
 
 /* === Submit Button === */
@@ -108,7 +116,7 @@
   padding: 14px;
   font-size: 1rem;
   font-weight: bold;
-  background-color: #28a745;
+  background-color: #222;
   color: white;
   border: none;
   border-radius: 6px;
@@ -117,7 +125,7 @@
 }
 
 .place-order-button:hover {
-  background-color: #218838;
+  background-color: #3f3f3f;
 }
 
 
@@ -127,6 +135,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+
 }
 
 .summary-item-content {
@@ -140,7 +149,6 @@
   height: 60px;
   overflow: hidden;
   border-radius: 6px;
-  background-color: #f1f1f1;
 }
 
 .summary-item-image {
@@ -171,15 +179,14 @@
 
 /* === Totals === */
 .summary-totals {
-  margin-top: 20px;
   border-top: 1px solid #ddd;
-  padding-top: 10px;
+
 }
 
 .summary-line {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 
 .total-line {
@@ -198,6 +205,8 @@
   border-radius: 6px;
 }
 
+
+
 /* === Responsive Design (Optional) === */
 @media (max-width: 900px) {
   .checkout-grid {
@@ -211,4 +220,32 @@
   .radio-option {
     min-width: 100%;
   }
+}
+
+/* Container that includes the list of summary items */
+.summary-items-list {
+  max-height:275px; /* Adjust height as needed */
+  overflow-y: auto;
+  margin-bottom: 16px; /* Space before totals */
+  padding-right: 8px; /* Optional: for scrollbar space */
+  scroll-behavior: smooth;
+}
+
+/* Optional: Style the scrollbar */
+.summary-items-list::-webkit-scrollbar {
+  width: 6px;
+}
+.summary-items-list::-webkit-scrollbar-thumb {
+  display: none;
+  background-color: #ccc;
+  border-radius: 4px;
+}
+.summary-items-list::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Keep summary-totals fixed at the bottom of the card */
+.summary-totals {
+  border-top: 1px solid #eee;
+  padding-top: 16px;
 }

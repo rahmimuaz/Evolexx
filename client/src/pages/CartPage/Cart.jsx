@@ -43,72 +43,74 @@ const Cart = () => {
     <div className="cart">
       <h1 className="cart-title">Shopping Cart</h1>
       <main className="cart-content max-width">
-        <section className="cart-items">
-          {cartItems.length === 0 ? (
-            <p className="empty-message">Your cart is empty.</p>
-          ) : (
-            cartItems.map(item => (
-              <article className="cart-item" key={item._id}>
-                <div className="image-wrapper">
-                  {item.product?.images?.length ? (
-                    <>
-                      <img
-                        src={getImageUrl(item.product.images[0])}
-                        alt={item.product.name}
-                        onError={onImageError}
-                        className="product-image"
-                      />
-                      <div className="image-placeholder" style={{ display: 'none' }}>
+        <div className="cart-items-wrapper">
+          <section className="cart-items">
+            {cartItems.length === 0 ? (
+              <p className="empty-message">Your cart is empty.</p>
+            ) : (
+              cartItems.map(item => (
+                <article className="cart-item" key={item._id}>
+                  <div className="image-wrapper">
+                    {item.product?.images?.length ? (
+                      <>
+                        <img
+                          src={getImageUrl(item.product.images[0])}
+                          alt={item.product.name}
+                          onError={onImageError}
+                          className="product-image"
+                        />
+                        <div className="image-placeholder" style={{ display: 'none' }}>
+                          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" className="placeholder-icon">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="image-placeholder">
                         <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" className="placeholder-icon">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
-                    </>
-                  ) : (
-                    <div className="image-placeholder">
-                      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" className="placeholder-icon">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-
-                <div className="details">
-                  <h2 className="product-name">{item.product?.name || 'N/A'}</h2>
-                  <p className="product-desc">{item.product?.description || 'N/A'}</p>
-                  {item.selectedColor && (
-                    <p className="product-color">Color: {item.selectedColor}</p>
-                  )}
-                  {item.product?.stock <= 0 && (
-                    <p className="cart-out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>Out of Stock</p>
-                  )}
-
-                  <div className="quantity-controls">
-                    <button
-                      onClick={() => handleQuantityChange(item._id, 'decrement')}
-                      className="qty-btn"
-                      aria-label="Decrease quantity"
-                    >-</button>
-                    <span className="qty-display">{String(item.quantity).padStart(2, '0')}</span>
-                    <button
-                      onClick={() => handleQuantityChange(item._id, 'increment')}
-                      className="qty-btn"
-                      aria-label="Increase quantity"
-                    >+</button>
-                    <button
-                      onClick={() => removeFromCart(item.product._id)}
-                      className="remove-btn"
-                    >Remove</button>
+                    )}
                   </div>
-                </div>
 
-                <div className="item-price">
-                  Rs. {(item.product?.price * item.quantity).toLocaleString() || 'N/A'}
-                </div>
-              </article>
-            ))
-          )}
-        </section>
+                  <div className="details">
+                    <h2 className="product-name">{item.product?.name || 'N/A'}</h2>
+                    <p className="product-desc">{item.product?.description || 'N/A'}</p>
+                    {item.selectedColor && (
+                      <p className="product-color">Color: {item.selectedColor}</p>
+                    )}
+                    {item.product?.stock <= 0 && (
+                      <p className="cart-out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>Out of Stock</p>
+                    )}
+
+                    <div className="quantity-controls">
+                      <button
+                        onClick={() => handleQuantityChange(item._id, 'decrement')}
+                        className="qty-btn"
+                        aria-label="Decrease quantity"
+                      >-</button>
+                      <span className="qty-display">{String(item.quantity).padStart(2, '0')}</span>
+                      <button
+                        onClick={() => handleQuantityChange(item._id, 'increment')}
+                        className="qty-btn"
+                        aria-label="Increase quantity"
+                      >+</button>
+                      <button
+                        onClick={() => removeFromCart(item.product._id)}
+                        className="remove-btn"
+                      >Remove</button>
+                    </div>
+                  </div>
+
+                  <div className="item-price">
+                    Rs. {(item.product?.price * item.quantity).toLocaleString() || 'N/A'}
+                  </div>
+                </article>
+              ))
+            )}
+          </section>
+        </div>
 
         <aside className="cart-summary">
           <h2 className="summary-title">Add a Note</h2>
@@ -133,7 +135,7 @@ const Cart = () => {
         </aside>
       </main>
       <Footer />
-  </div>
+    </div>
   );
 };
 

@@ -6,6 +6,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import BankTransferModal from '../Payment/BankTransferModal'
 import './Checkout.css'; // Assuming you have a CSS file for styles
+import Footer from '../../components/Footer/Footer';
 
 const Checkout = () => {
   const { cartItems, clearCart } = useCart();
@@ -192,7 +193,7 @@ const Checkout = () => {
   return (
     <div className="checkout-page-container">
       <div className="checkout-max-width-wrapper">
-        <h1 className="checkout-title">Checkout</h1>
+              <h1 className="checkout-title">Checkout</h1>
         <div className="checkout-grid">
           <div className="shipping-info-section">
             <div className="checkout-card">
@@ -336,61 +337,63 @@ const Checkout = () => {
           </div>
 
           <div className="order-summary-section">
-            <div className="checkout-card">
-              <h2 className="section-heading">Order Summary</h2>
-              <div className="summary-items-list">
-                {cartItems.map((item) => (
-                  <div key={item._id} className="summary-item">
-                    <div className="summary-item-content">
-                      <div className="summary-item-image-container">
-                        {item.product.images && item.product.images.length > 0 ? (
-                          <>
-                            <img
-                              src={getImageUrl(item.product.images[0])}
-                              alt={item.product.name}
-                              className="summary-item-image"
-                              onError={handleImageError}
-                            />
-                            <div className="summary-item-image-placeholder" style={{ display: 'none' }}>
-                              <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="summary-item-image-placeholder">
-                            <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="summary-item-details">
-                        <p className="summary-item-name">{item.product.name}</p>
-                        <p className="summary-item-quantity">Quantity: {item.quantity}</p>
-                      </div>
-                    </div>
-                    <p className="summary-item-price">Rs. {(item.product.price * item.quantity).toLocaleString()}</p>
-                  </div>
-                ))}
-                <div className="summary-totals">
-                  <div className="summary-line">
-                    <p className="summary-label">Subtotal</p>
-                    <p className="summary-value">Rs. {subtotal.toLocaleString()}</p>
-                  </div>
-                  <div className="summary-line">
-                    <p className="summary-label">Shipping</p>
-                    <p className="summary-value">Free</p>
-                  </div>
-                  <div className="summary-line total-line">
-                    <p>Total</p>
-                    <p>Rs. {total.toLocaleString()}</p>
-                  </div>
+           <div className="checkout-card">
+  <h2 className="section-heading">Order Summary</h2>
+
+  {/* Make just this section scrollable */}
+  <div className="summary-items-list">
+    {cartItems.map((item) => (
+      <div key={item._id} className="summary-item">
+        <div className="summary-item-content">
+          <div className="summary-item-image-container">
+            {item.product.images && item.product.images.length > 0 ? (
+              <>
+                <img
+                  src={getImageUrl(item.product.images[0])}
+                  alt={item.product.name}
+                  className="summary-item-image"
+                  onError={handleImageError}
+                />
+                <div className="summary-item-image-placeholder" style={{ display: 'none' }}>
+                  {/* SVG Placeholder */}
                 </div>
+              </>
+            ) : (
+              <div className="summary-item-image-placeholder">
+                {/* SVG Placeholder */}
               </div>
-            </div>
+            )}
+          </div>
+          <div className="summary-item-details">
+            <p className="summary-item-name">{item.product.name}</p>
+            <p className="summary-item-quantity">Quantity: {item.quantity}</p>
           </div>
         </div>
+        <p className="summary-item-price">Rs. {(item.product.price * item.quantity).toLocaleString()}</p>
+      </div>
+    ))}
+  </div>
+
+  {/* This remains outside the scrollable div */}
+  <div className="summary-totals">
+    <div className="summary-line">
+      <p className="summary-label">Subtotal</p>
+      <p className="summary-value">Rs. {subtotal.toLocaleString()}</p>
+    </div>
+    <div className="summary-line">
+      <p className="summary-label">Shipping</p>
+      <p className="summary-value">Free</p>
+    </div>
+    <div className="summary-line total-line">
+      <p>Total</p>
+      <p>Rs. {total.toLocaleString()}</p>
+    </div>
+  </div>
+</div>
+
+          </div>
+        </div>
+        <Footer />
       </div>
 
       {showBankTransferModal && (

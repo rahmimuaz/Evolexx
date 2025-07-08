@@ -37,7 +37,7 @@ const OrderDetails = () => {
     if (user) {
       fetchOrder();
     } else {
-      navigate('/login');
+      navigate('/');
     }
   }, [id, user, navigate]);
 
@@ -100,7 +100,7 @@ const OrderDetails = () => {
           {/* Order Header */}
           <div className="order-header">
             <div className="order-header-content">
-              <h1 className="order-id-title">Order : ORD {order._id}</h1>
+              <h1 className="order-id-title"> Order Place Successfully</h1>
               <div className="order-status-badges">
                 <span className={`order-status-badge ${
                   order.status === 'delivered' ? 'status-delivered' :
@@ -123,33 +123,38 @@ const OrderDetails = () => {
             <p className="order-placed-date">
               Placed on {new Date(order.createdAt).toLocaleDateString()}
             </p>
+            <div className="back-home-button-wrapper">
+  <button className="back-home-btn" onClick={() => navigate('/')}>
+     Back to Home
+  </button>
+</div>
+
           </div>
 
           {/* Order Details */}
           <div className="info-section">
-            <div className="info-grid">
-              {/* Shipping Information */}
-              <div>
-                <h2 className="info-heading">Shipping Information</h2>
-                <div className="info-details-group">
-                  <p><span className="font-medium">Name:</span> {order.shippingAddress.fullName}</p>
-                  <p><span className="font-medium">Email:</span> {order.shippingAddress.email}</p>
-                  <p><span className="font-medium">Phone:</span> {order.shippingAddress.phone}</p>
-                  <p><span className="font-medium">Address:</span> {order.shippingAddress.address}</p>
-                  <p><span className="font-medium">City:</span> {order.shippingAddress.city}</p>
-                  <p><span className="font-medium">Postal Code:</span> {order.shippingAddress.postalCode}</p>
-                </div>
-              </div>
+           <div className="info-grid">
+  <div className="info-card">
+    <h2 className="info-heading">Shipping Information</h2>
+    <div className="info-details-group">
+      <p><span className="font-medium">Name:</span> {order.shippingAddress.fullName}</p>
+      <p><span className="font-medium">Email:</span> {order.shippingAddress.email}</p>
+      <p><span className="font-medium">Phone:</span> {order.shippingAddress.phone}</p>
+      <p><span className="font-medium">Address:</span> {order.shippingAddress.address}</p>
+      <p><span className="font-medium">City:</span> {order.shippingAddress.city}</p>
+      <p><span className="font-medium">Postal Code:</span> {order.shippingAddress.postalCode}</p>
+    </div>
+  </div>
 
-              {/* Payment Information */}
-              <div>
-                <h2 className="info-heading">Payment Information</h2>
-                <div className="info-details-group">
-                  <p><span className="font-medium">Method:</span> {order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod}</p>
-                  <p><span className="font-medium">Status:</span> {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}</p>
-                </div>
-              </div>
-            </div>
+  <div className="info-card">
+    <h2 className="info-heading">Payment Information</h2>
+    <div className="info-details-group">
+      <p><span className="font-medium">Method:</span> {order.paymentMethod}</p>
+      <p><span className="font-medium">Status:</span> {order.paymentStatus}</p>
+    </div>
+  </div>
+</div>
+
           </div>
 
           {/* Order Items */}
@@ -202,6 +207,7 @@ const OrderDetails = () => {
               <h2 className="summary-heading">Total</h2>
               <p className="total-price">Rs. {order.totalPrice.toLocaleString()}</p>
             </div>
+              
           </div>
         </div>
       </div>
