@@ -29,16 +29,16 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-
+       {/* Hamburger (mobile) */}
+        <button className="hamburger-button" onClick={toggleMenu} aria-label="Toggle menu">
+          <FaBars />
+        </button>
         {/* Left Section */}
         <div className="navbar-left">
           <Link to="/" className="navbar-brand">EVOLEXX</Link>
         </div>
 
-        {/* Hamburger (mobile) */}
-        <button className="hamburger-button" onClick={toggleMenu} aria-label="Toggle menu">
-          <FaBars />
-        </button>
+        
 
         {/* Center Section */}
         <div className={`navbar-center ${menuOpen ? 'open' : ''}`}>
