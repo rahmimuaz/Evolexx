@@ -41,26 +41,11 @@ const OrderDetails = () => {
     }
   }, [id, user, navigate]);
 
-  // Updated image handling to support both Cloudinary and local uploads
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
-
-    // If it's already a full URL (Cloudinary), return as is
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-
-    // If it's a local upload path, construct the full URL
-    if (imagePath.startsWith('uploads/')) {
-      return `http://localhost:5001/${imagePath}`;
-    }
-
-    // If it starts with /uploads/, remove the leading slash
-    if (imagePath.startsWith('/uploads/')) {
-      return `http://localhost:5001${imagePath}`;
-    }
-
-    // Default case: assume it's a local upload
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+    if (imagePath.startsWith('/uploads/')) return `http://localhost:5001${imagePath}`;
+    if (imagePath.startsWith('uploads/')) return `http://localhost:5001/${imagePath}`;
     return `http://localhost:5001/uploads/${imagePath}`;
   };
 
@@ -73,9 +58,9 @@ const OrderDetails = () => {
     return (
       <div className="order-details-page-container">
         <div className="order-details-max-width-wrapper">
-          <div className="loading-container">
-            <div className="spinner"></div>
-          </div>
+          <p style={{ textAlign: 'center', padding: '50px 0', fontSize: '1.1rem', color: '#555' }}>
+            Loading order details...
+          </p>
         </div>
       </div>
     );
@@ -100,7 +85,7 @@ const OrderDetails = () => {
           {/* Order Header */}
           <div className="order-header">
             <div className="order-header-content">
-              <h1 className="order-id-title"> Order Place Successfully</h1>
+              <h1 className="order-id-title"> Order Placed Successfully</h1>
               <div className="order-status-badges">
                 <span className={`order-status-badge ${
                   order.status === 'delivered' ? 'status-delivered' :
@@ -124,37 +109,35 @@ const OrderDetails = () => {
               Placed on {new Date(order.createdAt).toLocaleDateString()}
             </p>
             <div className="back-home-button-wrapper">
-  <button className="back-home-btn" onClick={() => navigate('/')}>
-     Back to Home
-  </button>
-</div>
-
+              <button className="back-home-btn" onClick={() => navigate('/')}>
+                Back to Home
+              </button>
+            </div>
           </div>
 
-          {/* Order Details */}
+          {/* Shipping and Payment Info */}
           <div className="info-section">
-           <div className="info-grid">
-  <div className="info-card">
-    <h2 className="info-heading">Shipping Information</h2>
-    <div className="info-details-group">
-      <p><span className="font-medium">Name:</span> {order.shippingAddress.fullName}</p>
-      <p><span className="font-medium">Email:</span> {order.shippingAddress.email}</p>
-      <p><span className="font-medium">Phone:</span> {order.shippingAddress.phone}</p>
-      <p><span className="font-medium">Address:</span> {order.shippingAddress.address}</p>
-      <p><span className="font-medium">City:</span> {order.shippingAddress.city}</p>
-      <p><span className="font-medium">Postal Code:</span> {order.shippingAddress.postalCode}</p>
-    </div>
-  </div>
+            <div className="info-grid">
+              <div className="info-card">
+                <h2 className="info-heading">Shipping Information</h2>
+                <div className="info-details-group">
+                  <p><span className="font-medium">Name:</span> {order.shippingAddress.fullName}</p>
+                  <p><span className="font-medium">Email:</span> {order.shippingAddress.email}</p>
+                  <p><span className="font-medium">Phone:</span> {order.shippingAddress.phone}</p>
+                  <p><span className="font-medium">Address:</span> {order.shippingAddress.address}</p>
+                  <p><span className="font-medium">City:</span> {order.shippingAddress.city}</p>
+                  <p><span className="font-medium">Postal Code:</span> {order.shippingAddress.postalCode}</p>
+                </div>
+              </div>
 
-  <div className="info-card">
-    <h2 className="info-heading">Payment Information</h2>
-    <div className="info-details-group">
-      <p><span className="font-medium">Method:</span> {order.paymentMethod}</p>
-      <p><span className="font-medium">Status:</span> {order.paymentStatus}</p>
-    </div>
-  </div>
-</div>
-
+              <div className="info-card">
+                <h2 className="info-heading">Payment Information</h2>
+                <div className="info-details-group">
+                  <p><span className="font-medium">Method:</span> {order.paymentMethod}</p>
+                  <p><span className="font-medium">Status:</span> {order.paymentStatus}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Order Items */}
@@ -207,7 +190,6 @@ const OrderDetails = () => {
               <h2 className="summary-heading">Total</h2>
               <p className="total-price">Rs. {order.totalPrice.toLocaleString()}</p>
             </div>
-              
           </div>
         </div>
       </div>

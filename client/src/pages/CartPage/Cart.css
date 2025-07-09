@@ -236,68 +236,128 @@
 .cart-items-wrapper::-webkit-scrollbar-track {
   background-color: transparent;
 }
+/* === Responsive Layout Adjustments === */
 
-/* === Responsive Design === */
-@media screen and (max-width: 992px) {
+/* Tablets (<=1024px) */
+@media (max-width: 1024px) {
   .cart-content {
-    flex-direction: column;
     padding: 10px 20px;
-  }
-
-  .cart-items-wrapper {
-    max-height: none;
-    flex: unset;
+    gap: 30px;
   }
 
   .cart-summary {
-    width: 100%;
-    max-width: 100%;
+    margin-top: 30px;
   }
 }
 
-@media screen and (max-width: 768px) {
+/* Mobile & Small Tablets (<=768px) */
+@media (max-width: 768px) {
   .cart-title {
     font-size: 1.6rem;
   }
 
-  .cart-item {
+  .cart-content {
     flex-direction: column;
-    align-items: flex-start;
+    padding: 10px 15px;
+    gap: 30px;
+  }
+
+  .cart-items-wrapper {
+    max-height: none;
+    padding-right: 0;
+  }
+  .cart-items {
+    gap: 20px;
   }
 
   .image-wrapper {
-    width: 100%;
-    max-width: 150px;
-    height: auto;
-  }
-
-  .item-price {
-    margin-top: 10px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .cart-title {
-    font-size: 1.4rem;
-    margin-bottom: 30px;
-  }
-
-  .qty-btn,
-  .qty-display {
-    font-size: 0.9rem;
-    width: 28px;
-    height: 28px;
-  }
-
-  .checkout-btn {
-    font-size: 0.95rem;
+    width: 80px;
+    height: 80px;
   }
 
   .product-name {
     font-size: 1rem;
   }
 
-  .product-desc {
+  .product-desc,
+  .product-color {
     font-size: 0.85rem;
+  }
+
+  .item-price {
+    font-size: 0.95rem;
+  }
+
+  .quantity-controls {
+    gap: 8px;
+  }
+
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .qty-display {
+    font-size: 0.9rem;
+    width: 30px;
+  }
+
+  .remove-btn {
+    font-size: 0.85rem;
+  }
+
+  .cart-summary {
+    width: 100%;
+    max-width: 100%;
+    padding: 15px;
+  }
+
+  .summary-details {
+    margin-top: 30px;
+  }
+
+  .checkout-btn {
+    font-size: 0.95rem;
+    padding: 10px;
+  }
+}
+
+/* Extra Small Devices (<=480px) */
+@media (max-width: 480px) {
+  .cart-title {
+    font-size: 1.4rem;
+  }
+
+  .cart-item {
+    padding-bottom: 15px;
+  }
+
+  .image-wrapper {
+    width: 70px;
+    height: 70px;
+  }
+
+  .product-name {
+    font-size: 0.95rem;
+  }
+
+  .cart-summary {
+    padding: 10px;
+  }
+
+  .summary-title,
+  .subtotal,
+  .summary-row {
+    font-size: 0.9rem;
+  }
+
+  .note-instruction,
+  .taxes-note {
+    font-size: 0.75rem;
+  }
+
+  .checkout-btn {
+    font-size: 0.9rem;
   }
 }
