@@ -17,6 +17,8 @@ const LoginForm = () => {
     setError('');
     setLoading(true);
 
+    console.log('Attempting login with:', { email, password });
+
     try {
       const response = await fetch('http://localhost:5001/api/admin/login', {
         method: 'POST',
@@ -26,12 +28,18 @@ const LoginForm = () => {
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.ok) {
+        console.log('Login successful, token received:', data.token);
         login(data.token);
         navigate('/');
       } else {
+        console.log('Login failed:', data.message);
         setError(data.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
@@ -95,6 +103,13 @@ const LoginForm = () => {
             </button>
           </div>
         </form>
+        
+        {/* Debug info */}
+        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>
+          <p>Default admin credentials:</p>
+          <p>Email: admin@example.com</p>
+          <p>Password: password123</p>
+        </div>
       </div>
     </div>
   );

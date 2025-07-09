@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import AddProduct from './pages/Inventory/AddProduct';
 import EditProduct from './pages/Inventory/EditProduct';
@@ -16,102 +16,54 @@ import OutOfStockProducts from './pages/Inventory/OutOfStockProducts';
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
-
-  return isAuthenticated ? children : null;
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
 };
 
 function AppContent() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <>
-      <Navbar>
-        <main className="main-content">
-          <div className="max-width-container">
-            <Routes>
-              <Route path="/login" element={<LoginForm />} />
-              <Route path="/register" element={<RegisterForm />} />
-              <Route
-                path="/"
-                element={
-                  <PrivateRoute>
-                    <AdminDashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/AddProduct"
-                element={
-                  <PrivateRoute>
-                    <AddProduct />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/EditProduct/:id"
-                element={
-                  <PrivateRoute>
-                    <EditProduct />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/Products"
-                element={
-                  <PrivateRoute>
-                    <Products />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/OrderList"
-                element={
-                  <PrivateRoute>
-                    <OrderList />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/ToBeShippedList"
-                element={
-                  <PrivateRoute>
-                    <ToBeShippedList />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/admin/low-stock"
-                element={
-                  <PrivateRoute>
-                    <LowStockProducts />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/admin/out-of-stock"
-                element={
-                  <PrivateRoute>
-                    <OutOfStockProducts />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="*"
-                element={
-                  <PrivateRoute>
-                    <AdminDashboard />
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </div>
-        </main>
-      </Navbar>
+      {isAuthenticated ? (
+        <Navbar>
+          <main className="main-content">
+            <div className="max-width-container">
+              <Routes>
+                <Route path="/" element={<AdminDashboard />} />
+                <Route path="/AddProduct" element={<AddProduct />} />
+                <Route path="/EditProduct/:id" element={<EditProduct />} />
+                <Route path="/Products" element={<Products />} />
+                <Route path="/OrderList" element={<OrderList />} />
+                <Route path="/ToBeShippedList" element={<ToBeShippedList />} />
+                <Route path="/admin/low-stock" element={<LowStockProducts />} />
+                <Route path="/admin/out-of-stock" element={<OutOfStockProducts />} />
+                <Route path="*" element={<AdminDashboard />} />
+              </Routes>
+            </div>
+          </main>
+        </Navbar>
+      ) : (
+        <Routes>
+          <Route path="/login" element={<PublicRoute><LoginForm /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><RegisterForm /></PublicRoute>} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      )}
     </>
   );
 }

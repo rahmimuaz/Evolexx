@@ -1,12 +1,25 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsOpen(false);
+  };
+
+  const handleRegisterAdmin = () => {
+    navigate('/register');
+    setIsOpen(false);
   };
 
   return (
@@ -52,6 +65,18 @@ const Navbar = ({ children }) => {
             >
               Shipments
             </NavLink>
+            <button
+              onClick={handleRegisterAdmin}
+              className="navbar-register-button"
+            >
+              Register Admin
+            </button>
+            <button
+              onClick={handleLogout}
+              className="navbar-logout-button"
+            >
+              Sign Out
+            </button>
           </div>
 
           <div className="navbar-mobile-menu-button-wrapper">
@@ -137,6 +162,18 @@ const Navbar = ({ children }) => {
             >
               Shipments
             </NavLink>
+            <button
+              onClick={handleRegisterAdmin}
+              className="navbar-mobile-register-button"
+            >
+              Register Admin
+            </button>
+            <button
+              onClick={handleLogout}
+              className="navbar-mobile-logout-button"
+            >
+              Sign Out
+            </button>
           </div>
         </div>
       </nav>
