@@ -56,11 +56,9 @@
   width: 100px;
   height: 100px;
   flex-shrink: 0;
-  background-color: #f0f0f0;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #e5e5e5;
 }
 
 .product-image {

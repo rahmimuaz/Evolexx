@@ -22,6 +22,9 @@ const ProductDetail = () => {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState(null);
   const [selectedColor, setSelectedColor] = useState('');
+  const [activeTab, setActiveTab] = useState('Description'); // State for active tab
+  const [filteredReviews, setFilteredReviews] = useState([]); // State for filtered reviews
+  const [selectedReviewFilter, setSelectedReviewFilter] = useState('All ratings'); // State for selected review filter
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -50,7 +53,10 @@ const ProductDetail = () => {
     if (product) {
       axios
         .get(`http://localhost:5001/api/products/${id}/reviews`)
-        .then((res) => setReviews(res.data))
+        .then((res) => {
+          setReviews(res.data);
+          setFilteredReviews(res.data); // Initialize filtered reviews with all reviews
+        })
         .catch(() => setReviews([]));
     }
   }, [product, id]);
@@ -60,6 +66,29 @@ const ProductDetail = () => {
       setSelectedColor(product.details.color[0]);
     }
   }, [product]);
+
+  // Handle review filtering based on selectedReviewFilter
+  useEffect(() => {
+    if (reviews.length > 0) {
+      let tempReviews = [...reviews];
+      if (selectedReviewFilter === 'All ratings') {
+        setFilteredReviews(tempReviews);
+      } else if (selectedReviewFilter.includes('positive')) {
+        // This is a simplified example. You'd need a more robust way to categorize reviews
+        setFilteredReviews(tempReviews.filter(review => review.rating >= 4));
+      } else if (selectedReviewFilter.includes('disappointed')) {
+        setFilteredReviews(tempReviews.filter(review => review.rating <= 2));
+      } else if (!isNaN(parseInt(selectedReviewFilter))) {
+        const rating = parseInt(selectedReviewFilter);
+        setFilteredReviews(tempReviews.filter(review => review.rating === rating));
+      } else {
+        setFilteredReviews(tempReviews);
+      }
+    } else {
+      setFilteredReviews([]);
+    }
+  }, [reviews, selectedReviewFilter]);
+
 
   const handleQuantityChange = (type) => {
     setQuantity((prev) => {
@@ -105,17 +134,39 @@ const ProductDetail = () => {
       await axios.post(`http://localhost:5001/api/products/${id}/reviews`, {
         rating: reviewRating,
         comment: reviewComment,
+        // Assuming your backend can derive userId from auth token
+      }, {
+        headers: {
+          Authorization: `Bearer ${user?.token}` // Include user token if available for authentication
+        }
       });
       setReviewComment('');
       setReviewRating(5);
       const res = await axios.get(`http://localhost:5001/api/products/${id}/reviews`);
       setReviews(res.data);
+      setFilteredReviews(res.data); // Update filtered reviews after new submission
     } catch (err) {
-      setReviewError('Failed to submit review.');
+      setReviewError('Failed to submit review. Please ensure you are logged in.');
+      console.error("Review submission error:", err);
     } finally {
       setReviewSubmitting(false);
     }
   };
+
+  // Calculate average rating
+  const averageRating = reviews.length > 0
+    ? (reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length).toFixed(1)
+    : '0.0';
+
+  // Count reviews by rating for the filters
+  const ratingCounts = reviews.reduce((acc, review) => {
+    acc[review.rating] = (acc[review.rating] || 0) + 1;
+    return acc;
+  }, {});
+
+  const positiveReviewsCount = reviews.filter(review => review.rating >= 4).length;
+  const disappointedReviewsCount = reviews.filter(review => review.rating <= 2).length;
+
 
   if (loading)
     return <div className="loading-spinner-container"><div className="loading-spinner"></div></div>;
@@ -158,20 +209,23 @@ const ProductDetail = () => {
             <p className="product-tagline">{product.description || 'We always provide high quality Products.'}</p>
 
             <div className="product-ratings">
+              {/* Display average rating stars */}
               {[...Array(5)].map((_, i) => (
-                <svg key={i} className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg key={i} className="h-5 w-5" fill={i < Math.floor(averageRating) ? "currentColor" : "none"} viewBox="0 0 20 20" stroke="currentColor">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.539 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.565-1.839-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
                 </svg>
               ))}
-              <span className="ml-2 text-gray-600 text-sm">Ratings</span>
+              <span className="ml-2 text-gray-600 text-sm">
+                {reviews.length} Ratings
+              </span>
             </div>
             <hr className="section-divider" />
 
             <div className="price-section">
               {product.discountPrice ? (
                 <>
-                  <span className="product-price" style={{ textDecoration: 'line-through', color: '#888', marginRight: 8 }}>
-                    Rs. {product.price?.toLocaleString() ?? 'N/A'}
+                  <span className="product-price" style={{ textDecoration: 'line-through', color: '#888', marginRight: 10, fontSize: '18px' }}>
+                  Rs. {product.price?.toLocaleString() ?? 'N/A'}
                   </span>
                   <span className="product-price" style={{ color: '#e53935', fontWeight: 'bold' }}>
                     Rs. {product.discountPrice?.toLocaleString()}
@@ -284,60 +338,211 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        <div className="product-description-section">
-          <h2>Description</h2>
-          <p>{product.description}</p>
-          {product.longDescription && (
-            <>
-              <h3 style={{ marginTop: 12 }}>More Details</h3>
-              <p>{product.longDescription}</p>
-            </>
-          )}
+        {/* AliExpress style navigation tabs */}
+        <div className="product-tabs-navigation">
+          <div
+            className={`tab-item ${activeTab === 'Description' ? 'active' : ''}`}
+            onClick={() => setActiveTab('Description')}
+          >
+            Description
+          </div>
+          <div
+            className={`tab-item ${activeTab === 'Specifications' ? 'active' : ''}`}
+            onClick={() => setActiveTab('Specifications')}
+          >
+            Specifications
+          </div>
+          
+          <div
+            className={`tab-item ${activeTab === 'Store' ? 'active' : ''}`}
+            onClick={() => setActiveTab('Store')}
+          >
+            Store
+          </div>
+          <div
+            className={`tab-item ${activeTab === 'Customer Reviews' ? 'active' : ''}`}
+            onClick={() => setActiveTab('Customer Reviews')}
+          >
+            Customer Reviews ({reviews.length})
+          </div>
+          <div
+            className={`tab-item ${activeTab === 'More to love' ? 'active' : ''}`}
+            onClick={() => setActiveTab('More to love')}
+          >
+            More to love
+          </div>
         </div>
 
-        <div className="product-reviews-section">
-          <h2>Customer Reviews</h2>
-          {reviews.length === 0 && <p>No reviews yet.</p>}
-          {reviews.map((review, idx) => (
-            <div key={idx} className="review-item">
-              <div className="review-rating">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} style={{ color: i < review.rating ? '#FFD700' : '#ccc' }}>★</span>
+        {/* Conditional rendering based on activeTab */}
+        {activeTab === 'Description' && (
+          <div className="product-description-section">
+            <h2>Description</h2>
+            {product.longDescription && (
+              <>
+                <p>{product.longDescription}</p>
+              </>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'Specifications' && (
+          <div className="product-specifications-section">
+            <h2>Specifications</h2>
+            {product.details ? (
+              <ul>
+                {Object.entries(product.details).map(([key, value]) => (
+                  <li key={key}>
+                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {Array.isArray(value) ? value.join(', ') : value}
+                  </li>
                 ))}
-              </div>
-              <div className="review-comment">{review.comment}</div>
-              <div className="review-meta">
-                <span>{review.date ? new Date(review.date).toLocaleDateString() : ''}</span>
-              </div>
+              </ul>
+            ) : (
+              <p>No specifications available.</p>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'Customer Reviews' && (
+          <div className="product-reviews-section">
+            <h2>Reviews | {averageRating} <span className="stars-in-reviews">
+                {[...Array(5)].map((_, i) => (
+                    <span key={i} style={{ color: i < Math.floor(averageRating) ? '#FFD700' : '#ccc' }}>★</span>
+                ))}
+            </span> {reviews.length} ratings <span className="verified-purchases"> All from verified purchases</span></h2>
+
+            {/* Review Filter Buttons */}
+            <div className="review-filters">
+                <button
+                    className={`filter-button ${selectedReviewFilter === 'All ratings' ? 'active' : ''}`}
+                    onClick={() => setSelectedReviewFilter('All ratings')}
+                >
+                    All ratings ({reviews.length})
+                </button>
+                {ratingCounts[5] > 0 && <button
+                    className={`filter-button ${selectedReviewFilter === '5' ? 'active' : ''}`}
+                    onClick={() => setSelectedReviewFilter('5')}
+                >
+                    (5) ({ratingCounts[5]})
+                </button>}
+                {ratingCounts[4] > 0 && <button
+                    className={`filter-button ${selectedReviewFilter === '4' ? 'active' : ''}`}
+                    onClick={() => setSelectedReviewFilter('4')}
+                >
+                    (4) ({ratingCounts[4]})
+                </button>}
+                {ratingCounts[3] > 0 && <button
+                    className={`filter-button ${selectedReviewFilter === '3' ? 'active' : ''}`}
+                    onClick={() => setSelectedReviewFilter('3')}
+                >
+                    (3) ({ratingCounts[3]})
+                </button>}
+                {ratingCounts[2] > 0 && <button
+                    className={`filter-button ${selectedReviewFilter === '2' ? 'active' : ''}`}
+                    onClick={() => setSelectedReviewFilter('2')}
+                >
+                    (2) ({ratingCounts[2]})
+                </button>}
+                {ratingCounts[1] > 0 && <button
+                    className={`filter-button ${selectedReviewFilter === '1' ? 'active' : ''}`}
+                    onClick={() => setSelectedReviewFilter('1')}
+                >
+                    (1) ({ratingCounts[1]})
+                </button>}
+                {positiveReviewsCount > 0 && <button
+                    className={`filter-button ${selectedReviewFilter === 'positive' ? 'active' : ''}`}
+                    onClick={() => setSelectedReviewFilter('positive')}
+                >
+                    positive ({positiveReviewsCount})
+                </button>}
+                {disappointedReviewsCount > 0 && <button
+                    className={`filter-button ${selectedReviewFilter === 'disappointed' ? 'active' : ''}`}
+                    onClick={() => setSelectedReviewFilter('disappointed')}
+                >
+                    disappointed ({disappointedReviewsCount})
+                </button>}
+                {/* You can add more specific filters as needed, e.g., 'beautiful shape' if you had tags in your review data */}
             </div>
-          ))}
-          {user ? (
-            <form onSubmit={handleReviewSubmit} className="review-form">
-              <h3>Write a Review</h3>
-              <div className="review-form-rating">
-                <label>Rating: </label>
-                <select value={reviewRating} onChange={(e) => setReviewRating(Number(e.target.value))}>
-                  {[5, 4, 3, 2, 1].map((val) => (
-                    <option key={val} value={val}>{val}</option>
-                  ))}
-                </select>
+
+
+            {filteredReviews.length === 0 && <p>No reviews yet for this filter.</p>}
+            {filteredReviews.map((review, idx) => (
+              <div key={idx} className="review-item">
+                <div className="review-header">
+                    <div className="reviewer-info">
+                        <span className="reviewer-avatar">
+                           {/* Replace with actual user avatar if available */}
+                            <svg className="h-6 w-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
+                        </span>
+                        <span className="reviewer-name">{review.user?.username || `User ${review.userId || idx + 1}`}</span> {/* Assuming review object has user info */}
+                    </div>
+                    <div className="review-rating">
+                        {[...Array(5)].map((_, i) => (
+                            <span key={i} style={{ color: i < review.rating ? '#FFD700' : '#ccc' }}>★</span>
+                        ))}
+                    </div>
+                </div>
+                {review.productColor && <div className="review-product-details">
+                    Color: {review.productColor}
+                </div>}
+                <div className="review-comment">{review.comment}</div>
+                {review.images && review.images.length > 0 && (
+                    <div className="review-images">
+                        {review.images.map((img, i) => (
+                            <img key={i} src={cleanImagePath(img)} alt={`Review image ${i}`} className="review-thumbnail-image" />
+                        ))}
+                    </div>
+                )}
+                <div className="review-meta">
+                  <span className="review-date">{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}</span>
+                  <button className="helpful-button">Helpful (0)</button> {/* Placeholder for helpful button */}
+                </div>
               </div>
-              <textarea
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-                placeholder="Write your review here..."
-                required
-                rows={3}
-              />
-              <button type="submit" disabled={reviewSubmitting} className="submit-review-btn">
-                {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
-              </button>
-              {reviewError && <div className="review-error">{reviewError}</div>}
-            </form>
-          ) : (
-            <p style={{ marginTop: 12 }}>Please log in to write a review.</p>
-          )}
-        </div>
+            ))}
+            {user ? (
+              <form onSubmit={handleReviewSubmit} className="review-form">
+                <h3>Write a Review</h3>
+                <div className="review-form-rating">
+                  <label>Rating: </label>
+                  <select value={reviewRating} onChange={(e) => setReviewRating(Number(e.target.value))}>
+                    {[5, 4, 3, 2, 1].map((val) => (
+                      <option key={val} value={val}>{val}</option>
+                    ))}
+                  </select>
+                </div>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Share your experience..."
+                  required
+                  rows={3}
+                />
+                <button type="submit" disabled={reviewSubmitting} className="submit-review-btn">
+                  {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+                {reviewError && <div className="review-error">{reviewError}</div>}
+              </form>
+            ) : (
+              <p style={{ marginTop: 12 }}>Please log in to write a review.</p>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'Store' && (
+          <div className="product-store-section">
+            <h2>Store Information</h2>
+            <p>Details about the store selling this product would go here.</p>
+            {/* You would typically fetch and display store-specific information */}
+          </div>
+        )}
+
+        {activeTab === 'More to love' && (
+          <div className="product-more-to-love-section">
+            <h2>More Products You Might Love</h2>
+            <p>Similar products or recommendations would be displayed here.</p>
+            {/* Implement logic to fetch and display related products */}
+          </div>
+        )}
+
       </div>
       <Footer />
     </div>
