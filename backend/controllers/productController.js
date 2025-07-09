@@ -306,3 +306,22 @@ export const getOutOfStockProducts = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Search products by name (case-insensitive, partial match)
+export const searchProducts = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query || query.trim() === '') {
+      return res.status(200).json([]);
+    }
+    const products = await Product.find({
+      name: { $regex: query, $options: 'i' }
+    });
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Search error:', error);
+    console.error(error.stack);
+    // Always return an array on error to prevent frontend issues
+    res.status(500).json([]);
+  }
+};

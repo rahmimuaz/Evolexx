@@ -5,7 +5,7 @@ import './Login.css';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
-const Login = () => {
+const Login = ({ asModal = false, onSuccess, onSwitchRegister }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -15,7 +15,8 @@ const Login = () => {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate('/');
+      if (onSuccess) onSuccess();
+      else navigate('/');
     } catch (error) {
       // Error handling is likely done within the login context or an outer toast handler
       // If not, you might want a toast.error(error.message || 'Login failed') here.
@@ -38,8 +39,8 @@ const Login = () => {
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-      <div className="login-page-container">
-        <div className="login-card">
+      {asModal ? (
+        <>
           <h2 className="login-title">Login</h2>
           <form onSubmit={submitHandler}>
             <div className="form-group">
@@ -80,11 +81,59 @@ const Login = () => {
             />
           </div>
           <p className="register-text">
-            New Customer? 
-            <Link to="/register" className="register-link">Register</Link>
+            New Customer?{' '}
+            <button type="button" className="register-link" style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', padding: 0 }} onClick={onSwitchRegister}>Register</button>
           </p>
+        </>
+      ) : (
+        <div className="login-page-container">
+          <div className="login-card">
+            <h2 className="login-title">Login</h2>
+            <form onSubmit={submitHandler}>
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  className="form-input"
+                  placeholder="Enter email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group password">
+                <label htmlFor="password" className="form-label">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  className="form-input password-input"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="login-button"
+              >
+                Login
+              </button>
+            </form>
+            <div style={{ margin: '16px 0' }}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => alert('Google Login Failed')}
+              />
+            </div>
+            <p className="register-text">
+              New Customer? 
+              <Link to="/register" className="register-link">Register</Link>
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </GoogleOAuthProvider>
   );
 };

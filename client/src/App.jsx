@@ -15,6 +15,7 @@ import { UserProvider } from './context/UserContext';
 import { CartProvider } from './context/CartContext';
 import Homepage from './pages/Home/Homepage';
 import Footer from './components/Footer/Footer'; // Uncomment if you want to use Footer
+import CategoryPage from './pages/Category/CategoryPage';
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Homepage />} />
                 <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/category/:category" element={<CategoryPage />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/card-payment" element={<CardPaymentPage />} />

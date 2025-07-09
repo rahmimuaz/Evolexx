@@ -22,6 +22,17 @@ const Homepage = () => {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
 
+  const sortOptions = [
+    { value: 'price-asc', label: 'Price: Low to High' },
+    { value: 'price-desc', label: 'Price: High to Low' },
+    { value: 'newest', label: 'Newest' },
+    { value: 'oldest', label: 'Oldest' },
+  ];
+  const [sort, setSort] = useState('price-asc');
+  const [priceRange, setPriceRange] = useState([0, 1000000]);
+  const [brandFilter, setBrandFilter] = useState([]);
+  const [inStockOnly, setInStockOnly] = useState(false);
+
   useEffect(() => {
     fetchProducts();
 
@@ -51,6 +62,17 @@ const Homepage = () => {
     };
   }, [bannerImages.length, isTransitioning, currentBannerIndex]);
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const prices = products.map(p => p.price || 0);
+      setPriceRange([Math.min(...prices), Math.max(...prices)]);
+    }
+  }, [products]);
+
   const fetchProducts = async () => {
     try {
       const response = await axios.get('http://localhost:5001/api/products');
@@ -72,10 +94,25 @@ const Homepage = () => {
     return '/logo192.png';
   };
 
+  const allBrands = Array.from(new Set(products.map(p => p.details?.brand).filter(Boolean)));
+  const filteredProducts = products.filter(product => {
+    const price = product.price || 0;
+    const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
+    const matchesBrand = brandFilter.length === 0 || brandFilter.includes(product.details?.brand);
+    const matchesStock = !inStockOnly || (product.stock && product.stock > 0);
+    return matchesPrice && matchesBrand && matchesStock;
+  });
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sort === 'price-asc') return (a.price || 0) - (b.price || 0);
+    if (sort === 'price-desc') return (b.price || 0) - (a.price || 0);
+    if (sort === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
+    if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
+    return 0;
+  });
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
-  const totalPages = Math.ceil(products.length / productsPerPage);
+  const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages && pageNumber !== currentPage) {
@@ -93,6 +130,26 @@ const Homepage = () => {
         }
       }, 400);
     }
+  };
+
+  const handleBrandChange = (brand) => {
+    setBrandFilter(prev =>
+      prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+    );
+    setCurrentPage(1);
+  };
+  const handlePriceChange = (e, idx) => {
+    const val = Number(e.target.value);
+    setPriceRange(pr => idx === 0 ? [val, pr[1]] : [pr[0], val]);
+    setCurrentPage(1);
+  };
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
+    setCurrentPage(1);
+  };
+  const handleStockChange = (e) => {
+    setInStockOnly(e.target.checked);
+    setCurrentPage(1);
   };
 
   if (loading) return <div className="loader">Loading products...</div>;
@@ -143,21 +200,21 @@ const Homepage = () => {
       {/* CATEGORIES */}
       <section className="category-section">
         <div className="category-grid-custom">
-          <Link to="/category/sound" className="category-card tall">
+          <Link to="/category/Mobile%20Phone" className="category-card tall">
             <img src="/category-accessories.jpg" alt="Sound System" />
-            <div className="overlay-text bottom"><p>Sound System</p></div>
+            <div className="overlay-text bottom"><p>Brand New Phone</p></div>
           </Link>
-          <Link to="/category/watch" className="category-card square">
+          <Link to="/category/Preowned%20Phones" className="category-card square">
             <img src="/category-accessories.jpg" alt="Smart Watch" />
-            <div className="overlay-text bottom"><p>Smart Watch</p></div>
+            <div className="overlay-text bottom"><p>Pre Owned Phone</p></div>
           </Link>
-          <Link to="/category/tablet" className="category-card square">
+          <Link to="/category/Laptops" className="category-card square">
             <img src="/category-accessories.jpg" alt="Tablet" />
-            <div className="overlay-text bottom"><p>Tablet Computer</p></div>
+            <div className="overlay-text bottom"><p>laptop</p></div>
           </Link>
-          <Link to="/category/game" className="category-card wide">
+          <Link to="/category/Mobile%20Accessories" className="category-card wide">
             <img src="/category-accessories.jpg" alt="Game Controller" />
-            <div className="overlay-text bottom"><p>Game Controller</p></div>
+            <div className="overlay-text bottom"><p>mobileAccessories </p></div>
           </Link>
         </div>
       </section>
@@ -165,6 +222,47 @@ const Homepage = () => {
       {/* PRODUCTS */}
       <section className="product-section" ref={productSectionRef}>
         <h2 ref={headingRef}>All Products</h2>
+        {/* FILTER & SORT BAR */}
+        <div className="filter-sort-bar">
+          {/* Sort */}
+          <div>
+            <label>Sort:&nbsp;</label>
+            <select value={sort} onChange={handleSortChange}>
+              {sortOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          {/* Price Range */}
+          <div>
+            <label>Price:&nbsp;</label>
+            <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} style={{ width: 70 }} />
+            &nbsp;-&nbsp;
+            <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} style={{ width: 70 }} />
+          </div>
+          {/* Brand Filter */}
+          {allBrands.length > 0 && (
+            <div>
+              <label>Brand:&nbsp;</label>
+              {allBrands.map(brand => (
+                <label key={brand} className="brand-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={brandFilter.includes(brand)}
+                    onChange={() => handleBrandChange(brand)}
+                  />
+                  &nbsp;{brand}
+                </label>
+              ))}
+            </div>
+          )}
+          {/* In Stock Only */}
+          <div>
+            <label>
+              <input type="checkbox" checked={inStockOnly} onChange={handleStockChange} /> In Stock Only
+            </label>
+          </div>
+        </div>
         <div className={`product-grid-container ${animationDirection}`}>
           <div className="product-grid">
             {currentProducts.map((product) => {

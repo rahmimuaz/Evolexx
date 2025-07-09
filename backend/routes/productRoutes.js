@@ -10,8 +10,9 @@ import {
   addReview,
   getReviews,
   getLowStockProducts,
-  getOutOfStockProducts
-} from '../controller/productController.js';
+  getOutOfStockProducts,
+  searchProducts
+} from '../controllers/productController.js';
 
 const router = express.Router();
 
@@ -23,6 +24,9 @@ router.get('/', getProducts);
 
 // Get products by category — must come BEFORE getProduct('/:id') route
 router.get('/category/:category', getProductsByCategory);
+
+// Product search (by name) - must come before /:id
+router.get('/search', searchProducts);
 
 // Get a single product by ID
 router.get('/:id', getProduct);
