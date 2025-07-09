@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import '../Home/Homepage.css';
+import { FaBars } from 'react-icons/fa';
 
 const PRODUCTS_PER_PAGE = 8;
 
@@ -20,6 +21,7 @@ const CategoryPage = () => {
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [brandFilter, setBrandFilter] = useState([]);
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [showFilterBar, setShowFilterBar] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -28,7 +30,6 @@ const CategoryPage = () => {
       .then(data => {
         setProducts(data);
         setCurrentPage(1);
-        // Set price range based on products
         if (data.length > 0) {
           const prices = data.map(p => p.price || 0);
           setPriceRange([Math.min(...prices), Math.max(...prices)]);
@@ -37,14 +38,11 @@ const CategoryPage = () => {
       .finally(() => setLoading(false));
   }, [category]);
 
-  // Helper for image fallback
   const generateImageUrl = (product) =>
     product.images && product.images.length > 0 ? product.images[0] : '/logo192.png';
 
-  // Get all brands in this category
   const allBrands = Array.from(new Set(products.map(p => p.details?.brand).filter(Boolean)));
 
-  // Filtering
   const filteredProducts = products.filter(product => {
     const price = product.price || 0;
     const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
@@ -53,7 +51,6 @@ const CategoryPage = () => {
     return matchesPrice && matchesBrand && matchesStock;
   });
 
-  // Sorting
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sort === 'price-asc') return (a.price || 0) - (b.price || 0);
     if (sort === 'price-desc') return (b.price || 0) - (a.price || 0);
@@ -62,12 +59,10 @@ const CategoryPage = () => {
     return 0;
   });
 
-  // Pagination logic
   const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE);
   const startIdx = (currentPage - 1) * PRODUCTS_PER_PAGE;
   const currentProducts = sortedProducts.slice(startIdx, startIdx + PRODUCTS_PER_PAGE);
 
-  // Handlers
   const handleBrandChange = (brand) => {
     setBrandFilter(prev =>
       prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
@@ -90,48 +85,59 @@ const CategoryPage = () => {
 
   return (
     <div className="product-section">
-      <h2>Category: {category}</h2>
-      {/* FILTER & SORT BAR */}
-      <div className="filter-sort-bar">
-        {/* Sort */}
-        <div>
-          <label>Sort:&nbsp;</label>
-          <select value={sort} onChange={handleSortChange}>
-            {sortOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-        {/* Price Range */}
-        <div>
-          <label>Price:&nbsp;</label>
-          <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} style={{ width: 70 }} />
-          &nbsp;-&nbsp;
-          <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} style={{ width: 70 }} />
-        </div>
-        {/* Brand Filter */}
-        {allBrands.length > 0 && (
-          <div>
-            <label>Brand:&nbsp;</label>
-            {allBrands.map(brand => (
-              <label key={brand} className="brand-checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={brandFilter.includes(brand)}
-                  onChange={() => handleBrandChange(brand)}
-                />
-                &nbsp;{brand}
-              </label>
-            ))}
-          </div>
-        )}
-        {/* In Stock Only */}
-        <div>
-          <label>
-            <input type="checkbox" checked={inStockOnly} onChange={handleStockChange} /> In Stock Only
-          </label>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>Category: {category}</h2>
+        <FaBars
+          onClick={() => setShowFilterBar(!showFilterBar)}
+          style={{ cursor: 'pointer', fontSize: '1.5rem' }}
+          title="Toggle Filters"
+        />
       </div>
+
+      {/* FILTER & SORT BAR */}
+      {showFilterBar && (
+        <div className="filter-sort-bar">
+          {/* Sort */}
+          <div>
+            <label>Sort:&nbsp;</label>
+            <select value={sort} onChange={handleSortChange}>
+              {sortOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          {/* Price Range */}
+          <div>
+            <label>Price:&nbsp;</label>
+            <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} style={{ width: 70 }} />
+            &nbsp;-&nbsp;
+            <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} style={{ width: 70 }} />
+          </div>
+          {/* Brand Filter */}
+          {allBrands.length > 0 && (
+            <div>
+              <label>Brand:&nbsp;</label>
+              {allBrands.map(brand => (
+                <label key={brand} className="brand-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={brandFilter.includes(brand)}
+                    onChange={() => handleBrandChange(brand)}
+                  />
+                  &nbsp;{brand}
+                </label>
+              ))}
+            </div>
+          )}
+          {/* In Stock Only */}
+          <div>
+            <label>
+              <input type="checkbox" checked={inStockOnly} onChange={handleStockChange} /> In Stock Only
+            </label>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -169,7 +175,7 @@ const CategoryPage = () => {
               );
             })}
           </div>
-          {/* PAGINATION */}
+
           {totalPages > 1 && (
             <div className="pagination-dots">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -188,4 +194,4 @@ const CategoryPage = () => {
   );
 };
 
-export default CategoryPage; 
+export default CategoryPage;

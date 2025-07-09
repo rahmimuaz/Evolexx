@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Homepage.css';
 import axios from 'axios';
-import { FaShippingFast, FaRedoAlt } from 'react-icons/fa';
+import { FaShippingFast, FaRedoAlt, FaSlidersH } from 'react-icons/fa';
 import { HiShieldCheck } from 'react-icons/hi';
 import Footer from '../../components/Footer/Footer';
 
@@ -12,8 +12,9 @@ const Homepage = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [animationDirection, setAnimationDirection] = useState('');
-  const productsPerPage = 12;
+  const [showFilters, setShowFilters] = useState(false);
 
+  const productsPerPage = 12;
   const productSectionRef = useRef(null);
   const headingRef = useRef(null);
 
@@ -102,6 +103,7 @@ const Homepage = () => {
     const matchesStock = !inStockOnly || (product.stock && product.stock > 0);
     return matchesPrice && matchesBrand && matchesStock;
   });
+
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sort === 'price-asc') return (a.price || 0) - (b.price || 0);
     if (sort === 'price-desc') return (b.price || 0) - (a.price || 0);
@@ -109,6 +111,7 @@ const Homepage = () => {
     if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
     return 0;
   });
+
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
@@ -125,7 +128,7 @@ const Homepage = () => {
 
         if (headingRef.current) {
           const topPos = headingRef.current.getBoundingClientRect().top + window.pageYOffset;
-          const offset = 80; // Adjust this value to your fixed header height
+          const offset = 80;
           window.scrollTo({ top: topPos - offset, behavior: 'smooth' });
         }
       }, 400);
@@ -138,15 +141,18 @@ const Homepage = () => {
     );
     setCurrentPage(1);
   };
+
   const handlePriceChange = (e, idx) => {
     const val = Number(e.target.value);
     setPriceRange(pr => idx === 0 ? [val, pr[1]] : [pr[0], val]);
     setCurrentPage(1);
   };
+
   const handleSortChange = (e) => {
     setSort(e.target.value);
     setCurrentPage(1);
   };
+
   const handleStockChange = (e) => {
     setInStockOnly(e.target.checked);
     setCurrentPage(1);
@@ -174,27 +180,9 @@ const Homepage = () => {
 
       {/* FEATURES */}
       <section className="features">
-        <div className="feature">
-          <FaShippingFast />
-          <div className="feature-text">
-            <h3>Fast & Free Shipping</h3>
-            <p>Every single order ships for free.</p>
-          </div>
-        </div>
-        <div className="feature">
-          <FaRedoAlt />
-          <div className="feature-text">
-            <h3>30 Days Returns</h3>
-            <p>Product returns accepted within 30 days.</p>
-          </div>
-        </div>
-        <div className="feature">
-          <HiShieldCheck />
-          <div className="feature-text">
-            <h3>Top Quality Products</h3>
-            <p>We always provide high quality products.</p>
-          </div>
-        </div>
+        <div className="feature"><FaShippingFast /><div className="feature-text"><h3>Fast & Free Shipping</h3><p>Every single order ships for free.</p></div></div>
+        <div className="feature"><FaRedoAlt /><div className="feature-text"><h3>30 Days Returns</h3><p>Product returns accepted within 30 days.</p></div></div>
+        <div className="feature"><HiShieldCheck /><div className="feature-text"><h3>Top Quality Products</h3><p>We always provide high quality products.</p></div></div>
       </section>
 
       {/* CATEGORIES */}
@@ -221,48 +209,55 @@ const Homepage = () => {
 
       {/* PRODUCTS */}
       <section className="product-section" ref={productSectionRef}>
-        <h2 ref={headingRef}>All Products</h2>
-        {/* FILTER & SORT BAR */}
-        <div className="filter-sort-bar">
-          {/* Sort */}
-          <div>
-            <label>Sort:&nbsp;</label>
-            <select value={sort} onChange={handleSortChange}>
-              {sortOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-          {/* Price Range */}
-          <div>
-            <label>Price:&nbsp;</label>
-            <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} style={{ width: 70 }} />
-            &nbsp;-&nbsp;
-            <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} style={{ width: 70 }} />
-          </div>
-          {/* Brand Filter */}
-          {allBrands.length > 0 && (
-            <div>
-              <label>Brand:&nbsp;</label>
-              {allBrands.map(brand => (
-                <label key={brand} className="brand-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={brandFilter.includes(brand)}
-                    onChange={() => handleBrandChange(brand)}
-                  />
-                  &nbsp;{brand}
-                </label>
-              ))}
-            </div>
-          )}
-          {/* In Stock Only */}
-          <div>
-            <label>
-              <input type="checkbox" checked={inStockOnly} onChange={handleStockChange} /> In Stock Only
-            </label>
-          </div>
+        <div className="heading-with-icon">
+          <h2 ref={headingRef}>All Products</h2>
+          <FaSlidersH
+            className="filter-toggle-icon"
+            onClick={() => setShowFilters(!showFilters)}
+            title="Filter & Sort"
+          />
         </div>
+
+        {showFilters && (
+          <div className="filter-sort-bar">
+            <div>
+              <label>Sort:&nbsp;</label>
+              <select value={sort} onChange={handleSortChange}>
+                {sortOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>Price:&nbsp;</label>
+              <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} style={{ width: 70 }} />
+              &nbsp;-&nbsp;
+              <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} style={{ width: 70 }} />
+            </div>
+            {allBrands.length > 0 && (
+              <div>
+                <label>Brand:&nbsp;</label>
+                {allBrands.map(brand => (
+                  <label key={brand} className="brand-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={brandFilter.includes(brand)}
+                      onChange={() => handleBrandChange(brand)}
+                    />
+                    &nbsp;{brand}
+                  </label>
+                ))}
+              </div>
+            )}
+            <div>
+              <label>
+                <input type="checkbox" checked={inStockOnly} onChange={handleStockChange} /> In Stock Only
+              </label>
+            </div>
+            <button onClick={() => setShowFilters(false)} className="nav-info-button">Done</button>
+          </div>
+        )}
+
         <div className={`product-grid-container ${animationDirection}`}>
           <div className="product-grid">
             {currentProducts.map((product) => {
@@ -299,7 +294,6 @@ const Homepage = () => {
           </div>
         </div>
 
-        {/* PAGINATION */}
         <div className="pagination-dots">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <div

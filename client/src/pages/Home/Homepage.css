@@ -480,19 +480,19 @@
   transform: scale(1.2);
   border-color: #111;
 }
-
 /* FILTER & SORT BAR */
 .filter-sort-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
+  gap: 6rem;
   align-items: center;
   justify-content: center;
   margin-bottom: 2rem;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: 1.5rem;
   box-shadow: 0 2px 12px 0 rgba(31, 38, 135, 0.08);
-  padding: 1.2rem 2rem;
+  padding: 1.2rem 1.2rem;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
 }
 
 .filter-sort-bar label {
@@ -505,7 +505,7 @@
 .filter-sort-bar input[type="number"] {
   border: 1px solid #e5e7eb;
   border-radius: 1rem;
-  padding: 0.4rem 1rem;
+  padding: 1px 1px;
   font-size: 1rem;
   margin-right: 0.5rem;
   background: #f9f9f9;
@@ -530,6 +530,50 @@
   color: #444;
   font-size: 0.98rem;
 }
+
+/* Heading and Toggle Icon Container */
+.heading-with-icon {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Filter toggle icon styling */
+.filter-toggle-icon {
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.3s ease;
+  user-select: none;
+}
+
+.filter-toggle-icon:hover {
+  color: #e75480;
+}
+
+/* Optional button style, if you use buttons elsewhere */
+.nav-info-button {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  background-color: #eae8e8;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+/* Responsive: Hide filter bar by default on small screens, show toggle */
+@media (max-width: 768px) {
+  .filter-sort-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 1.5rem;
+    gap: 1.2rem;
+  }
+}
+
 
 /* ============ MEDIA QUERIES ============ */
 @media (max-width: 768px) {
