@@ -130,6 +130,7 @@
 
 /* SEARCH ICON BUTTON */
 .search-icon-button {
+
   background: none;
   border: none;
   cursor: pointer;
@@ -157,6 +158,22 @@
   width: 100%;
   display: flex;
   align-items: center;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 12px;
+  color: #888;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  z-index: 2;
+}
+
+.search-input-navbar,
+.mobile-search-input {
+  padding-left: 38px !important;
 }
 
 /* Glassmorphism Input */
@@ -500,6 +517,59 @@
     min-width: 160px; /* Slightly smaller for mobile */
     padding: 1rem;
   }
+
+  /* Mobile search overlay styles */
+  .mobile-search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 70px;
+    background: #fff;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    gap: 0.5rem;
+  }
+  .mobile-search-input {
+    flex: 1;
+    font-size: 1.1em;
+    padding: 10px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    background: #f5f5f5;
+    outline: none;
+  }
+  .mobile-search-cancel {
+    margin-left: 10px;
+    background: none;
+    border: none;
+    color: #007aff;
+    font-size: 1em;
+    cursor: pointer;
+    padding: 6px 10px;
+  }
+  .mobile-only { display: inline-flex !important; }
+  .desktop-only { display: none !important; }
+  .search-suggestions-dropdown.mobile {
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100vw;
+    background: #fff;
+    z-index: 2100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 0 0 12px 12px;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-search-overlay { display: none !important; }
+  .mobile-only { display: none !important; }
+  .desktop-only { display: inline-flex !important; }
 }
 
 @media (max-width: 480px) {

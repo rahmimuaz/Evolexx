@@ -31,6 +31,7 @@ const Navbar = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const navigate = useNavigate();
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
   const toggleSearch = () => {
@@ -67,7 +68,8 @@ const Navbar = () => {
   }, [searchQuery]);
 
   const handleSearchSelect = (productId) => {
-    setSearchOpen(false);
+    setSearchOpen(false); // closes desktop search bar
+    setMobileSearchOpen(false); // closes mobile overlay
     setSearchQuery('');
     setSearchResults([]);
     navigate(`/products/${productId}`);
@@ -75,7 +77,52 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-container">
+      {/* Mobile Search Overlay */}
+      {mobileSearchOpen && (
+        <div className="mobile-search-overlay">
+          <div className="search-input-wrapper-inner">
+            <span className="search-input-icon"><FaSearch size={18} /></span>
+            <input
+              type="text"
+              placeholder="Search or type URL"
+              className="mobile-search-input"
+              autoFocus
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            <button
+              className="mobile-search-cancel"
+              onClick={() => { setMobileSearchOpen(false); setSearchQuery(''); setSearchResults([]); setSearchError(null); }}
+            >
+              Cancel
+            </button>
+          </div>
+          {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
+            <div className="search-suggestions-dropdown mobile">
+              {searchLoading && <div className="search-suggestion-loading">Searching...</div>}
+              {searchError && <div className="search-suggestion-error">{searchError}</div>}
+              {!searchLoading && !searchError && searchResults.length === 0 && (
+                <div className="search-suggestion-empty">No products found</div>
+              )}
+              {searchResults.map(product => (
+                <div
+                  className="search-suggestion-item"
+                  key={product._id}
+                  onClick={() => handleSearchSelect(product._id)}
+                >
+                  <img src={product.images?.[0]} alt={product.name} className="search-suggestion-img" onError={(e) => { e.target.onerror = null; e.target.src = '/logo192.png'; }} />
+                  <div className="search-suggestion-info">
+                    <div className="search-suggestion-name">{product.name}</div>
+                    <div className="search-suggestion-price">Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {/* Main Navbar (hidden on mobile search open) */}
+      <div className="navbar-container" style={{ display: mobileSearchOpen ? 'none' : undefined }}>
         {/* Hamburger (mobile) */}
         <button className="hamburger-button" onClick={toggleMenu} aria-label="Toggle menu">
           <FaBars />
@@ -89,9 +136,10 @@ const Navbar = () => {
         <div className={`navbar-center ${menuOpen ? 'open' : ''}`}>
           <div className="navbar-links">
             <Link to="/" className={`navbar-link ${location.pathname === '/' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Home</Link>
-            <Link to="/phones" className={`navbar-link ${location.pathname === '/phones' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Phones</Link>
-            <Link to="/accessories" className={`navbar-link ${location.pathname === '/accessories' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Accessories</Link>
-            <Link to="/newdeals" className={`navbar-link ${location.pathname === '/newdeals' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>New Deals</Link>
+            <Link to="/category/Mobile%20Phone" className={`navbar-link ${location.pathname === '/category/Mobile%20Phone' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Brand New Phone</Link>
+            <Link to="/category/Preowned%20Phones" className={`navbar-link ${location.pathname === '/category/Preowned%20Phones' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Pre Owned Phone</Link>
+            <Link to="/category/Laptops" className={`navbar-link ${location.pathname === '/category/Laptops' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Laptops</Link>
+            <Link to="/category/Mobile%20Accessories" className={`navbar-link ${location.pathname === '/category/Mobile%20Accessories' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Accessories</Link>
           </div>
         </div>
 
@@ -99,55 +147,73 @@ const Navbar = () => {
 
         {/* Right Section */}
         <div className="navbar-right">
-           {/* Conditional rendering for Search Icon or Search Bar */}
-          {!searchOpen ? (
-            <button className="search-icon-button" onClick={toggleSearch} aria-label="Open search">
+          {/* Desktop: search icon or search bar inline, left of cart/profile */}
+          {window.innerWidth > 768 ? (
+            !searchOpen ? (
+              <button
+                className="search-icon-button"
+                onClick={() => setSearchOpen(true)}
+                aria-label="Open search"
+              >
+                <FaSearch size={18} />
+              </button>
+            ) : (
+              <div className="search-bar-integrated">
+                <div className="search-input-wrapper-inner">
+                  <span className="search-input-icon"><FaSearch size={18} /></span>
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="search-input-navbar"
+                    autoFocus
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                  />
+                  <button
+                    className="search-bar-close"
+                    onClick={() => setSearchOpen(false)}
+                    aria-label="Close search"
+                    type="button"
+                  >
+                    &times;
+                  </button>
+                </div>
+                {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
+                  <div className="search-suggestions-dropdown">
+                    {searchLoading && <div className="search-suggestion-loading">Searching...</div>}
+                    {searchError && <div className="search-suggestion-error">{searchError}</div>}
+                    {!searchLoading && !searchError && searchResults.length === 0 && (
+                      <div className="search-suggestion-empty">No products found</div>
+                    )}
+                    {searchResults.map(product => (
+                      <div
+                        className="search-suggestion-item"
+                        key={product._id}
+                        onClick={() => handleSearchSelect(product._id)}
+                      >
+                        <img src={product.images?.[0]} alt={product.name} className="search-suggestion-img" onError={(e) => { e.target.onerror = null; e.target.src = '/logo192.png'; }} />
+                        <div className="search-suggestion-info">
+                          <div className="search-suggestion-name">{product.name}</div>
+                          <div className="search-suggestion-price">Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          ) : (
+            // Mobile: always show search icon, triggers overlay
+            <button
+              className="search-icon-button"
+              onClick={() => setMobileSearchOpen(true)}
+              aria-label="Open search"
+            >
               <FaSearch size={18} />
             </button>
-          ) : (
-            <div className="search-bar-integrated">
-              <div className="search-input-wrapper-inner">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="search-input-navbar"
-                  autoFocus
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                />
-                <button
-                  className="search-bar-close"
-                  onClick={toggleSearch}
-                  aria-label="Close search"
-                  type="button"
-                >
-                  &times;
-                </button>
-              </div>
-              {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
-                <div className="search-suggestions-dropdown">
-                  {searchLoading && <div className="search-suggestion-loading">Searching...</div>}
-                  {searchError && <div className="search-suggestion-error">{searchError}</div>}
-                  {!searchLoading && !searchError && searchResults.length === 0 && (
-                    <div className="search-suggestion-empty">No products found</div>
-                  )}
-                  {searchResults.map(product => (
-                    <div
-                      className="search-suggestion-item"
-                      key={product._id}
-                      onClick={() => handleSearchSelect(product._id)}
-                    >
-                      <img src={product.images?.[0]} alt={product.name} className="search-suggestion-img" onError={(e) => { e.target.onerror = null; e.target.src = '/logo192.png'; }} />
-                      <div className="search-suggestion-info">
-                        <div className="search-suggestion-name">{product.name}</div>
-                        <div className="search-suggestion-price">Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           )}
+
+          {/* Cart icon (visible on all screen sizes) */}
           {user && (
             <Link to="/cart" className="cart-button">
               <FaShoppingCart size={18} />
@@ -155,14 +221,11 @@ const Navbar = () => {
             </Link>
           )}
 
-         
-
-          {/* Profile Dropdown */}
+          {/* Profile Dropdown (visible on all screen sizes) */}
           <div className="profile-dropdown-wrapper">
             <button className="profile-icon-button" onClick={toggleDropdown} aria-label="Toggle profile menu">
               <FaUserCircle size={22} />
             </button>
-
             <div className={`dropdown-menu ${dropdownOpen ? 'show-dropdown' : ''}`}>
               {user ? (
                 <>
@@ -178,7 +241,7 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                <span className="dropdown-text">Wellcome</span>
+                  <span className="dropdown-text">Wellcome</span>
                   <button className="dropdown-link" onClick={() => { setLoginModalOpen(true); setDropdownOpen(false); }}>
                     <FaSignInAlt className="dropdown-icon" />
                     Login
