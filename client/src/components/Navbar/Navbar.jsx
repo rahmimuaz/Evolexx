@@ -178,6 +178,7 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
+                <span className="dropdown-text">Wellcome</span>
                   <button className="dropdown-link" onClick={() => { setLoginModalOpen(true); setDropdownOpen(false); }}>
                     <FaSignInAlt className="dropdown-icon" />
                     Login

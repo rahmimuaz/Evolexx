@@ -321,23 +321,31 @@
 }
 
 .dropdown-link, .logout-dropdown-button {
-  background: rgba(255,255,255,0.25);
+  background: none;
   border: none;
-  border-radius: 0.5rem;
-  color: #222;
-  padding: 0.5rem 1.2rem;
-  margin: 0.2rem 0;
+  border-radius: 0;
+  color: inherit; /* or use specific color like #222 if needed */
+  padding: 0;
+  margin: 0;
   font-size: 1rem;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: none;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  text-decoration: none; /* Ensure links look like buttons */
+  text-decoration: none;
+}
+.dropdown-link{
+  margin-top: 15px;
+  padding: 0.5rem 1.4rem;
+  font-size: 1rem;
+  width: 100%;
 }
 
+
 .dropdown-link:hover, .logout-dropdown-button:hover {
+  border-radius: 0.5rem;
   background: #686868;
   color: #fff;
 }
@@ -362,6 +370,7 @@
 }
 
 .logout-dropdown-button:hover {
+  border-radius: 0.5rem;
   background-color: #dc2626;
 }
 
