@@ -16,7 +16,7 @@ const Homepage = () => {
 
   const productsPerPage = 12;
   const productSectionRef = useRef(null);
-  const headingRef = useRef(null);
+  const headingRef = useRef(null); 
 
   const originalBannerImages = ['/banner1.jpg', '/banner2.jpg', '/banner3.jpg'];
   const bannerImages = [...originalBannerImages, originalBannerImages[0]];
@@ -253,7 +253,7 @@ const Homepage = () => {
                     onChange={handleBrandChange} // Uses the updated handler
                     className="brand-select-dropdown" // Add this for potential styling
                   >
-                    <option value="">Select Brand</option> {/* Default "Select Brand" option */}
+                    <option value="">All</option> {/* Default "Select Brand" option */}
                     {allBrands.map(brand => (
                       <option key={brand} value={brand}>
                         {brand}

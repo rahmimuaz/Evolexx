@@ -166,7 +166,7 @@ const Navbar = () => {
             <div className={`dropdown-menu ${dropdownOpen ? 'show-dropdown' : ''}`}>
               {user ? (
                 <>
-                  <span className="dropdown-text">Welcome, {user.name}</span>
+                  <span className="dropdown-text">Hello, {user.name}</span>
                   <Link to="/settings" className="dropdown-link" onClick={() => setDropdownOpen(false)}>
                     <FaCog className="dropdown-icon" />
                     Settings

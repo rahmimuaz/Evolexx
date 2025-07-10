@@ -86,7 +86,8 @@ const CategoryPage = () => {
   return (
     <div className="product-section">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Category: {category}</h2>
+        <h2 style={{ marginBottom: '60px' }}>{category}</h2>
+
         <FaBars
           onClick={() => setShowFilterBar(!showFilterBar)}
           style={{ cursor: 'pointer', fontSize: '1.5rem' }}

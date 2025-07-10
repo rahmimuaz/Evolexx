@@ -399,87 +399,106 @@
 .filter-sort-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem; /* Reduced gap for a more compact look */
+  gap: 2rem 3.5rem;
   align-items: center;
-  justify-content: center; /* Center items horizontally */
-  margin-bottom: 2rem;
-  background: rgba(255, 255, 255, 0.95); /* Slightly more opaque */
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
   border-radius: 1.5rem;
-  box-shadow: 0 4px 20px rgba(31, 38, 135, 0.08); /* More prominent shadow */
-  padding: 1rem; /* Increased padding */
-  transition: max-height 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 8px 24px rgba(31, 38, 135, 0.15);
+  padding: 1.5rem 2rem;
+  transition: all 0.3s ease;
+  flex-grow: 1;
+  max-width: 100%;
+}
+
+.filter-sort-bar:hover {
+  box-shadow: 0 12px 28px rgba(31, 38, 135, 0.18);
 }
 
 .filter-sort-bar .filter-group {
   display: flex;
   align-items: center;
-  gap: 0.6rem; /* Gap between label and input/select */
+  gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .filter-sort-bar label {
-  font-weight: 500;
-  color: #333; /* Slightly darker color */
-  white-space: nowrap; /* Prevent label from wrapping */
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  margin-right: 0.3rem;
 }
 
 .filter-sort-bar select,
 .filter-sort-bar input[type="number"] {
-  border: 1px solid #d1d5db; /* Lighter border */
-  border-radius: 0.75rem; /* Slightly smaller border-radius */
-  padding: 0.4rem 0.75rem; /* Adjusted padding */
-  font-size: 0.95rem; /* Slightly smaller font size */
-  background: #fdfdfd; /* Lighter background */
+  border: 1px solid #d1d5db;
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.95rem;
+  background: #fdfdfd;
   color: #222;
   outline: none;
+  min-width: 100px;
+  max-width: 140px;
   transition: border-color 0.2s, box-shadow 0.2s;
-  flex-grow: 1; /* Allow inputs to grow if space permits */
 }
 
 .filter-sort-bar select:focus,
 .filter-sort-bar input[type="number"]:focus {
-  border-color: #e75480;
-  box-shadow: 0 0 0 3px rgba(231, 84, 128, 0.2); /* Soft focus shadow */
+  border-color: #5e5a5b;
+  box-shadow: 0 0 0 4px rgba(231, 84, 128, 0.15);
 }
 
-.filter-sort-bar .price-range-group {
-  gap: 0.75rem; /* Space between price inputs and '-' */
+.price-range-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.filter-sort-bar .price-input {
-  width: 80px; /* Fixed width for price inputs */
+.price-input {
+  width: 90px;
   text-align: center;
+  border-radius: 0.4rem;
 }
 
 .filter-sort-bar input[type="checkbox"] {
-  accent-color: #e75480;
+  accent-color: #5e9f3b;
   margin-right: 0.3rem;
-  transform: scale(1.1); /* Slightly larger checkbox */
+  transform: scale(1.15);
+  cursor: pointer;
 }
 
 .brand-filter-group {
   display: flex;
-  flex-direction: column; /* Stack label and checkboxes */
   align-items: flex-start;
+  gap: 0.4rem;
 }
 
 .brand-checkboxes {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1rem; /* Gap between brand checkboxes */
+  gap: 0.6rem 1rem;
   margin-top: 0.5rem;
 }
 
 .brand-checkbox-label {
-  font-weight: 400;
+  font-weight: 500;
   color: #444;
-  font-size: 0.9rem; /* Slightly smaller font for brand labels */
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.brand-checkbox-label:hover {
+  color: #4e4c4c;
 }
 
 .stock-checkbox-label {
-  font-weight: 500;
+  font-weight: 600;
   color: #333;
   display: flex;
   align-items: center;
@@ -487,30 +506,20 @@
 }
 
 .filter-done-button {
-  padding: 0.6rem 1.2rem;
-  font-size: 0.95rem;
-  background-color: #e75480; /* Highlight color */
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  background: linear-gradient(to right, #4b4a4a, #4b4a4a);
   color: #fff;
-  border-radius: 2rem;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-left: auto; /* Push "Done" button to the right */
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin-left: auto;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .filter-done-button:hover {
-  background-color: #d63d6b;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(231, 84, 128, 0.4);
-}
+  background: linear-gradient(to right, #000000, #000000);
 
-
-/* Optional button style, if you use buttons elsewhere */
-.nav-info-button {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
-  background-color: #eae8e8;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
 }
 
 /* ============ MEDIA QUERIES ============ */
