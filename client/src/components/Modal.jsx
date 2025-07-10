@@ -16,7 +16,6 @@ const Modal = ({ isOpen, onClose, children, title }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
-        {title && <h2 className="modal-title">{title}</h2>}
         {children}
         <button className="modal-close" onClick={onClose}>&times;</button>
       </div>
@@ -24,4 +23,4 @@ const Modal = ({ isOpen, onClose, children, title }) => {
   );
 };
 
-export default Modal; 
+export default Modal;  

@@ -82,7 +82,7 @@ const Login = ({ asModal = false, onSuccess, onSwitchRegister }) => {
           </div>
           <p className="register-text">
             New Customer?{' '}
-            <button type="button" className="register-link" style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', padding: 0 }} onClick={onSwitchRegister}>Register</button>
+            <button type="button" className="register-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} onClick={onSwitchRegister}>Register</button>
           </p>
         </>
       ) : (

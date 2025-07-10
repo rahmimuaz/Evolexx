@@ -89,7 +89,7 @@ const Register = ({ asModal = false, onSuccess, onSwitchLogin }) => {
         </form>
         <p className="login-text">
           Already have an account?{' '}
-          <button type="button" className="login-link" style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', padding: 0 }} onClick={onSwitchLogin}>Login</button>
+          <button type="button" className="login-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} onClick={onSwitchLogin}>Login</button>
         </p>
       </>
     ) : (

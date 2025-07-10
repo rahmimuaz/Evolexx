@@ -15,9 +15,9 @@
 .modal-content {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 60%, rgba(255, 192, 203, 0.25) 100%);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  border-radius: 2rem;
+  border-radius: 1rem;
   padding: 2.5rem 2rem 2rem 2rem;
-  min-width: 340px;
+  min-width: 500px;
   max-width: 95vw;
   color: #222;
   position: relative;
@@ -31,7 +31,7 @@
   margin-bottom: 1.5rem;
   font-size: 2rem;
   font-weight: 700;
-  text-align: left;
+  text-align: center;
   color: #222;
   letter-spacing: 0.5px;
 }
@@ -43,7 +43,7 @@
   background: rgba(255,255,255,0.5);
   border: none;
   font-size: 2rem;
-  color: #b48bb6;
+  color: #5e5e5e;
   border-radius: 50%;
   width: 2.5rem;
   height: 2.5rem;
@@ -56,5 +56,5 @@
 
 .modal-close:hover {
   background: rgba(255,255,255,0.8);
-  color: #e75480;
+  color: #000000;
 } 

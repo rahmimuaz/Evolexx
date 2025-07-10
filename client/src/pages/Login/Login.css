@@ -3,6 +3,7 @@
   align-items: center;
   justify-content: center;
   min-height: 60vh;
+
 }
 
 .login-card {
@@ -20,20 +21,13 @@
   font-weight: 700;
   color: #222;
   margin-bottom: 1.5rem;
-  text-align: left;
+  text-align: center;
 }
 
 .form-group {
   margin-bottom: 1.2rem;
 }
 
-.form-label {
-  font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
-  font-size: 1rem;
-  color: #222;
-  margin-bottom: 0.3rem;
-  display: block;
-}
 
 .form-input {
   background: rgba(255,255,255,0.7);
@@ -48,18 +42,18 @@
 }
 
 .form-input:focus {
-  border: 1.5px solid #e75480;
+  border: 1.5px solid #898989;
 }
 
 .login-button {
-  background: linear-gradient(90deg, #e75480 0%, #b48bb6 100%);
+  background-color: #141414;
   color: #fff;
   border: none;
-  border-radius: 2rem;
+  border-radius: 0.5rem;
   padding: 0.7rem 2rem;
   font-size: 1.1rem;
   font-weight: 600;
-  margin-top: 1rem;
+  margin-top: 2.5rem;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(231, 84, 128, 0.08);
   transition: background 0.2s, box-shadow 0.2s;
@@ -67,19 +61,20 @@
 }
 
 .login-button:hover {
-  background: linear-gradient(90deg, #b48bb6 0%, #e75480 100%);
-  box-shadow: 0 4px 16px rgba(231, 84, 128, 0.15);
+  background-color: #414141;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
 }
 
 .register-text {
   margin-top: 1.2rem;
   text-align: center;
-  color: #888;
+  color: #ffffff;
   font-size: 1rem;
 }
 
 .register-link {
-  color: #e75480;
+  color: #141414;
   font-weight: 600;
   text-decoration: none;
   background: none;
@@ -92,5 +87,5 @@
 }
 
 .register-link:hover {
-  color: #b48bb6;
+  color: #414141;
 }
