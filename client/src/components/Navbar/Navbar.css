@@ -16,6 +16,8 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
+  max-width: 1400px; /* Max width for content */
+  margin: 0 auto; /* Center content */
 }
 
 /* LEFT SECTION */
@@ -23,6 +25,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0; /* Prevent from shrinking */
 }
 
 .navbar-brand {
@@ -33,29 +36,32 @@
   white-space: nowrap;
 }
 
-/* HAMBURGER */
+/* HAMBURGER (Only visible on mobile) */
 .hamburger-button {
-  display: none;
+  display: none; /* Hidden by default */
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.6rem;
   color: #000;
+  flex-shrink: 0;
+  margin-right: 1.2rem; /* Space between hamburger and brand */
 }
 
-/* CENTER SECTION */
+/* CENTER SECTION (Navigation Links) */
 .navbar-center {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 35rem;
+  flex-grow: 1; /* Allow to grow and push other items */
+  /* Remove fixed margin-left, let flexbox handle it */
 }
 
 .navbar-links {
   display: flex;
   gap: 4rem;
   position: relative;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Prevent wrapping on desktop */
 }
 
 .navbar-link {
@@ -66,6 +72,7 @@
   font-size: 0.95rem;
   padding-bottom: 5px;
   transition: color 0.2s ease;
+  white-space: nowrap; /* Prevent links from breaking */
 }
 
 .navbar-link:hover {
@@ -77,7 +84,7 @@
   position: absolute;
   bottom: -1px;
   left: 0;
-  width: 95%;
+  width: 95%; /* Adjust width for active link underline */
   height: 1.5px;
   background-color: #000000;
   border-radius: 1px;
@@ -88,15 +95,19 @@
   height: 24px;
   width: 1px;
   background-color: #e5e7eb;
-  margin: 0 1rem;
+  margin: 0 1.5rem; /* Increased margin for better spacing */
+  flex-shrink: 0;
 }
 
-/* RIGHT SECTION */
+/* RIGHT SECTION (Cart, Search, Profile) */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  position: relative;
+  gap: 1.5rem; /* Space between icons/elements */
+  position: relative; /* Keep for profile dropdown positioning */
+  flex-shrink: 0; /* Prevent shrinking too much */
+  flex-grow: 0; /* Initially don't grow */
+  /* This flex-grow will be overridden for search bar */
 }
 
 .cart-button {
@@ -105,6 +116,7 @@
   text-decoration: none;
   display: flex;
   align-items: center;
+  flex-shrink: 0; /* Prevent from shrinking */
 }
 
 .cart-count {
@@ -116,13 +128,7 @@
   margin-bottom: 16px;
 }
 
-/* SEARCH */
-.search-wrapper {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
+/* SEARCH ICON BUTTON */
 .search-icon-button {
   background: none;
   border: none;
@@ -131,25 +137,22 @@
   display: flex;
   align-items: center;
   padding: 0.25rem;
+  flex-shrink: 0; /* Essential to prevent shrinking when other items appear */
 }
 
-/* Search Bar Overlay */
-.search-bar-overlay {
-  position: fixed;
-  top: 76px; /* Adjust if your navbar is taller/shorter */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3000;
-  width: 350px;
-  max-width: 90vw;
-  padding: 0;
+/* INTEGRATED SEARCH BAR (when open) */
+.search-bar-integrated {
+  flex-grow: 1; /* Allows it to take available space */
+  min-width: 400px;
+  position: relative; /* For positioning suggestions dropdown */
   display: flex;
-  flex-direction: column;
   align-items: center;
+  transition: max-width 0.3s ease-out, margin-right 0.3s ease-out; /* Smooth transition */
+
 }
 
-/* Input + Close Button Wrapper */
-.search-bar-input-wrapper {
+/* Inner wrapper for input and close button */
+.search-input-wrapper-inner {
   position: relative;
   width: 100%;
   display: flex;
@@ -159,13 +162,13 @@
 /* Glassmorphism Input */
 .search-input-navbar {
   width: 100%;
-  padding: 0.6rem 1.1rem;
+  padding: 0.3rem 1rem;
   padding-right: 2.5rem; /* space for the close button */
   border: none;
   border-radius: 1.5rem;
   font-size: 1rem;
   outline: none;
-  background: linear-gradient(135deg, rgba(255,255,255,0.55) 60%, rgba(255,192,203,0.35) 100%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.55) 60%, rgba(71, 61, 63, 0.35) 100%);
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.10);
   color: #222;
@@ -174,21 +177,21 @@
 }
 
 .search-input-navbar:focus {
-  box-shadow: 0 6px 24px 0 rgba(231, 84, 128, 0.15);
-  background: linear-gradient(135deg, rgba(255,255,255,0.85) 60%, rgba(255,192,203,0.55) 100%);
+  box-shadow: 0 6px 24px 0 rgba(71, 61, 63, 0.35);
+  background: linear-gradient(135deg, rgba(255,255,255,0.85) 60%,rgba(71, 61, 63, 0.35)100%);
 }
 
 /* Close Button Inside Input */
 .search-bar-close {
   position: absolute;
-  right: 0.7rem;
+  right: 0.3rem;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(255,255,255,0.5);
   border: none;
   border-radius: 50%;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
   font-size: 1.5rem;
   color: #b48bb6;
   cursor: pointer;
@@ -207,17 +210,15 @@
 /* Suggestions Dropdown */
 .search-suggestions-dropdown {
   position: absolute;
-  top: 110%;
+  top: calc(100% + 5px); /* Position below the input */
   left: 0;
-  width: 100%;
+  width: 100%; /* Match width of the input */
   background: linear-gradient(135deg, rgba(255,255,255,0.85) 60%, rgba(255,192,203,0.55) 100%);
   backdrop-filter: blur(8px);
-  border-radius: 1.5rem;
+  border-radius: 0.7rem;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  border: 1.5px solid rgba(255,255,255,0.25);
   z-index: 3100;
   padding: 0.5rem 0;
-  margin-top: 0.3rem;
   max-height: 320px;
   overflow-y: auto;
 }
@@ -273,9 +274,10 @@
 }
 
 
-/* DROPDOWN (override/fix) */
+/* PROFILE DROPDOWN */
 .profile-dropdown-wrapper {
   position: relative;
+  flex-shrink: 0; /* Prevent profile icon from shrinking */
 }
 .profile-icon-button{
   background-color: #ffffff;
@@ -367,95 +369,199 @@
    MOBILE RESPONSIVE STYLES
    =========================== */
 @media (max-width: 1024px) {
+  .navbar-container {
+    padding: 0.8rem 1rem; /* Adjust padding for smaller desktops */
+  }
+
   .navbar-center {
-    margin-left: 2rem;
+    /* Let flex-grow handle it, remove fixed margin-left */
+    /* margin-left: 2rem; */
     gap: 1.5rem;
   }
 
   .navbar-links {
     gap: 2rem;
   }
+
+  .search-bar-integrated {
+    max-width: 300px; /* Adjust max width for smaller desktop screens */
+    margin-right: 1rem; /* Keep some space */
+  }
+
+  .navbar-divider {
+    margin: 0 1rem;
+  }
 }
 
 @media (max-width: 768px) {
   .navbar-container {
-    padding: 0rem rem;
-    flex-wrap: wrap;
-  }
-
-  .navbar-left {
-    flex: 1;
+    padding: 0.8rem 1rem; /* Consistent padding */
+    flex-wrap: wrap; /* Allow wrapping */
     justify-content: space-between;
   }
 
-  .navbar-center {
+  .navbar-left {
+    order: 1; /* Order for mobile layout */
+    flex-grow: 1; /* Allow brand to take space */
+    justify-content: center; /* Center brand when hamburger is hidden */
+  }
+
+  /* Hamburger visible on mobile */
+  .hamburger-button {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    max-height: 0;
+    order: 0; /* Place hamburger first */
+    margin-right: 1rem;
+  }
+
+  .navbar-center {
+    order: 3; /* Move links below other items on mobile */
+    flex-basis: 100%; /* Take full width */
+    max-height: 0; /* Collapsed by default */
     overflow: hidden;
-    transition: max-height 0.3s ease;
-    width: 100%;
-    position: absolute;
-    top: 71px;
-    left: 0;
-    right: 0;
-    background-color: rgb(255, 255, 255);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    z-index: 999;
-    margin: auto;
+    transition: max-height 0.3s ease-out;
+    position: static; /* No absolute positioning on mobile for the menu */
+    background-color: #ffffff;
+    box-shadow: none; /* Remove box-shadow to prevent double shadow */
   }
 
   .navbar-center.open {
-    max-height: 500px; /* enough to show all links */
+    max-height: 500px; /* Expand height to show links */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Add shadow when open */
+    border-top: 1px solid #eee; /* Visual separation */
   }
 
   .navbar-links {
     flex-direction: column;
-    gap: 1rem;
+    gap: 0; /* No gap between links vertically */
     width: 100%;
-    padding: 0.7rem ;
+    padding: 0; /* No padding on container, let links have it */
   }
 
   .navbar-link {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1.5rem; /* Padding for individual links */
     width: 100%;
-    text-align: center;
-    border-top: 1px solid #e5e7eb;
+    text-align: left; /* Align links to the left */
+    border-top: 1px solid #e5e7eb; /* Separator between links */
     font-size: 1rem;
+  }
+  .navbar-link:first-child {
+      border-top: none; /* No top border for the first link */
   }
 
   .navbar-divider {
-    display: none;
-  }
-
-  /* HAMBURGER */
-  .hamburger-button {
-    display: flex;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
-    color: #000;
-    margin-right: 1.2rem;
+    display: none; /* Hide divider on mobile */
   }
 
   .navbar-right {
-    gap: 1rem;
+    order: 2; /* Place right icons next to brand */
+    flex-grow: 0; /* Don't expand as much on mobile */
+    gap: 0.8rem; /* Smaller gap for mobile icons */
+  }
+
+  /* Search bar adjustments for mobile */
+  .search-bar-integrated {
+    max-width: none; /* Let it expand freely on mobile */
+    margin-right: 0.5rem;
+    flex-grow: 1; /* Allow it to take up max space */
+  }
+
+  .search-suggestions-dropdown {
+    width: calc(100% - 20px); /* Adjust width to fit screen with some margin */
+    left: 10px; /* Offset from left edge */
+    right: 10px; /* Offset from right edge */
+  }
+
+  .search-input-navbar {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+    padding-right: 2.2rem;
+  }
+  .search-bar-close {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.3rem;
+  }
+
+  /* Profile dropdown on mobile: position directly relative to profile icon */
+  .dropdown-menu {
+    top: 2.5rem; /* Adjusted for better alignment below icon */
+    right: 0;
+    left: auto; /* Ensure it stays right-aligned */
+    transform-origin: top right; /* For better scaling animation */
+    min-width: 160px; /* Slightly smaller for mobile */
+    padding: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .navbar-links {
-    gap: 1rem;
+  .navbar-container {
+    padding: 0.8rem 0.5rem;
   }
+
+  .hamburger-button {
+    font-size: 1.4rem;
+    margin-right: 0.8rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+
+  .navbar-right {
+    gap: 0.6rem;
+  }
+
+  .cart-button .fa-shopping-cart,
+  .search-icon-button .fa-search,
+  .profile-icon-button .fa-user-circle {
+    font-size: 1rem; /* Smaller icons on very small screens */
+  }
+
   .search-input-navbar {
-    width: 140px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+    padding-right: 1.8rem;
+  }
+  .search-bar-close {
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 1rem;
+    right: 0.5rem;
+  }
+
+  .search-suggestions-dropdown {
+    width: calc(100% - 10px); /* Even tighter on very small screens */
+    left: 5px;
+    right: 5px;
+    border-radius: 1rem; /* Smaller radius */
+  }
+
+  .search-suggestion-item {
+    padding: 0.5rem 0.8rem;
+    gap: 0.8rem;
+  }
+
+  .search-suggestion-img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .search-suggestion-name {
+    font-size: 0.9rem;
+  }
+
+  .search-suggestion-price {
     font-size: 0.8rem;
   }
 
   .dropdown-menu {
-    right: 10px;
+    right: 5px;
+    min-width: 140px;
+    padding: 0.8rem;
+  }
+
+  .dropdown-link, .logout-dropdown-button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
   }
 }

@@ -46,7 +46,7 @@ const Navbar = () => {
 
   // Debounced search
   React.useEffect(() => {
-    if (!searchQuery) {
+    if (!searchQuery) { // Only search if there's a query
       setSearchResults([]);
       setSearchError(null);
       return;
@@ -64,13 +64,13 @@ const Navbar = () => {
         .finally(() => setSearchLoading(false));
     }, 350);
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery]);
+  }, [searchQuery]); // Removed searchOpen from dependency array, as the UI handles its visibility
 
   const handleSearchSelect = (productId) => {
     setSearchOpen(false);
     setSearchQuery('');
     setSearchResults([]);
-    navigate(`/products/${productId}`);
+    navigate(`/products/${productId}`); // Corrected path to match typical product routes
   };
 
   return (
@@ -99,14 +99,21 @@ const Navbar = () => {
 
         {/* Right Section */}
         <div className="navbar-right">
-           {/* Conditional rendering for Search Icon or Search Bar */}
+          {user && (
+            <Link to="/cart" className="cart-button">
+              <FaShoppingCart size={18} />
+              <span className="cart-count">{cartItems.length}</span>
+            </Link>
+          )}
+
+          {/* Conditional rendering for Search Icon or Search Bar */}
           {!searchOpen ? (
             <button className="search-icon-button" onClick={toggleSearch} aria-label="Open search">
               <FaSearch size={18} />
             </button>
           ) : (
-            <div className="search-bar-integrated">
-              <div className="search-input-wrapper-inner">
+            <div className="search-bar-integrated"> {/* New wrapper for the integrated bar */}
+              <div className="search-input-wrapper-inner"> {/* Inner wrapper for input and close */}
                 <input
                   type="text"
                   placeholder="Search..."
@@ -124,7 +131,7 @@ const Navbar = () => {
                   &times;
                 </button>
               </div>
-              {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
+              {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && ( // Only show suggestions if there's a query
                 <div className="search-suggestions-dropdown">
                   {searchLoading && <div className="search-suggestion-loading">Searching...</div>}
                   {searchError && <div className="search-suggestion-error">{searchError}</div>}
@@ -148,16 +155,8 @@ const Navbar = () => {
               )}
             </div>
           )}
-          {user && (
-            <Link to="/cart" className="cart-button">
-              <FaShoppingCart size={18} />
-              <span className="cart-count">{cartItems.length}</span>
-            </Link>
-          )}
 
-         
-
-          {/* Profile Dropdown */}
+          {/* Profile Dropdown (moved outside of the search-wrapper logic) */}
           <div className="profile-dropdown-wrapper">
             <button className="profile-icon-button" onClick={toggleDropdown} aria-label="Toggle profile menu">
               <FaUserCircle size={22} />
