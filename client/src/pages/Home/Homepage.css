@@ -20,7 +20,7 @@
   font-size: 1.2rem;
 }
 
-/* ============ HEADER ============ */
+/* ============ HEADER (No changes needed for this request) ============ */
 .header {
   display: flex;
   flex-wrap: wrap;
@@ -318,13 +318,39 @@
   border-top: 1px solid #e5e7eb;
 }
 
+/* Heading and Toggle Icon Container */
+.heading-with-icon {
+  display: flex;
+  justify-content: space-between; /* Spreads out items */
+  align-items: center;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+  /* Centering the heading and pushing the icon to the right */
+  position: relative; /* For absolute positioning of the icon if needed */
+}
+
 .product-section h2 {
   font-size: 2rem;
   font-weight: 800;
-  margin-bottom: 2rem;
+  margin: 0 auto; /* Centers the heading */
   position: relative;
-  display: inline-block;
+  display: block; /* Ensures it takes full width for margin auto to work */
   text-align: center;
+  flex-grow: 1; /* Allows the heading to take available space */
+}
+
+/* Filter toggle icon styling */
+.filter-toggle-icon {
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.3s ease;
+  user-select: none;
+  margin-left: auto; /* Pushes the icon to the far right */
+}
+
+.filter-toggle-icon:hover {
+  color: #e75480;
 }
 
 /* Container for product grid with hidden overflow */
@@ -480,79 +506,114 @@
   transform: scale(1.2);
   border-color: #111;
 }
+
 /* FILTER & SORT BAR */
 .filter-sort-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 6rem;
+  gap: 1.5rem; /* Reduced gap for a more compact look */
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* Center items horizontally */
   margin-bottom: 2rem;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.95); /* Slightly more opaque */
   border-radius: 1.5rem;
-  box-shadow: 0 2px 12px 0 rgba(31, 38, 135, 0.08);
-  padding: 1.2rem 1.2rem;
+  box-shadow: 0 4px 20px rgba(31, 38, 135, 0.08); /* More prominent shadow */
+  padding: 1.5rem; /* Increased padding */
   transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.filter-sort-bar .filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Gap between label and input/select */
 }
 
 .filter-sort-bar label {
   font-weight: 500;
-  color: #222;
-  margin-right: 0.5rem;
+  color: #333; /* Slightly darker color */
+  white-space: nowrap; /* Prevent label from wrapping */
 }
 
 .filter-sort-bar select,
 .filter-sort-bar input[type="number"] {
-  border: 1px solid #e5e7eb;
-  border-radius: 1rem;
-  padding: 1px 1px;
-  font-size: 1rem;
-  margin-right: 0.5rem;
-  background: #f9f9f9;
+  border: 1px solid #d1d5db; /* Lighter border */
+  border-radius: 0.75rem; /* Slightly smaller border-radius */
+  padding: 0.4rem 0.75rem; /* Adjusted padding */
+  font-size: 0.95rem; /* Slightly smaller font size */
+  background: #fdfdfd; /* Lighter background */
   color: #222;
   outline: none;
-  transition: border 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  flex-grow: 1; /* Allow inputs to grow if space permits */
 }
 
 .filter-sort-bar select:focus,
 .filter-sort-bar input[type="number"]:focus {
-  border: 1.5px solid #e75480;
+  border-color: #e75480;
+  box-shadow: 0 0 0 3px rgba(231, 84, 128, 0.2); /* Soft focus shadow */
+}
+
+.filter-sort-bar .price-range-group {
+  gap: 0.75rem; /* Space between price inputs and '-' */
+}
+
+.filter-sort-bar .price-input {
+  width: 80px; /* Fixed width for price inputs */
+  text-align: center;
 }
 
 .filter-sort-bar input[type="checkbox"] {
   accent-color: #e75480;
   margin-right: 0.3rem;
+  transform: scale(1.1); /* Slightly larger checkbox */
+}
+
+.brand-filter-group {
+  display: flex;
+  flex-direction: column; /* Stack label and checkboxes */
+  align-items: flex-start;
+}
+
+.brand-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem; /* Gap between brand checkboxes */
+  margin-top: 0.5rem;
 }
 
 .brand-checkbox-label {
-  margin-right: 1rem;
   font-weight: 400;
   color: #444;
-  font-size: 0.98rem;
-}
-
-/* Heading and Toggle Icon Container */
-.heading-with-icon {
+  font-size: 0.9rem; /* Slightly smaller font for brand labels */
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 1rem;
-  margin-bottom: 1rem;
-}
-
-/* Filter toggle icon styling */
-.filter-toggle-icon {
-  font-size: 1.6rem;
   cursor: pointer;
-  color: #333;
-  transition: color 0.3s ease;
-  user-select: none;
 }
 
-.filter-toggle-icon:hover {
-  color: #e75480;
+.stock-checkbox-label {
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
+
+.filter-done-button {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  background-color: #e75480; /* Highlight color */
+  color: #fff;
+  border-radius: 2rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-left: auto; /* Push "Done" button to the right */
+}
+
+.filter-done-button:hover {
+  background-color: #d63d6b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(231, 84, 128, 0.4);
+}
+
 
 /* Optional button style, if you use buttons elsewhere */
 .nav-info-button {
@@ -563,17 +624,6 @@
   border-radius: 2rem;
   cursor: pointer;
 }
-
-/* Responsive: Hide filter bar by default on small screens, show toggle */
-@media (max-width: 768px) {
-  .filter-sort-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem 1.5rem;
-    gap: 1.2rem;
-  }
-}
-
 
 /* ============ MEDIA QUERIES ============ */
 @media (max-width: 768px) {
@@ -645,8 +695,28 @@
 
   .filter-sort-bar {
     flex-direction: column;
-    align-items: stretch;
-    padding: 1rem 0.5rem;
-    gap: 1rem;
+    align-items: stretch; /* Stretch items to fill width */
+    padding: 1rem 0.75rem; /* Adjusted padding */
+    gap: 1rem; /* Adjusted gap */
+  }
+
+  .filter-sort-bar .filter-group {
+    width: 100%; /* Make each filter group take full width */
+    justify-content: space-between; /* Space out label and input/select */
+  }
+
+  .filter-sort-bar .brand-filter-group {
+    align-items: center; /* Center brand label */
+  }
+
+  .filter-sort-bar .brand-checkboxes {
+    justify-content: center; /* Center checkboxes on small screens */
+    width: 100%;
+  }
+
+  .filter-done-button {
+    margin-left: 0; /* Remove auto-margin on small screens */
+    width: 100%; /* Make button full width */
+    text-align: center;
   }
 }

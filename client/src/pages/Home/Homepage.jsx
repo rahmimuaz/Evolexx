@@ -31,7 +31,8 @@ const Homepage = () => {
   ];
   const [sort, setSort] = useState('price-asc');
   const [priceRange, setPriceRange] = useState([0, 1000000]);
-  const [brandFilter, setBrandFilter] = useState([]);
+  // Changed brandFilter to a string for single dropdown selection
+  const [brandFilter, setBrandFilter] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
 
   useEffect(() => {
@@ -95,11 +96,14 @@ const Homepage = () => {
     return '/logo192.png';
   };
 
+  // allBrands remains the same
   const allBrands = Array.from(new Set(products.map(p => p.details?.brand).filter(Boolean)));
+
   const filteredProducts = products.filter(product => {
     const price = product.price || 0;
     const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
-    const matchesBrand = brandFilter.length === 0 || brandFilter.includes(product.details?.brand);
+    // Updated brand filter logic for single string
+    const matchesBrand = !brandFilter || product.details?.brand === brandFilter;
     const matchesStock = !inStockOnly || (product.stock && product.stock > 0);
     return matchesPrice && matchesBrand && matchesStock;
   });
@@ -135,11 +139,11 @@ const Homepage = () => {
     }
   };
 
-  const handleBrandChange = (brand) => {
-    setBrandFilter(prev =>
-      prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
-    );
-    setCurrentPage(1);
+  // Updated handleBrandChange for dropdown
+  const handleBrandChange = (event) => {
+    const selectedBrand = event.target.value;
+    setBrandFilter(selectedBrand);
+    setCurrentPage(1); // Reset to first page on filter change
   };
 
   const handlePriceChange = (e, idx) => {
@@ -220,41 +224,54 @@ const Homepage = () => {
 
         {showFilters && (
           <div className="filter-sort-bar">
-            <div>
-              <label>Sort:&nbsp;</label>
-              <select value={sort} onChange={handleSortChange}>
+            {/* Sort Dropdown */}
+            <div className="filter-group">
+              <label htmlFor="sort-select">Sort:</label>
+              <select id="sort-select" value={sort} onChange={handleSortChange}>
                 {sortOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label>Price:&nbsp;</label>
-              <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} style={{ width: 70 }} />
-              &nbsp;-&nbsp;
-              <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} style={{ width: 70 }} />
+
+            {/* Price Range Inputs */}
+            <div className="filter-group price-range-group">
+              <label>Price:</label>
+              <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} className="price-input" />
+              <span>-</span>
+              <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} className="price-input" />
             </div>
+
+            {/* Brand Filter Dropdown */}
             {allBrands.length > 0 && (
-              <div>
-                <label>Brand:&nbsp;</label>
-                {allBrands.map(brand => (
-                  <label key={brand} className="brand-checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={brandFilter.includes(brand)}
-                      onChange={() => handleBrandChange(brand)}
-                    />
-                    &nbsp;{brand}
-                  </label>
-                ))}
+              <div className="filter-group brand-filter-group">
+                <label htmlFor="brand-select">Brand:</label>
+                <div className="brand-dropdown-container">
+                  <select
+                    id="brand-select"
+                    value={brandFilter} // Binds value to the state
+                    onChange={handleBrandChange} // Uses the updated handler
+                    className="brand-select-dropdown" // Add this for potential styling
+                  >
+                    <option value="">Select Brand</option> {/* Default "Select Brand" option */}
+                    {allBrands.map(brand => (
+                      <option key={brand} value={brand}>
+                        {brand}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             )}
-            <div>
-              <label>
+
+            {/* In Stock Only Checkbox */}
+            <div className="filter-group">
+              <label className="stock-checkbox-label">
                 <input type="checkbox" checked={inStockOnly} onChange={handleStockChange} /> In Stock Only
               </label>
             </div>
-            <button onClick={() => setShowFilters(false)} className="nav-info-button">Done</button>
+
+            <button onClick={() => setShowFilters(false)} className="nav-info-button filter-done-button">Done</button>
           </div>
         )}
 
@@ -263,7 +280,7 @@ const Homepage = () => {
             {currentProducts.map((product) => {
               const imageUrl = generateImageUrl(product);
               const fullPrice = product.price || 0;
-              const kokoTotal = fullPrice * 1.12;
+              const kokoTotal = fullPrice * 1.12; // Assuming 12% is a Koko-specific charge
               const kokoInstallment = kokoTotal / 3;
 
               return (
