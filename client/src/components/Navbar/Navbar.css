@@ -309,7 +309,7 @@
   transform: translateY(-10px) scale(0.98);
   pointer-events: none;
   transition: opacity 0.25s cubic-bezier(.4,0,.2,1), transform 0.25s cubic-bezier(.4,0,.2,1);
-  background: linear-gradient(135deg, rgba(88, 88, 88, 0.85) 60%, rgba(223, 222, 222, 0.55) 100%);
+  background: linear-gradient(135deg, rgba(113, 112, 112, 0.85) 60%, rgba(253, 253, 253, 0.55) 100%);
   backdrop-filter: blur(8px);
   border-radius: 1rem;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
