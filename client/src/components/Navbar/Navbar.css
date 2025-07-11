@@ -181,11 +181,11 @@
   width: 100%;
   padding: 0.3rem 1rem;
   padding-right: 2.5rem; /* space for the close button */
-  border: 1px solid rgba(180, 180, 180, 0.2);
+  border: none;
   border-radius: 1.5rem;
   font-size: 1rem;
   outline: none;
-  background: linear-gradient(135deg, rgba(236, 235, 235, 0.55) 60%, rgba(208, 208, 208, 0.35) 100%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.55) 60%, rgba(71, 61, 63, 0.35) 100%);
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.10);
   color: #222;
@@ -193,6 +193,10 @@
   transition: box-shadow 0.2s, background 0.2s;
 }
 
+.search-input-navbar:focus {
+  box-shadow: 0 6px 24px 0 rgba(71, 61, 63, 0.35);
+  background: linear-gradient(135deg, rgba(255,255,255,0.85) 60%,rgba(71, 61, 63, 0.35)100%);
+}
 
 /* Close Button Inside Input */
 .search-bar-close {
@@ -309,7 +313,7 @@
   transform: translateY(-10px) scale(0.98);
   pointer-events: none;
   transition: opacity 0.25s cubic-bezier(.4,0,.2,1), transform 0.25s cubic-bezier(.4,0,.2,1);
-  background: linear-gradient(135deg, rgba(113, 112, 112, 0.85) 60%, rgba(253, 253, 253, 0.55) 100%);
+  background: linear-gradient(135deg, rgba(88, 88, 88, 0.85) 60%, rgba(223, 222, 222, 0.55) 100%);
   backdrop-filter: blur(8px);
   border-radius: 1rem;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
@@ -503,9 +507,6 @@
     height: 2rem;
     font-size: 1.3rem;
   }
-  .product-section{
-    padding: 0rem 4rem; /* Adjust padding for mobile */
-  }
 
   /* Profile dropdown on mobile: position directly relative to profile icon */
   .dropdown-menu {
@@ -545,7 +546,7 @@
     margin-left: 10px;
     background: none;
     border: none;
-    color: #616161;
+    color: #007aff;
     font-size: 1em;
     cursor: pointer;
     padding: 6px 10px;
@@ -553,16 +554,16 @@
   .mobile-only { display: inline-flex !important; }
   .desktop-only { display: none !important; }
   .search-suggestions-dropdown.mobile {
-    margin-top: -15px;
-  position: absolute;
-  width: 98%; /* Match width of the input */
-  background: linear-gradient(135deg, rgba(144, 143, 143, 0.85) 60%, rgba(255, 255, 255, 0.785) 100%);
-  backdrop-filter: blur(8px);
-  border-radius: 0.7rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  z-index: 3100;
-  padding: 0.5rem 0;
-  overflow-y: auto;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100vw;
+    background: #fff;
+    z-index: 2100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 0 0 12px 12px;
+    max-height: 50vh;
+    overflow-y: auto;
   }
 }
 @media (min-width: 769px) {
@@ -570,8 +571,6 @@
   .mobile-only { display: none !important; }
   .desktop-only { display: inline-flex !important; }
 }
- 
-
 
 @media (max-width: 480px) {
   .navbar-container {
@@ -645,4 +644,3 @@
     padding: 0.4rem 0.8rem;
   }
 }
-

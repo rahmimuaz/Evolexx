@@ -16,7 +16,7 @@ html, body, #root {
 
 
 /* App container */
-.app { 
+.app {
   display: flex;
   flex-direction: column;
   width: 100vw;

@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import './index.css';
 import LowStockProducts from './pages/Inventory/LowStockProducts';
 import OutOfStockProducts from './pages/Inventory/OutOfStockProducts';
+import UserList from './pages/AdminDashboard/UserList';
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -52,6 +53,7 @@ function AppContent() {
                 <Route path="/ToBeShippedList" element={<ToBeShippedList />} />
                 <Route path="/admin/low-stock" element={<LowStockProducts />} />
                 <Route path="/admin/out-of-stock" element={<OutOfStockProducts />} />
+                <Route path="/admin/users" element={<UserList />} />
                 <Route path="*" element={<AdminDashboard />} />
               </Routes>
             </div>

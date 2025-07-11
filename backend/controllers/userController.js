@@ -214,4 +214,29 @@ export const googleLogin = async (req, res) => {
   }
 };
 
+// @desc    Get all users (Admin)
+// @route   GET /api/admin/users
+// @access  Private/Admin
+export const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find().select('-password');
+  res.status(200).json(users);
+});
+
+// @desc    Delete a user (Admin)
+// @route   DELETE /api/admin/users/:id
+// @access  Private/Admin
+export const deleteUser = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+    res.status(200).json({ message: 'User removed' });
+  } catch (error) {
+    res.status(500);
+    throw new Error(error.message || 'Something went wrong while deleting user');
+  }
+});
+
 export { authUser, registerUser, addToCart, updateCartItemQuantity, removeFromUserCart, getUserCart, clearUserCart }; 

@@ -84,7 +84,7 @@ const Navbar = () => {
             <span className="search-input-icon"><FaSearch size={18} /></span>
             <input
               type="text"
-              placeholder="Search.."
+              placeholder="Search or type URL"
               className="mobile-search-input"
               autoFocus
               value={searchQuery}

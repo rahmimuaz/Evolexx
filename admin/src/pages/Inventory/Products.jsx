@@ -52,12 +52,6 @@ const Products = () => {
 
   return (
     <div className="products-container">
-      <h1 className="products-title">All Products</h1>
-      <div style={{ marginBottom: 16 }}>
-        <button onClick={() => navigate('/admin/low-stock')} style={{ marginRight: 8 }}>Low Stock</button>
-        <button onClick={() => navigate('/admin/out-of-stock')}>Out of Stock</button>
-      </div>
-
       <div className="table-outer-wrapper">
         <div className="table-scroll-wrapper">
           <div className="table-inner-wrapper">

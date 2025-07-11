@@ -1,12 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
+import axios from 'axios';
 
 const Navbar = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
+
+  // Notification state
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    // Fetch alerts: low stock, out of stock, new orders
+    const fetchAlerts = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const [lowStockRes, outOfStockRes, ordersRes] = await Promise.all([
+          axios.get('http://localhost:5001/api/products/admin/low-stock', { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get('http://localhost:5001/api/products/admin/out-of-stock', { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get('http://localhost:5001/api/orders', { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+        const lowStock = lowStockRes.data.map(p => ({ type: 'low', msg: `Low stock: ${p.name} (${p.stock})`, link: `/EditProduct/${p._id}` }));
+        const outOfStock = outOfStockRes.data.map(p => ({ type: 'out', msg: `Out of stock: ${p.name}`, link: `/EditProduct/${p._id}` }));
+        // New orders: show only those with status 'pending'
+        const newOrders = ordersRes.data.filter(o => o.status === 'pending').map(o => ({ type: 'order', msg: `New order: #${o.orderNumber}`, link: `/orders/${o._id}` }));
+        const allAlerts = [...lowStock, ...outOfStock, ...newOrders];
+        setAlerts(allAlerts);
+        setUnreadCount(allAlerts.length);
+      } catch (err) {
+        setAlerts([]);
+        setUnreadCount(0);
+      }
+    };
+    fetchAlerts();
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -20,6 +51,16 @@ const Navbar = ({ children }) => {
   const handleRegisterAdmin = () => {
     navigate('/register');
     setIsOpen(false);
+  };
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+    setUnreadCount(0); // Mark as read when opened
+  };
+
+  const handleNotificationClick = (link) => {
+    setShowNotifications(false);
+    if (link) navigate(link);
   };
 
   return (
@@ -77,6 +118,32 @@ const Navbar = ({ children }) => {
             >
               Sign Out
             </button>
+          </div>
+
+          {/* Notification Icon - moved after links */}
+          <div className="navbar-notification-wrapper">
+            <button className="navbar-notification-btn" onClick={toggleNotifications}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="28" height="28">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+            </button>
+            {showNotifications && (
+              <div className="notification-dropdown">
+                <h4>Notifications</h4>
+                {alerts.length === 0 ? (
+                  <div className="notification-empty">No alerts</div>
+                ) : (
+                  <ul>
+                    {alerts.map((alert, idx) => (
+                      <li key={idx} className={`notification-item notification-${alert.type}`}
+                          style={{ cursor: alert.link ? 'pointer' : 'default' }}
+                          onClick={() => handleNotificationClick(alert.link)}>{alert.msg}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="navbar-mobile-menu-button-wrapper">
