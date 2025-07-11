@@ -503,9 +503,6 @@
     height: 2rem;
     font-size: 1.3rem;
   }
-  .product-section{
-    padding: 0rem 4rem; /* Adjust padding for mobile */
-  }
 
   /* Profile dropdown on mobile: position directly relative to profile icon */
   .dropdown-menu {
@@ -553,16 +550,16 @@
   .mobile-only { display: inline-flex !important; }
   .desktop-only { display: none !important; }
   .search-suggestions-dropdown.mobile {
-    margin-top: -15px;
-  position: absolute;
-  width: 98%; /* Match width of the input */
-  background: linear-gradient(135deg, rgba(144, 143, 143, 0.85) 60%, rgba(255, 255, 255, 0.785) 100%);
-  backdrop-filter: blur(8px);
-  border-radius: 0.7rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  z-index: 3100;
-  padding: 0.5rem 0;
-  overflow-y: auto;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100vw;
+    background: #fff;
+    z-index: 2100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 0 0 12px 12px;
+    max-height: 50vh;
+    overflow-y: auto;
   }
 }
 @media (min-width: 769px) {
@@ -570,8 +567,6 @@
   .mobile-only { display: none !important; }
   .desktop-only { display: inline-flex !important; }
 }
- 
-
 
 @media (max-width: 480px) {
   .navbar-container {
@@ -645,4 +640,3 @@
     padding: 0.4rem 0.8rem;
   }
 }
-
