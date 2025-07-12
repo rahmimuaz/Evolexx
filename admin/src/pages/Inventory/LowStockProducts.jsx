@@ -7,12 +7,19 @@ const LowStockProducts = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
-    axios.get('http://localhost:5001/api/products/admin/low-stock')
+    // Use the API_BASE_URL here
+    axios.get(`${API_BASE_URL}/api/products/admin/low-stock`)
       .then(res => setProducts(res.data))
-      .catch(() => setProducts([]))
+      .catch((error) => { // Added error parameter for better logging
+        console.error("Error fetching low stock products:", error); // Log the error
+        setProducts([]);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [API_BASE_URL]); // Add API_BASE_URL to dependency array
 
   return (
     <div className="products-container">
@@ -28,15 +35,21 @@ const LowStockProducts = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map(product => (
-              <tr key={product._id}>
-                <td>{product.name}</td>
-                <td>{product.stock}</td>
-                <td>
-                  <button onClick={() => navigate(`/admin/products/edit/${product._id}`)}>Edit</button>
-                </td>
+            {products.length === 0 ? (
+              <tr>
+                <td colSpan="3">No low stock products found.</td>
               </tr>
-            ))}
+            ) : (
+              products.map(product => (
+                <tr key={product._id}>
+                  <td>{product.name}</td>
+                  <td>{product.stock}</td>
+                  <td>
+                    <button onClick={() => navigate(`/EditProduct/${product._id}`)}>Edit</button> {/* Corrected path based on previous examples */}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       )}
@@ -44,4 +57,4 @@ const LowStockProducts = () => {
   );
 };
 
-export default LowStockProducts; 
+export default LowStockProducts;

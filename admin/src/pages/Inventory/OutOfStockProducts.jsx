@@ -7,12 +7,19 @@ const OutOfStockProducts = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
-    axios.get('http://localhost:5001/api/products/admin/out-of-stock')
+    // Use the API_BASE_URL here for the axios request
+    axios.get(`${API_BASE_URL}/api/products/admin/out-of-stock`)
       .then(res => setProducts(res.data))
-      .catch(() => setProducts([]))
+      .catch((error) => { // Added error parameter for better logging
+        console.error("Error fetching out of stock products:", error); // Log the error
+        setProducts([]);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [API_BASE_URL]); // Add API_BASE_URL to the dependency array
 
   return (
     <div className="products-container">
@@ -28,15 +35,22 @@ const OutOfStockProducts = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map(product => (
-              <tr key={product._id}>
-                <td>{product.name}</td>
-                <td>{product.stock}</td>
-                <td>
-                  <button onClick={() => navigate(`/admin/products/edit/${product._id}`)}>Edit</button>
-                </td>
+            {products.length === 0 ? (
+              <tr>
+                <td colSpan="3">No out of stock products found.</td>
               </tr>
-            ))}
+            ) : (
+              products.map(product => (
+                <tr key={product._id}>
+                  <td>{product.name}</td>
+                  <td>{product.stock}</td>
+                  <td>
+                    {/* Corrected navigation path to match typical admin product edit routes */}
+                    <button onClick={() => navigate(`/EditProduct/${product._id}`)}>Edit</button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       )}
@@ -44,4 +58,4 @@ const OutOfStockProducts = () => {
   );
 };
 
-export default OutOfStockProducts; 
+export default OutOfStockProducts;

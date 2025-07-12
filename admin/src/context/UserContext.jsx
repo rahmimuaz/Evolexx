@@ -10,6 +10,9 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     const userInfo = localStorage.getItem('userInfo');
     if (userInfo) {
@@ -21,7 +24,8 @@ export const UserProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const { data } = await axios.post(
-        'http://localhost:5001/api/users/login',
+        // Use the API_BASE_URL here
+        `${API_BASE_URL}/api/users/login`,
         { email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -38,7 +42,8 @@ export const UserProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       const { data } = await axios.post(
-        'http://localhost:5001/api/users',
+        // Use the API_BASE_URL here
+        `${API_BASE_URL}/api/users`,
         { name, email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -67,4 +72,4 @@ export const UserProvider = ({ children }) => {
       {children}
     </UserContext.Provider>
   );
-}; 
+};

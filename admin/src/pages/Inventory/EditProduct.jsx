@@ -15,15 +15,18 @@ const EditProduct = () => {
     longDescription: '',
     stock: '',
     details: {},
-    images: [],
+    images: [], // Existing images from the product
     warrantyPeriod: 'No Warranty',
     discountPrice: ''
   });
 
-  const [newImages, setNewImages] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
+  const [newImages, setNewImages] = useState([]); // Newly selected files for upload
+  const [previewUrls, setPreviewUrls] = useState([]); // URLs for both existing and new image previews
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const categories = [
     'Mobile Phone',
@@ -78,7 +81,8 @@ const EditProduct = () => {
 
   const fetchProduct = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/products/${id}`);
+      // Use API_BASE_URL for fetching product details
+      const response = await axios.get(`${API_BASE_URL}/api/products/${id}`);
       const product = response.data;
       setFormData(product);
 
@@ -86,7 +90,8 @@ const EditProduct = () => {
         if (img.startsWith('http')) {
           return img;
         } else {
-          return `http://localhost:5001/${img.replace(/^\//, '')}`;
+          // Construct full URL for images stored locally
+          return `${API_BASE_URL}/${img.replace(/^\//, '')}`;
         }
       });
       setPreviewUrls(previewList);
@@ -94,8 +99,9 @@ const EditProduct = () => {
     } catch (err) {
       setError('Failed to load product');
       setLoading(false);
+      console.error("Error fetching product:", err); // Log the error for debugging
     }
-  }, [id]);
+  }, [id, API_BASE_URL]); // Add API_BASE_URL to dependencies
 
   useEffect(() => {
     fetchProduct();
@@ -123,10 +129,17 @@ const EditProduct = () => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const totalCurrentImages = formData.images.length + newImages.length;
-    const filesToAdd = Math.min(files.length, 5 - totalCurrentImages);
+    const maxImages = 5; // Define max images allowed
+
+    if (totalCurrentImages >= maxImages) {
+      alert(`You have reached the maximum of ${maxImages} images.`);
+      return;
+    }
+
+    const filesToAdd = Math.min(files.length, maxImages - totalCurrentImages);
 
     if (filesToAdd < files.length) {
-      alert(`You can only add ${5 - totalCurrentImages} more image(s).`);
+      alert(`Only ${maxImages - totalCurrentImages} more image(s) can be added.`);
     }
 
     const validFiles = files.slice(0, filesToAdd);
@@ -139,16 +152,18 @@ const EditProduct = () => {
     const totalExisting = formData.images.length;
 
     if (index < totalExisting) {
-      // It's an existing image
-      const updatedImages = [...formData.images];
-      updatedImages.splice(index, 1);
-      setFormData(prev => ({ ...prev, images: updatedImages }));
+      // It's an existing image from the database
+      const updatedExistingImages = [...formData.images];
+      updatedExistingImages.splice(index, 1);
+      setFormData(prev => ({ ...prev, images: updatedExistingImages }));
     } else {
-      // It's a newly added image
+      // It's a newly added image (not yet uploaded)
       const newImageIndex = index - totalExisting;
       const updatedNewImages = [...newImages];
       updatedNewImages.splice(newImageIndex, 1);
       setNewImages(updatedNewImages);
+      // Revoke object URL for newly added image to prevent memory leaks
+      URL.revokeObjectURL(previewUrls[index]);
     }
 
     // Remove from preview URLs regardless of whether it's existing or new
@@ -170,23 +185,27 @@ const EditProduct = () => {
     formDataToSend.append('discountPrice', formData.discountPrice);
     formDataToSend.append('stock', formData.stock);
     formDataToSend.append('details', JSON.stringify(formData.details));
-    formDataToSend.append('existingImages', JSON.stringify(formData.images)); // Send existing image URLs
+    
+    // Send existing image URLs to the backend so it knows which ones to keep
+    formDataToSend.append('existingImages', JSON.stringify(formData.images));
 
+    // Append new image files for upload
     newImages.forEach(file => {
-      formDataToSend.append('images', file); // Append new image files
+      formDataToSend.append('images', file);
     });
 
     try {
-      await axios.put(`http://localhost:5001/api/products/${id}`, formDataToSend, {
+      // Use API_BASE_URL for updating product details
+      await axios.put(`${API_BASE_URL}/api/products/${id}`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       alert('Product updated successfully!');
-      navigate('/Products');
+      navigate('/Products'); // Navigate to the product list
     } catch (err) {
       console.error('Update failed:', err);
-      alert('Error updating product');
+      alert('Error updating product. Please try again.');
     }
   };
 
@@ -302,7 +321,7 @@ const EditProduct = () => {
         <div className="edit-product-form-section">
           <h2 className="section-title">Product Details</h2>
           <div className="form-grid">
-            {categoryFields[formData.category]?.map(field => (
+            {formData.category && categoryFields[formData.category]?.map(field => (
               <div key={field.name} className="form-field">
                 <label className="form-label">{field.label}</label>
                 {field.name === 'color' ? (
@@ -355,14 +374,19 @@ const EditProduct = () => {
             ))}
           </div>
           <div className="form-field">
-            <label className="form-label">Add New Images</label>
+            <label className="form-label">Add New Images (Max 5 total)</label>
             <input
               type="file"
               accept="image/*"
               multiple
               onChange={handleImageChange}
               className="file-input"
+              // Disable input if 5 images already exist
+              disabled={formData.images.length + newImages.length >= 5}
             />
+             {formData.images.length + newImages.length >= 5 && (
+                <p className="text-red-500 text-sm mt-1">Maximum 5 images allowed.</p>
+              )}
           </div>
         </div>
 

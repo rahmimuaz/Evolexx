@@ -12,33 +12,43 @@ const AdminDashboard = () => {
   const [orderStats, setOrderStats] = useState({ labels: [], data: [] });
   const [loading, setLoading] = useState(true);
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     // Fetch orders and group by date
     const fetchOrderStats = async () => {
       setLoading(true);
       try {
         const token = localStorage.getItem('authToken');
-        const res = await fetch('http://localhost:5001/api/orders', {
+        // Use the API_BASE_URL here
+        const res = await fetch(`${API_BASE_URL}/api/orders`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const orders = await res.json();
         // Group orders by date (YYYY-MM-DD)
         const dateMap = {};
         orders.forEach(order => {
-          const date = new Date(order.createdAt).toLocaleDateString();
+          // Use 'en-CA' or another locale that formats dates as YYYY-MM-DD for consistent keys
+          // Or explicitly format:
+          const orderDate = new Date(order.createdAt);
+          const date = orderDate.toISOString().split('T')[0]; // YYYY-MM-DD
           dateMap[date] = (dateMap[date] || 0) + 1;
         });
-        const labels = Object.keys(dateMap).sort((a, b) => new Date(a) - new Date(b));
+
+        // Sort labels to ensure chronological order on the chart
+        const labels = Object.keys(dateMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         const data = labels.map(date => dateMap[date]);
         setOrderStats({ labels, data });
       } catch (err) {
+        console.error("Failed to fetch order statistics:", err); // Log the error
         setOrderStats({ labels: [], data: [] });
       } finally {
         setLoading(false);
       }
     };
     fetchOrderStats();
-  }, []);
+  }, [API_BASE_URL]); // Add API_BASE_URL to the dependency array
 
   return (
     <div className="admin-dashboard-layout">
@@ -86,7 +96,7 @@ const AdminDashboard = () => {
                   y: { title: { display: true, text: 'Orders' }, beginAtZero: true },
                 },
               }}
-              height={80}
+              height={80} // Adjust height as needed
             />
           )}
         </div>

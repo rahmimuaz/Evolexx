@@ -14,15 +14,19 @@ const Navbar = ({ children }) => {
   const [alerts, setAlerts] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     // Fetch alerts: low stock, out of stock, new orders
     const fetchAlerts = async () => {
       try {
         const token = localStorage.getItem('authToken');
+        // Use API_BASE_URL for all axios requests
         const [lowStockRes, outOfStockRes, ordersRes] = await Promise.all([
-          axios.get('http://localhost:5001/api/products/admin/low-stock', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('http://localhost:5001/api/products/admin/out-of-stock', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('http://localhost:5001/api/orders', { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/api/products/admin/low-stock`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/api/products/admin/out-of-stock`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/api/orders`, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
         const lowStock = lowStockRes.data.map(p => ({ type: 'low', msg: `Low stock: ${p.name} (${p.stock})`, link: `/EditProduct/${p._id}` }));
         const outOfStock = outOfStockRes.data.map(p => ({ type: 'out', msg: `Out of stock: ${p.name}`, link: `/EditProduct/${p._id}` }));
@@ -34,10 +38,11 @@ const Navbar = ({ children }) => {
       } catch (err) {
         setAlerts([]);
         setUnreadCount(0);
+        console.error("Error fetching alerts:", err); // Log error for debugging
       }
     };
     fetchAlerts();
-  }, []);
+  }, [API_BASE_URL]); // Add API_BASE_URL to dependency array
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);

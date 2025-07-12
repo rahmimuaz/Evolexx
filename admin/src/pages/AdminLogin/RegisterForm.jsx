@@ -14,6 +14,9 @@ const RegisterForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -26,7 +29,8 @@ const RegisterForm = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/admin/register', {
+      // Use the API_BASE_URL here
+      const response = await fetch(`${API_BASE_URL}/api/admin/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

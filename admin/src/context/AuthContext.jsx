@@ -9,6 +9,9 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate(); 
   
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   // Check if token exists and is valid on app startup
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -16,8 +19,8 @@ export const AuthProvider = ({ children }) => {
       
       if (storedToken) {
         try {
-          // Verify token with backend
-          const response = await fetch('http://localhost:5001/api/admin/verify-token', {
+          // Verify token with backend using the environment variable
+          const response = await fetch(`${API_BASE_URL}/api/admin/verify-token`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${storedToken}`,
@@ -50,7 +53,7 @@ export const AuthProvider = ({ children }) => {
     };
     
     checkAuthStatus();
-  }, []);
+  }, [API_BASE_URL]); // Add API_BASE_URL to the dependency array
   
   useEffect(() => {
     console.log('AuthContext: Token changed to:', token);

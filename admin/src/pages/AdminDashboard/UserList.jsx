@@ -6,16 +6,19 @@ const UserList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [API_BASE_URL]); // Add API_BASE_URL to dependencies
 
   const fetchUsers = async () => {
     setLoading(true);
     setError('');
     try {
       const token = localStorage.getItem('authToken');
-      const response = await axios.get('http://localhost:5001/api/admin/users', {
+      const response = await axios.get(`${API_BASE_URL}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
@@ -30,7 +33,7 @@ const UserList = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
       const token = localStorage.getItem('authToken');
-      await axios.delete(`http://localhost:5001/api/admin/users/${userId}`, {
+      await axios.delete(`${API_BASE_URL}/api/admin/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(prev => prev.filter(u => u._id !== userId));
@@ -74,4 +77,4 @@ const UserList = () => {
   );
 };
 
-export default UserList; 
+export default UserList;

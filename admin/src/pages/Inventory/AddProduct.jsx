@@ -22,6 +22,9 @@ const AddProduct = () => {
   const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   const categories = [
     'Mobile Phone',
     'Mobile Accessories',
@@ -125,7 +128,8 @@ const AddProduct = () => {
         formDataToSend.append('images', file);
       });
 
-      const response = await axios.post('http://localhost:5001/api/products', formDataToSend, {
+      // Use the API_BASE_URL here
+      const response = await axios.post(`${API_BASE_URL}/api/products`, formDataToSend, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
