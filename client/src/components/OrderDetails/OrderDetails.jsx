@@ -22,9 +22,10 @@ const OrderDetails = () => {
         };
 
         const { data } = await axios.get(
-          `http://localhost:5001/api/orders/${id}`,
-          config
-        );
+  `${process.env.REACT_APP_API_BASE_URL}/api/orders/${id}`,
+  config
+);
+
 
         setOrder(data);
         setLoading(false);
@@ -42,12 +43,14 @@ const OrderDetails = () => {
   }, [id, user, navigate]);
 
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '';
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-    if (imagePath.startsWith('/uploads/')) return `http://localhost:5001${imagePath}`;
-    if (imagePath.startsWith('uploads/')) return `http://localhost:5001/${imagePath}`;
-    return `http://localhost:5001/uploads/${imagePath}`;
-  };
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+  if (imagePath.startsWith('/uploads/')) return `${baseUrl}${imagePath}`;
+  if (imagePath.startsWith('uploads/')) return `${baseUrl}/${imagePath}`;
+  return `${baseUrl}/uploads/${imagePath}`;
+};
+
 
   const handleImageError = (e) => {
     e.target.style.display = 'none';

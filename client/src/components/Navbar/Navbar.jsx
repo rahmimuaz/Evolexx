@@ -133,12 +133,11 @@ const Navbar = () => {
         </div>
 
         {/* Center Section */}
-        <div className={`navbar-center ${menuOpen ? 'open' : ''}`}>
+<div className={`navbar-center ${menuOpen ? 'open' : ''} ${searchOpen ? 'shifted-left' : ''}`}>
           <div className="navbar-links">
             <Link to="/" className={`navbar-link ${location.pathname === '/' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Home</Link>
-            <Link to="/category/Mobile%20Phone" className={`navbar-link ${location.pathname === '/category/Mobile%20Phone' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Brand New Phone</Link>
-            <Link to="/category/Preowned%20Phones" className={`navbar-link ${location.pathname === '/category/Preowned%20Phones' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Pre Owned Phone</Link>
-            <Link to="/category/Laptops" className={`navbar-link ${location.pathname === '/category/Laptops' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Laptops</Link>
+            <Link to="/category/Mobile%20Phone" className={`navbar-link ${location.pathname === '/category/Mobile%20Phone' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Brand New</Link>
+            <Link to="/category/Preowned%20Phones" className={`navbar-link ${location.pathname === '/category/Preowned%20Phones' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Pre Owned</Link>
             <Link to="/category/Mobile%20Accessories" className={`navbar-link ${location.pathname === '/category/Mobile%20Accessories' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Accessories</Link>
           </div>
         </div>
@@ -158,7 +157,7 @@ const Navbar = () => {
                 <FaSearch size={18} />
               </button>
             ) : (
-              <div className="search-bar-integrated">
+            <div className={`search-bar-integrated ${searchOpen ? 'visible' : ''}`}>
                 <div className="search-input-wrapper-inner">
                   <span className="search-input-icon"><FaSearch size={18} /></span>
                   <input
@@ -229,7 +228,8 @@ const Navbar = () => {
             <div className={`dropdown-menu ${dropdownOpen ? 'show-dropdown' : ''}`}>
               {user ? (
                 <>
-                  <span className="dropdown-text">Hello, {user.name}</span>
+                
+                  <span className="dropdown-text-1">Signed in as <span className="user-name-dropdown-text">{user.name}</span></span>
                   <Link to="/settings" className="dropdown-link" onClick={() => setDropdownOpen(false)}>
                     <FaCog className="dropdown-icon" />
                     Settings

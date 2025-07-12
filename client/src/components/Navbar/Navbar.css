@@ -16,8 +16,8 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
-  max-width: 1400px; /* Max width for content */
   margin: 0 auto; /* Center content */
+  height: 2rem;
 }
 
 /* LEFT SECTION */
@@ -52,7 +52,7 @@
 .navbar-center {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   flex-grow: 1; /* Allow to grow and push other items */
   /* Remove fixed margin-left, let flexbox handle it */
 }
@@ -313,17 +313,16 @@
   transform: translateY(-10px) scale(0.98);
   pointer-events: none;
   transition: opacity 0.25s cubic-bezier(.4,0,.2,1), transform 0.25s cubic-bezier(.4,0,.2,1);
-  background: linear-gradient(135deg, rgba(88, 88, 88, 0.85) 60%, rgba(223, 222, 222, 0.55) 100%);
+background: linear-gradient(135deg, rgba(113, 112, 112, 0.85) 60%, rgba(253, 253, 253, 0.55) 100%);
   backdrop-filter: blur(8px);
-  border-radius: 1rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 0.7rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18); 
   color: #222;
   font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
   padding: 1.2rem 1.5rem;
   min-width: 250px;
   margin-top: 0.4rem;
-  text-align: center;
+  text-align: left;
 }
 
 .show-dropdown {
@@ -332,9 +331,16 @@
   pointer-events: auto !important;
 }
 
-.dropdown-text {
+.dropdown-text-1 {
   color: #ffffff;
-  font-weight: 500;
+  font-weight: 400;
+  margin-bottom: 1rem !important;
+
+}
+
+.user-name-dropdown-text{
+    font-weight: 600;
+
 }
 
 .dropdown-link, .logout-dropdown-button {
@@ -343,7 +349,7 @@
   border-radius: 0;
   color: inherit; /* or use specific color like #222 if needed */
   padding: 0;
-  margin: 0;
+  margin-top: 0.5rem;
   font-size: 1rem;
   font-family: inherit;
   cursor: pointer;
@@ -354,10 +360,11 @@
   text-decoration: none;
 }
 .dropdown-link{
-  margin-top: 15px;
-  padding: 0.5rem 1.4rem;
-  font-size: 1rem;
+  padding: 0.6rem 0.6rem;
+  font-size: 0.875rem;
   width: 100%;
+    color: #fff;
+
 }
 
 
@@ -373,12 +380,11 @@
 }
 
 .logout-dropdown-button {
-  color: #222;
-  padding: 0.6rem 1.4rem;
+  color: #fff;
+  padding: 0.6rem 0.6rem;
   font-size: 0.875rem;
   border: none;
   cursor: pointer;
-  margin-top: 1rem;
   transition: background-color 0.2s ease;
   display: flex;
   align-items: center;
@@ -448,12 +454,11 @@
     position: static; /* No absolute positioning on mobile for the menu */
     background-color: #ffffff;
     box-shadow: none; /* Remove box-shadow to prevent double shadow */
+    margin-top: 1rem;
   }
 
   .navbar-center.open {
     max-height: 500px; /* Expand height to show links */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Add shadow when open */
-    border-top: 1px solid #eee; /* Visual separation */
   }
 
   .navbar-links {
@@ -574,7 +579,7 @@
 
 @media (max-width: 480px) {
   .navbar-container {
-    padding: 0.8rem 0.5rem;
+    padding: 0rem 0.5rem;
   }
 
   .hamburger-button {
@@ -643,4 +648,29 @@
     font-size: 0.9rem;
     padding: 0.4rem 0.8rem;
   }
+}
+
+
+
+/* Search bar animation using scaleX for Apple-style smoothness */
+.search-bar-integrated {
+  transform: scaleX(0.85);
+  transform-origin: right center;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.search-bar-integrated.visible {
+  transform: scaleX(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.navbar-center {
+  transition: transform 0.35s ease;
+}
+
+.navbar-center.shifted-left {
+  transform: translateX(-40px);
 }
