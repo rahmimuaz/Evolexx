@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import '../Home/Homepage.css';
 import { FaBars } from 'react-icons/fa';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const PRODUCTS_PER_PAGE = 8;
 
 const sortOptions = [
@@ -25,7 +26,7 @@ const CategoryPage = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/products/category/${encodeURIComponent(category)}`)
+    fetch(`${API_BASE_URL}/api/products/category/${encodeURIComponent(category)}`)
       .then(res => res.json())
       .then(data => {
         setProducts(data);
@@ -69,15 +70,18 @@ const CategoryPage = () => {
     );
     setCurrentPage(1);
   };
+
   const handlePriceChange = (e, idx) => {
     const val = Number(e.target.value);
     setPriceRange(pr => idx === 0 ? [val, pr[1]] : [pr[0], val]);
     setCurrentPage(1);
   };
+
   const handleSortChange = (e) => {
     setSort(e.target.value);
     setCurrentPage(1);
   };
+
   const handleStockChange = (e) => {
     setInStockOnly(e.target.checked);
     setCurrentPage(1);
@@ -87,7 +91,6 @@ const CategoryPage = () => {
     <div className="product-section">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ marginBottom: '60px' }}>{category}</h2>
-
         <FaBars
           onClick={() => setShowFilterBar(!showFilterBar)}
           style={{ cursor: 'pointer', fontSize: '1.5rem' }}

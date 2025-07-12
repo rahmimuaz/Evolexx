@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import './Cart.css';
 import Footer from '../../components/Footer/Footer';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
@@ -27,9 +29,9 @@ const Cart = () => {
   const getImageUrl = (path) => {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return path.startsWith('/') 
-      ? `http://localhost:5001${path}` 
-      : `http://localhost:5001/${path}`;
+    return path.startsWith('/')
+      ? `${API_BASE_URL}${path}`
+      : `${API_BASE_URL}/${path}`;
   };
 
   const onImageError = (e) => {
@@ -81,7 +83,9 @@ const Cart = () => {
                       <p className="product-color">Color: {item.selectedColor}</p>
                     )}
                     {item.product?.stock <= 0 && (
-                      <p className="cart-out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>Out of Stock</p>
+                      <p className="cart-out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>
+                        Out of Stock
+                      </p>
                     )}
 
                     <div className="quantity-controls">
@@ -129,7 +133,11 @@ const Cart = () => {
 
           <p className="taxes-note">Taxes and shipping free</p>
 
-          <button className="checkout-btn" onClick={() => navigate('/checkout')} disabled={anyOutOfStock}>
+          <button
+            className="checkout-btn"
+            onClick={() => navigate('/checkout')}
+            disabled={anyOutOfStock}
+          >
             Check Out
           </button>
         </aside>

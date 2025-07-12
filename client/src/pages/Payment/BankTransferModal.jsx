@@ -3,6 +3,8 @@ import { toast } from 'react-toastify';
 import { useUser } from '../../context/UserContext';
 import './BankTransferModal.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 const BankTransferModal = ({ onClose, onSubmit }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -64,7 +66,7 @@ const BankTransferModal = ({ onClose, onSubmit }) => {
         fileType: selectedFile.type
       });
 
-      const response = await fetch('http://localhost:5001/api/upload/bank-transfer-proof', {
+      const response = await fetch(`${API_BASE_URL}/api/upload/bank-transfer-proof`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`,

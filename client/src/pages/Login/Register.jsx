@@ -23,7 +23,7 @@ const Register = ({ asModal = false, onSuccess, onSwitchLogin }) => {
       if (onSuccess) onSuccess();
       else navigate('/');
     } catch (error) {
-      
+      toast.error(error?.response?.data?.message || 'Registration failed');
     }
   };
 

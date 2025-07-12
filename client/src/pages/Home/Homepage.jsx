@@ -6,6 +6,8 @@ import { FaShippingFast, FaRedoAlt, FaSlidersH } from 'react-icons/fa';
 import { HiShieldCheck } from 'react-icons/hi';
 import Footer from '../../components/Footer/Footer';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 const Homepage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,6 @@ const Homepage = () => {
   ];
   const [sort, setSort] = useState('price-asc');
   const [priceRange, setPriceRange] = useState([0, 1000000]);
-  // Changed brandFilter to a string for single dropdown selection
   const [brandFilter, setBrandFilter] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
 
@@ -77,7 +78,7 @@ const Homepage = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/products');
+      const response = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(response.data);
       setLoading(false);
     } catch (error) {
@@ -89,20 +90,20 @@ const Homepage = () => {
 
   const generateImageUrl = (product) => {
     if (product.images && product.images.length > 0) {
-      return product.images[0].startsWith('http')
-        ? product.images[0]
-        : `http://localhost:5001/${product.images[0].replace(/^\//, '')}`;
+      const image = product.images[0];
+      if (image.startsWith('http')) return image;
+      if (image.startsWith('/uploads/')) return `${API_BASE_URL}${image}`;
+      if (image.startsWith('uploads/')) return `${API_BASE_URL}/${image}`;
+      return `${API_BASE_URL}/uploads/${image.replace(/^\//, '')}`;
     }
     return '/logo192.png';
   };
 
-  // allBrands remains the same
   const allBrands = Array.from(new Set(products.map(p => p.details?.brand).filter(Boolean)));
 
   const filteredProducts = products.filter(product => {
     const price = product.price || 0;
     const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
-    // Updated brand filter logic for single string
     const matchesBrand = !brandFilter || product.details?.brand === brandFilter;
     const matchesStock = !inStockOnly || (product.stock && product.stock > 0);
     return matchesPrice && matchesBrand && matchesStock;
@@ -139,11 +140,10 @@ const Homepage = () => {
     }
   };
 
-  // Updated handleBrandChange for dropdown
   const handleBrandChange = (event) => {
     const selectedBrand = event.target.value;
     setBrandFilter(selectedBrand);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1);
   };
 
   const handlePriceChange = (e, idx) => {
@@ -167,7 +167,6 @@ const Homepage = () => {
 
   return (
     <div className="home">
-      {/* BANNER */}
       <section className="banner">
         <div
           className="banner-slider"
@@ -182,14 +181,12 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section className="features">
         <div className="feature"><FaShippingFast /><div className="feature-text"><h3>Fast & Free Shipping</h3><p>Every single order ships for free.</p></div></div>
         <div className="feature"><FaRedoAlt /><div className="feature-text"><h3>30 Days Returns</h3><p>Product returns accepted within 30 days.</p></div></div>
         <div className="feature"><HiShieldCheck /><div className="feature-text"><h3>Top Quality Products</h3><p>We always provide high quality products.</p></div></div>
       </section>
 
-      {/* CATEGORIES */}
       <section className="category-section">
         <div className="category-grid-custom">
           <Link to="/category/Mobile%20Phone" className="category-card tall">
@@ -202,16 +199,15 @@ const Homepage = () => {
           </Link>
           <Link to="/category/Laptops" className="category-card square">
             <img src="/category-accessories.jpg" alt="Tablet" />
-            <div className="overlay-text bottom"><p>laptop</p></div>
+            <div className="overlay-text bottom"><p>Laptop</p></div>
           </Link>
           <Link to="/category/Mobile%20Accessories" className="category-card wide">
             <img src="/category-accessories.jpg" alt="Game Controller" />
-            <div className="overlay-text bottom"><p>mobileAccessories </p></div>
+            <div className="overlay-text bottom"><p>Mobile Accessories</p></div>
           </Link>
         </div>
       </section>
 
-      {/* PRODUCTS */}
       <section className="product-section" ref={productSectionRef}>
         <div className="heading-with-icon">
           <h2 ref={headingRef}>All Products</h2>
@@ -224,7 +220,6 @@ const Homepage = () => {
 
         {showFilters && (
           <div className="filter-sort-bar">
-            {/* Sort Dropdown */}
             <div className="filter-group">
               <label htmlFor="sort-select">Sort:</label>
               <select id="sort-select" value={sort} onChange={handleSortChange}>
@@ -234,7 +229,6 @@ const Homepage = () => {
               </select>
             </div>
 
-            {/* Price Range Inputs */}
             <div className="filter-group price-range-group">
               <label>Price:</label>
               <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} className="price-input" />
@@ -242,29 +236,25 @@ const Homepage = () => {
               <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} className="price-input" />
             </div>
 
-            {/* Brand Filter Dropdown */}
             {allBrands.length > 0 && (
               <div className="filter-group brand-filter-group">
                 <label htmlFor="brand-select">Brand:</label>
                 <div className="brand-dropdown-container">
                   <select
                     id="brand-select"
-                    value={brandFilter} // Binds value to the state
-                    onChange={handleBrandChange} // Uses the updated handler
-                    className="brand-select-dropdown" // Add this for potential styling
+                    value={brandFilter}
+                    onChange={handleBrandChange}
+                    className="brand-select-dropdown"
                   >
-                    <option value="">All</option> {/* Default "Select Brand" option */}
+                    <option value="">All</option>
                     {allBrands.map(brand => (
-                      <option key={brand} value={brand}>
-                        {brand}
-                      </option>
+                      <option key={brand} value={brand}>{brand}</option>
                     ))}
                   </select>
                 </div>
               </div>
             )}
 
-            {/* In Stock Only Checkbox */}
             <div className="filter-group">
               <label className="stock-checkbox-label">
                 <input type="checkbox" checked={inStockOnly} onChange={handleStockChange} /> In Stock Only
@@ -280,7 +270,7 @@ const Homepage = () => {
             {currentProducts.map((product) => {
               const imageUrl = generateImageUrl(product);
               const fullPrice = product.price || 0;
-              const kokoTotal = fullPrice * 1.12; // Assuming 12% is a Koko-specific charge
+              const kokoTotal = fullPrice * 1.12;
               const kokoInstallment = kokoTotal / 3;
 
               return (
@@ -323,7 +313,6 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* FOOTER */}
       <Footer />
     </div>
   );

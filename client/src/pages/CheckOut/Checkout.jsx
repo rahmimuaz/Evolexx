@@ -8,6 +8,8 @@ import BankTransferModal from '../Payment/BankTransferModal';
 import './Checkout.css';
 import Footer from '../../components/Footer/Footer';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 const Checkout = () => {
   const { cartItems, clearCart } = useCart();
   const { user } = useUser();
@@ -35,26 +37,22 @@ const Checkout = () => {
   const handlePaymentMethodChange = (e) => {
     const selectedMethod = e.target.value;
     setFormData(prev => ({ ...prev, paymentMethod: selectedMethod }));
-
     if (selectedMethod === 'card') navigate('/card-payment');
     if (selectedMethod !== 'bank_transfer') setBankTransferProofUrl(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!user) {
       toast.error('Please login to place an order');
       navigate('/login');
       return;
     }
-
     if (cartItems.length === 0) {
       toast.error('Your cart is empty');
       navigate('/cart');
       return;
     }
-
     if (formData.paymentMethod === 'bank_transfer') {
       setShowBankTransferModal(true);
       return;
@@ -106,7 +104,7 @@ const Checkout = () => {
       };
 
       const { data } = await axios.post(
-        'http://localhost:5001/api/orders',
+        `${API_BASE_URL}/api/orders`,
         orderData,
         config
       );
@@ -130,9 +128,9 @@ const Checkout = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-    if (imagePath.startsWith('/uploads/')) return `http://localhost:5001${imagePath}`;
-    if (imagePath.startsWith('uploads/')) return `http://localhost:5001/${imagePath}`;
-    return `http://localhost:5001/uploads/${imagePath}`;
+    if (imagePath.startsWith('/uploads/')) return `${API_BASE_URL}${imagePath}`;
+    if (imagePath.startsWith('uploads/')) return `${API_BASE_URL}/${imagePath}`;
+    return `${API_BASE_URL}/uploads/${imagePath}`;
   };
 
   const handleImageError = (e) => {

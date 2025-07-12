@@ -26,10 +26,13 @@ const ProductDetail = () => {
   const [filteredReviews, setFilteredReviews] = useState([]); // State for filtered reviews
   const [selectedReviewFilter, setSelectedReviewFilter] = useState('All ratings'); // State for selected review filter
 
+  // Base URL for API calls
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:5001/api/products/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/api/products/${id}`);
         setProduct(response.data);
         setLoading(false);
         if (response.data.images && response.data.images.length > 0) {
@@ -41,7 +44,7 @@ const ProductDetail = () => {
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, API_BASE_URL]);
 
   useEffect(() => {
     if (product && product.images && product.images.length > 0 && !mainImage) {
@@ -52,14 +55,14 @@ const ProductDetail = () => {
   useEffect(() => {
     if (product) {
       axios
-        .get(`http://localhost:5001/api/products/${id}/reviews`)
+        .get(`${API_BASE_URL}/api/products/${id}/reviews`)
         .then((res) => {
           setReviews(res.data);
           setFilteredReviews(res.data); // Initialize filtered reviews with all reviews
         })
         .catch(() => setReviews([]));
     }
-  }, [product, id]);
+  }, [product, id, API_BASE_URL]);
 
   useEffect(() => {
     if (product && Array.isArray(product.details?.color) && product.details.color.length > 0) {
@@ -119,9 +122,9 @@ const ProductDetail = () => {
   const cleanImagePath = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http')) return imagePath;
-    if (imagePath.startsWith('uploads/')) return `http://localhost:5001/${imagePath}`;
-    if (imagePath.startsWith('/uploads/')) return `http://localhost:5001${imagePath}`;
-    return `http://localhost:5001/uploads/${imagePath}`;
+    if (imagePath.startsWith('uploads/')) return `${API_BASE_URL}/${imagePath}`;
+    if (imagePath.startsWith('/uploads/')) return `${API_BASE_URL}${imagePath}`;
+    return `${API_BASE_URL}/uploads/${imagePath}`;
   };
 
   const currentMainImageUrl = cleanImagePath(mainImage);
@@ -131,7 +134,7 @@ const ProductDetail = () => {
     setReviewSubmitting(true);
     setReviewError(null);
     try {
-      await axios.post(`http://localhost:5001/api/products/${id}/reviews`, {
+      await axios.post(`${API_BASE_URL}/api/products/${id}/reviews`, {
         rating: reviewRating,
         comment: reviewComment,
         // Assuming your backend can derive userId from auth token
@@ -142,7 +145,7 @@ const ProductDetail = () => {
       });
       setReviewComment('');
       setReviewRating(5);
-      const res = await axios.get(`http://localhost:5001/api/products/${id}/reviews`);
+      const res = await axios.get(`${API_BASE_URL}/api/products/${id}/reviews`);
       setReviews(res.data);
       setFilteredReviews(res.data); // Update filtered reviews after new submission
     } catch (err) {
@@ -225,7 +228,7 @@ const ProductDetail = () => {
               {product.discountPrice ? (
                 <>
                   <span className="product-price" style={{ textDecoration: 'line-through', color: '#888', marginRight: 10, fontSize: '18px' }}>
-                  Rs. {product.price?.toLocaleString() ?? 'N/A'}
+                    Rs. {product.price?.toLocaleString() ?? 'N/A'}
                   </span>
                   <span className="product-price" style={{ color: '#e53935', fontWeight: 'bold' }}>
                     Rs. {product.discountPrice?.toLocaleString()}
@@ -470,7 +473,7 @@ const ProductDetail = () => {
                 <div className="review-header">
                     <div className="reviewer-info">
                         <span className="reviewer-avatar">
-                           {/* Replace with actual user avatar if available */}
+                            {/* Replace with actual user avatar if available */}
                             <svg className="h-6 w-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
                         </span>
                         <span className="reviewer-name">{review.user?.username || `User ${review.userId || idx + 1}`}</span> {/* Assuming review object has user info */}

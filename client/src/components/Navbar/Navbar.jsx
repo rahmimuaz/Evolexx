@@ -33,6 +33,9 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
   const toggleSearch = () => {
     setSearchOpen(!searchOpen);
@@ -54,7 +57,8 @@ const Navbar = () => {
     }
     setSearchLoading(true);
     const delayDebounce = setTimeout(() => {
-      fetch('http://localhost:5001/api/products/search?query=' + encodeURIComponent(searchQuery))
+      // Use the API_BASE_URL here
+      fetch(`${API_BASE_URL}/api/products/search?query=` + encodeURIComponent(searchQuery))
         .then(res => res.json())
         .then(data => {
           console.log('Search response:', data);
@@ -65,7 +69,7 @@ const Navbar = () => {
         .finally(() => setSearchLoading(false));
     }, 350);
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery]);
+  }, [searchQuery, API_BASE_URL]); // Add API_BASE_URL to dependency array
 
   const handleSearchSelect = (productId) => {
     setSearchOpen(false); // closes desktop search bar
