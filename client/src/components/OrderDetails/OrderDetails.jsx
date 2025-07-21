@@ -22,9 +22,10 @@ const OrderDetails = () => {
         };
 
         const { data } = await axios.get(
-          `http://localhost:5001/api/orders/${id}`,
-          config
-        );
+  `${process.env.REACT_APP_API_BASE_URL}/api/orders/${id}`,
+  config
+);
+
 
         setOrder(data);
         setLoading(false);
@@ -37,32 +38,19 @@ const OrderDetails = () => {
     if (user) {
       fetchOrder();
     } else {
-      navigate('/login');
+      navigate('/');
     }
   }, [id, user, navigate]);
 
-  // Updated image handling to support both Cloudinary and local uploads
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '';
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+  if (imagePath.startsWith('/uploads/')) return `${baseUrl}${imagePath}`;
+  if (imagePath.startsWith('uploads/')) return `${baseUrl}/${imagePath}`;
+  return `${baseUrl}/uploads/${imagePath}`;
+};
 
-    // If it's already a full URL (Cloudinary), return as is
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-
-    // If it's a local upload path, construct the full URL
-    if (imagePath.startsWith('uploads/')) {
-      return `http://localhost:5001/${imagePath}`;
-    }
-
-    // If it starts with /uploads/, remove the leading slash
-    if (imagePath.startsWith('/uploads/')) {
-      return `http://localhost:5001${imagePath}`;
-    }
-
-    // Default case: assume it's a local upload
-    return `http://localhost:5001/uploads/${imagePath}`;
-  };
 
   const handleImageError = (e) => {
     e.target.style.display = 'none';
@@ -73,9 +61,9 @@ const OrderDetails = () => {
     return (
       <div className="order-details-page-container">
         <div className="order-details-max-width-wrapper">
-          <div className="loading-container">
-            <div className="spinner"></div>
-          </div>
+          <p style={{ textAlign: 'center', padding: '50px 0', fontSize: '1.1rem', color: '#555' }}>
+            Loading order details...
+          </p>
         </div>
       </div>
     );
@@ -100,7 +88,7 @@ const OrderDetails = () => {
           {/* Order Header */}
           <div className="order-header">
             <div className="order-header-content">
-              <h1 className="order-id-title">Order #{order._id}</h1>
+              <h1 className="order-id-title"> Order Placed Successfully</h1>
               <div className="order-status-badges">
                 <span className={`order-status-badge ${
                   order.status === 'delivered' ? 'status-delivered' :
@@ -123,13 +111,17 @@ const OrderDetails = () => {
             <p className="order-placed-date">
               Placed on {new Date(order.createdAt).toLocaleDateString()}
             </p>
+            <div className="back-home-button-wrapper">
+              <button className="back-home-btn" onClick={() => navigate('/')}>
+                Back to Home
+              </button>
+            </div>
           </div>
 
-          {/* Order Details */}
+          {/* Shipping and Payment Info */}
           <div className="info-section">
             <div className="info-grid">
-              {/* Shipping Information */}
-              <div>
+              <div className="info-card">
                 <h2 className="info-heading">Shipping Information</h2>
                 <div className="info-details-group">
                   <p><span className="font-medium">Name:</span> {order.shippingAddress.fullName}</p>
@@ -141,12 +133,11 @@ const OrderDetails = () => {
                 </div>
               </div>
 
-              {/* Payment Information */}
-              <div>
+              <div className="info-card">
                 <h2 className="info-heading">Payment Information</h2>
                 <div className="info-details-group">
-                  <p><span className="font-medium">Method:</span> {order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod}</p>
-                  <p><span className="font-medium">Status:</span> {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}</p>
+                  <p><span className="font-medium">Method:</span> {order.paymentMethod}</p>
+                  <p><span className="font-medium">Status:</span> {order.paymentStatus}</p>
                 </div>
               </div>
             </div>
@@ -182,6 +173,9 @@ const OrderDetails = () => {
                     )}
                     <div className="product-info">
                       <h3 className="product-name">{item.product.name}</h3>
+                      {item.selectedColor && (
+                        <p className="product-color">Color: {item.selectedColor}</p>
+                      )}
                       <p className="product-quantity">Quantity: {item.quantity}</p>
                     </div>
                   </div>

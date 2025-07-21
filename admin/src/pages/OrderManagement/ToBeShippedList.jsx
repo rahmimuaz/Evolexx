@@ -10,6 +10,9 @@ const ToBeShippedList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     const fetchToBeShipped = async () => {
       if (!token) {
@@ -22,7 +25,8 @@ const ToBeShippedList = () => {
       setError('');
 
       try {
-        const response = await fetch('http://localhost:5001/api/orders/tobeshipped', {
+        // Use API_BASE_URL for fetching to-be-shipped orders
+        const response = await fetch(`${API_BASE_URL}/api/orders/tobeshipped`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -45,7 +49,7 @@ const ToBeShippedList = () => {
     };
 
     fetchToBeShipped();
-  }, [token]);
+  }, [token, API_BASE_URL]); // Add API_BASE_URL to dependencies
 
   const downloadPdf = (order) => {
     const doc = new jsPDF();

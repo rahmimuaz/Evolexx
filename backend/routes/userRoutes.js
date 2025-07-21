@@ -1,10 +1,11 @@
 import express from 'express';
 const router = express.Router();
-import { authUser, registerUser, addToCart, updateCartItemQuantity, removeFromUserCart, getUserCart, clearUserCart } from '../controllers/userController.js';
+import { authUser, registerUser, addToCart, updateCartItemQuantity, removeFromUserCart, getUserCart, clearUserCart, googleLogin } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 router.post('/login', authUser);
 router.route('/').post(registerUser);
+router.post('/google-login', googleLogin);
 
 // Protected routes for cart management
 router.route('/cart')
