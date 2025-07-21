@@ -61,15 +61,21 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Mobile Phone', 'Mobile Accessories', 'Preowned Phones', 'Laptops']
+    enum: ['Mobile Phone', 'Mobile Accessories', 'Preowned Phones', 'Laptops', 'Phone Covers', 'Chargers']
   },
   price: {
     type: Number,
     required: true
   },
+  discountPrice: {
+    type: Number
+  },
   description: {
     type: String,
     required: true
+  },
+  longDescription: {
+    type: String
   },
   images: [{
     type: String,
@@ -80,6 +86,18 @@ const productSchema = new mongoose.Schema({
     required: true,
     default: 0
   },
+  warrantyPeriod: {
+    type: String,
+    default: 'No Warranty'
+  },
+  reviews: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      rating: { type: Number, min: 1, max: 5 },
+      comment: String,
+      date: { type: Date, default: Date.now }
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now

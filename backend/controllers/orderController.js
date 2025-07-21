@@ -1,8 +1,10 @@
 import Order from '../models/Order.js';
 import User from '../models/userModel.js';
 import ToBeShipped from '../models/ToBeShipped.js'; // Import the ToBeShipped model
+import Product from '../models/Product.js';
 
 import asyncHandler from 'express-async-handler';
+import { sendEmail } from '../utils/sendEmail.js';
 
 // @desc    Get all orders (Admin)
 // @route   GET /api/orders
@@ -105,6 +107,34 @@ export const createOrder = asyncHandler(async (req, res) => {
     console.log('Using cart items as fallback');
   }
 
+  // Inventory check and deduction
+  for (const item of finalOrderItems) {
+    const product = await Product.findById(item.product);
+    if (!product) {
+      res.status(400);
+      throw new Error(`Product not found: ${item.product}`);
+    }
+    if (product.stock < item.quantity) {
+      res.status(400);
+      throw new Error(`Insufficient stock for product: ${product.name}`);
+    }
+  }
+  // Deduct stock and check for low stock
+  for (const item of finalOrderItems) {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      item.product,
+      { $inc: { stock: -item.quantity } },
+      { new: true }
+    );
+    if (updatedProduct.stock > 0 && updatedProduct.stock < 5) {
+      await sendEmail(
+        process.env.ALERT_EMAIL_USER,
+        'Low Stock Alert',
+        `Product "${updatedProduct.name}" is low on stock. Only ${updatedProduct.stock} left.`
+      );
+    }
+  }
+
   try {
     const orderNumber = await Order.generateOrderNumber();
 
@@ -133,6 +163,20 @@ export const createOrder = asyncHandler(async (req, res) => {
     console.log('Final order data:', orderData);
 
     const order = await Order.create(orderData);
+
+    // Send new order email to admin
+    await sendEmail(
+      process.env.ALERT_EMAIL_USER,
+      'New Order Received',
+      `Evolexx Store\nNew Order Received\nA new order has been placed. Order ID: ${order._id}\n\nView Order: http://localhost:3000/admin/orders/${order._id}`
+    );
+
+    // Send order confirmation to user
+    await sendEmail(
+      order.shippingAddress.email,
+      'Your Order Confirmation - Evolexx Store',
+      `Thank you for your order at Evolexx Store!\n\nYour order has been received. Order ID: ${order._id}\n\nWe will notify you when your order is shipped.\n\nIf you have an account, you can view your order here: http://localhost:3000/orders/${order._id}`
+    );
 
     // Clear cart only if we used cart items
     if (!orderItems || orderItems.length === 0) {
