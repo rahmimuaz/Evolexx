@@ -55,6 +55,48 @@ export const protect = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc Admin protect middleware - Specifically for admin routes
+ */
+export const adminProtect = asyncHandler(async (req, res, next) => {
+  let token;
+
+  // Check if Authorization header exists and starts with 'Bearer'
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      // Get token from header
+      token = req.headers.authorization.split(' ')[1];
+
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Check if it's an admin token
+      if (decoded.role === 'admin' || decoded.role === 'super_admin') {
+        // Fetch the admin from database
+        const admin = await Admin.findById(decoded.id).select('-password');
+        if (!admin) {
+          res.status(401);
+          throw new Error('Not authorized, admin not found');
+        }
+        req.admin = admin;
+        next();
+      } else {
+        res.status(401);
+        throw new Error('Not authorized, admin access required');
+      }
+    } catch (error) {
+      console.error('Admin token verification error:', error);
+      res.status(401);
+      throw new Error('Not authorized, token failed');
+    }
+  }
+
+  if (!token) {
+    res.status(401);
+    throw new Error('Not authorized, no token');
+  }
+});
+
+/**
  * @desc Admin middleware - Checks if the authenticated user is an admin
  */
 export const admin = (req, res, next) => {

@@ -11,19 +11,27 @@ const AddProduct = () => {
     category: '',
     price: '',
     description: '',
+    longDescription: '',
     stock: '',
-    details: {}
+    details: {},
+    warrantyPeriod: 'No Warranty',
+    discountPrice: ''
   });
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   const categories = [
     'Mobile Phone',
     'Mobile Accessories',
     'Preowned Phones',
-    'Laptops'
+    'Laptops',
+    'Phone Covers',
+    'Chargers'
   ];
 
   const categoryFields = {
@@ -110,6 +118,9 @@ const AddProduct = () => {
       formDataToSend.append('category', formData.category);
       formDataToSend.append('price', formData.price);
       formDataToSend.append('description', formData.description);
+      formDataToSend.append('longDescription', formData.longDescription);
+      formDataToSend.append('warrantyPeriod', formData.warrantyPeriod);
+      formDataToSend.append('discountPrice', formData.discountPrice);
       formDataToSend.append('stock', formData.stock);
       formDataToSend.append('details', JSON.stringify(formData.details));
 
@@ -117,7 +128,8 @@ const AddProduct = () => {
         formDataToSend.append('images', file);
       });
 
-      const response = await axios.post('http://localhost:5001/api/products', formDataToSend, {
+      // Use the API_BASE_URL here
+      const response = await axios.post(`${API_BASE_URL}/api/products`, formDataToSend, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -201,8 +213,45 @@ const AddProduct = () => {
               value={formData.description}
               onChange={handleInputChange}
               required
-              rows="4"
+              rows="3"
               className="form-textarea"
+            />
+          </div>
+          <div className="form-field" style={{ marginTop: '1rem' }}>
+            <label className="form-label">Long Description</label>
+            <textarea
+              name="longDescription"
+              value={formData.longDescription}
+              onChange={handleInputChange}
+              rows="6"
+              className="form-textarea"
+              placeholder="Enter a more detailed description (optional)"
+            />
+          </div>
+          <div className="form-field">
+            <label className="form-label">Warranty Period</label>
+            <select
+              name="warrantyPeriod"
+              value={formData.warrantyPeriod}
+              onChange={handleInputChange}
+              className="form-select"
+            >
+              <option value="No Warranty">No Warranty</option>
+              <option value="6 months">6 months</option>
+              <option value="1 year">1 year</option>
+              <option value="2 years">2 years</option>
+            </select>
+          </div>
+          <div className="form-field">
+            <label className="form-label">Discount/Offer Price</label>
+            <input
+              type="number"
+              name="discountPrice"
+              value={formData.discountPrice}
+              onChange={handleInputChange}
+              className="form-input"
+              placeholder="Enter offer price (optional)"
+              min="0"
             />
           </div>
         </div>
@@ -214,14 +263,38 @@ const AddProduct = () => {
               {categoryFields[formData.category].map(field => (
                 <div key={field.name} className="form-field">
                   <label className="form-label">{field.label}</label>
-                  <input
-                    type="text"
-                    name={field.name}
-                    value={formData.details[field.name] || ''}
-                    onChange={handleDetailChange}
-                    required
-                    className="form-input"
-                  />
+                  {field.name === 'color' ? (
+                    <>
+                      <input
+                        type="text"
+                        name="color"
+                        value={Array.isArray(formData.details.color) ? formData.details.color.join(', ') : (formData.details.color || '')}
+                        onChange={e => {
+                          const value = e.target.value;
+                          setFormData(prev => ({
+                            ...prev,
+                            details: {
+                              ...prev.details,
+                              color: value.split(',').map(c => c.trim()).filter(Boolean)
+                            }
+                          }));
+                        }}
+                        required
+                        className="form-input"
+                        placeholder="e.g. Red, Black, Gray"
+                      />
+                      <small>Enter multiple colors separated by commas</small>
+                    </>
+                  ) : (
+                    <input
+                      type="text"
+                      name={field.name}
+                      value={formData.details[field.name] || ''}
+                      onChange={handleDetailChange}
+                      required
+                      className="form-input"
+                    />
+                  )}
                 </div>
               ))}
             </div>

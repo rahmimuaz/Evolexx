@@ -19,6 +19,7 @@ import userRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import ToBeShipped from './models/ToBeShipped.js';
+import productRoutes from './routes/productRoutes.js';
 
 dotenv.config();
 
@@ -49,13 +50,8 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1);
   });
 
-// Product Routes (directly using controller functions)
-app.get('/api/products', getProducts);
-app.get('/api/products/category/:category', getProductsByCategory);
-app.get('/api/products/:id', getProduct);
-app.post('/api/products', upload.array('images', 5), createProduct);
-app.put('/api/products/:id', upload.array('images', 5), updateProduct);
-app.delete('/api/products/:id', deleteProduct);
+// Product Routes (use router, not direct controller functions)
+app.use('/api/products', productRoutes);
 
 // Use routers for modular routes
 app.use('/api/admin', adminRoutes);

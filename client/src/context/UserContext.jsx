@@ -3,8 +3,9 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const UserContext = createContext();
-
 export const useUser = () => useContext(UserContext);
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -21,7 +22,7 @@ export const UserProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const { data } = await axios.post(
-        'http://localhost:5001/api/users/login',
+        `${API_BASE_URL}/api/users/login`,
         { email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -38,7 +39,7 @@ export const UserProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       const { data } = await axios.post(
-        'http://localhost:5001/api/users',
+        `${API_BASE_URL}/api/users`,
         { name, email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -67,4 +68,4 @@ export const UserProvider = ({ children }) => {
       {children}
     </UserContext.Provider>
   );
-}; 
+};

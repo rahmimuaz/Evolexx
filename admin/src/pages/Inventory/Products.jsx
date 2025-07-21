@@ -9,15 +9,20 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [API_BASE_URL]); // Add API_BASE_URL to the dependency array
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/products');
+      // Use the API_BASE_URL for fetching products
+      const response = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(response.data);
     } catch (err) {
+      console.error("Error fetching products:", err); // Log the error for debugging
       setError('Error fetching products');
     } finally {
       setLoading(false);
@@ -25,16 +30,18 @@ const Products = () => {
   };
 
   const handleEdit = (productId) => {
-    navigate(`/EditProduct/${productId}`);
+    navigate(`/EditProduct/${productId}`); // Ensure this path matches your router configuration
   };
 
   const handleDelete = async (productId) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
-      await axios.delete(`http://localhost:5001/api/products/${productId}`);
+      // Use the API_BASE_URL for deleting a product
+      await axios.delete(`${API_BASE_URL}/api/products/${productId}`);
       setProducts(prev => prev.filter(p => p._id !== productId));
     } catch (err) {
-      alert('Error deleting product. Try again.');
+      console.error("Error deleting product:", err); // Log the error for debugging
+      alert('Error deleting product. Please try again.');
     }
   };
 
@@ -52,13 +59,6 @@ const Products = () => {
 
   return (
     <div className="products-container">
-      <div className="products-header-wrapper">
-        <div className="products-header-content">
-          <h1 className="products-title">Products</h1>
-          <p className="products-description">A list of all products in your store.</p>
-        </div>
-      </div>
-
       <div className="table-outer-wrapper">
         <div className="table-scroll-wrapper">
           <div className="table-inner-wrapper">
@@ -90,7 +90,15 @@ const Products = () => {
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           ${product.price?.toFixed(2) || 'N/A'}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{product.stock}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {product.stock === 0 ? (
+                            <span style={{ color: 'white', background: 'red', padding: '2px 8px', borderRadius: 4, fontWeight: 'bold' }}>Out of Stock</span>
+                          ) : product.stock < 5 ? (
+                            <span style={{ color: 'black', background: 'yellow', padding: '2px 8px', borderRadius: 4, fontWeight: 'bold' }}>Low Stock ({product.stock})</span>
+                          ) : (
+                            product.stock
+                          )}
+                        </td>
                         <td className="whitespace-nowrap py-4 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
                             onClick={() => handleEdit(product._id)}

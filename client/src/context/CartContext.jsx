@@ -4,8 +4,9 @@ import { toast } from 'react-toastify';
 import { useUser } from './UserContext';
 
 const CartContext = createContext();
-
 export const useCart = () => useContext(CartContext);
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -18,22 +19,22 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-        try {
-          const config = {
-            headers: {
+      try {
+        const config = {
+          headers: {
             Authorization: `Bearer ${user.token}`,
-            },
-          };
-          const { data } = await axios.get('http://localhost:5001/api/users/cart', config);
-          setCartItems(data);
-        } catch (error) {
-          console.error('Error fetching cart items:', error);
+          },
+        };
+        const { data } = await axios.get(`${API_BASE_URL}/api/users/cart`, config);
+        setCartItems(data);
+      } catch (error) {
+        console.error('Error fetching cart items:', error);
         toast.error(error.response?.data?.message || 'Failed to load cart.');
       }
     };
 
     fetchCartItems();
-  }, [user]); 
+  }, [user]);
 
   const addToCart = async (product, quantity) => {
     if (!user) {
@@ -49,7 +50,7 @@ export const CartProvider = ({ children }) => {
         },
       };
       const { data } = await axios.post(
-        'http://localhost:5001/api/users/cart',
+        `${API_BASE_URL}/api/users/cart`,
         { productId: product._id, quantity },
         config
       );
@@ -73,7 +74,7 @@ export const CartProvider = ({ children }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.delete(`http://localhost:5001/api/users/cart/${productId}`, config);
+      const { data } = await axios.delete(`${API_BASE_URL}/api/users/cart/${productId}`, config);
       setCartItems(data);
       toast.success('Item removed from cart.');
     } catch (error) {
@@ -101,7 +102,7 @@ export const CartProvider = ({ children }) => {
         },
       };
       const { data } = await axios.put(
-        'http://localhost:5001/api/users/cart',
+        `${API_BASE_URL}/api/users/cart`,
         { productId, quantity: newQuantity },
         config
       );
@@ -125,8 +126,8 @@ export const CartProvider = ({ children }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      await axios.delete('http://localhost:5001/api/users/cart', config);
-    setCartItems([]);
+      await axios.delete(`${API_BASE_URL}/api/users/cart`, config);
+      setCartItems([]);
       toast.success('Cart cleared successfully.');
     } catch (error) {
       console.error('Error clearing cart:', error);
@@ -135,8 +136,10 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}>
+    <CartContext.Provider
+      value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}
+    >
       {children}
     </CartContext.Provider>
   );
-}; 
+};

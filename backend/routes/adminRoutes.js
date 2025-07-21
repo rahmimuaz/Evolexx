@@ -1,6 +1,8 @@
 // routes/adminRoutes.js
 import express from 'express';
-import { loginAdmin, registerAdmin } from '../controllers/adminController.js'; // Import both controllers
+import { loginAdmin, registerAdmin, verifyToken } from '../controllers/adminController.js';
+import { getAllUsers, deleteUser } from '../controllers/userController.js';
+import { adminProtect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -17,6 +19,27 @@ router.post('/login', loginAdmin);
  * @access Public
  */
 router.post('/register', registerAdmin);
+
+/**
+ * @route GET /api/admin/verify-token
+ * @desc Verify admin token
+ * @access Private
+ */
+router.get('/verify-token', adminProtect, verifyToken);
+
+/**
+ * @route GET /api/admin/users
+ * @desc Get all users (admin only)
+ * @access Private
+ */
+router.get('/users', adminProtect, getAllUsers);
+
+/**
+ * @route DELETE /api/admin/users/:id
+ * @desc Delete a user (admin only)
+ * @access Private
+ */
+router.delete('/users/:id', adminProtect, deleteUser);
 
 // You can add more admin-specific routes here, e.g.:
 // router.get('/dashboard-stats', protect, adminMiddleware, getDashboardStats);
