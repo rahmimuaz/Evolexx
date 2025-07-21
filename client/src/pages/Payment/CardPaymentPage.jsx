@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import './CardPaymentPage.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 const CardPaymentPage = () => {
   const navigate = useNavigate();
   const [cardNumber, setCardNumber] = useState('');
@@ -11,25 +13,45 @@ const CardPaymentPage = () => {
   const [cardHolderName, setCardHolderName] = useState('');
   const [saveCard, setSaveCard] = useState(false);
 
-  const [savedCards, setSavedCards] = useState([
+  const [savedCards] = useState([
     { id: '1', last4: '1234', brand: 'Visa', expiry: '12/25' },
     { id: '2', last4: '5678', brand: 'MasterCard', expiry: '07/26' },
   ]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!cardNumber || !expiryDate || !cvv || !cardHolderName) {
       toast.error('Please fill in all fields');
       return;
     }
 
     toast.info('Processing payment...');
-    
-    setTimeout(() => {
-      toast.success('Payment successful!');
-      navigate('/checkout');
-    }, 2000);
+
+    try {
+      // Example API call to process payment - replace with your real endpoint & logic
+      /*
+      const response = await fetch(`${API_BASE_URL}/api/payments/card`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardNumber, expiryDate, cvv, cardHolderName, saveCard }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Payment failed');
+      }
+      */
+
+      // Simulated delay for demo purposes
+      setTimeout(() => {
+        toast.success('Payment successful!');
+        navigate('/checkout');
+      }, 2000);
+
+    } catch (error) {
+      toast.error(error.message || 'Payment failed. Please try again.');
+    }
   };
 
   const selectSavedCard = (card) => {

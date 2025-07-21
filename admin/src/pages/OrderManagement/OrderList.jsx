@@ -26,6 +26,9 @@ const OrderList = () => {
   // State to manage expanded order rows
   const [expandedOrders, setExpandedOrders] = useState({});
 
+  // Define the API base URL from environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -46,7 +49,8 @@ const OrderList = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5001/api/orders', {
+      // Use API_BASE_URL for fetching orders
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -67,7 +71,7 @@ const OrderList = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, API_BASE_URL]); // Add API_BASE_URL to dependencies
 
   useEffect(() => {
     fetchOrders();
@@ -79,14 +83,15 @@ const OrderList = () => {
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
     const pendingOrders = orders.filter(order => order.status === 'pending').length;
     const completedOrders = orders.filter(order => order.status === 'delivered').length;
-    const pendingPayments = orders.filter(order => order.paymentStatus === 'pending').length;
+    // Removed pendingPayments as it was not explicitly used in the stats display
+    // const pendingPayments = orders.filter(order => order.paymentStatus === 'pending').length;
 
     return {
       totalOrders,
       totalRevenue,
       pendingOrders,
       completedOrders,
-      pendingPayments
+      // pendingPayments
     };
   };
 
@@ -98,7 +103,8 @@ const OrderList = () => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:5001/api/orders/${orderId}/status`, {
+      // Use API_BASE_URL for updating order status
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +150,8 @@ const OrderList = () => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:5001/api/orders/${orderId}/payment`, {
+      // Use API_BASE_URL for updating payment status
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/payment`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -181,7 +188,8 @@ const OrderList = () => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:5001/api/orders/${orderToDelete}`, {
+      // Use API_BASE_URL for deleting order
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderToDelete}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -526,6 +534,7 @@ const OrderList = () => {
                         <option value="pending">Pending</option>
                         <option value="accepted">Accept</option>
                         <option value="declined">Decline</option>
+                        {/* Add other status options as needed, e.g., 'shipped', 'delivered' if relevant for this view */}
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
@@ -576,8 +585,7 @@ const OrderList = () => {
                         <div className="expanded-details-content">
                           <div className="detail-group">
                             <strong>Order Date:</strong>{' '}
-                            {new Date(order.createdAt).toLocaleDateString()}{' '}
-                            {new Date(order.createdAt).toLocaleTimeString()}
+                            {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </div>
                           <div className="detail-group">
                             <strong>User Email:</strong>{' '}
@@ -601,7 +609,7 @@ const OrderList = () => {
                               {order.orderItems && order.orderItems.length > 0 ? (
                                 order.orderItems.map((item, idx) => (
                                   <li key={idx}>
-                                    {item.product ? `${item.product.name}` : 'Unknown Product'} (x{item.quantity})
+                                    {item.product ? `${item.product.name}` : 'Unknown Product'} (x{item.quantity}) - ${item.price?.toFixed(2)} each
                                   </li>
                                 ))
                               ) : (
@@ -640,7 +648,7 @@ const OrderList = () => {
                                 {order.bankTransferProof.match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
                                   <div className="proof-image-preview">
                                     <img
-                                      src={order.bankTransferProof}
+                                      src={`${API_BASE_URL}/${order.bankTransferProof.replace(/^\//, '')}`} // Use API_BASE_URL
                                       alt="Bank Transfer Proof"
                                       className="proof-thumbnail"
                                       onError={(e) => {
@@ -654,18 +662,23 @@ const OrderList = () => {
                                   </div>
                                 )}
                                 <a
-                                  href={order.bankTransferProof}
+                                  href={`${API_BASE_URL}/${order.bankTransferProof.replace(/^\//, '')}`} // Use API_BASE_URL
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="proof-link"
                                   title="View/Download Proof"
-                                  onClick={(e) => {
-                                    fetch(order.bankTransferProof, { method: 'HEAD' })
-                                      .catch(err => {
-                                        console.error('Proof URL not accessible:', err);
+                                  onClick={async (e) => {
+                                    try {
+                                      const res = await fetch(`${API_BASE_URL}/${order.bankTransferProof.replace(/^\//, '')}`, { method: 'HEAD' });
+                                      if (!res.ok) {
                                         e.preventDefault();
-                                        alert('Proof file not accessible. Please check the URL.');
-                                      });
+                                        alert('Proof file not accessible. It might have been moved or deleted.');
+                                      }
+                                    } catch (err) {
+                                      console.error('Error checking proof URL:', err);
+                                      e.preventDefault();
+                                      alert('Network error or proof file not accessible. Please try again later.');
+                                    }
                                   }}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -674,7 +687,7 @@ const OrderList = () => {
                                   {order.bankTransferProof.match(/\.pdf$/i) ? 'View PDF' : 'View Proof'}
                                 </a>
                                 <a
-                                  href={order.bankTransferProof}
+                                  href={`${API_BASE_URL}/${order.bankTransferProof.replace(/^\//, '')}`} // Use API_BASE_URL
                                   download
                                   className="proof-download-link"
                                   title="Download File"
