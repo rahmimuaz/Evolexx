@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { useCart } from '../../context/CartContext';
@@ -21,6 +21,8 @@ const Navbar = () => {
   const { user, logout } = useUser();
   const { cartItems } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,26 +32,42 @@ const Navbar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState(null);
-  const navigate = useNavigate();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
-  // Define the API base URL from environment variables
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-  const toggleSearch = () => {
-    setSearchOpen(!searchOpen);
-    // Clear search state when closing
-    if (searchOpen) {
-      setSearchQuery('');
-      setSearchResults([]);
-      setSearchError(null);
+  const dropdownRef = useRef(null);
+  const menuRef = useRef(null); // NEW
+
+  // 🔁 Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // 🔁 Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutsideMenu = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutsideMenu);
     }
-  };
+    return () => document.removeEventListener('mousedown', handleClickOutsideMenu);
+  }, [menuOpen]);
+
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
-  // Debounced search
-  React.useEffect(() => {
+  useEffect(() => {
     if (!searchQuery) {
       setSearchResults([]);
       setSearchError(null);
@@ -57,11 +75,9 @@ const Navbar = () => {
     }
     setSearchLoading(true);
     const delayDebounce = setTimeout(() => {
-      // Use the API_BASE_URL here
-      fetch(`${API_BASE_URL}/api/products/search?query=` + encodeURIComponent(searchQuery))
+      fetch(`${API_BASE_URL}/api/products/search?query=${encodeURIComponent(searchQuery)}`)
         .then(res => res.json())
         .then(data => {
-          console.log('Search response:', data);
           setSearchResults(Array.isArray(data) ? data : []);
           setSearchError(null);
         })
@@ -69,11 +85,11 @@ const Navbar = () => {
         .finally(() => setSearchLoading(false));
     }, 350);
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery, API_BASE_URL]); // Add API_BASE_URL to dependency array
+  }, [searchQuery, API_BASE_URL]);
 
   const handleSearchSelect = (productId) => {
-    setSearchOpen(false); // closes desktop search bar
-    setMobileSearchOpen(false); // closes mobile overlay
+    setSearchOpen(false);
+    setMobileSearchOpen(false);
     setSearchQuery('');
     setSearchResults([]);
     navigate(`/products/${productId}`);
@@ -81,14 +97,13 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      {/* Mobile Search Overlay */}
       {mobileSearchOpen && (
         <div className="mobile-search-overlay">
           <div className="search-input-wrapper-inner">
             <span className="search-input-icon"><FaSearch size={18} /></span>
             <input
               type="text"
-              placeholder="Search or type URL"
+              placeholder="Search.."
               className="mobile-search-input"
               autoFocus
               value={searchQuery}
@@ -96,7 +111,12 @@ const Navbar = () => {
             />
             <button
               className="mobile-search-cancel"
-              onClick={() => { setMobileSearchOpen(false); setSearchQuery(''); setSearchResults([]); setSearchError(null); }}
+              onClick={() => {
+                setMobileSearchOpen(false);
+                setSearchQuery('');
+                setSearchResults([]);
+                setSearchError(null);
+              }}
             >
               Cancel
             </button>
@@ -114,10 +134,17 @@ const Navbar = () => {
                   key={product._id}
                   onClick={() => handleSearchSelect(product._id)}
                 >
-                  <img src={product.images?.[0]} alt={product.name} className="search-suggestion-img" onError={(e) => { e.target.onerror = null; e.target.src = '/logo192.png'; }} />
+                  <img
+                    src={product.images?.[0]}
+                    alt={product.name}
+                    className="search-suggestion-img"
+                    onError={(e) => { e.target.onerror = null; e.target.src = '/logo192.png'; }}
+                  />
                   <div className="search-suggestion-info">
                     <div className="search-suggestion-name">{product.name}</div>
-                    <div className="search-suggestion-price">Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</div>
+                    <div className="search-suggestion-price">
+                      Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -125,19 +152,21 @@ const Navbar = () => {
           )}
         </div>
       )}
-      {/* Main Navbar (hidden on mobile search open) */}
+
       <div className="navbar-container" style={{ display: mobileSearchOpen ? 'none' : undefined }}>
-        {/* Hamburger (mobile) */}
         <button className="hamburger-button" onClick={toggleMenu} aria-label="Toggle menu">
           <FaBars />
         </button>
-        {/* Left Section */}
+
         <div className="navbar-left">
           <Link to="/" className="navbar-brand">EVOLEXX</Link>
         </div>
 
-        {/* Center Section */}
-<div className={`navbar-center ${menuOpen ? 'open' : ''} ${searchOpen ? 'shifted-left' : ''}`}>
+        {/* ✅ Mobile dropdown with ref */}
+        <div
+          ref={menuRef}
+          className={`navbar-center ${menuOpen ? 'open' : ''} ${searchOpen ? 'shifted-left' : ''}`}
+        >
           <div className="navbar-links">
             <Link to="/" className={`navbar-link ${location.pathname === '/' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Home</Link>
             <Link to="/category/Mobile%20Phone" className={`navbar-link ${location.pathname === '/category/Mobile%20Phone' ? 'active-link' : ''}`} onClick={() => setMenuOpen(false)}>Brand New</Link>
@@ -148,9 +177,7 @@ const Navbar = () => {
 
         <div className="navbar-divider" />
 
-        {/* Right Section */}
         <div className="navbar-right">
-          {/* Desktop: search icon or search bar inline, left of cart/profile */}
           {window.innerWidth > 768 ? (
             !searchOpen ? (
               <button
@@ -161,7 +188,7 @@ const Navbar = () => {
                 <FaSearch size={18} />
               </button>
             ) : (
-            <div className={`search-bar-integrated ${searchOpen ? 'visible' : ''}`}>
+              <div className={`search-bar-integrated ${searchOpen ? 'visible' : ''}`}>
                 <div className="search-input-wrapper-inner">
                   <span className="search-input-icon"><FaSearch size={18} /></span>
                   <input
@@ -194,10 +221,17 @@ const Navbar = () => {
                         key={product._id}
                         onClick={() => handleSearchSelect(product._id)}
                       >
-                        <img src={product.images?.[0]} alt={product.name} className="search-suggestion-img" onError={(e) => { e.target.onerror = null; e.target.src = '/logo192.png'; }} />
+                        <img
+                          src={product.images?.[0]}
+                          alt={product.name}
+                          className="search-suggestion-img"
+                          onError={(e) => { e.target.onerror = null; e.target.src = '/logo192.png'; }}
+                        />
                         <div className="search-suggestion-info">
                           <div className="search-suggestion-name">{product.name}</div>
-                          <div className="search-suggestion-price">Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</div>
+                          <div className="search-suggestion-price">
+                            Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -206,7 +240,6 @@ const Navbar = () => {
               </div>
             )
           ) : (
-            // Mobile: always show search icon, triggers overlay
             <button
               className="search-icon-button"
               onClick={() => setMobileSearchOpen(true)}
@@ -216,7 +249,6 @@ const Navbar = () => {
             </button>
           )}
 
-          {/* Cart icon (visible on all screen sizes) */}
           {user && (
             <Link to="/cart" className="cart-button">
               <FaShoppingCart size={18} />
@@ -224,19 +256,22 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* Profile Dropdown (visible on all screen sizes) */}
-          <div className="profile-dropdown-wrapper">
+          {/* Profile dropdown */}
+          <div className="profile-dropdown-wrapper" ref={dropdownRef}>
             <button className="profile-icon-button" onClick={toggleDropdown} aria-label="Toggle profile menu">
               <FaUserCircle size={22} />
             </button>
             <div className={`dropdown-menu ${dropdownOpen ? 'show-dropdown' : ''}`}>
               {user ? (
                 <>
-                
                   <span className="dropdown-text-1">Signed in as <span className="user-name-dropdown-text">{user.name}</span></span>
                   <Link to="/settings" className="dropdown-link" onClick={() => setDropdownOpen(false)}>
                     <FaCog className="dropdown-icon" />
                     Settings
+                  </Link>
+                  <Link to="/my-orders" className="dropdown-link" onClick={() => setDropdownOpen(false)}>
+                    <FaShoppingCart className="dropdown-icon" />
+                    My Orders
                   </Link>
                   <button className="logout-dropdown-button" onClick={logout}>
                     <FaSignOutAlt className="dropdown-icon" />
@@ -245,7 +280,7 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <span className="dropdown-text">Wellcome</span>
+                  <span className="dropdown-text">Welcome</span>
                   <button className="dropdown-link" onClick={() => { setLoginModalOpen(true); setDropdownOpen(false); }}>
                     <FaSignInAlt className="dropdown-icon" />
                     Login
@@ -260,11 +295,27 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Login/Register Modals */}
       <Modal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} title="Login">
-        <Login asModal onSuccess={() => setLoginModalOpen(false)} onSwitchRegister={() => { setLoginModalOpen(false); setRegisterModalOpen(true); }} />
+        <Login
+          asModal
+          onSuccess={() => setLoginModalOpen(false)}
+          onSwitchRegister={() => {
+            setLoginModalOpen(false);
+            setRegisterModalOpen(true);
+          }}
+        />
       </Modal>
       <Modal isOpen={registerModalOpen} onClose={() => setRegisterModalOpen(false)} title="Register">
-        <Register asModal onSuccess={() => setRegisterModalOpen(false)} onSwitchLogin={() => { setRegisterModalOpen(false); setLoginModalOpen(true); }} />
+        <Register
+          asModal
+          onSuccess={() => setRegisterModalOpen(false)}
+          onSwitchLogin={() => {
+            setRegisterModalOpen(false);
+            setLoginModalOpen(true);
+          }}
+        />
       </Modal>
     </nav>
   );

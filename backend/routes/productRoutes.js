@@ -14,6 +14,8 @@ import {
   searchProducts
 } from '../controllers/productController.js';
 
+import { protect } from '../middleware/authMiddleware.js'; 
+
 const router = express.Router();
 
 // Create a new product with image upload (Cloudinary)
@@ -38,7 +40,7 @@ router.put('/:id', upload.array('images', 5), updateProduct);
 router.delete('/:id', deleteProduct);
 
 // Add a review to a product
-router.post('/:id/reviews', addReview);
+router.post('/:id/reviews', protect, addReview); // <--- THIS IS THE CRUCIAL CHANGE!
 // Get all reviews for a product
 router.get('/:id/reviews', getReviews);
 

@@ -1,0 +1,40 @@
+
+.product-section2 {
+  height: 81vh;
+  padding: 1rem 2rem;
+  text-align: center;
+  background-color: #ffffff;
+  margin-bottom: 100px;
+}
+/* Center the heading in the middle of the page */
+.product-section2 h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-top: 20px;
+  position: relative;
+  display: block; /* Ensures it takes full width for margin auto to work */
+  text-align: center;
+  flex-grow: 1; /* Allows the heading to take available space */
+}
+
+
+/* Pagination dots container */
+.pagination-dots2 {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 40px;
+  margin-bottom: 50px;
+}
+
+
+
+@media (max-width: 768px) {
+
+  .product-section2 {
+    padding: 0rem 2rem; /* Adjust padding for smaller screens */
+  }
+    .product-section2 h2{
+   font-size: 1.5rem;
+  }
+}

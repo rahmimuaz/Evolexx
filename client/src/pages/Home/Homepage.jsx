@@ -5,6 +5,8 @@ import axios from 'axios';
 import { FaShippingFast, FaRedoAlt, FaSlidersH } from 'react-icons/fa';
 import { HiShieldCheck } from 'react-icons/hi';
 import Footer from '../../components/Footer/Footer';
+import bannerImage from '../Home/banner1.jpg';
+
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -18,12 +20,7 @@ const Homepage = () => {
 
   const productsPerPage = 12;
   const productSectionRef = useRef(null);
-  const headingRef = useRef(null); 
-
-  const originalBannerImages = ['/banner1.jpg', '/banner2.jpg', '/banner3.jpg'];
-  const bannerImages = [...originalBannerImages, originalBannerImages[0]];
-  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(true);
+  const headingRef = useRef(null);
 
   const sortOptions = [
     { value: 'price-asc', label: 'Price: Low to High' },
@@ -35,35 +32,6 @@ const Homepage = () => {
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [brandFilter, setBrandFilter] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
-
-  useEffect(() => {
-    fetchProducts();
-
-    const bannerInterval = setInterval(() => {
-      setIsTransitioning(true);
-      setCurrentBannerIndex((prevIndex) =>
-        prevIndex === bannerImages.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 4000);
-
-    const transitionEndHandler = () => {
-      if (!isTransitioning && currentBannerIndex === 0) {
-        setTimeout(() => setIsTransitioning(true), 50);
-      }
-    };
-
-    const bannerSlider = document.querySelector('.banner-slider');
-    if (bannerSlider) {
-      bannerSlider.addEventListener('transitionend', transitionEndHandler);
-    }
-
-    return () => {
-      clearInterval(bannerInterval);
-      if (bannerSlider) {
-        bannerSlider.removeEventListener('transitionend', transitionEndHandler);
-      }
-    };
-  }, [bannerImages.length, isTransitioning, currentBannerIndex]);
 
   useEffect(() => {
     fetchProducts();
@@ -162,48 +130,50 @@ const Homepage = () => {
     setCurrentPage(1);
   };
 
+  const getAverageRating = (reviews = []) => {
+  if (!reviews.length) return 0;
+  const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+  return total / reviews.length;
+};
+
+
   if (loading) return <div className="loader">Loading products...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="home">
+      {/* Static Banner Section */}
       <section className="banner">
-        <div
-          className="banner-slider"
-          style={{
-            transform: `translateX(-${currentBannerIndex * 100}%)`,
-            transition: isTransitioning ? 'transform 1s ease-in-out' : 'none',
-          }}
-        >
-          {bannerImages.map((image, index) => (
-            <img key={index} src={image} alt={`Hero Banner ${index + 1}`} className="banner-image" />
-          ))}
-        </div>
+       <img src={bannerImage} className="banner-image" alt="Homepage Banner" />
       </section>
 
       <section className="features">
         <div className="feature"><FaShippingFast /><div className="feature-text"><h3>Fast & Free Shipping</h3><p>Every single order ships for free.</p></div></div>
-        <div className="feature"><FaRedoAlt /><div className="feature-text"><h3>30 Days Returns</h3><p>Product returns accepted within 30 days.</p></div></div>
+        <div className="feature"><FaRedoAlt /><div className="feature-text"><h3>7 Days Returns</h3><p>Product returns accepted within 30 days.</p></div></div>
         <div className="feature"><HiShieldCheck /><div className="feature-text"><h3>Top Quality Products</h3><p>We always provide high quality products.</p></div></div>
       </section>
 
       <section className="category-section">
         <div className="category-grid-custom">
           <Link to="/category/Mobile%20Phone" className="category-card tall">
-            <img src="/category-accessories.jpg" alt="Sound System" />
+            <img src="/BrandNewPhone.jpg" alt="Sound System" />
+            <div className="overlay-blur-bg"></div>
             <div className="overlay-text bottom"><p>Brand New Phone</p></div>
           </Link>
           <Link to="/category/Preowned%20Phones" className="category-card square">
-            <img src="/category-accessories.jpg" alt="Smart Watch" />
+            <img src="/PreOwnedPhone.jpg" alt="Smart Watch" />
+            <div className="overlay-blur-bg"></div>
             <div className="overlay-text bottom"><p>Pre Owned Phone</p></div>
           </Link>
           <Link to="/category/Laptops" className="category-card square">
-            <img src="/category-accessories.jpg" alt="Tablet" />
+            <img src="/Laptop.jpg" alt="Tablet" />
+            <div className="overlay-blur-bg"></div>
             <div className="overlay-text bottom"><p>Laptop</p></div>
           </Link>
           <Link to="/category/Mobile%20Accessories" className="category-card wide">
-            <img src="/category-accessories.jpg" alt="Game Controller" />
-            <div className="overlay-text bottom"><p>Mobile Accessories</p></div>
+            <img src="/MobileAccessories.jpg" alt="Game Controller" />
+            <div className="overlay-blur-bg"></div>
+            <div className="overlay-text bottom"><p>Accessories</p></div>
           </Link>
         </div>
       </section>
@@ -276,24 +246,28 @@ const Homepage = () => {
               return (
                 <Link to={`/products/${product._id}`} className="product-card" key={product._id}>
                   <img src={imageUrl} alt={product.name} onError={(e) => (e.target.src = '/logo192.png')} />
-                  <h3>{product.name}</h3>
-                  <p>{product.description}</p>
-                  <div className="star-rating">
+                  <div className="product-card-content">
+                    <h3 className="product-name">{product.name}</h3>
+                    <p className="product-description">{product.description}</p>
+                   <div className="star-rating">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <span key={star}>{product.rating >= star ? '★' : '☆'}</span>
-                    ))}
-                  </div>
-                  <div className="card-footer">
-                    <p className="price">
-                      Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                    </p>
-                    {product.price && (
-                      <p className="koko-pay">
-                        or pay in 3 × Rs.{" "}
-                        {kokoInstallment.toLocaleString("en-LK", { minimumFractionDigits: 2 })}{" "}
-                        with <img src="/koko.webp" alt="Koko" className="koko-logo" />
+                      <span key={star}>
+                       {getAverageRating(product.reviews) >= star ? '★' : '☆'}
+                      </span>
+                      ))}
+                    </div>
+                    <div className="card-footer">
+                      <p className="price">
+                        Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                       </p>
-                    )}
+                      {product.kokoPay && product.price && (
+                        <p className="koko-pay">
+                           pay in 3 × Rs.{" "}
+                          {kokoInstallment.toLocaleString("en-LK", { minimumFractionDigits: 2 })}{" "}
+                          with <img src="/koko.webp" alt="Koko" className="koko-logo" />
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </Link>
               );
