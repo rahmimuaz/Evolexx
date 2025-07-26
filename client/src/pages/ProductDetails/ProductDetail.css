@@ -30,18 +30,24 @@
 
 .main-image-container {
   width: 100%;
+  aspect-ratio: 1 / 1; /* Optional: Makes it a square */
   overflow: hidden;
+  
 }
 
 .main-image {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover; /* Ensures the image fills the container and keeps it uniform */
+  display: block;
+
 }
 
 .thumbnail-container {
   display: flex;
   gap: 15px;
   margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 .thumbnail-image {
@@ -49,13 +55,12 @@
   height: 60px;
   object-fit: cover;
   border: 1px solid #ccc;
-  border-radius: 4px;
   cursor: pointer;
   transition: border 0.3s;
 }
 
 .thumbnail-image.selected {
-  border: 2px solid black;
+  border: 2px solid #444;
 }
 
 .product-info-section {
@@ -65,16 +70,17 @@
 }
 
 .product-name-section {
-  margin-top: 10px;
+  margin-top: 15px;
   font-size: 24px;
-  font-weight: 300;
+  font-weight: 320;
   margin-bottom: 20px;
-  color: black;
+  color: #333;
 }
 
 .product-tagline {
-  color: #666;
-  font-size: 18px;
+  color: #888;
+  font-weight: 300;
+  font-size: 16px;
   margin-bottom: 10px;
 }
 
@@ -93,7 +99,7 @@
   align-items: center;
   margin-top: 30px;
   margin-bottom: 40px;
-  color: #000;
+  color: #555;
   gap: 1px;
 }
 
@@ -184,9 +190,17 @@
 }
 
 .stock-info {
-  margin-top: 5px;
-  color: #666;
+  margin-top: 10px;
+  color: #888;
   font-size: 14px;
+  margin-right: 6px;
+}
+.stock-status-section{
+ text-align: center;
+ margin-right: 30px;
+ margin-bottom: 10px;
+ font-size: 1rem;
+
 }
 
 /* === Purchase Buttons === */
@@ -250,9 +264,10 @@
 
 .info-block-title {
   margin-top: 20px;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 30px;
+  font-size: 18px;
+  font-weight: 550;
+  margin-bottom: 10px;
+  color: #333;
 }
 
 .info-list {
@@ -268,19 +283,35 @@
 }
 
 .info-list-item svg {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   flex-shrink: 0;
-  color: #000;
+  color: #444;
+  margin-left: 10px;
 }
 
-.info-list-item p {
+.font-semibold {
+  color:#555 ;
+  font-weight: 400;
   font-size: 15px;
-  margin: 0;
 }
 
 .sub-text {
-  font-size: 12px;
+  margin-top: 3px;
+  font-size: 13px;
+  color: #888;
+  margin-left: 3px;
+}
+
+.info-block-title1 {
+  margin-top: 15px;
+  font-size: 18px;
+  font-weight: 550;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.no{
   color: #888;
 }
 
@@ -300,7 +331,7 @@
 .product-description-section {
   width: 93%;
   background-color: #ffffff;
-  padding: 10px;
+  padding: 24px;
   color: #333;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -311,6 +342,7 @@
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .product-description-section h3 {
@@ -321,7 +353,7 @@
 }
 
 .product-description-section p {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
   margin-bottom: 10px;
 }
@@ -339,15 +371,17 @@
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 10px;
+  text-align: center;
 
 }
 .product-specifications-section ul {
   list-style-type: none;
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }   
 .product-specifications-section li {
-  font-size: 15px;
-  margin-bottom: 8px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  margin-left: 20px;
 }
 
 
@@ -365,7 +399,7 @@
 }
 
 .product-reviews-section h2 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -457,14 +491,14 @@
     padding: 15px 25px;
     cursor: pointer;
     font-weight: bold;
-    color: #5e5e5e;
-    border-bottom: 2px solid transparent;
+    color: #333;
+    border-bottom: 1px solid transparent;
     transition: all 0.3s ease;
     font-size: 1.1em;
 }
 
 .tab-item:hover {
-    color: #9c9592;
+    color: #666;
 }
 
 .tab-item.active {
@@ -524,7 +558,7 @@
 .filter-button {
     background-color: #f0f0f0;
     border: 1px solid #ddd;
-    border-radius: 20px;
+    border-radius: 5px;
     padding: 8px 15px;
     cursor: pointer;
     font-size: 0.9em;
@@ -538,9 +572,8 @@
 }
 
 .filter-button.active {
-    background-color: #ff4700;
+    background-color: #000000;
     color: #fff;
-    border-color: #ff4700;
 }
 
 
@@ -693,11 +726,11 @@
 }
 
 .submit-review-btn {
-    background-color: #ff4700;
+    background-color: #000000;
     color: #fff;
     padding: 10px 20px;
     border: none;
-    border-radius: 25px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
     font-weight: bold;
@@ -705,7 +738,7 @@
 }
 
 .submit-review-btn:hover:not(:disabled) {
-    background-color: #e63e00;
+    background-color: #444;
 }
 
 .submit-review-btn:disabled {
@@ -718,9 +751,6 @@
     margin-top: 10px;
     font-size: 0.9em;
 }
-
-/* === Base Styles (Already Provided) === */
-/* All your existing styles remain unchanged */
 
 /* === Responsive Styles === */
 @media (max-width: 1200px) {
@@ -807,7 +837,7 @@
   .product-specifications-section,
   .product-reviews-section,
   .product-tabs-navigation {
-    width: 100%;
+    width: 98%;
     padding: 5px;
   }
 
@@ -823,6 +853,28 @@
   .review-form textarea {
     font-size: 0.85em;
   }
+  .product-reviews-section h2 {
+    font-size: 0.875em;
+    margin-bottom: 15px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.product-reviews-section h2 .stars-in-reviews span {
+    color: #FFD700;
+    font-size: 1em;
+}
+.tab-item {
+    padding: 15px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
 }
 
 @media (max-width: 480px) {
