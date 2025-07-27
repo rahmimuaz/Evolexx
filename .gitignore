@@ -72,3 +72,4 @@ uploads/
 tmp/
 temp/
 largefolder/
+client/node_modules/
