@@ -192,8 +192,7 @@
   justify-content: space-between; /* Spreads out items */
   align-items: center;
   padding: 0 1rem;
-  margin-bottom: 3rem;
-  /* Centering the heading and pushing the icon to the right */
+  margin-bottom: 1rem;
   position: relative; /* For absolute positioning of the icon if needed */
 }
 
@@ -209,12 +208,15 @@
 
 /* Filter toggle icon styling */
 .filter-toggle-icon {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   cursor: pointer;
   color: #000;
   transition: color 0.3s ease;
   user-select: none;
-  margin-left: auto; /* Pushes the icon to the far right */
+  position: absolute; /* Allows it to be positioned relative to the heading */
+  right: 3rem; /* Adjusts the position to the right */
+
+ /* Pushes the icon to the far right */
 }
 
 .filter-toggle-icon:hover {
@@ -676,6 +678,9 @@
     padding: 0 0.5rem; /* Adjust padding */
     margin-bottom: 2rem; /* Adjust margin */
   }
+   .filter-toggle-icon {
+  font-size: 1rem;
+}
 }
 
 
@@ -724,4 +729,7 @@
     margin-left:2px; /* Adjust margin for smaller screens */
     width: 20%; /* Adjust width to make logo smaller */
   }
+  .filter-toggle-icon {
+  font-size: 1rem;
+}
 }

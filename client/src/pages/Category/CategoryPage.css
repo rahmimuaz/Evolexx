@@ -10,7 +10,7 @@
 .product-section2 h2 {
   font-size: 2rem;
   font-weight: 800;
-  margin-top: 20px;
+  margin-top: 10px;
   position: relative;
   display: block; /* Ensures it takes full width for margin auto to work */
   text-align: center;
