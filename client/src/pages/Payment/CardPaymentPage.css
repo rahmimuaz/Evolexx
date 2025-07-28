@@ -1,0 +1,399 @@
+/* General Page Container */
+.card-payment-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to top, not center vertically */
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background-color: #f0f2f5; /* Light background for the page */
+  font-family: 'Inter', sans-serif;
+}
+
+/* Payment Card Container */
+.payment-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 600px; /* Max width for the card */
+  box-sizing: border-box; /* Include padding in width */
+}
+
+/* Main Title */
+.main-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.8rem;
+}
+
+/* Saved Cards Section */
+.saved-cards-section {
+  margin-bottom: 2rem;
+}
+
+.saved-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Stack saved cards */
+  gap: 1rem;
+}
+
+.saved-card-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.saved-card-item:hover {
+  background-color: #eef7ff;
+  border-color: #a7d9ff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.saved-card-brand-last4 {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.3rem;
+  font-size: 1rem;
+}
+
+.saved-card-expiry {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.saved-card-icon {
+  width: 24px;
+  height: 24px;
+  color: #007bff; /* Blue checkmark */
+}
+
+/* Form Fields */
+.new-card-form {
+  margin-top: 1.5rem;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid #ddd;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  color: #333;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box; /* Ensure padding doesn't add to width */
+}
+
+.form-input::placeholder {
+  color: #aaa;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Grid for Expiry/CVV */
+.grid-cols-2-gap-6 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem; /* Equivalent to 24px */
+  margin-bottom: 1.5rem; /* Add margin bottom if this is a standalone grid */
+}
+
+/* Checkbox */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.checkbox-input {
+  margin-right: 0.8rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  appearance: none; /* Hide default checkbox */
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkbox-input:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.checkbox-input:checked::after {
+  content: '✔'; /* Checkmark character */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.9rem;
+}
+
+.checkbox-label {
+  font-size: 0.95rem;
+  color: #555;
+  cursor: pointer;
+}
+
+/* Buttons */
+.pay-now-button {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background-color: #141414;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.pay-now-button:hover {
+  background-color: #414141;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.pay-now-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.back-to-checkout-button {
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  background-color: transparent;
+  color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  margin-top: 1.5rem;
+}
+
+.back-to-checkout-button:hover {
+  background-color: #eef7ff;
+  color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Spinner for button */
+.spinner-button {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .payment-card {
+    padding: 1.8rem;
+    border-radius: 0.8rem;
+  }
+
+  .main-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .saved-card-item {
+    padding: 0.8rem 1rem;
+  }
+
+  .saved-card-brand-last4 {
+    font-size: 0.95rem;
+  }
+
+  .saved-card-expiry {
+    font-size: 0.8rem;
+  }
+
+  .form-field {
+    margin-bottom: 1.2rem;
+  }
+
+  .form-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input {
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .grid-cols-2-gap-6 {
+    gap: 1rem;
+  }
+
+  .checkbox-container {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .checkbox-input {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .checkbox-input:checked::after {
+    font-size: 0.8rem;
+  }
+
+  .checkbox-label {
+    font-size: 0.9rem;
+  }
+
+  .pay-now-button {
+    padding: 0.9rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .back-to-checkout-button {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-card {
+    padding: 1.2rem;
+    border-radius: 0.75rem;
+  }
+
+  .main-title {
+    font-size: 1.6rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    margin-top: 1.2rem;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .saved-card-item {
+    padding: 0.7rem 0.8rem;
+  }
+
+  .saved-card-brand-last4 {
+    font-size: 0.9rem;
+  }
+
+  .saved-card-expiry {
+    font-size: 0.75rem;
+  }
+
+  .form-field {
+    margin-bottom: 1rem;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-input {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .grid-cols-2-gap-6 {
+    gap: 0.8rem;
+  }
+
+  .checkbox-container {
+    margin-top: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .checkbox-input {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .checkbox-input:checked::after {
+    font-size: 0.7rem;
+  }
+
+  .checkbox-label {
+    font-size: 0.85rem;
+  }
+
+  .pay-now-button {
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .back-to-checkout-button {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    margin-top: 0.8rem;
+  }
+}

@@ -3,7 +3,7 @@
   display: flex;
   justify-content: center;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  
+  position: relative; /* Added for the loading overlay */
 }
 .disabled-label {
   color: #aaa;
@@ -22,7 +22,6 @@
 }
 .checkout-max-width-wrapper {
   width: 100%;
-
 }
 
 /* === Main Grid Layout === */
@@ -47,7 +46,6 @@
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 15px;
-
 }
 
 /* === Form Layout === */
@@ -129,10 +127,20 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s;
+  display: flex; /* Added for button spinner alignment */
+  align-items: center; /* Added for button spinner alignment */
+  justify-content: center; /* Added for button spinner alignment */
+  gap: 0.8rem; /* Added for spacing between text and spinner */
 }
 
-.place-order-button:hover {
+.place-order-button:hover:not(:disabled) {
   background-color: #3f3f3f;
+}
+
+.place-order-button:disabled {
+  background-color: #cccccc; /* Added disabled style */
+  cursor: not-allowed; /* Added disabled style */
+  opacity: 0.7; /* Added disabled style */
 }
 
 
@@ -142,7 +150,6 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-
 }
 
 .summary-item-content {
@@ -187,7 +194,6 @@
 /* === Totals === */
 .summary-totals {
   border-top: 1px solid #ddd;
-
 }
 
 .summary-line {
@@ -250,11 +256,71 @@
   margin: auto;
 }
 
+/* Full-page Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* Ensure it's on top of everything */
+  backdrop-filter: blur(1px); /* Optional: blur background content */
+}
+
+.loading-overlay .spinner {
+  border: 6px solid #f3f3f3; /* Light grey */
+  border-top: 6px solid #000; /* Blue */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+.loading-overlay p {
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: 600;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
+/* Autocomplete Suggestions */
+.form-group {
+  position: relative;
+  margin-bottom: 1rem; /* Adjusted margin for consistency */
+}
+
+.autocomplete-suggestions {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  width: 100%;
+  z-index: 1000;
+  margin-top: 2px;
+  border-radius: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.autocomplete-suggestion {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.autocomplete-suggestion:hover {
+  background-color: #f0f0f0;
+}
 
 
 /* === Responsive Layout for Checkout Page === */
@@ -281,6 +347,14 @@
 
   .radio-option {
     min-width: 120px;
+  }
+
+  .loading-overlay .spinner { /* Responsive for full-page spinner */
+    width: 40px;
+    height: 40px;
+  }
+  .loading-overlay p {
+    font-size: 1.1rem;
   }
 }
 
@@ -343,13 +417,27 @@
   .total-line {
     font-size: 1rem;
   }
+
+  .loading-overlay .spinner { /* Responsive for full-page spinner */
+    width: 35px;
+    height: 35px;
+  }
+  .loading-overlay p {
+    font-size: 1rem;
+  }
 }
 
 /* Mobile Phones (<=480px) */
 @media (max-width: 480px) {
+  .checkout-max-width-wrapper {
+    padding: 1rem;
+  }
+
   .checkout-title {
     font-size: 1.4rem;
-    margin-bottom: 25px;
+    margin-bottom: 1.5rem; /* Adjusted margin */
+    margin-left: 0; /* Center title on small screens */
+    text-align: center;
   }
 
   .checkout-grid {
@@ -361,20 +449,12 @@
   }
 
   .section-heading {
-    font-size: 1.1rem;
-  }
-
-  .form-grid {
-    gap: 15px;
-  }
-
-  .form-label {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
   }
 
   .form-input {
-    padding: 8px;
-    font-size: 0.85rem;
+    padding: 0.7rem 0.8rem;
+    font-size: 0.9rem;
   }
 
   .payment-options-group {
@@ -417,31 +497,12 @@
   .total-line {
     font-size: 0.95rem;
   }
-}
-.form-group {
-  position: relative;
-  margin-bottom: 1rem;
-}
 
-.autocomplete-suggestions {
-  position: absolute;
-  background: white;
-  border: 1px solid #ccc;
-  max-height: 150px;
-  overflow-y: auto;
-  width: 100%;
-  z-index: 1000;
-  margin-top: 2px;
-  border-radius: 4px;
-  padding: 0;
-  list-style: none;
-}
-
-.autocomplete-suggestion {
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.autocomplete-suggestion:hover {
-  background-color: #f0f0f0;
+  .loading-overlay .spinner { /* Responsive for full-page spinner */
+    width: 30px;
+    height: 30px;
+  }
+  .loading-overlay p {
+    font-size: 0.9rem;
+  }
 }

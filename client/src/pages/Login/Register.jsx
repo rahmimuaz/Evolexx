@@ -52,6 +52,7 @@ const Register = ({ asModal = false, onSuccess, onSwitchLogin }) => {
       if (onSuccess) onSuccess();
       else navigate('/');
     } catch (error) {
+      // Using react-toastify for API errors, which is a good practice for non-form field errors
       toast.error(error?.response?.data?.message || 'Registration failed');
     }
   };
@@ -69,7 +70,7 @@ const Register = ({ asModal = false, onSuccess, onSwitchLogin }) => {
           onChange={(e) => setName(e.target.value)}
           required
         />
-        {errors.name && <p className="error-message">{errors.name}</p>}
+        {errors.name && <p className="error-message-reg">{errors.name}</p>}
       </div>
 
       <div className="form-group">
@@ -83,7 +84,7 @@ const Register = ({ asModal = false, onSuccess, onSwitchLogin }) => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        {errors.email && <p className="error-message">{errors.email}</p>}
+        {errors.email && <p className="error-message-reg">{errors.email}</p>}
       </div>
 
       <div className="form-group">
@@ -97,7 +98,7 @@ const Register = ({ asModal = false, onSuccess, onSwitchLogin }) => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {errors.password && <p className="error-message">{errors.password}</p>}
+        {errors.password && <p className="error-message-reg">{errors.password}</p>}
       </div>
 
       <div className="form-group confirm-password">
@@ -111,7 +112,7 @@ const Register = ({ asModal = false, onSuccess, onSwitchLogin }) => {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
-        {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
+        {errors.confirmPassword && <p className="error-message-reg">{errors.confirmPassword}</p>}
       </div>
 
       <button type="submit" className="register-button">Register</button>

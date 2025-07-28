@@ -27,7 +27,7 @@
 }
 
 .form-group {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.2rem; /* Adjusted for error message space */
 }
 
 .form-label {
@@ -100,10 +100,15 @@
   color: #414141;
 }
 
-.error-message {
-  color: #ff4d4f;
-  font-size: 0.875rem;
-  margin-top: 4px;
+/* Updated error message styling for consistency with Login.css */
+.error-message-reg {
+  color: #dc3545; /* A standard red for errors */
+  padding: 8px 12px; /* Slightly less padding for inline errors */
+  border-radius: 6px; /* Slightly smaller border-radius */
+  margin-top: 8px; /* Space above the message */
+  text-align: left; /* Align text to left for form field errors */
+  font-size: 0.85em; /* Slightly smaller font size */
+  font-weight: 500;
 }
 
 
@@ -145,6 +150,10 @@
   .login-link {
     font-size: 0.95rem;
   }
+  .error-message-reg {
+    font-size: 0.8em;
+    padding: 7px 10px;
+  }
 }
 
 /* Small phones */
@@ -163,5 +172,9 @@
   .login-text,
   .login-link {
     font-size: 0.9rem;
+  }
+  .error-message-reg {
+    font-size: 0.75em;
+    padding: 6px 8px;
   }
 }

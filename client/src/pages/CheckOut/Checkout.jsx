@@ -48,7 +48,8 @@ const Checkout = () => {
   const [citySuggestions, setCitySuggestions] = useState([]);
   const cityRef = useRef(null);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Controls full-page loading overlay
+  const [isButtonLoading, setIsButtonLoading] = useState(false); // Controls only button loading spinner
   const [showBankTransferModal, setShowBankTransferModal] = useState(false);
   const [bankTransferProofUrl, setBankTransferProofUrl] = useState(null);
 
@@ -110,34 +111,34 @@ const Checkout = () => {
 
   // Validation before submitting
   const validateForm = () => {
-  const { fullName, email, address, city, postalCode, phone } = formData;
+    const { fullName, email, address, city, postalCode, phone } = formData;
 
-  if (!fullName.trim()) {
-    toast.error('Full name is required');
-    return false;
-  }
-  if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
-    toast.error('Valid email is required');
-    return false;
-  }
-  if (!phone.trim() || phone.length < 7) {
-    toast.error('Valid phone number is required');
-    return false;
-  }
-  if (!city.trim()) {
-    toast.error('City is required');
-    return false;
-  }
-  if (!address.trim()) {
-    toast.error('Address is required');
-    return false;
-  }
-  if (!postalCode.trim()) {
-    toast.error('Postal code is required');
-    return false;
-  }
-  return true;
-};
+    if (!fullName.trim()) {
+      toast.error('Full name is required');
+      return false;
+    }
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+      toast.error('Valid email is required');
+      return false;
+    }
+    if (!phone.trim() || phone.length < 7) {
+      toast.error('Valid phone number is required');
+      return false;
+    }
+    if (!city.trim()) {
+      toast.error('City is required');
+      return false;
+    }
+    if (!address.trim()) {
+      toast.error('Address is required');
+      return false;
+    }
+    if (!postalCode.trim()) {
+      toast.error('Postal code is required');
+      return false;
+    }
+    return true;
+  };
 
 
   // Submit handler
@@ -156,21 +157,24 @@ const Checkout = () => {
       navigate('/cart');
       return;
     }
+
     if (formData.paymentMethod === 'bank_transfer') {
       setShowBankTransferModal(true);
       return;
     }
 
-    setIsLoading(true);
+    // If not bank transfer, show full page loading and place order directly
+    setIsLoading(true); // Show full page loading
     try {
       await placeOrder();
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Hide full page loading
     }
   };
 
   // Place order API call
   const placeOrder = async (proofUrl = null) => {
+    setIsButtonLoading(true); // Show button loading spinner
     try {
       const config = {
         headers: {
@@ -207,6 +211,9 @@ const Checkout = () => {
         totalPrice: total
       };
 
+      // Simulate a delay for the order placement API call
+      await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5 second delay
+
       const { data } = await axios.post(
         `${API_BASE_URL}/api/orders`,
         orderData,
@@ -219,6 +226,9 @@ const Checkout = () => {
     } catch (error) {
       console.error('Order creation error:', error.response?.data || error);
       toast.error(error.response?.data?.message || 'Failed to place order');
+    } finally {
+      setIsButtonLoading(false); // Hide button loading spinner
+      setIsLoading(false); // Ensure full page loading is hidden in case of error
     }
   };
 
@@ -227,7 +237,8 @@ const Checkout = () => {
     setBankTransferProofUrl(fileUrl);
     setShowBankTransferModal(false);
     toast.info('Bank transfer proof attached. Proceeding to place order.');
-    placeOrder(fileUrl);
+    setIsLoading(true); // Show full page loading after modal closes and before placing order
+    placeOrder(fileUrl); // place order with the proof URL
   };
 
   // Image URL helper
@@ -255,6 +266,13 @@ const Checkout = () => {
 
   return (
     <div className="checkout-page-container">
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="spinner"></div>
+          <p>Placing your order...</p>
+        </div>
+      )}
+
       <div className="checkout-max-width-wrapper">
         <h1 className="checkout-title">Checkout</h1>
         <div className="checkout-grid">
@@ -341,9 +359,9 @@ const Checkout = () => {
                   <button
                     type="submit"
                     className="place-order-button"
-                    disabled={isLoading}
+                    disabled={isLoading || isButtonLoading} // Disable if either is loading
                   >
-                    {isLoading ? <div className="spinner-button" /> : 'Place Order'}
+                    {isButtonLoading ? <div className="spinner-button" /> : 'Place Order'}
                   </button>
                 </div>
               </form>

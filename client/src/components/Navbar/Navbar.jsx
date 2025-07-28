@@ -13,7 +13,7 @@ import {
   FaSignOutAlt,
   FaCog
 } from 'react-icons/fa';
-import Modal from '../Modal';
+import Modal from '../Modal/Modal';
 import Login from '../../pages/Login/Login';
 import Register from '../../pages/Login/Register';
 
