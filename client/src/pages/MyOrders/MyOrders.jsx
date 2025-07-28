@@ -68,7 +68,7 @@ const MyOrders = () => {
         <table className="orders-table">
           <thead>
             <tr>
-              <th>Order #</th>
+              <th>Order ID</th>
               <th>Date</th>
               <th>Total</th>
               <th>Status</th>
