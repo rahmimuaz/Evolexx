@@ -181,12 +181,12 @@ const Homepage = () => {
       <section className="product-section" ref={productSectionRef}>
         <div className="heading-with-icon">
           <h2 ref={headingRef}>All Products</h2>
-        </div>
-        <FaSlidersH
+          <FaSlidersH
             className="filter-toggle-icon"
             onClick={() => setShowFilters(!showFilters)}
             title="Filter & Sort"
           />
+        </div>
 
         {showFilters && (
           <div className="filter-sort-bar">
