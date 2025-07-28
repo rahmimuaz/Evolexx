@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import './EditProduct.css';
+import SimpleMDE from 'react-simplemde-editor'; // Import SimpleMDE
+import 'easymde/dist/easymde.min.css'; // Import SimpleMDE styles
+
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -17,13 +20,15 @@ const EditProduct = () => {
     details: {},
     images: [], // Existing images from the product
     warrantyPeriod: 'No Warranty',
-    discountPrice: ''
+    discountPrice: '',
+    kokoPay: false // Added missing kokoPay field
   });
 
   const [newImages, setNewImages] = useState([]); // Newly selected files for upload
   const [previewUrls, setPreviewUrls] = useState([]); // URLs for both existing and new image previews
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [discountError, setDiscountError] = useState(''); // Added discount error state
 
   // Define the API base URL from environment variables
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -81,7 +86,6 @@ const EditProduct = () => {
 
   const fetchProduct = useCallback(async () => {
     try {
-      // Use API_BASE_URL for fetching product details
       const response = await axios.get(`${API_BASE_URL}/api/products/${id}`);
       const product = response.data;
       setFormData(product);
@@ -101,18 +105,32 @@ const EditProduct = () => {
       setLoading(false);
       console.error("Error fetching product:", err); // Log the error for debugging
     }
-  }, [id, API_BASE_URL]); // Add API_BASE_URL to dependencies
+  }, [id, API_BASE_URL]);
 
   useEffect(() => {
     fetchProduct();
   }, [fetchProduct]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target; // Destructure type and checked
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value // Handle checkbox input
     }));
+    if (name === 'discountPrice') {
+      if (value && Number(value) > Number(formData.price)) {
+        setDiscountError('Discount/Offer price cannot be greater than Price.');
+      } else {
+        setDiscountError('');
+      }
+    }
+    if (name === 'price' && formData.discountPrice) {
+      if (Number(formData.discountPrice) > Number(value)) {
+        setDiscountError('Discount/Offer price cannot be greater than Price.');
+      } else {
+        setDiscountError('');
+      }
+    }
   };
 
   const handleDetailChange = (e) => {
@@ -175,6 +193,11 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (formData.discountPrice && Number(formData.discountPrice) > Number(formData.price)) {
+      alert('Discount/Offer price cannot be greater than Price.');
+      return;
+    }
+
     const formDataToSend = new FormData();
     formDataToSend.append('name', formData.name);
     formDataToSend.append('category', formData.category);
@@ -185,7 +208,8 @@ const EditProduct = () => {
     formDataToSend.append('discountPrice', formData.discountPrice);
     formDataToSend.append('stock', formData.stock);
     formDataToSend.append('details', JSON.stringify(formData.details));
-    
+    formDataToSend.append('kokoPay', formData.kokoPay); // Append kokoPay
+
     // Send existing image URLs to the backend so it knows which ones to keep
     formDataToSend.append('existingImages', JSON.stringify(formData.images));
 
@@ -195,14 +219,13 @@ const EditProduct = () => {
     });
 
     try {
-      // Use API_BASE_URL for updating product details
       await axios.put(`${API_BASE_URL}/api/products/${id}`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       alert('Product updated successfully!');
-      navigate('/Products'); // Navigate to the product list
+      navigate('/admin/products'); // Corrected navigation path
     } catch (err) {
       console.error('Update failed:', err);
       alert('Error updating product. Please try again.');
@@ -281,13 +304,10 @@ const EditProduct = () => {
           </div>
           <div className="form-field" style={{ marginTop: '1rem' }}>
             <label className="form-label">Long Description</label>
-            <textarea
-              name="longDescription"
+            <SimpleMDE // Used SimpleMDE here
               value={formData.longDescription}
-              onChange={handleInputChange}
-              rows="6"
-              className="form-textarea"
-              placeholder="Enter a more detailed description (optional)"
+              onChange={value => setFormData(prev => ({ ...prev, longDescription: value }))}
+              options={{ placeholder: 'Enter a more detailed description (supports Markdown formatting)' }}
             />
           </div>
           <div className="form-field">
@@ -315,6 +335,19 @@ const EditProduct = () => {
               placeholder="Enter offer price (optional)"
               min="0"
             />
+            {discountError && <div className="error-message" style={{ color: 'red', fontSize: '0.9em' }}>{discountError}</div>}
+          </div>
+          <div className="form-field">
+            <label className="form-label">
+              <input
+                type="checkbox"
+                name="kokoPay"
+                checked={formData.kokoPay}
+                onChange={handleInputChange}
+                style={{ marginRight: '8px' }}
+              />
+              Enable KOKO Pay (3 installments)
+            </label>
           </div>
         </div>
 
