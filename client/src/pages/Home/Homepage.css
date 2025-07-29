@@ -85,7 +85,7 @@
 
 .feature-text p {
   color: #6b7280;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   line-height: 1.4;
 }
 
@@ -161,7 +161,7 @@
 }
 
 .overlay-text p {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin: 0;
   font-weight: 600;
 }
@@ -200,16 +200,17 @@
 
 /* Filter toggle icon styling */
 .filter-toggle-icon {
-    display: flex;
+  display: flex;
   justify-content: space-between; /* Spreads out items */
   align-items: center;
-  margin-top: 5px;
+  margin-top: 0px;
   font-size: 1.4rem;
   cursor: pointer;
   color: #000;
   transition: color 0.3s ease;
   user-select: none;
   margin-left: auto; /* Pushes the icon to the far right */
+  margin-bottom: 10px; /* Adds some space below the icon */
 }
 
 .filter-toggle-icon:hover {
@@ -241,11 +242,11 @@
 }
 
 .product-card {
+  margin-top: 20px;
   background-color: #ffffff;
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border-radius: 8px;
-  padding-bottom: 10px;
   margin-bottom: 10px;
 }
 
@@ -255,9 +256,8 @@
 
 .product-card img {
   width: 100%;
-  height: 300px;
+  height: 280px;
   object-fit: cover;
-  background-color: #f0f0f094;
   border-radius: 8px;
 }
 
@@ -273,7 +273,7 @@
 .product-card p {
   text-align: left;
   padding: 0.2rem 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #6b7280;
   margin: 0;
   margin-left: 10px;
@@ -284,7 +284,7 @@
   font-size: 1rem;
   color: #080808;
   font-weight: 450;
-  margin-top: 20px;
+  margin-top: 15px;
   margin-left: 10px;
 
 }
@@ -313,7 +313,7 @@
 }
 
 .koko-pay {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #555;
   margin-top: 5px;
   display: flex;
@@ -393,7 +393,6 @@
   transition: all 0.3s ease;
 }
 
-
 .filter-sort-bar:hover {
   box-shadow: 0 12px 28px rgba(31, 38, 135, 0.18);
 }
@@ -409,7 +408,7 @@
   font-weight: 600;
   color: #222;
   white-space: nowrap;
-  font-size: 0.95rem;
+  font-size: 1rem;
   margin-right: 0.3rem;
 }
 
@@ -418,7 +417,7 @@
   border: 1px solid #d1d5db;
   border-radius: 0.4rem;
   padding: 0.3rem 0.6rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
   background: #fdfdfd;
   color: #222;
   outline: none;

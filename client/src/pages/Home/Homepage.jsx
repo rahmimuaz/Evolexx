@@ -191,7 +191,7 @@ const Homepage = () => {
         {showFilters && (
           <div className="filter-sort-bar">
             <div className="filter-group">
-              <label htmlFor="sort-select">Sort:</label>
+              <label htmlFor="sort-select">Sort</label>
               <select id="sort-select" value={sort} onChange={handleSortChange}>
                 {sortOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -200,7 +200,7 @@ const Homepage = () => {
             </div>
 
             <div className="filter-group price-range-group">
-              <label>Price:</label>
+              <label>Price</label>
               <input type="number" min="0" value={priceRange[0]} onChange={e => handlePriceChange(e, 0)} className="price-input" />
               <span>-</span>
               <input type="number" min="0" value={priceRange[1]} onChange={e => handlePriceChange(e, 1)} className="price-input" />
@@ -208,7 +208,7 @@ const Homepage = () => {
 
             {allBrands.length > 0 && (
               <div className="filter-group brand-filter-group">
-                <label htmlFor="brand-select">Brand:</label>
+                <label htmlFor="brand-select">Brand</label>
                 <div className="brand-dropdown-container">
                   <select
                     id="brand-select"

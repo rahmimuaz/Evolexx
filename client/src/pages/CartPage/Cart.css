@@ -8,7 +8,7 @@
 
 /* === Title === */
 .cart-title {
-    margin-top: 20px;
+  margin-top: 20px;
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 20px;
@@ -90,19 +90,19 @@
 }
 
 .product-name {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   margin-bottom: 5px;
 }
 
 .product-desc {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #777;
   margin-bottom: 15px;
 }
 
 .product-color {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   margin-bottom: 10px;
 }
 
@@ -120,12 +120,12 @@
   height: 30px;
   border: 1px solid #ccc;
   background-color: #fff;
-  font-size: 16px;
+  font-size: 1rem;
   cursor: pointer;
 }
 
 .qty-display {
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   width: 35px;
   text-align: center;
   font-weight: 500;
@@ -133,11 +133,11 @@
 
 .remove-btn {
   background: none;
-  color: #999;
+  color: #cf0101;
   border: none;
   cursor: pointer;
   margin-left: 15px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 /* === Item Price === */
@@ -170,7 +170,7 @@
 }
 
 .note-instruction {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #777;
   margin-bottom: 20px;
 }
@@ -186,7 +186,7 @@
 .summary-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
 }
 
 .subtotal {

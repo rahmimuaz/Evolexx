@@ -43,9 +43,9 @@
 
 /* === Section Headings === */
 .section-heading {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 /* === Form Layout === */
@@ -70,7 +70,7 @@
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
 }
 
 /* === Payment Method Section === */
@@ -178,11 +178,11 @@
 
 .summary-item-name {
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
 }
 
 .summary-item-quantity {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #666;
 }
 
@@ -204,7 +204,7 @@
 
 .total-line {
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 /* === Placeholder if Image Fails === */
@@ -283,7 +283,7 @@
 }
 
 .loading-overlay p {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   color: #333;
   font-weight: 600;
 }
