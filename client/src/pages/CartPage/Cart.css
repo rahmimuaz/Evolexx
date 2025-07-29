@@ -255,7 +255,7 @@
 /* Mobile & Small Tablets (<=768px) */
 @media (max-width: 768px) {
   .cart-title {
-    font-size: 1.6rem;
+    font-size: 1.2rem;
   }
 
   .cart-content {
@@ -287,7 +287,7 @@
   }
 
   .item-price {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .quantity-controls {
@@ -297,7 +297,7 @@
   .qty-btn {
     width: 28px;
     height: 28px;
-    font-size: 14px;
+    font-size: 0.9rem;
   }
 
   .qty-display {
@@ -306,7 +306,7 @@
   }
 
   .remove-btn {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .cart-summary {
@@ -320,7 +320,7 @@
   }
 
   .checkout-btn {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     padding: 10px;
   }
 }
@@ -341,7 +341,7 @@
   }
 
   .product-name {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .cart-summary {

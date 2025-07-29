@@ -361,7 +361,7 @@
 /* Small Tablets & Large Mobiles (<=768px) */
 @media (max-width: 768px) {
   .checkout-title {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     margin-bottom: 30px;
   }
 
@@ -375,7 +375,7 @@
   }
 
   .form-label {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .form-input {
@@ -384,7 +384,7 @@
   }
 
   .place-order-button {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     padding: 12px;
   }
 
@@ -430,26 +430,26 @@
 /* Mobile Phones (<=480px) */
 @media (max-width: 480px) {
   .checkout-max-width-wrapper {
-    padding: 1rem;
+    padding: 0.8rem;
   }
 
   .checkout-title {
     font-size: 1.4rem;
-    margin-bottom: 1.5rem; /* Adjusted margin */
+    margin-bottom: 1rem; /* Adjusted margin */
     margin-left: 0; /* Center title on small screens */
-    text-align: center;
+    text-align: left;
   }
 
   .checkout-grid {
-    padding: 10px;
+    padding: 0px;
   }
 
   .checkout-card {
-    padding: 15px;
+    padding: 10px;
   }
 
   .section-heading {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .form-input {

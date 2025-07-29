@@ -505,12 +505,17 @@
 
 /* ============ MEDIA QUERIES ============ */
 @media (max-width: 768px) {
+ .product-section h2 {
+  font-size: 1.5rem;
+}
   .product-card h3 {
-    font-size: 0.85rem;
+    padding: 0rem 0.3rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.1rem;
   }
   .product-card p {
     text-align: left;
-    padding: 0.2rem;
+    padding: 0.2rem 0.1rem;
     font-size: 0.8rem;
     color: #6b7280;
 
@@ -525,34 +530,44 @@
     display: flex;
     flex-direction: row;
     align-items: flex-start; /* Align items to the top */
-    gap: 1rem;
-    padding: 1rem;
+    gap: 0.5rem;
+    padding: 0rem;
     background-color: #fff;
     border-bottom: 0.5px solid #d1d5db;
-    border-radius: 0px;  }
+    border-radius: 0px; 
+    margin-top: 0px;
+   }
 
   .product-card img {
-    width: 40%; /* Reduced width for mobile */
+    width: 35%; /* Reduced width for mobile */
     height: auto;
     object-fit: cover;
-    border-radius: 0.5rem;
+  }
+  .product-card .price {
+    text-align: left;
+    font-size: 0.9rem;
+    color: #080808;
+    font-weight: 500;
+    margin-top: 5px;
+    margin-left: 10px;
   }
 
   .product-card-content {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 0.35rem;
+    gap: 0rem;
     width: 60%; /* Take remaining width */
     text-align: left !important; /* Force text alignment to left */
   }
 
   .product-name {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 580;
     margin: 0;
-    color: #111827;
+    color: #000;
     text-align: left !important; /* Force text alignment to left */
+    margin-bottom: 5px;
   }
 
   .product-description {
@@ -584,7 +599,7 @@
   }
 
   .koko-pay {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #6b7280;
     display: flex;
     align-items: center;
@@ -597,6 +612,9 @@
     height: 14px;
     width: auto;
   }
+  .product-card:hover {
+     box-shadow: none;
+ }
 
   .features {
     flex-direction: column;
@@ -683,30 +701,33 @@
     max-height: 52vh;
   }
 
-  .filter-sort-bar .filter-group {
-    display: flex;
-    flex-direction: column; /* Stack label and input/select vertically */
-    align-items: flex-start; /* Align text to the left */
-    gap: 0.5rem; /* Reduce gap */
-    width: 100%;
-  }
+ .filter-sort-bar .filter-group {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: row; /* Align label and input/select side by side */
+  align-items: center; /* Vertically center them */
+  gap: 0rem;
+  width: 100%;
+}
 
-  .filter-sort-bar label {
-    margin-right: 0; /* Remove extra margin */
-  }
+.filter-sort-bar label {
+  margin-right: 0; /* Optional: keep label tight to the input */
+  white-space: nowrap; /* Prevent label text from wrapping */
+  min-width: 70px; /* Optional: fix width for label to align better */
+}
 
-  .filter-sort-bar select,
-  .filter-sort-bar input[type="number"] {
-    width: 100%; /* Make inputs and selects full width */
-    max-width: none; /* Remove max-width constraint */
-  }
+.filter-sort-bar select,
+.filter-sort-bar input[type="number"] {
+  flex: 1; /* Take remaining width */
+  max-width: 100%;
+}
 
-  .price-range-group {
-    flex-direction: column; /* Stack price inputs vertically */
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
+.filter-sort-bar input[type="checkbox"] {
+    accent-color: #5e9f3b;
+    margin-left: 16px;
+    transform: scale(1.15);
+    cursor: pointer;
+}
   .price-range-group span {
     display: none; /* Hide the '-' separator when stacked */
   }
@@ -717,7 +738,7 @@
   }
 
   .card-footer .koko-logo {
-    margin-left:2px; /* Adjust margin for smaller screens */
+    margin-left:25px; /* Adjust margin for smaller screens */
     width: 20%; /* Adjust width to make logo smaller */
   }
 }

@@ -783,15 +783,15 @@
 
 @media (max-width: 768px) {
   .product-name-section {
-    font-size: 20px;
+    font-size: 1.2rem;
   }
 
   .product-tagline {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .product-price {
-    font-size: 22px;
+    font-size: 1.2rem;
   }
 
   .product-ratings svg {
@@ -808,28 +808,37 @@
   .quantity-input {
     width: 30px;
     height: 30px;
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .add-to-cart-button,
   .buy-now-button {
     padding: 10px 20px;
-    font-size: 13px;
+    font-size: 1rem;
   }
 
   .side-info-section {
     padding: 15px;
   }
 .color-options-title {
+  font-size: 1rem;
     padding: 5px 0;
 }
 
   .info-block-title {
-    font-size: 18px;
+    font-size: 1rem;
   }
 
+  .info-block-title1 {
+    font-size: 1rem;
+  }
   .info-list-item p {
-    font-size: 14px;
+    font-size: 0.9rem;
+  }
+  .font-semibold {
+    color: #555;
+    font-weight: 400;
+    font-size: 1rem;
   }
 
   .product-description-section,
@@ -839,10 +848,11 @@
     width: 98%;
     padding: 5px;
   }
-
-  .tab-item {
-    padding: 10px 15px;
-    font-size: 1em;
+  .product-description-section h2{
+    font-size: 1rem;
+  }
+  .product-detail-page-container{
+    font-size: 0.9rem;
   }
 
   .review-item {
@@ -850,7 +860,7 @@
   }
 
   .review-form textarea {
-    font-size: 0.85em;
+    font-size: 0.8rem;
   }
   .product-reviews-section h2 {
     font-size: 0.875em;
@@ -865,15 +875,32 @@
     font-size: 1em;
 }
 .tab-item {
-    padding: 15px 10px;
+    padding: 15px 13px;
     cursor: pointer;
     font-weight: bold;
     color: #333;
     border-bottom: 1px solid transparent;
     transition: all 0.3s ease;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
+}
+.filter-button{
+  padding: 6px 12px;
+  font-size: 0.8rem;
 }
 
+.product-description-section{
+  line-height: 1.4;
+  padding: 18px;
+}
+.product-specifications-section li {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  margin-left: 5px;
+}
+.product-specifications-section h2{
+  font-size: 1rem;
+
+}
 }
 
 @media (max-width: 480px) {
