@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import './EditProduct.css';
-import SimpleMDE from 'react-simplemde-editor'; // Import SimpleMDE
-import 'easymde/dist/easymde.min.css'; // Import SimpleMDE styles
-
+import SimpleMDE from 'react-simplemde-editor';
+import 'easymde/dist/easymde.min.css';
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -18,19 +17,18 @@ const EditProduct = () => {
     longDescription: '',
     stock: '',
     details: {},
-    images: [], // Existing images from the product
+    images: [],
     warrantyPeriod: 'No Warranty',
     discountPrice: '',
-    kokoPay: false // Added missing kokoPay field
+    kokoPay: false
   });
 
-  const [newImages, setNewImages] = useState([]); // Newly selected files for upload
-  const [previewUrls, setPreviewUrls] = useState([]); // URLs for both existing and new image previews
+  const [newImages, setNewImages] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [discountError, setDiscountError] = useState(''); // Added discount error state
+  const [discountError, setDiscountError] = useState('');
 
-  // Define the API base URL from environment variables
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const categories = [
@@ -91,19 +89,14 @@ const EditProduct = () => {
       setFormData(product);
 
       const previewList = product.images.map(img => {
-        if (img.startsWith('http')) {
-          return img;
-        } else {
-          // Construct full URL for images stored locally
-          return `${API_BASE_URL}/${img.replace(/^\//, '')}`;
-        }
+        return img.startsWith('http') ? img : `${API_BASE_URL}/${img.replace(/^\//, '')}`;
       });
       setPreviewUrls(previewList);
       setLoading(false);
     } catch (err) {
       setError('Failed to load product');
       setLoading(false);
-      console.error("Error fetching product:", err); // Log the error for debugging
+      console.error("Error fetching product:", err);
     }
   }, [id, API_BASE_URL]);
 
@@ -112,25 +105,27 @@ const EditProduct = () => {
   }, [fetchProduct]);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target; // Destructure type and checked
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value // Handle checkbox input
-    }));
-    if (name === 'discountPrice') {
-      if (value && Number(value) > Number(formData.price)) {
+    const { name, value, type, checked } = e.target;
+
+    setFormData(prev => {
+      let newState = { ...prev };
+
+      if (name === 'category') {
+        newState.details = {};
+      }
+
+      newState[name] = type === 'checkbox' ? checked : value;
+
+      if (name === 'discountPrice' && value && Number(value) > Number(newState.price)) {
+        setDiscountError('Discount/Offer price cannot be greater than Price.');
+      } else if (name === 'price' && newState.discountPrice && Number(newState.discountPrice) > Number(value)) {
         setDiscountError('Discount/Offer price cannot be greater than Price.');
       } else {
         setDiscountError('');
       }
-    }
-    if (name === 'price' && formData.discountPrice) {
-      if (Number(formData.discountPrice) > Number(value)) {
-        setDiscountError('Discount/Offer price cannot be greater than Price.');
-      } else {
-        setDiscountError('');
-      }
-    }
+
+      return newState;
+    });
   };
 
   const handleDetailChange = (e) => {
@@ -147,7 +142,7 @@ const EditProduct = () => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const totalCurrentImages = formData.images.length + newImages.length;
-    const maxImages = 5; // Define max images allowed
+    const maxImages = 5;
 
     if (totalCurrentImages >= maxImages) {
       alert(`You have reached the maximum of ${maxImages} images.`);
@@ -155,39 +150,30 @@ const EditProduct = () => {
     }
 
     const filesToAdd = Math.min(files.length, maxImages - totalCurrentImages);
-
     if (filesToAdd < files.length) {
       alert(`Only ${maxImages - totalCurrentImages} more image(s) can be added.`);
     }
 
     const validFiles = files.slice(0, filesToAdd);
-
     setNewImages(prev => [...prev, ...validFiles]);
     setPreviewUrls(prev => [...prev, ...validFiles.map(file => URL.createObjectURL(file))]);
   };
 
   const removeImage = (index) => {
     const totalExisting = formData.images.length;
+    const updatedPreviewUrls = [...previewUrls];
 
     if (index < totalExisting) {
-      // It's an existing image from the database
-      const updatedExistingImages = [...formData.images];
-      updatedExistingImages.splice(index, 1);
-      setFormData(prev => ({ ...prev, images: updatedExistingImages }));
+      setFormData(prev => ({
+        ...prev,
+        images: prev.images.filter((_, i) => i !== index)
+      }));
     } else {
-      // It's a newly added image (not yet uploaded)
       const newImageIndex = index - totalExisting;
-      const updatedNewImages = [...newImages];
-      updatedNewImages.splice(newImageIndex, 1);
-      setNewImages(updatedNewImages);
-      // Revoke object URL for newly added image to prevent memory leaks
-      URL.revokeObjectURL(previewUrls[index]);
+      setNewImages(prev => prev.filter((_, i) => i !== newImageIndex));
+      URL.revokeObjectURL(updatedPreviewUrls[index]);
     }
-
-    // Remove from preview URLs regardless of whether it's existing or new
-    const updatedPreviews = [...previewUrls];
-    updatedPreviews.splice(index, 1);
-    setPreviewUrls(updatedPreviews);
+    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -199,21 +185,21 @@ const EditProduct = () => {
     }
 
     const formDataToSend = new FormData();
+
     formDataToSend.append('name', formData.name);
     formDataToSend.append('category', formData.category);
     formDataToSend.append('price', formData.price);
     formDataToSend.append('description', formData.description);
     formDataToSend.append('longDescription', formData.longDescription);
+    formDataToSend.append('stock', formData.stock);
     formDataToSend.append('warrantyPeriod', formData.warrantyPeriod);
     formDataToSend.append('discountPrice', formData.discountPrice);
-    formDataToSend.append('stock', formData.stock);
-    formDataToSend.append('details', JSON.stringify(formData.details));
-    formDataToSend.append('kokoPay', formData.kokoPay); // Append kokoPay
+    formDataToSend.append('kokoPay', formData.kokoPay);
 
-    // Send existing image URLs to the backend so it knows which ones to keep
+    formDataToSend.append('details', JSON.stringify(formData.details));
+
     formDataToSend.append('existingImages', JSON.stringify(formData.images));
 
-    // Append new image files for upload
     newImages.forEach(file => {
       formDataToSend.append('images', file);
     });
@@ -225,12 +211,17 @@ const EditProduct = () => {
         }
       });
       alert('Product updated successfully!');
-      navigate('/admin/products'); // Corrected navigation path
+      navigate('/admin/products');
     } catch (err) {
-      console.error('Update failed:', err);
+      console.error('Update failed:', err.response?.data || err.message);
       alert('Error updating product. Please try again.');
     }
   };
+
+  // Memoize the SimpleMDE options to prevent re-renders
+  const mdeOptions = useMemo(() => ({
+    placeholder: 'Enter a more detailed description (supports Markdown formatting)'
+  }), []);
 
   if (loading) return <div className="loading-container"><div className="spinner" /></div>;
   if (error) return <div className="error-message">{error}</div>;
@@ -304,10 +295,10 @@ const EditProduct = () => {
           </div>
           <div className="form-field" style={{ marginTop: '1rem' }}>
             <label className="form-label">Long Description</label>
-            <SimpleMDE // Used SimpleMDE here
+            <SimpleMDE
               value={formData.longDescription}
               onChange={value => setFormData(prev => ({ ...prev, longDescription: value }))}
-              options={{ placeholder: 'Enter a more detailed description (supports Markdown formatting)' }}
+              options={mdeOptions}
             />
           </div>
           <div className="form-field">
@@ -351,48 +342,50 @@ const EditProduct = () => {
           </div>
         </div>
 
-        <div className="edit-product-form-section">
-          <h2 className="section-title">Product Details</h2>
-          <div className="form-grid">
-            {formData.category && categoryFields[formData.category]?.map(field => (
-              <div key={field.name} className="form-field">
-                <label className="form-label">{field.label}</label>
-                {field.name === 'color' ? (
-                  <>
+        {formData.category && (
+          <div className="edit-product-form-section">
+            <h2 className="section-title">Product Details</h2>
+            <div className="form-grid">
+              {categoryFields[formData.category]?.map(field => (
+                <div key={field.name} className="form-field">
+                  <label className="form-label">{field.label}</label>
+                  {field.name === 'color' ? (
+                    <>
+                      <input
+                        type="text"
+                        name="color"
+                        value={Array.isArray(formData.details.color) ? formData.details.color.join(', ') : (formData.details.color || '')}
+                        onChange={e => {
+                          const value = e.target.value;
+                          setFormData(prev => ({
+                            ...prev,
+                            details: {
+                              ...prev.details,
+                              color: value.split(',').map(c => c.trim()).filter(Boolean)
+                            }
+                          }));
+                        }}
+                        required
+                        className="form-input"
+                        placeholder="e.g. Red, Black, Gray"
+                      />
+                      <small>Enter multiple colors separated by commas</small>
+                    </>
+                  ) : (
                     <input
                       type="text"
-                      name="color"
-                      value={Array.isArray(formData.details.color) ? formData.details.color.join(', ') : (formData.details.color || '')}
-                      onChange={e => {
-                        const value = e.target.value;
-                        setFormData(prev => ({
-                          ...prev,
-                          details: {
-                            ...prev.details,
-                            color: value.split(',').map(c => c.trim()).filter(Boolean)
-                          }
-                        }));
-                      }}
+                      name={field.name}
+                      value={formData.details[field.name] || ''}
+                      onChange={handleDetailChange}
                       required
                       className="form-input"
-                      placeholder="e.g. Red, Black, Gray"
                     />
-                    <small>Enter multiple colors separated by commas</small>
-                  </>
-                ) : (
-                  <input
-                    type="text"
-                    name={field.name}
-                    value={formData.details[field.name] || ''}
-                    onChange={handleDetailChange}
-                    required
-                    className="form-input"
-                  />
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="edit-product-form-section">
           <h2 className="section-title">Product Images</h2>
@@ -414,7 +407,6 @@ const EditProduct = () => {
               multiple
               onChange={handleImageChange}
               className="file-input"
-              // Disable input if 5 images already exist
               disabled={formData.images.length + newImages.length >= 5}
             />
              {formData.images.length + newImages.length >= 5 && (

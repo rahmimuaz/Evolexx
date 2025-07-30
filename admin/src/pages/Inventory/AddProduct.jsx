@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './AddProduct.css';
@@ -171,6 +171,11 @@ const AddProduct = () => {
     }
   };
 
+  // Memoize the SimpleMDE options to prevent re-renders
+  const mdeOptions = useMemo(() => ({
+    placeholder: 'Enter a more detailed description (supports Markdown formatting)'
+  }), []);
+
   return (
     <div className="add-product-container">
       <h1 className="add-product-title">Add New Product</h1>
@@ -248,7 +253,7 @@ const AddProduct = () => {
             <SimpleMDE
               value={formData.longDescription}
               onChange={value => setFormData(prev => ({ ...prev, longDescription: value }))}
-              options={{ placeholder: 'Enter a more detailed description (supports Markdown formatting)' }}
+              options={mdeOptions}
             />
           </div>
           <div className="form-field">
