@@ -2,13 +2,38 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Homepage.css';
 import axios from 'axios';
-import { FaShippingFast, FaRedoAlt, FaSlidersH } from 'react-icons/fa';
+import { FaShippingFast, FaRedoAlt, FaSlidersH, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { HiShieldCheck } from 'react-icons/hi';
 import Footer from '../../components/Footer/Footer';
 import bannerImage from '../Home/banner1.jpg';
 
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+const bannerData = [
+  {
+    id: 1,
+    title: "iPhone 16 Pro Max",
+    description: "iPhone 16 Pro takes performance and innovation to a whole new level. Built with aerospace-grade titanium, it's lighter yet stronger than ever before. Powered by the breakthrough A18 Pro chip, it delivers unmatched speed, console-level gaming, and advanced machine learning for smarter everyday experiences. The Pro camera system captures stunning detail in any light, while the larger Super Retina XDR display brings movies, photos, and apps to life in brilliant color. With all-day battery, enhanced durability, and the most advanced iOS features, iPhone 16 Pro isn't just the next iPhone — it's the future in your hands.",
+    image: "/iPhone16ProMax.png",
+    link: "/products/iphone-16-pro-max"
+  },
+  {
+    id: 2,
+    title: "Watch Series 10",
+    description: "Apple Watch Series 10 is your ultimate companion for health, fitness, and connectivity. With a larger, brighter display, advanced heart and sleep tracking, and innovative safety features, it helps you stay active, motivated, and protected. Redesigned with powerful new sensors and the latest watchOS, it’s more than a watch — it’s a personal coach, a health monitor, and a life assistant, all on your wrist.",
+    image: "/series10.png",
+    link: "/category/Laptops"
+  },
+  {
+    id: 2,
+    title: "AirPods Max",
+    description: "AirPods Max reimagine over-ear headphones. From the custom acoustic design to the powerful Apple-designed driver, every detail is engineered for an immersive, high-fidelity sound experience. Active Noise Cancellation and Transparency mode let you control what you hear, while spatial audio with dynamic head tracking places sound all around you. With a soft, breathable knit mesh canopy and memory foam ear cushions, comfort meets pure audio bliss for hours of listening.",
+    image: "/airpodsMax.png",
+    link: "/category/Laptops"
+  }
+];
+
 
 const Homepage = () => {
   const [products, setProducts] = useState([]);
@@ -20,6 +45,43 @@ const Homepage = () => {
   const productsPerPage = 12;
   const productSectionRef = useRef(null);
   const headingRef = useRef(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Combine original banner data with a duplicate of the first slide for seamless looping
+  const slides = [...bannerData, bannerData[0]];
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [contentKey, setContentKey] = useState(0); // New state variable
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const prices = products.map(p => p.price || 0);
+      setPriceRange([Math.min(...prices), Math.max(...prices)]);
+    }
+  }, [products]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prevSlide) => (prevSlide + 1));
+    }, 5000); // Change slide every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (currentSlide === slides.length - 1) {
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setCurrentSlide(0);
+      }, 1000); // This delay should match the CSS transition duration
+    } else {
+      setIsTransitioning(true);
+    }
+    setContentKey(currentSlide); // Trigger re-render of content for animation
+  }, [currentSlide, slides.length]);
+
 
   const sortOptions = [
     { value: 'price-asc', label: 'Price: Low to High' },
@@ -32,16 +94,6 @@ const Homepage = () => {
   const [brandFilter, setBrandFilter] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    if (products.length > 0) {
-      const prices = products.map(p => p.price || 0);
-      setPriceRange([Math.min(...prices), Math.max(...prices)]);
-    }
-  }, [products]);
 
   const fetchProducts = async () => {
     try {
@@ -130,10 +182,10 @@ const Homepage = () => {
   };
 
   const getAverageRating = (reviews = []) => {
-  if (!reviews.length) return 0;
-  const total = reviews.reduce((sum, r) => sum + r.rating, 0);
-  return total / reviews.length;
-};
+    if (!reviews.length) return 0;
+    const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+    return total / reviews.length;
+  };
 
   if (loading) return <div className="loader">Loading products...</div>;
   if (error) return <div className="error">{error}</div>;
@@ -141,9 +193,36 @@ const Homepage = () => {
   return (
     <div className="home">
 
-      {/* Static Banner Section */}
-      <section className="banner">
-       <img src={bannerImage} className="banner-image" alt="Homepage Banner" />
+      {/* NEW BANNER SECTION */}
+      <section className="banner-new">
+        <div
+          className={`banner-slider ${isTransitioning ? 'transitioning' : ''}`}
+          style={{ transform: `translateX(-${currentSlide * 100}vw)` }}
+        >
+          {slides.map((slide, index) => (
+            <div className="banner-slide" key={index}>
+              <div key={contentKey} className="banner-content">
+                <h1>{slide.title}</h1>
+                <p>{slide.description}</p>
+                <Link to={slide.link} className="explore-button">Explore</Link>
+              </div>
+              <div className="banner-image-container">
+                <img src={slide.image} alt={slide.title} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="banner-controls">
+          <div className="pagination-dots-banner">
+            {bannerData.map((_, index) => (
+              <span
+                key={index}
+                className={`dot ${currentSlide === index ? 'active' : ''}`}
+                onClick={() => setCurrentSlide(index)}
+              ></span>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="features">
