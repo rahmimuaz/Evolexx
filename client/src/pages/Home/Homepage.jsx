@@ -280,12 +280,6 @@ const Homepage = () => {
           </div>
         </div>
       </section>
-
-      {/* Static Banner Section - Keeping as fallback */}
-      <section className="banner">
-       <img src={bannerImage} className="banner-image" alt="Homepage Banner" />
-      </section>
-
       <section className="features">
         <div className="feature"><FaShippingFast /><div className="feature-text"><h3>Fast & Free Shipping</h3><p>Every single order ships for free.</p></div></div>
         <div className="feature"><FaRedoAlt /><div className="feature-text"><h3>7 Days Returns</h3><p>Product returns accepted within 30 days.</p></div></div>
