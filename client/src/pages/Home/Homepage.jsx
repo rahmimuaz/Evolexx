@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Homepage.css';
 import axios from 'axios';
-import { FaShippingFast, FaRedoAlt, FaSlidersH } from 'react-icons/fa';
+import { FaShippingFast, FaRedoAlt, FaSlidersH, FaArrowRight, FaPlay, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { HiShieldCheck } from 'react-icons/hi';
 import Footer from '../../components/Footer/Footer';
 import bannerImage from '../Home/banner1.jpg';
@@ -17,6 +17,47 @@ const Homepage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [animationDirection, setAnimationDirection] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
+
+  // Hero section data
+  const heroSections = [
+    {
+      id: 1,
+      title: "Discover Amazing",
+      subtitle: "TECH PRODUCTS",
+      description: "Experience the future of technology with our curated collection of premium devices, accessories, and innovative solutions.",
+      background: bannerImage,
+      category: "All Products",
+      buttonText: "SHOP NOW"
+    },
+    {
+      id: 2,
+      title: "Premium Quality",
+      subtitle: "MOBILE PHONES",
+      description: "Get the latest smartphones with cutting-edge technology, stunning cameras, and powerful performance.",
+      background: "/BrandNewPhone.jpg",
+      category: "Mobile Phones",
+      buttonText: "EXPLORE PHONES"
+    },
+    {
+      id: 3,
+      title: "Powerful Performance",
+      subtitle: "LAPTOPS & COMPUTERS",
+      description: "High-performance laptops and desktops for work, gaming, and creative professionals.",
+      background: "/Laptop.jpg",
+      category: "Laptops",
+      buttonText: "VIEW LAPTOPS"
+    },
+    {
+      id: 4,
+      title: "Smart Accessories",
+      subtitle: "MOBILE ACCESSORIES",
+      description: "Enhance your mobile experience with premium accessories, cases, and smart gadgets.",
+      background: "/MobileAccessories.jpg",
+      category: "Accessories",
+      buttonText: "BROWSE ACCESSORIES"
+    }
+  ];
 
   const productsPerPage = 12;
   const productSectionRef = useRef(null);
@@ -136,13 +177,111 @@ const Homepage = () => {
   return total / reviews.length;
 };
 
+  const handleHeroCardClick = (index) => {
+    if (index === activeHeroIndex) return; // Don't animate if same card
+    
+    // Add fade-out animation to both text and background
+    const textContainer = document.querySelector('.hero-text-container');
+    const backgroundImage = document.querySelector('.hero-bg-image');
+    
+    if (textContainer && backgroundImage) {
+      // Fade out text and background
+      textContainer.classList.add('fade-out');
+      backgroundImage.classList.add('bg-fade-out');
+      
+      // Wait for fade-out to complete, then change content and fade-in
+      setTimeout(() => {
+        setActiveHeroIndex(index);
+        
+        // Add fade-in animation after content change
+        setTimeout(() => {
+          textContainer.classList.remove('fade-out');
+          backgroundImage.classList.remove('bg-fade-out');
+          textContainer.classList.add('fade-in');
+          backgroundImage.classList.add('bg-fade-in');
+          
+          // Remove fade-in classes after animation completes
+          setTimeout(() => {
+            textContainer.classList.remove('fade-in');
+            backgroundImage.classList.remove('bg-fade-in');
+          }, 600);
+        }, 100);
+      }, 400);
+    } else {
+      // Fallback if DOM elements not found
+      setActiveHeroIndex(index);
+    }
+  };
+
+  const nextHero = () => {
+    setActiveHeroIndex((prev) => (prev + 1) % heroSections.length);
+  };
+
+  const prevHero = () => {
+    setActiveHeroIndex((prev) => (prev - 1 + heroSections.length) % heroSections.length);
+  };
+
 
   if (loading) return <div className="loader">Loading products...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="home">
-      {/* Static Banner Section */}
+      {/* Interactive Hero Section */}
+      <section className="hero-section">
+        <div className="hero-background">
+          <img 
+            src={heroSections[activeHeroIndex].background} 
+            alt="Hero Background" 
+            className="hero-bg-image"
+          />
+          <div className="hero-overlay"></div>
+        </div>
+        
+        <div className="hero-content">
+          <div className="hero-text-container">
+            <div className="hero-line"></div>
+            <span className="hero-category">{heroSections[activeHeroIndex].category}</span>
+            <h1 className="hero-title">
+              <span className="title-main">{heroSections[activeHeroIndex].title}</span>
+              <span className="title-sub">{heroSections[activeHeroIndex].subtitle}</span>
+            </h1>
+            <p className="hero-description">
+              {heroSections[activeHeroIndex].description}
+            </p>
+            <div className="hero-actions">
+              <Link to={`/category/${encodeURIComponent(heroSections[activeHeroIndex].category)}`} className="discover-button">
+                {heroSections[activeHeroIndex].buttonText}
+              </Link>
+            </div>
+          </div>
+          
+          <div className="hero-cards-section">
+            <div className="cards-container">
+              {heroSections.map((section, index) => (
+                <div 
+                  key={section.id}
+                  className={`hero-card ${index === activeHeroIndex ? 'active' : ''}`}
+                  onClick={() => handleHeroCardClick(index)}
+                >
+                  <div className="card-image">
+                    <img src={section.background} alt={section.category} />
+                  </div>
+                  <div className="card-text">
+                    {section.subtitle}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="page-indicator">
+              {String(activeHeroIndex + 1).padStart(2, '0')}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Static Banner Section - Keeping as fallback */}
       <section className="banner">
        <img src={bannerImage} className="banner-image" alt="Homepage Banner" />
       </section>
