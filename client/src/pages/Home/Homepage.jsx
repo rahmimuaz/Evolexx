@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Homepage.css';
 import axios from 'axios';
-import { FaShippingFast, FaRedoAlt, FaSlidersH, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { HiShieldCheck } from 'react-icons/hi';
+import { FaSlidersH } from 'react-icons/fa';
 import Footer from '../../components/Footer/Footer';
 import bannerImage from '../Home/banner1.jpg';
 
@@ -26,12 +25,26 @@ const bannerData = [
     link: "/category/Laptops"
   },
   {
-    id: 2,
+    id: 3, // Corrected to a unique ID
     title: "AirPods Max",
     description: "AirPods Max reimagine over-ear headphones. From the custom acoustic design to the powerful Apple-designed driver, every detail is engineered for an immersive, high-fidelity sound experience. Active Noise Cancellation and Transparency mode let you control what you hear, while spatial audio with dynamic head tracking places sound all around you. With a soft, breathable knit mesh canopy and memory foam ear cushions, comfort meets pure audio bliss for hours of listening.",
     image: "/airpodsMax.png",
     link: "/category/Laptops"
   }
+];
+
+// Static brand data for the scrolling carousel
+const staticBrands = [
+  { name: 'Apple', logo: '/brands/apple.png', link: '/products?brand=Apple' },
+  { name: 'Samsung', logo: '/brands/samsung.png', link: '/products?brand=Samsung' },
+  { name: 'Google', logo: '/brands/google.png', link: '/products?brand=Google' },
+  { name: 'Huawei', logo: '/brands/huawei.png', link: '/products?brand=Huawei' },
+  { name: 'Xiaomi', logo: '/brands/xiaomi.png', link: '/products?brand=Xiaomi' },
+  { name: 'Sony', logo: '/brands/sony.png', link: '/products?brand=Sony' },
+  { name: 'HP', logo: '/brands/hp.png', link: '/products?brand=HP' },
+  { name: 'Dell', logo: '/brands/dell.png', link: '/products?brand=Dell' },
+  { name: 'Lenovo', logo: '/brands/lenovo.png', link: '/products?brand=Lenovo' },
+  { name: 'Asus', logo: '/brands/asus.png', link: '/products?brand=Asus' },
 ];
 
 
@@ -118,7 +131,11 @@ const Homepage = () => {
     return '/logo192.png';
   };
 
+  // Get all unique brands from fetched products for the filter dropdown
   const allBrands = Array.from(new Set(products.map(p => p.details?.brand).filter(Boolean)));
+  // Combine static brand data with a duplicate for a continuous scrolling effect
+  const duplicatedBrands = [...staticBrands, ...staticBrands];
+
 
   const filteredProducts = products.filter(product => {
     const price = product.price || 0;
@@ -224,13 +241,6 @@ const Homepage = () => {
           </div>
         </div>
       </section>
-
-      <section className="features">
-        <div className="feature"><FaShippingFast /><div className="feature-text"><h3>Fast & Free Shipping</h3><p>Every single order ships for free.</p></div></div>
-        <div className="feature"><FaRedoAlt /><div className="feature-text"><h3>7 Days Returns</h3><p>Product returns accepted within 30 days.</p></div></div>
-        <div className="feature"><HiShieldCheck /><div className="feature-text"><h3>Top Quality Products</h3><p>We always provide high quality products.</p></div></div>
-      </section>
-
       <section className="category-section">
         <div className="category-grid-custom">
           <Link to="/category/Mobile%20Phone" className="category-card tall">
@@ -364,7 +374,17 @@ const Homepage = () => {
           ))}
         </div>
       </section>
-
+           {/* NEW BRANDS CAROUSEL SECTION */}
+      <section className="scrolling-brands-container">
+        <div className="scrolling-brands">
+          {duplicatedBrands.map((brand, index) => (
+            <Link to={brand.link} className="brand-item" key={`${brand.name}-${index}`}>
+              <img src={brand.logo} alt={`${brand.name} Logo`} className="brand-logo" />
+              <h3>{brand.name}</h3>
+            </Link>
+          ))}
+        </div>
+      </section>
       <Footer />
     </div>
   );
