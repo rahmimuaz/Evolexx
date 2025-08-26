@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Homepage.css';
 import axios from 'axios';
-import { FaShippingFast, FaRedoAlt, FaSlidersH } from 'react-icons/fa';
-import { HiShieldCheck } from 'react-icons/hi';
+import { FaSlidersH } from 'react-icons/fa';
 import Footer from '../../components/Footer/Footer';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -33,13 +32,13 @@ const bannerData = [
 ];
 
 const staticBrands = [
-  { name: 'Apple', logo: '/brands/apple.png', link: '/products?brand=Apple' },
-  { name: 'Samsung', logo: '/brands/samsung.png', link: '/products?brand=Samsung' },
-  { name: 'Google', logo: '/brands/google.png', link: '/products?brand=Google' },
-  { name: 'Anker', logo: '/brands/Anker.png', link: '/products?brand=Huawei' },
-  { name: 'Xiaomi', logo: '/brands/xiaomi.png', link: '/products?brand=Xiaomi' },
-  { name: 'Sony', logo: '/brands/ugreen.png', link: '/products?brand=Sony' },
-  { name: 'HP', logo: '/brands/baseus.png', link: '/products?brand=HP' },
+  { logo: '/brands/apple.png'},
+  { logo: '/brands/samsung.png' },
+  { logo: '/brands/google.png' },
+  { logo: '/brands/Anker.png'},
+  { logo: '/brands/xiaomi.png'},
+  { logo: '/brands/ugreen.png'},
+  { logo: '/brands/baseus.png'},
 ];
 
 const Homepage = () => {
@@ -364,18 +363,14 @@ const Homepage = () => {
           ))}
         </div>
       </section>
-
       {/* SCROLLING BRANDS */}
       <section className="scrolling-brands-container">
         <div className="scrolling-brands">
-          {staticBrands.concat(staticBrands).map((brand, index) => (
-            <Link to={brand.link} className="brand-item" key={`${brand.name}-${index}`}>
+          {staticBrands.concat(staticBrands).map((brand) => (
               <img src={brand.logo} alt={`${brand.name} Logo`} className="brand-logo" />
-            </Link>
           ))}
         </div>
       </section>
-
       <Footer />
     </div>
   );
