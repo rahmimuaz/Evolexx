@@ -2,9 +2,11 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Homepage.css';
 import axios from 'axios';
-import { FaShippingFast, FaRedoAlt, FaSlidersH } from 'react-icons/fa';
+import { FaShippingFast, FaRedoAlt, FaSlidersH, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { HiShieldCheck } from 'react-icons/hi';
 import Footer from '../../components/Footer/Footer';
+import bannerImage from '../Home/banner1.jpg';
+
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -32,6 +34,7 @@ const bannerData = [
   }
 ];
 
+// Static brand data for the scrolling carousel
 const staticBrands = [
   { name: 'Apple', logo: '/brands/apple.png', link: '/products?brand=Apple' },
   { name: 'Samsung', logo: '/brands/samsung.png', link: '/products?brand=Samsung' },
@@ -54,8 +57,10 @@ const Homepage = () => {
   const headingRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const slides = [...bannerData, bannerData[0]]; // duplicate first slide for looping
-  const sliderRef = useRef(null);
+  // Combine original banner data with a duplicate of the first slide for seamless looping
+  const slides = [...bannerData, bannerData[0]];
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [contentKey, setContentKey] = useState(0); // New state variable
 
   useEffect(() => {
     fetchProducts();
@@ -70,20 +75,21 @@ const Homepage = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prevSlide) => prevSlide + 1);
-    }, 5000); // auto slide every 5s
+      setCurrentSlide((prevSlide) => (prevSlide + 1));
+    }, 5000); // Change slide every 5 seconds
     return () => clearInterval(interval);
   }, []);
 
-  // Removed the handleTransitionEnd logic
-  // The carousel will now transition from the last real slide to the duplicated slide.
-  // We'll reset the state instantly after that transition to loop seamlessly.
   useEffect(() => {
     if (currentSlide === slides.length - 1) {
       setTimeout(() => {
+        setIsTransitioning(false);
         setCurrentSlide(0);
-      }, 1000); // Wait for the transition to finish (1s) before resetting
+      }, 1000); // This delay should match the CSS transition duration
+    } else {
+      setIsTransitioning(true);
     }
+    setContentKey(currentSlide); // Trigger re-render of content for animation
   }, [currentSlide, slides.length]);
 
 
@@ -97,6 +103,7 @@ const Homepage = () => {
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [brandFilter, setBrandFilter] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
+
 
   const fetchProducts = async () => {
     try {
@@ -148,9 +155,11 @@ const Homepage = () => {
     if (pageNumber >= 1 && pageNumber <= totalPages && pageNumber !== currentPage) {
       const direction = pageNumber > currentPage ? 'slide-left' : 'slide-right';
       setAnimationDirection(direction);
+
       setTimeout(() => {
         setCurrentPage(pageNumber);
         setAnimationDirection('');
+
         if (headingRef.current) {
           const topPos = headingRef.current.getBoundingClientRect().top + window.pageYOffset;
           const offset = 80;
@@ -161,7 +170,8 @@ const Homepage = () => {
   };
 
   const handleBrandChange = (event) => {
-    setBrandFilter(event.target.value);
+    const selectedBrand = event.target.value;
+    setBrandFilter(selectedBrand);
     setCurrentPage(1);
   };
 
@@ -193,19 +203,15 @@ const Homepage = () => {
   return (
     <div className="home">
 
-      {/* BANNER SECTION WITH OLD TRANSITION */}
+      {/* NEW BANNER SECTION */}
       <section className="banner-new">
         <div
-          ref={sliderRef}
-          className="banner-slider"
-          style={{
-            transform: `translateX(-${currentSlide * 100}vw)`,
-            transition: currentSlide === 0 && slides.length > 1 ? 'none' : 'transform 1s ease-in-out'
-          }}
+          className={`banner-slider ${isTransitioning ? 'transitioning' : ''}`}
+          style={{ transform: `translateX(-${currentSlide * 100}vw)` }}
         >
           {slides.map((slide, index) => (
             <div className="banner-slide" key={index}>
-              <div className="banner-content">
+              <div key={contentKey} className="banner-content">
                 <h1>{slide.title}</h1>
                 <p>{slide.description}</p>
                 <Link to={slide.link} className="explore-button">Explore</Link>
@@ -221,7 +227,7 @@ const Homepage = () => {
             {bannerData.map((_, index) => (
               <span
                 key={index}
-                className={`dot ${currentSlide === index || (currentSlide === slides.length - 1 && index === 0) ? 'active' : ''}`}
+                className={`dot ${currentSlide === index ? 'active' : ''}`}
                 onClick={() => setCurrentSlide(index)}
               ></span>
             ))}
@@ -229,7 +235,12 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* CATEGORY SECTION */}
+      <section className="features">
+        <div className="feature"><FaShippingFast /><div className="feature-text"><h3>Fast & Free Shipping</h3><p>Every single order ships for free.</p></div></div>
+        <div className="feature"><FaRedoAlt /><div className="feature-text"><h3>7 Days Returns</h3><p>Product returns accepted within 30 days.</p></div></div>
+        <div className="feature"><HiShieldCheck /><div className="feature-text"><h3>Top Quality Products</h3><p>We always provide high quality products.</p></div></div>
+      </section>
+
       <section className="category-section">
         <div className="category-grid-custom">
           <Link to="/category/Mobile%20Phone" className="category-card tall">
@@ -255,7 +266,6 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* PRODUCT SECTION */}
       <section className="product-section" ref={productSectionRef}>
         <div className="heading-with-icon">
           <h2 ref={headingRef}>All Products</h2>
@@ -364,17 +374,16 @@ const Homepage = () => {
           ))}
         </div>
       </section>
-
-      {/* SCROLLING BRANDS */}
-      <section className="scrolling-brands-container">
-        <div className="scrolling-brands">
-          {staticBrands.concat(staticBrands).map((brand, index) => (
-            <Link to={brand.link} className="brand-item" key={`${brand.name}-${index}`}>
-              <img src={brand.logo} alt={`${brand.name} Logo`} className="brand-logo" />
-            </Link>
-          ))}
-        </div>
-      </section>
+            {/* NEW BRANDS CAROUSEL SECTION */}
+            <section className="scrolling-brands-container">
+              <div className="scrolling-brands">
+                {duplicatedBrands.map((brand, index) => (
+                  <Link to={brand.link} className="brand-item" key={`${brand.name}-${index}`}>
+                    <img src={brand.logo} alt={`${brand.name} Logo`} className="brand-logo" />
+                  </Link>
+                ))}
+              </div>
+            </section>
 
       <Footer />
     </div>
