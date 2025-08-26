@@ -38,13 +38,10 @@ const staticBrands = [
   { name: 'Apple', logo: '/brands/apple.png', link: '/products?brand=Apple' },
   { name: 'Samsung', logo: '/brands/samsung.png', link: '/products?brand=Samsung' },
   { name: 'Google', logo: '/brands/google.png', link: '/products?brand=Google' },
-  { name: 'Huawei', logo: '/brands/huawei.png', link: '/products?brand=Huawei' },
+  { name: 'Anker', logo: '/brands/Anker.png', link: '/products?brand=Huawei' },
   { name: 'Xiaomi', logo: '/brands/xiaomi.png', link: '/products?brand=Xiaomi' },
-  { name: 'Sony', logo: '/brands/sony.png', link: '/products?brand=Sony' },
-  { name: 'HP', logo: '/brands/hp.png', link: '/products?brand=HP' },
-  { name: 'Dell', logo: '/brands/dell.png', link: '/products?brand=Dell' },
-  { name: 'Lenovo', logo: '/brands/lenovo.png', link: '/products?brand=Lenovo' },
-  { name: 'Asus', logo: '/brands/asus.png', link: '/products?brand=Asus' },
+  { name: 'Sony', logo: '/brands/ugreen.png', link: '/products?brand=Sony' },
+  { name: 'HP', logo: '/brands/baseus.png', link: '/products?brand=HP' },
 ];
 
 
@@ -380,7 +377,6 @@ const Homepage = () => {
           {duplicatedBrands.map((brand, index) => (
             <Link to={brand.link} className="brand-item" key={`${brand.name}-${index}`}>
               <img src={brand.logo} alt={`${brand.name} Logo`} className="brand-logo" />
-              <h3>{brand.name}</h3>
             </Link>
           ))}
         </div>
