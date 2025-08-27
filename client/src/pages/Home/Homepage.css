@@ -167,14 +167,12 @@
   transition: color 0.3s ease;
 }
 
-.brand-item:hover {
-  color: #007bff;
-}
+
 
 .brand-logo {
   height: 50px;
   width: auto;
-  object-fit: contain;
+  margin-left: 60px;
 }
 
 .brand-item h3 {
