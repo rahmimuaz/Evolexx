@@ -124,14 +124,15 @@ const CategoryPage = () => {
 
   return (
     <div className="product-section2">
-      <div className="heading-with-icon1">
+      <div className="heading-with-icon">
         <h2 ref={headingRef}>{category}</h2>
-      </div>
-    <FaSlidersH
-          className="filter-toggle-icon1"
+        <FaSlidersH
+          className="filter-toggle-icon"
           onClick={() => setShowFilters(!showFilters)}
           title="Filter & Sort"
         />
+      </div>
+
       {showFilters && (
         <div className="filter-sort-bar">
           <div className="filter-group">

@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar/Navbar';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Sidebar from './components/Sidebar/Sidebar';
 import AddProduct from './pages/Inventory/AddProduct';
 import EditProduct from './pages/Inventory/EditProduct';
 import Products from './pages/Inventory/Products';
@@ -11,19 +11,10 @@ import LoginForm from './pages/AdminLogin/LoginForm';
 import RegisterForm from './pages/AdminLogin/RegisterForm';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './index.css';
+import './styles/admin-global.css';
 import LowStockProducts from './pages/Inventory/LowStockProducts';
 import OutOfStockProducts from './pages/Inventory/OutOfStockProducts';
 import UserList from './pages/AdminDashboard/UserList';
-
-const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return children;
-};
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -41,24 +32,20 @@ function AppContent() {
   return (
     <>
       {isAuthenticated ? (
-        <Navbar>
-          <main className="main-content">
-            <div className="max-width-container">
-              <Routes>
-                <Route path="/" element={<AdminDashboard />} />
-                <Route path="/AddProduct" element={<AddProduct />} />
-                <Route path="/EditProduct/:id" element={<EditProduct />} />
-                <Route path="/Products" element={<Products />} />
-                <Route path="/OrderList" element={<OrderList />} />
-                <Route path="/ToBeShippedList" element={<ToBeShippedList />} />
-                <Route path="/admin/low-stock" element={<LowStockProducts />} />
-                <Route path="/admin/out-of-stock" element={<OutOfStockProducts />} />
-                <Route path="/admin/users" element={<UserList />} />
-                <Route path="*" element={<AdminDashboard />} />
-              </Routes>
-            </div>
-          </main>
-        </Navbar>
+        <Sidebar>
+          <Routes>
+            <Route path="/" element={<AdminDashboard />} />
+            <Route path="/AddProduct" element={<AddProduct />} />
+            <Route path="/EditProduct/:id" element={<EditProduct />} />
+            <Route path="/Products" element={<Products />} />
+            <Route path="/OrderList" element={<OrderList />} />
+            <Route path="/ToBeShippedList" element={<ToBeShippedList />} />
+            <Route path="/admin/low-stock" element={<LowStockProducts />} />
+            <Route path="/admin/out-of-stock" element={<OutOfStockProducts />} />
+            <Route path="/admin/users" element={<UserList />} />
+            <Route path="*" element={<AdminDashboard />} />
+          </Routes>
+        </Sidebar>
       ) : (
         <Routes>
           <Route path="/login" element={<PublicRoute><LoginForm /></PublicRoute>} />

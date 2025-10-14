@@ -1,7 +1,7 @@
 
 .product-section2 {
   height: 81vh;
-  padding: 0rem 2rem;
+  padding: 1rem 2rem;
   text-align: center;
   background-color: #ffffff;
   margin-bottom: 100px;
@@ -10,7 +10,7 @@
 .product-section2 h2 {
   font-size: 2rem;
   font-weight: 800;
-  margin-top: 10px;
+  margin-top: 20px;
   position: relative;
   display: block; /* Ensures it takes full width for margin auto to work */
   text-align: center;
@@ -27,23 +27,6 @@
   margin-bottom: 50px;
 }
 
-.filter-toggle-icon1 {
-  display: flex;
-  justify-content: space-between; /* Spreads out items */
-  align-items: center;
-  font-size: 1.4rem;
-  cursor: pointer;
-  color: #000;
-  transition: color 0.3s ease;
-  user-select: none;
-  margin-left: auto; /* Pushes the icon to the far right */
-  margin-bottom: 30px;
-}
-
-.filter-toggle-icon1:hover{
-  color: #4d4d4d;
-}
-
 
 
 @media (max-width: 768px) {
@@ -53,9 +36,5 @@
   }
     .product-section2 h2{
    font-size: 1.5rem;
-  }
-  .filter-toggle-icon1{
-    font-size: 1.2rem; /* Adjust icon size for smaller screens */
-    margin-bottom: 20px; /* Reduce bottom margin for smaller screens */
   }
 }

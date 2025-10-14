@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../context/UserContext';
 import { Link } from 'react-router-dom';
 import './MyOrders.css';
 
@@ -68,7 +68,7 @@ const MyOrders = () => {
         <table className="orders-table">
           <thead>
             <tr>
-              <th>Order ID</th>
+              <th>Order #</th>
               <th>Date</th>
               <th>Total</th>
               <th>Status</th>

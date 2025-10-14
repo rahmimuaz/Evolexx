@@ -1,109 +1,242 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AdminDashboard.css';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
-import { useEffect, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Filler } from 'chart.js';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Filler);
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [orderStats, setOrderStats] = useState({ labels: [], data: [] });
+  const [dashboardStats, setDashboardStats] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    pendingOrders: 0,
+    lowStockProducts: 0,
+    outOfStockProducts: 0,
+    totalUsers: 0,
+    completedOrders: 0
+  });
   const [loading, setLoading] = useState(true);
 
-  // Define the API base URL from environment variables
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
-    // Fetch orders and group by date
-    const fetchOrderStats = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem('authToken');
-        // Use the API_BASE_URL here
-        const res = await fetch(`${API_BASE_URL}/api/orders`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const orders = await res.json();
-        // Group orders by date (YYYY-MM-DD)
-        const dateMap = {};
-        orders.forEach(order => {
-          // Use 'en-CA' or another locale that formats dates as YYYY-MM-DD for consistent keys
-          // Or explicitly format:
-          const orderDate = new Date(order.createdAt);
-          const date = orderDate.toISOString().split('T')[0]; // YYYY-MM-DD
-          dateMap[date] = (dateMap[date] || 0) + 1;
-        });
+    fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API_BASE_URL]);
 
-        // Sort labels to ensure chronological order on the chart
-        const labels = Object.keys(dateMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-        const data = labels.map(date => dateMap[date]);
-        setOrderStats({ labels, data });
-      } catch (err) {
-        console.error("Failed to fetch order statistics:", err); // Log the error
-        setOrderStats({ labels: [], data: [] });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrderStats();
-  }, [API_BASE_URL]); // Add API_BASE_URL to the dependency array
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+
+      // Fetch all necessary data
+      const [ordersRes, productsRes, usersRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/orders`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/api/products`),
+        fetch(`${API_BASE_URL}/api/users`, { headers: { Authorization: `Bearer ${token}` } }).catch(() => null)
+      ]);
+
+      const orders = await ordersRes.json();
+      const products = await productsRes.json();
+      const users = usersRes ? await usersRes.json() : [];
+
+      // Calculate stats
+      const stats = {
+        totalProducts: products.length,
+        totalOrders: orders.length,
+        totalRevenue: orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0),
+        pendingOrders: orders.filter(o => o.status === 'pending').length,
+        completedOrders: orders.filter(o => o.status === 'delivered').length,
+        lowStockProducts: products.filter(p => p.stock > 0 && p.stock < 5).length,
+        outOfStockProducts: products.filter(p => p.stock === 0).length,
+        totalUsers: users.length || 0
+      };
+
+      setDashboardStats(stats);
+
+      // Process order stats for chart
+      const dateMap = {};
+      orders.forEach(order => {
+        const orderDate = new Date(order.createdAt);
+        const date = orderDate.toISOString().split('T')[0];
+        dateMap[date] = (dateMap[date] || 0) + 1;
+      });
+
+      const labels = Object.keys(dateMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()).slice(-7); // Last 7 days
+      const data = labels.map(date => dateMap[date]);
+      setOrderStats({ labels, data });
+
+    } catch (err) {
+      console.error("Failed to fetch dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Loading Dashboard...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="admin-dashboard-layout">
-      <aside className="admin-sidebar">
-        <ul className="sidebar-links">
-          <li onClick={() => navigate('/AddProduct')}>Add Product</li>
-          <li onClick={() => navigate('/Products')}>View All Products</li>
-          <li onClick={() => navigate('/OrderList')}>View Orders</li>
-          <li onClick={() => navigate('/ToBeShippedList')}>View Shipments</li>
-          <li onClick={() => navigate('/admin/low-stock')}>Low Stock Products</li>
-          <li onClick={() => navigate('/admin/out-of-stock')}>Out of Stock Products</li>
-          <li onClick={() => navigate('/admin/users')}>View All Users</li>
-        </ul>
-      </aside>
-      <main className="admin-dashboard-main">
-        <h1 className="dashboard-title">Welcome to the Admin Dashboard</h1>
-        <p className="dashboard-description">
-          Here you can get a quick overview of your inventory, orders, and shipments.
-        </p>
-        <div className="dashboard-graph-placeholder">
-          {loading ? (
-            <span>Loading order graph...</span>
-          ) : orderStats.labels.length === 0 ? (
-            <span>No order data available</span>
+    <div>
+      {/* Page Header */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h1 className="page-title">Dashboard</h1>
+        <p className="page-subtitle">Welcome back! Here's what's happening with your store today.</p>
+      </div>
+
+      {/* Stats Grid - 5 Cards in Single Line */}
+      <div className="stats-grid">
+        <div className="stat-card" onClick={() => navigate('/Products')} style={{ cursor: 'pointer' }}>
+          <div className="stat-card-header">
+            <div className="stat-card-title">Total Products</div>
+            <div className="stat-card-icon">📦</div>
+          </div>
+          <div className="stat-card-value">{dashboardStats.totalProducts}</div>
+          <div className="stat-card-change positive">→ View all products</div>
+        </div>
+
+        <div className="stat-card" onClick={() => navigate('/OrderList')} style={{ cursor: 'pointer' }}>
+          <div className="stat-card-header">
+            <div className="stat-card-title">Total Orders</div>
+            <div className="stat-card-icon">🛒</div>
+          </div>
+          <div className="stat-card-value">{dashboardStats.totalOrders}</div>
+          <div className="stat-card-change positive">→ View all orders</div>
+        </div>
+
+        <div className="stat-card" onClick={() => navigate('/OrderList')} style={{ cursor: 'pointer' }}>
+          <div className="stat-card-header">
+            <div className="stat-card-title">Pending Orders</div>
+            <div className="stat-card-icon">⏳</div>
+          </div>
+          <div className="stat-card-value">{dashboardStats.pendingOrders}</div>
+          <div className="stat-card-change">⚠ Needs attention</div>
+        </div>
+
+        <div className="stat-card" onClick={() => navigate('/admin/low-stock')} style={{ cursor: 'pointer' }}>
+          <div className="stat-card-header">
+            <div className="stat-card-title">Low Stock</div>
+            <div className="stat-card-icon">⚠️</div>
+          </div>
+          <div className="stat-card-value">{dashboardStats.lowStockProducts}</div>
+          <div className="stat-card-change">→ View products</div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-header">
+            <div className="stat-card-title">Completed</div>
+            <div className="stat-card-icon">✅</div>
+          </div>
+          <div className="stat-card-value">{dashboardStats.completedOrders}</div>
+          <div className="stat-card-change positive">✓ Delivered orders</div>
+        </div>
+      </div>
+
+      {/* Orders Chart */}
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h2 className="admin-card-title">Orders Overview (Last 7 Days)</h2>
+          <button onClick={fetchDashboardData} className="btn btn-sm btn-secondary">
+            🔄 Refresh
+          </button>
+        </div>
+        <div className="admin-card-body">
+          {orderStats.labels.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">📊</div>
+              <div className="empty-state-title">No order data available</div>
+              <div className="empty-state-text">Orders will appear here once they are placed</div>
+            </div>
           ) : (
-            <Bar
-              data={{
-                labels: orderStats.labels,
-                datasets: [
-                  {
-                    label: 'New Orders',
-                    data: orderStats.data,
-                    backgroundColor: '#3b82f6',
+            <div style={{ height: '220px' }}>
+              <Line
+                data={{
+                  labels: orderStats.labels.map(date => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                  datasets: [
+                    {
+                      label: 'New Orders',
+                      data: orderStats.data,
+                      borderColor: '#0f172a',
+                      backgroundColor: 'rgba(15, 23, 42, 0.05)',
+                      borderWidth: 2.5,
+                      fill: true,
+                      tension: 0.4,
+                      pointRadius: 4,
+                      pointHoverRadius: 6,
+                      pointBackgroundColor: '#0f172a',
+                      pointBorderColor: '#fff',
+                      pointBorderWidth: 2,
+                      pointHoverBackgroundColor: '#0f172a',
+                      pointHoverBorderColor: '#fff',
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: { 
+                      enabled: true,
+                      backgroundColor: '#0f172a',
+                      padding: 12,
+                      titleFont: { size: 13, weight: '600' },
+                      bodyFont: { size: 12 },
+                      borderColor: '#e2e8f0',
+                      borderWidth: 1,
+                      cornerRadius: 8,
+                      displayColors: false,
+                    },
+                    filler: {
+                      propagate: false
+                    }
                   },
-                ],
-              }}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: { enabled: true },
-                },
-                scales: {
-                  x: { title: { display: true, text: 'Date' } },
-                  y: { title: { display: true, text: 'Orders' }, beginAtZero: true },
-                },
-              }}
-              height={80} // Adjust height as needed
-            />
+                  scales: {
+                    x: { 
+                      grid: { 
+                        display: false 
+                      },
+                      ticks: {
+                        font: { size: 11 },
+                        color: '#64748b'
+                      }
+                    },
+                    y: { 
+                      beginAtZero: true,
+                      ticks: { 
+                        stepSize: 1,
+                        font: { size: 11 },
+                        color: '#64748b'
+                      },
+                      grid: { 
+                        color: 'rgba(0, 0, 0, 0.04)',
+                        drawBorder: false
+                      },
+                      border: {
+                        display: false
+                      }
+                    },
+                  },
+                  interaction: {
+                    intersect: false,
+                    mode: 'index',
+                  },
+                }}
+              />
+            </div>
           )}
         </div>
-        <div className="dashboard-cards-grid">
-          {/* Existing cards can be kept or moved as needed */}
-        </div>
-      </main>
+      </div>
+
     </div>
   );
 };

@@ -5,13 +5,14 @@ const UserList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Define the API base URL from environment variables
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     fetchUsers();
-  }, [API_BASE_URL]); // Add API_BASE_URL to dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API_BASE_URL]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -42,36 +43,157 @@ const UserList = () => {
     }
   };
 
+  // Filter users
+  const filteredUsers = users.filter(user => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      (user.name || user.username || '').toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower)
+    );
+  });
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Loading Users...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="alert alert-error">
+        {error}
+      </div>
+    );
+  }
+
   return (
-    <div className="users-container">
-      <h1 className="users-title">Registered Users</h1>
-      {loading ? (
-        <div>Loading...</div>
-      ) : error ? (
-        <div style={{ color: 'red' }}>{error}</div>
-      ) : (
-        <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: 20 }}>
+    <div>
+      {/* Page Header */}
+      <div className="mb-5">
+        <h1 className="page-title">👥 Customer Management</h1>
+        <p className="page-subtitle">View and manage all registered users</p>
+      </div>
+
+      {/* Stats */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-card-header">
+            <div className="stat-card-title">Total Customers</div>
+            <div className="stat-card-icon">👥</div>
+          </div>
+          <div className="stat-card-value">{users.length}</div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-header">
+            <div className="stat-card-title">Admin Users</div>
+            <div className="stat-card-icon">👤</div>
+          </div>
+          <div className="stat-card-value">
+            {users.filter(u => u.isAdmin || u.role === 'admin').length}
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-header">
+            <div className="stat-card-title">Regular Users</div>
+            <div className="stat-card-icon">👨‍💼</div>
+          </div>
+          <div className="stat-card-value">
+            {users.filter(u => !u.isAdmin && u.role !== 'admin').length}
+          </div>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="admin-card">
+        <div className="form-group" style={{ marginBottom: 0 }}>
+          <label className="form-label">Search Users</label>
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div className="admin-table-container">
+        <table className="admin-table">
           <thead>
             <tr>
-              <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>Name</th>
-              <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>Email</th>
-              <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>Role</th>
-              <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>Actions</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Registered</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
-              <tr key={user._id}>
-                <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>{user.name || user.username}</td>
-                <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>{user.email}</td>
-                <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>{user.role || 'user'}</td>
-                <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
-                  <button onClick={() => handleDelete(user._id)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Delete</button>
+            {filteredUsers.length === 0 ? (
+              <tr>
+                <td colSpan="5">
+                  <div className="empty-state">
+                    <div className="empty-state-icon">👥</div>
+                    <div className="empty-state-title">No users found</div>
+                    <div className="empty-state-text">
+                      {searchTerm ? 'Try adjusting your search' : 'No registered users yet'}
+                    </div>
+                  </div>
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredUsers.map(user => (
+                <tr key={user._id}>
+                  <td>
+                    <span className="text-bold">{user.name || user.username || 'N/A'}</span>
+                  </td>
+                  <td>{user.email}</td>
+                  <td>
+                    {user.isAdmin || user.role === 'admin' ? (
+                      <span className="badge badge-info">Admin</span>
+                    ) : (
+                      <span className="badge badge-gray">Customer</span>
+                    )}
+                  </td>
+                  <td className="text-secondary">
+                    {user.createdAt 
+                      ? new Date(user.createdAt).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })
+                      : 'N/A'
+                    }
+                  </td>
+                  <td>
+                    <div className="table-actions">
+                      <button
+                        onClick={() => handleDelete(user._id)}
+                        className="btn btn-sm btn-danger"
+                        title="Delete User"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
+      </div>
+
+      {/* Footer Info */}
+      {filteredUsers.length > 0 && (
+        <div className="text-center mt-4 text-secondary">
+          Showing {filteredUsers.length} of {users.length} users
+        </div>
       )}
     </div>
   );

@@ -32,19 +32,36 @@ export const getProduct = async (req, res) => {
 // Create a new product
 export const createProduct = async (req, res) => {
   try {
-    const { name, category, price, description, longDescription, stock, details, warrantyPeriod, discountPrice, kokoPay } = req.body;
+    const { name, category, price, description, longDescription, stock, details, warrantyPeriod, discountPrice, kokoPay, variants, hasVariants } = req.body;
 
-    // Check if files were uploaded (assuming 'req.files' comes from a multer setup with cloudinary)
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'Product must have at least one image.' });
+    let images = [];
+    let parsedVariants = [];
+
+    // Handle color variants if present
+    if (hasVariants === 'true' && variants) {
+      try {
+        parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+        
+        // Use images from the request body (already uploaded)
+        if (req.body.images) {
+          images = typeof req.body.images === 'string' ? JSON.parse(req.body.images) : req.body.images;
+        }
+      } catch (err) {
+        return res.status(400).json({ message: 'Invalid JSON format for variants.' });
+      }
+    } else {
+      // Traditional product with no variants
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'Product must have at least one image.' });
+      }
+
+      if (req.files.length > 5) {
+        return res.status(400).json({ message: 'Product cannot have more than 5 images.' });
+      }
+
+      // Extract image paths (Cloudinary URLs) from uploaded files
+      images = req.files.map(file => file.path);
     }
-
-    if (req.files.length > 5) {
-      return res.status(400).json({ message: 'Product cannot have more than 5 images.' });
-    }
-
-    // Extract image paths (Cloudinary URLs) from uploaded files
-    const images = req.files.map(file => file.path);
 
     // Validate essential fields
     if (!name || !category || !price || !description || stock === undefined || stock === null) {

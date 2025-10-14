@@ -1,6 +1,7 @@
 /* === General Container Styling === */
 .order-details-page-container {
   padding: 30px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 
@@ -47,7 +48,7 @@
 }
 
 .order-placed-date {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #777;
 }
 
@@ -61,8 +62,8 @@
 .order-status-badge,
 .payment-status-badge {
   padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #fff;
   text-transform: capitalize;
@@ -70,13 +71,13 @@
 
 .status-delivered { background-color: #28a745; }
 .status-shipped { background-color: #17a2b8; }
-.status-approved { background-color: #28a745; color: #ffffff; }
+.status-approved { background-color: #ff5107a4; color: #000; }
 .status-denied { background-color: #dc3545; }
 .status-default { background-color: #6c757d; }
 
 .payment-completed { background-color: #28a745; }
 .payment-failed { background-color: #dc3545; }
-.payment-pending { background-color: #f7682f; color: #ffffff; }
+.payment-pending { background-color: #218838; color: #ffffff; }
 
 .info-section {
   display: flex;
@@ -104,8 +105,8 @@
 }
 
 .info-heading {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 600;
   color: #222;
   margin-bottom: 15px;
   display: flex;
@@ -114,12 +115,12 @@
 }
 
 .info-heading::before {
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 .info-details-group p {
   margin: 6px 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #555;
   display: flex;
   align-items: center;
@@ -133,7 +134,7 @@
 }
 
 .font-medium {
-  font-weight: 450;
+  font-weight: 500;
   color: #111;
 }
 
@@ -180,7 +181,7 @@
 
 .product-color,
 .product-quantity {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #666;
 }
 
@@ -197,13 +198,13 @@
 }
 
 .summary-heading {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 5px;
 }
 
 .total-price {
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #000;
 }

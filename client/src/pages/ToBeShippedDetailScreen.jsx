@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../context/UserContext';
 import { toast } from 'react-toastify';
-import '../../components/OrderDetails/OrderDetails';
+import '../components/OrderDetails/OrderDetails.css'; // Adjust the path as needed
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -149,8 +149,8 @@ const ToBeShippedDetailScreen = () => {
               Placed on {new Date(order.createdAt).toLocaleDateString()}
             </p>
             <div className="back-home-button-wrapper">
-              <button className="back-home-btn" onClick={() => navigate('/')}>
-                Back to To Home Page
+              <button className="back-home-btn" onClick={() => navigate('/ToBeShippedList')}>
+                Back to To Be Shipped List
               </button>
             </div>
           </div>

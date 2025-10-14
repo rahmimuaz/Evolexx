@@ -189,19 +189,6 @@
   color: #ffc107; /* Or whatever color you want it to be */
 }
 
-/* New: Styling for the error message */
-.error-message-login {
-  color: #dc3545; /* A standard red for errors */
-  background-color: #f8d7da; /* Light red background */
-  border: 1px solid #f5c6cb; /* Slightly darker red border */
-  padding: 10px 15px;
-  border-radius: 8px;
-  margin-bottom: 1.5rem; /* Space below the message */
-  text-align: center;
-  font-size: 0.9em;
-  font-weight: 500;
-}
-
 
 /* Mobile devices */
 @media (max-width: 768px) {
@@ -226,10 +213,6 @@
   .login-prompt-message {
     font-size: 0.7rem;
   }
-  .error-message {
-    font-size: 0.8em;
-    padding: 8px 12px;
-  }
 }
 
 /* Small phones */
@@ -251,9 +234,5 @@
   }
    .login-prompt-message {
     font-size: 0.7rem;
-  }
-  .error-message-login {
-    font-size: 0.75em;
-    padding: 7px 10px;
   }
 }

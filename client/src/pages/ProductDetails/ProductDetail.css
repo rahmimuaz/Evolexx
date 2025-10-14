@@ -71,7 +71,7 @@
 
 .product-name-section {
   margin-top: 15px;
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 320;
   margin-bottom: 20px;
   color: #333;
@@ -80,7 +80,7 @@
 .product-tagline {
   color: #888;
   font-weight: 300;
-  font-size: 1rem;
+  font-size: 16px;
   margin-bottom: 10px;
 }
 
@@ -89,7 +89,7 @@
 }
 
 .product-price {
-  font-size: 1.5rem;
+  font-size: 26px;
   font-weight: 400;
   color: #000;
 }
@@ -177,7 +177,7 @@
   height: 35px;
   border: none;
   background-color: #f3f3f3;
-  font-size: 1rem;
+  font-size: 18px;
   cursor: pointer;
 }
 
@@ -185,14 +185,14 @@
   width: 45px;
   text-align: center;
   border: none;
-  font-size: 1rem;
+  font-size: 16px;
   pointer-events: none;
 }
 
 .stock-info {
   margin-top: 10px;
   color: #888;
-  font-size: 0.8rem;
+  font-size: 14px;
   margin-right: 6px;
 }
 .stock-status-section{
@@ -222,7 +222,7 @@
 .add-to-cart-button,
 .buy-now-button {
   padding: 12px 25px;
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: bold;
   border-radius: 3px;
   cursor: pointer;
@@ -264,8 +264,8 @@
 
 .info-block-title {
   margin-top: 20px;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 550;
   margin-bottom: 10px;
   color: #333;
 }
@@ -293,20 +293,20 @@
 .font-semibold {
   color:#555 ;
   font-weight: 400;
-  font-size: 1rem;
+  font-size: 15px;
 }
 
 .sub-text {
   margin-top: 3px;
-  font-size: 0.8rem;
+  font-size: 13px;
   color: #888;
   margin-left: 3px;
 }
 
 .info-block-title1 {
   margin-top: 15px;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 550;
   margin-bottom: 10px;
   color: #333;
 }
@@ -323,7 +323,7 @@
   justify-content: center;
   align-items: center;
   height: 70vh;
-  font-size: 1rem;
+  font-size: 16px;
   color: #555;
 }
 
@@ -346,14 +346,14 @@
 }
 
 .product-description-section h3 {
-  font-size: 1rem;
+  font-size: 18px;
   font-weight: 500;
   margin-top: 20px;
   margin-bottom: 8px;
 }
 
 .product-description-section p {
-  font-size: 1rem;
+  font-size: 16px;
   line-height: 1.6;
   margin-bottom: 10px;
 }
@@ -368,7 +368,7 @@
   margin: 20px auto;              
 }
 .product-specifications-section h2 {
-  font-size: 1.5rem;
+  font-size: 22px;
   font-weight: bold;
   margin-bottom: 10px;
   text-align: center;
@@ -379,7 +379,7 @@
   margin-bottom: 10px;
 }   
 .product-specifications-section li {
-  font-size: 1rem;
+  font-size: 16px;
   margin-bottom: 15px;
   margin-left: 20px;
 }
@@ -394,11 +394,12 @@
   margin: 20px auto 40px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  font-family: 'Segoe UI', sans-serif;
   color: #333;
 }
 
 .product-reviews-section h2 {
-  font-size: 1rem;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -410,16 +411,16 @@
 
 .review-rating {
   color: #f9c178;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .review-comment {
-  font-size: 1rem;
+  font-size: 15px;
   margin: 5px 0;
 }
 
 .review-meta {
-  font-size: 1rem;
+  font-size: 12px;
   color: #777;
 }
 
@@ -431,7 +432,7 @@
 }
 
 .review-form h3 {
-  font-size: 1rem;
+  font-size: 18px;
   font-weight: 500;
 }
 
@@ -443,13 +444,13 @@
 
 .review-form-rating select {
   padding: 5px;
-  font-size: 1rem;
+  font-size: 14px;
 }
 
 .review-form textarea {
   resize: none;
   padding: 10px;
-  font-size: 1rem;
+  font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-family: 'Segoe UI', sans-serif;
@@ -457,7 +458,7 @@
 
 .submit-review-btn {
   padding: 10px 20px;
-  font-size: 1rem;
+  font-size: 14px;
   background-color: black;
   color: white;
   border: none;
@@ -473,7 +474,7 @@
 
 .review-error {
   color: red;
-  font-size: 0.8;
+  font-size: 13px;
 }
 
 /* Product Tabs Navigation */
@@ -493,7 +494,7 @@
     color: #333;
     border-bottom: 1px solid transparent;
     transition: all 0.3s ease;
-    font-size: 1rem;
+    font-size: 1.1em;
 }
 
 .tab-item:hover {
@@ -508,7 +509,7 @@
 
 
 .product-description-section h3 {
-    font-size: 1rem;
+    font-size: 1.2em;
     margin-top: 20px;
     margin-bottom: 10px;
     color: #555;
@@ -526,7 +527,7 @@
 }
 
 .product-reviews-section h2 {
-    font-size: 1.5rem;
+    font-size: 1.5em;
     margin-bottom: 15px;
     color: #333;
     display: flex;
@@ -560,7 +561,7 @@
     border-radius: 5px;
     padding: 8px 15px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.9em;
     color: #555;
     transition: all 0.2s ease;
 }
@@ -621,11 +622,11 @@
 }
 
 .review-rating span {
-    font-size: 1rem;
+    font-size: 1.2em;
 }
 
 .review-product-details {
-    font-size: 0.8rem;
+    font-size: 0.85em;
     color: #777;
     margin-bottom: 8px;
 }
@@ -656,7 +657,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.8em;
     color: #888;
     margin-top: 10px;
     border-top: 1px dashed #eee;
@@ -668,7 +669,7 @@
     border: 1px solid #ccc;
     border-radius: 15px;
     padding: 5px 10px;
-    font-size: 0.8rem;
+    font-size: 0.8em;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
@@ -688,7 +689,7 @@
 }
 
 .review-form h3 {
-    font-size: 1rem;
+    font-size: 1.3em;
     margin-bottom: 15px;
     color: #333;
 }
@@ -719,7 +720,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.9em;
     min-height: 80px;
     resize: vertical;
 }
@@ -731,7 +732,7 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1em;
     font-weight: bold;
     transition: background-color 0.2s ease;
 }
@@ -748,7 +749,7 @@
 .review-error {
     color: red;
     margin-top: 10px;
-    font-size: 1rem;
+    font-size: 0.9em;
 }
 
 /* === Responsive Styles === */
@@ -783,15 +784,15 @@
 
 @media (max-width: 768px) {
   .product-name-section {
-    font-size: 1.2rem;
+    font-size: 20px;
   }
 
   .product-tagline {
-    font-size: 1rem;
+    font-size: 16px;
   }
 
   .product-price {
-    font-size: 1.2rem;
+    font-size: 22px;
   }
 
   .product-ratings svg {
@@ -808,37 +809,28 @@
   .quantity-input {
     width: 30px;
     height: 30px;
-    font-size: 1rem;
+    font-size: 16px;
   }
 
   .add-to-cart-button,
   .buy-now-button {
     padding: 10px 20px;
-    font-size: 1rem;
+    font-size: 13px;
   }
 
   .side-info-section {
     padding: 15px;
   }
 .color-options-title {
-  font-size: 1rem;
     padding: 5px 0;
 }
 
   .info-block-title {
-    font-size: 1rem;
+    font-size: 18px;
   }
 
-  .info-block-title1 {
-    font-size: 1rem;
-  }
   .info-list-item p {
-    font-size: 0.9rem;
-  }
-  .font-semibold {
-    color: #555;
-    font-weight: 400;
-    font-size: 1rem;
+    font-size: 14px;
   }
 
   .product-description-section,
@@ -848,11 +840,10 @@
     width: 98%;
     padding: 5px;
   }
-  .product-description-section h2{
-    font-size: 1rem;
-  }
-  .product-detail-page-container{
-    font-size: 0.9rem;
+
+  .tab-item {
+    padding: 10px 15px;
+    font-size: 1em;
   }
 
   .review-item {
@@ -860,7 +851,7 @@
   }
 
   .review-form textarea {
-    font-size: 0.8rem;
+    font-size: 0.85em;
   }
   .product-reviews-section h2 {
     font-size: 0.875em;
@@ -875,32 +866,15 @@
     font-size: 1em;
 }
 .tab-item {
-    padding: 15px 13px;
+    padding: 15px 10px;
     cursor: pointer;
     font-weight: bold;
     color: #333;
     border-bottom: 1px solid transparent;
     transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
-.filter-button{
-  padding: 6px 12px;
-  font-size: 0.8rem;
+    font-size: 0.875rem;
 }
 
-.product-description-section{
-  line-height: 1.4;
-  padding: 18px;
-}
-.product-specifications-section li {
-  font-size: 0.9rem;
-  margin-bottom: 10px;
-  margin-left: 5px;
-}
-.product-specifications-section h2{
-  font-size: 1rem;
-
-}
 }
 
 @media (max-width: 480px) {
