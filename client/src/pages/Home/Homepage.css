@@ -4,6 +4,8 @@
   margin: 0;
   padding: 0;
   position: relative;
+  /* Space for bottom nav on mobile */
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
 .loader {
