@@ -4,8 +4,6 @@
   margin: 0;
   padding: 0;
   position: relative;
-  /* Space for bottom nav on mobile */
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
 .loader {
@@ -76,6 +74,22 @@
   );
   z-index: 2;
 }
+
+.banner-slider {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 1s ease-in-out;
+}
+
+.banner-image {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* HERO CONTENT */
 .hero-content {
   position: relative;
@@ -834,101 +848,114 @@
 @media (max-width: 768px) {
   .hero-content {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 2rem;
     text-align: center;
     padding: 0 1rem;
-    padding-top: 0;
-    min-height: 100svh; /* small viewport height for mobile browser chrome */
+    padding-top: 100px; /* More padding for mobile navbar */
   }
-  .hero-text{
-    gap: 0.5rem;
-  }
+
   /* Optimize video for mobile */
   .hero-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
     object-position: center center;
   }
-  /* Darken slightly for better contrast on small screens */
+
+  /* Adjust overlay for mobile */
   .hero-video-overlay {
     background: linear-gradient(
       135deg, 
-      rgba(0, 0, 0, 0.62) 0%, 
-      rgba(0, 0, 0, 0.46) 50%, 
-      rgba(0, 0, 0, 0.75) 100%
+      rgba(0, 0, 0, 0.7) 0%, 
+      rgba(0, 0, 0, 0.5) 50%, 
+      rgba(0, 0, 0, 0.8) 100%
     );
   }
+
   .hero-title-line1 {
-    font-size: 2.4rem;
-    font-weight: 200;
-    line-height: 1.05;
-    margin: 8px 0 4px 0;
+    font-size: 2.8rem;
+    font-weight: 100;
+    line-height: 1;
+    margin: 10px 0 5px 0;
   }
+
   .hero-title-line2 {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     font-weight: 600;
-    line-height: 1.05;
+    line-height: 1;
     margin: 0;
   }
+
   .hero-subtitle {
     font-size: 1rem;
     font-weight: 400;
-    line-height: 1.3;
-    margin: 0.75rem 0 0.5rem 0;
+    line-height: 1.2;
+    margin: 0.8rem 0;
   }
+
   .hero-product-image {
-    max-width: 420px;
+    max-width: 450px;
   }
+
   .hero-cta-button {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-    font-weight: 500;
+    padding: 0.8rem 1.8rem;
+    font-size: 0.85rem;
+    font-weight: 400;
   }
+
   .banner {
-    height: 100svh; /* full-screen including mobile UI */
-    max-height: 100svh;
-  }
-  .hero-apple-logo {
-    width: 56px;
-    height: 56px;
+    height: 100vh;
+    max-height: 100vh;
   }
 }
 
 @media (max-width: 480px) {
-  .hero-title-line1 {
-    font-size: 1.9rem;
-    font-weight: 200;
-    line-height: 1.05;
-    margin: 8px 0 4px 0;
+  .hero-text{
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
+  .hero-title-line1 {
+    font-size: 2rem;
+    font-weight: 100;
+    line-height: 1;
+    margin: 10px 0 5px 0;
+  }
+
   .hero-title-line2 {
-    font-size: 1.45rem;
+    font-size: 1.6rem;
     font-weight: 600;
-    line-height: 1.05;
+    line-height: 1;
     margin: 0;
   }
+
   .hero-subtitle {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 400;
-    line-height: 1.3;
-    margin: 0.6rem 0 0.4rem 0;
+    line-height: 1.2;
+    margin: 0.6rem 0;
   }
+
   .hero-product-image {
+    margin-bottom: 120px;
     max-width: 300px;
   }
+
   .hero-cta-button {
-    padding: 0.55rem 1.1rem;
-    font-size: 0.84rem;
-    font-weight: 500;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 400;
   }
+
   .hero-apple-logo {
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
   }
+
+  .cta-arrow {
+    width: 24px;
+    height: 24px;
+  }
+
   .banner {
-    height: 100svh;
-    max-height: 100svh;
+    height: 100vh;
+    max-height: 100vh;
   }
 }
 
@@ -1097,8 +1124,8 @@
 
 @media screen and (max-width: 480px) {
   .banner {
-    height: 52vh;
-    max-height: 52vh;
+    height: 59vh;
+    max-height: 59vh;
   }
 
   .filter-sort-bar .filter-group {

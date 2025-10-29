@@ -145,7 +145,7 @@
   border: none;
   cursor: pointer;
   font-size: 1.6rem;
-  color: #000;
+  color: inherit;
   flex-shrink: 0;
   margin-right: 1.2rem;
 }
@@ -800,6 +800,7 @@
 }
 
 @media (max-width: 768px) {
+
   .navbar-container {
     padding: 0.8rem 1rem;
     flex-wrap: wrap;
@@ -841,12 +842,19 @@
     0 1px 4px rgba(0, 0, 0, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   border-radius: 0px 0px 16px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 
   .navbar-center.open {
+    margin-left: 6.5rem;
     max-height: 500px;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    padding:0px 10px;
+    box-shadow: none;
+    transition: none;
   }
 
   .navbar-links {
@@ -854,13 +862,14 @@
     gap: 0;
     width: 100%;
     padding: 0;
-  }
+    border-radius: 20px;
+
+}
 
   .navbar-link {
     padding: 0.75rem 1.5rem;
     width: 100%;
     text-align: left;
-    border-top: 1px solid #e5e7eb;
     font-size: 1rem;
   }
   .navbar-link:first-child {
@@ -924,7 +933,7 @@
     left: 0;
     width: 100vw;
     height: 70px;
-    background: #fff;
+    background: none;
     z-index: 2000;
     display: flex;
     align-items: center;
@@ -945,7 +954,7 @@
     margin-left: 10px;
     background: none;
     border: none;
-    color: #777575;
+    color: #323232;
     font-size: 1em;
     cursor: pointer;
     padding: 6px 10px;
@@ -980,6 +989,7 @@
 }
 
 @media (max-width: 480px) {
+
   .navbar-container {
     padding: 0rem 0.5rem;
   }
@@ -1071,243 +1081,4 @@
 /* In pulled state: Position search bar to replace navbar-center */
 .navbar.pulled.search-open .search-bar-integrated {
   top: 16px; /* Center it in the pulled navbar */
-}
-
-/* ===========================
-   MOBILE BOTTOM NAVIGATION
-   =========================== */
-
-/* Mobile bottom navigation bar */
-.mobile-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1100;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 0.5rem 0.75rem;
-  min-height: 56px;
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-  
-  /* NAVBAR GLASS EFFECT - Same as navbar-links */
-  background: 
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.05) 0%, 
-      rgba(255, 255, 255, 0.01) 100%
-    );
-  
-  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  
-  box-shadow: 
-    0 -4px 12px rgba(0, 0, 0, 0.08),
-    0 -2px 6px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
-  
-  /* Safe area for devices with home indicator */
-  /* handled above */
-}
-
-/* Mobile nav items */
-.mobile-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 1rem;
-  background: transparent;
-  border: none;
-  color: inherit;
-  text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  min-width: 52px;
-  cursor: pointer;
-}
-
-/* Hide labels on very narrow screens to save height */
-@media (max-width: 380px) {
-  .mobile-nav-item span { display: none; }
-}
-
-.mobile-nav-item span {
-  font-size: 0.7rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.mobile-nav-item:hover {
-  color: #e0e0e0;
-  transform: translateY(-2px);
-}
-
-/* Active state for mobile nav items - VIBRANT TEAL ACCENT */
-
-.mobile-nav-item.active::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  background: #ffffff; /* White dot indicator */
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6); /* Soft white glow */
-}
-
-/* Mobile cart count badge */
-.mobile-cart-count {
-  position: absolute;
-  top: 0.2rem;
-  right: 0.2rem;
-  background: #ef4444;
-  color: white;
-  font-size: 0.6rem;
-  font-weight: 600;
-  padding: 0.2rem 0.4rem;
-  border-radius: 50%;
-  min-width: 1.2rem;
-  height: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
-}
-
-/* Mobile slide-up sheets (Menu/Profile) */
-.mobile-sheet {
-  position: fixed;
-  bottom: calc(90px + env(safe-area-inset-bottom));
-  left: 2px;
-  right: 2px;
-  z-index: 2000;
-  border-radius: 1rem 1rem 0rem 0rem;
-  overflow: visible;
-  pointer-events: auto;
-
-  /* NAVBAR GLASS EFFECT - Same as navbar-links */
-  background: 
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.05) 0%, 
-      rgba(255, 255, 255, 0.01) 100%
-    );
-  
-  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: sheetIn 200ms ease-out, magnifyingGlassGlow 4s ease-in-out infinite alternate;
-}
-
-@keyframes sheetIn {
-  from { transform: translateY(16px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.mobile-sheet-header {
-  padding: 12px 16px;
-  font-weight: 700;
-  color: inherit;
-  border-bottom: 1px solid rgba(255,255,255,0.25);
-}
-
-.mobile-sheet-links {
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
-}
-
-.mobile-sheet-link {
-  background: transparent;
-  border: none;
-  color: inherit;
-  text-align: left;
-  padding: 12px 12px;
-  margin: 2px 10px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-size: 0.95rem;
-  cursor: pointer;
-  width: 100%;
-  display: block;
-  pointer-events: auto;
-  z-index: 1;
-  position: relative;
-}
-
-.mobile-sheet-link:hover {
-  background: rgba(255,255,255,0.15);
-}
-
-.mobile-sheet-link.danger:hover {
-  background: rgba(220, 38, 38, 0.2);
-}
-
-/* Hide desktop navbar on mobile when bottom nav is active */
-@media (max-width: 1024px) {
-  .navbar.mobile-nav .navbar-container {
-    display: none;
-  }
-  
-  .navbar.mobile-nav .search-bar-integrated {
-    display: none;
-  }
-  
-  .mobile-bottom-nav {
-    display: flex;
-  }
-  
-  /* Mobile menu from bottom nav */
-  .navbar.mobile-nav .navbar-center {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 900;
-    max-height: 100vh;
-    overflow-y: auto;
-    padding-bottom: 80px; /* Space for bottom nav */
-  }
-}
-
-/* Show desktop navbar on larger screens */
-@media (min-width: 1025px) {
-  .mobile-bottom-nav {
-    display: none;
-  }
-}
-
-/* Theme support for mobile navigation */
-.navbar.light-theme .mobile-bottom-nav {
-  color: #ffffff;
-}
-
-.navbar.dark-theme .mobile-bottom-nav {
-  color: #000000;
-}
-
-.navbar.light-theme .mobile-nav-item:hover {
-  color: #e0e0e0;
-}
-
-.navbar.dark-theme .mobile-nav-item:hover {
-  color: #333333;
 }

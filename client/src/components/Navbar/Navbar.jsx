@@ -11,8 +11,7 @@ import {
   FaSignInAlt,
   FaUserPlus,
   FaSignOutAlt,
-  FaCog,
-  FaTimes
+  FaCog
 } from 'react-icons/fa';
 import Modal from '../Modal/Modal';
 import Login from '../../pages/Login/Login';
@@ -36,7 +35,6 @@ const Navbar = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -44,19 +42,13 @@ const Navbar = () => {
   const dropdownRightRef = useRef(null);         // Right-side dropdown
   const menuRef = useRef(null);
   const searchBarRef = useRef(null);
-  const mobileMenuSheetRef = useRef(null);       // Mobile menu sheet
-  const mobileProfileSheetRef = useRef(null);    // Mobile profile sheet
 
   // 🔁 Close profile dropdown when clicking outside (support both dropdown instances)
   useEffect(() => {
     const handleClickOutside = (event) => {
       const clickedInsideLeft = dropdownRef.current && dropdownRef.current.contains(event.target);
       const clickedInsideRight = dropdownRightRef.current && dropdownRightRef.current.contains(event.target);
-      const clickedInsideMobileProfile = mobileProfileSheetRef.current && mobileProfileSheetRef.current.contains(event.target);
-      if (!clickedInsideLeft && !clickedInsideRight && !clickedInsideMobileProfile) setDropdownOpen(false);
-
-      const clickedInsideMobileMenu = mobileMenuSheetRef.current && mobileMenuSheetRef.current.contains(event.target);
-      if (!clickedInsideMobileMenu && !menuRef.current?.contains(event.target)) setMenuOpen(false);
+      if (!clickedInsideLeft && !clickedInsideRight) setDropdownOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -65,9 +57,7 @@ const Navbar = () => {
   // 🔁 Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutsideMenu = (event) => {
-      const clickedInsideMenu = menuRef.current && menuRef.current.contains(event.target);
-      const clickedInsideMobileMenuSheet = mobileMenuSheetRef.current && mobileMenuSheetRef.current.contains(event.target);
-      if (!clickedInsideMenu && !clickedInsideMobileMenuSheet) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(false);
       }
     };
@@ -105,20 +95,20 @@ const Navbar = () => {
   // Dynamic theme detection and pulling animation based on scroll position
   useEffect(() => {
     const handleScroll = () => {
-      if (isMobile) {
-        // Keep consistent dark-theme (black text/icons) on mobile
-        setNavbarTheme('dark-theme');
-        setIsPulled(window.scrollY > 50);
-        return;
-      }
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
+      const isMobile = window.innerWidth <= 768;
       
-      // Pulling animation: activate when scrolled down on any page
-      if (scrollY > 50) { // Start pulling after 50px scroll on any page for more responsive animation
-        setIsPulled(true);
-      } else {
+      // Mobile: keep navbar normal (no pulled animation)
+      if (isMobile) {
         setIsPulled(false);
+      } else {
+        // Pulling animation: activate when scrolled down on any page
+        if (scrollY > 50) {
+          setIsPulled(true);
+        } else {
+          setIsPulled(false);
+        }
       }
       
       // Theme detection based on current page using location from React Router
@@ -148,7 +138,7 @@ const Navbar = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [location.pathname, isMobile]); // include isMobile
+  }, [location.pathname]); // Add location.pathname as dependency
 
   // Handle route changes and reset navbar state
   useEffect(() => {
@@ -157,10 +147,6 @@ const Navbar = () => {
     
     // Set initial theme based on current page with a small delay to ensure proper detection
     const setInitialTheme = () => {
-      if (isMobile) {
-        setNavbarTheme('dark-theme');
-        return;
-      }
       const currentPath = location.pathname;
       if (currentPath === '/') {
         // On homepage, check if we're in hero section
@@ -182,17 +168,7 @@ const Navbar = () => {
     const timeoutId = setTimeout(setInitialTheme, 100);
     
     return () => clearTimeout(timeoutId);
-  }, [location.pathname, isMobile]);
-
-  // Check if mobile/tablet
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 1024);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -222,16 +198,8 @@ const Navbar = () => {
     navigate(`/products/${productId}`);
   };
 
-  const handleMobileNavigate = (path) => {
-    console.log('Mobile navigate to:', path); // Debug log
-    // Close sheets first, then navigate
-    setMenuOpen(false);
-    setDropdownOpen(false);
-    navigate(path);
-  };
-
   return (
-    <nav className={`navbar ${navbarTheme} ${isPulled ? 'pulled' : ''} ${searchOpen ? 'search-open' : ''} ${isMobile ? 'mobile-nav' : ''}`}>
+    <nav className={`navbar ${navbarTheme} ${isPulled ? 'pulled' : ''} ${searchOpen ? 'search-open' : ''}`}>
       {mobileSearchOpen && (
         <div className="mobile-search-overlay">
           <div className="search-input-wrapper-inner">
@@ -252,9 +220,8 @@ const Navbar = () => {
                 setSearchResults([]);
                 setSearchError(null);
               }}
-              aria-label="Close search"
             >
-              <FaTimes size={18} />
+              Cancel
             </button>
           </div>
           {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
@@ -386,6 +353,14 @@ const Navbar = () => {
 
 
         <div className="navbar-right">
+          {/* Mobile-first ordering: cart → search → profile */}
+          {user && (
+            <Link to="/cart" className="cart-button">
+              <FaShoppingCart size={18} />
+              <span className="cart-count">{cartItems.length}</span>
+            </Link>
+          )}
+
           {window.innerWidth > 768 ? (
             <button
               className="search-icon-button"
@@ -402,13 +377,6 @@ const Navbar = () => {
             >
               <FaSearch size={18} />
             </button>
-          )}
-
-          {user && (
-            <Link to="/cart" className="cart-button">
-              <FaShoppingCart size={18} />
-              <span className="cart-count">{cartItems.length}</span>
-            </Link>
           )}
 
     
@@ -477,7 +445,7 @@ const Navbar = () => {
               aria-label="Close search"
               type="button"
             >
-              <FaTimes size={14} />
+              &times;
             </button>
           </div>
           {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
@@ -533,84 +501,6 @@ const Navbar = () => {
           }}
         />
       </Modal>
-
-      {/* Mobile Bottom Navigation */}
-      {isMobile && (
-        <>
-          <div className="mobile-bottom-nav">
-            <button 
-              className={`mobile-nav-item ${menuOpen ? 'active' : ''}`}
-              onClick={() => { setMenuOpen(!menuOpen); setDropdownOpen(false); }}
-              aria-label="Toggle menu"
-            >
-              <FaBars size={20} />
-              <span>Menu</span>
-            </button>
-            
-            <button 
-              className="mobile-nav-item"
-              onClick={() => { setMobileSearchOpen(true); setMenuOpen(false); setDropdownOpen(false); }}
-              aria-label="Search"
-            >
-              <FaSearch size={20} />
-              <span>Search</span>
-            </button>
-            
-            {user && (
-              <Link to="/cart" className="mobile-nav-item" onClick={() => { setMenuOpen(false); setDropdownOpen(false); }}>
-                <FaShoppingCart size={20} />
-                <span>Cart</span>
-                {cartItems.length > 0 && (
-                  <span className="mobile-cart-count">{cartItems.length}</span>
-                )}
-              </Link>
-            )}
-            
-            <button 
-              className={`mobile-nav-item ${dropdownOpen ? 'active' : ''}`}
-              onClick={() => { setDropdownOpen(!dropdownOpen); setMenuOpen(false); }}
-              aria-label="Profile"
-            >
-              <FaUserCircle size={20} />
-              <span>Profile</span>
-            </button>
-          </div>
-
-          {/* Mobile Menu Sheet - Categories */}
-          {menuOpen && (
-            <div className="mobile-sheet" ref={mobileMenuSheetRef}>
-              <div className="mobile-sheet-header">Categories</div>
-              <div className="mobile-sheet-links">
-                <button className="mobile-sheet-link" onClick={() => handleMobileNavigate('/')}>Home</button>
-                <button className="mobile-sheet-link" onClick={() => handleMobileNavigate('/category/Mobile%20Phone')}>Brand New</button>
-                <button className="mobile-sheet-link" onClick={() => handleMobileNavigate('/category/Preowned%20Phones')}>Pre Owned</button>
-                <button className="mobile-sheet-link" onClick={() => handleMobileNavigate('/category/Mobile%20Accessories')}>Accessories</button>
-              </div>
-            </div>
-          )}
-
-          {/* Mobile Profile Sheet */}
-          {dropdownOpen && (
-            <div className="mobile-sheet" ref={mobileProfileSheetRef}>
-              <div className="mobile-sheet-header">Account</div>
-              <div className="mobile-sheet-links">
-                {user ? (
-                  <>
-                    <button className="mobile-sheet-link" onClick={() => handleMobileNavigate('/my-orders')}>My Orders</button>
-                    <button className="mobile-sheet-link" onClick={() => handleMobileNavigate('/settings')}>Settings</button>
-                    <button className="mobile-sheet-link danger" onClick={() => { handleLogout(); }}>Logout</button>
-                  </>
-                ) : (
-                  <>
-                    <button className="mobile-sheet-link" onClick={() => { setLoginModalOpen(true); setDropdownOpen(false); }}>Login</button>
-                    <button className="mobile-sheet-link" onClick={() => { setRegisterModalOpen(true); setDropdownOpen(false); }}>Register</button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </>
-      )}
     </nav>
   );
 };
