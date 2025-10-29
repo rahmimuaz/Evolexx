@@ -1,14 +1,104 @@
-/* BASE NAVBAR STYLES */
+/* BASE NAVBAR STYLES - CLEAR GLASS DESIGN */
 .navbar {
-  background-color: #ffffff;
-  padding: 0.8rem 1.2rem;
+  padding: 1.5rem 1.2rem;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
   width: 100%;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Theme color applied at the root for cascading */
+.navbar.light-theme {
+  color: #ffffff; /* text/icon base color */
+}
+
+.navbar.dark-theme {
+  color: #000000; /* text/icon base color */
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Dynamic color inversion based on background */
+
+/* Pulling animation for navbar elements */
+.navbar.pulled {
+  padding: 0.8rem 1.2rem;
+}
+
+.navbar.pulled .navbar-container {
+  justify-content: center;
+}
+
+.navbar.pulled .navbar-left {
+  display: none;
+}
+
+.navbar.pulled .navbar-center {
+  order: 1;
+  position: static;
+  transform: none;
+  flex-grow: 1;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.navbar.pulled .navbar-right {
+  display: none;
+}
+
+/* Pulled state for navigation links container - Same glass effect as navbar-links */
+.navbar.pulled .navbar-links {
+  gap: 0.2rem;
+  padding: 0.3rem 0.8rem;
+  transform: none;
+  width: auto;
+  max-width: 90%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+  overflow: visible; /* allow dropdown to be visible when pulled */
+  
+  /* MAGNIFYING GLASS BASE - Very transparent (Same as navbar-links) */
+  background: 
+    linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(255, 255, 255, 0.01) 100%
+    );
+  
+  /* MAGNIFYING GLASS EFFECT - Pure magnification with slight blur (Same as navbar-links) */
+  backdrop-filter: blur(8px) saturate(150%) brightness(1.1); 
+  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  
+  /* Magnifying glass border (Same as navbar-links) */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  border-radius: 2.5rem;
+  
+  /* Magnifying glass shadows (Same as navbar-links) */
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Magnifying glass animation (Same as navbar-links) */
+  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
 }
 
 .navbar-container {
@@ -16,8 +106,9 @@
   align-items: center; 
   justify-content: space-between;
   flex-wrap: nowrap;
-  margin: 0 auto; /* Center content */
+  margin: 0 auto;
   height: 2rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* LEFT SECTION */
@@ -25,98 +116,270 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex-shrink: 0; /* Prevent from shrinking */
+  flex-shrink: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-brand {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #030303;
+  color: inherit;
   text-decoration: none;
   white-space: nowrap;
+  transition: color 0.5s ease;
+}
+
+/* Dynamic brand colors */
+.navbar.light-theme .navbar-brand {
+  color: #ffffff;
+}
+
+.navbar.dark-theme .navbar-brand {
+  color: #000000;
 }
 
 /* HAMBURGER (Only visible on mobile) */
 .hamburger-button {
-  display: none; /* Hidden by default */
+  display: none;
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.6rem;
   color: #000;
   flex-shrink: 0;
-  margin-right: 1.2rem; /* Space between hamburger and brand */
+  margin-right: 1.2rem;
 }
 
-/* CENTER SECTION (Navigation Links) */
+/* CENTER SECTION (Navigation Links) - CENTERED */
 .navbar-center {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-grow: 1; /* Allow to grow and push other items */
-  /* Remove fixed margin-left, let flexbox handle it */
+  justify-content: center;
+  flex-grow: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* MAGNIFYING GLASS CORE STYLES - True Magnification */
 .navbar-links {
   display: flex;
   gap: 4rem;
   position: relative;
-  flex-wrap: nowrap; /* Prevent wrapping on desktop */
+  flex-wrap: nowrap;
+  overflow: hidden; /* Essential for magnification effect */
+  
+  /* MAGNIFYING GLASS BASE - Very transparent */
+  background: 
+    linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(255, 255, 255, 0.01) 100%
+    );
+  
+  /* MAGNIFYING GLASS EFFECT - Pure magnification with slight blur */
+  backdrop-filter: blur(8px) saturate(150%) brightness(1.1); 
+  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  
+  /* Magnifying glass border */
+  border: 1px solid rgba(255, 255, 255, 0.2); 
+  
+  border-radius: 2.5rem;
+  padding: 0.5rem 2rem;
+  
+  /* Magnifying glass shadows */
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Magnifying glass animation */
+  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
+}
+
+/* Magnifying glass breathing animation */
+@keyframes magnifyingGlassGlow {
+  0% {
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.08),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+     backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+     -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+   }
+   50% {
+     box-shadow: 
+       0 6px 16px rgba(0, 0, 0, 0.1), 
+       0 3px 8px rgba(0, 0, 0, 0.06),
+       inset 0 1px 0 rgba(255, 255, 255, 0.4), 
+       inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+     backdrop-filter: blur(10px) saturate(160%) brightness(1.15);
+     -webkit-backdrop-filter: blur(10px) saturate(160%) brightness(1.15);
+   }
+   100% {
+     box-shadow: 
+       0 4px 12px rgba(0, 0, 0, 0.08),
+       0 2px 6px rgba(0, 0, 0, 0.04),
+       inset 0 1px 0 rgba(255, 255, 255, 0.3),
+       inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+     backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+     -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  }
+}
+
+/* MAGNIFYING GLASS EFFECT - Increased magnification */
+.navbar-links::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: inherit;
+  transform: scale(3.5) translateZ(0); /* Increased magnification effect */
+  transform-origin: center;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  will-change: transform;
+  clip-path: inset(0);
+  /* Pure magnification - no blur effects */
+}
+
+/* Magnifying glass bottom reflection */
+.navbar-links::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background: 
+    linear-gradient(0deg, 
+      rgba(0, 0, 0, 0.08) 0%, 
+      transparent 100%
+    );
+  border-radius: 0 0 2.5rem 2.5rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Magnifying glass hover effect */
+.navbar-links:hover {
+  /* Subtle magnifying glass lift */
+  transform: translateY(-1px);
+  
+  /* Enhanced magnifying glass shadows */
+  box-shadow: 
+    0 6px 18px rgba(0, 0, 0, 0.12), 
+    0 3px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  
+  /* Enhanced magnification on hover */
+  backdrop-filter: blur(10px) saturate(170%) brightness(1.2); 
+  -webkit-backdrop-filter: blur(10px) saturate(170%) brightness(1.2);
+}
+
+/* Reduce gap between navigation links when pulled */
+.navbar.pulled .navbar-links .navbar-link {
+  margin: 0 1rem;
+  font-size: 0.9rem;
+}
+
+/* Styling for logo when pulled into center */
+.navbar.pulled .navbar-links .navbar-brand {
+  margin: 0 0.2rem;
+  font-size: 1rem;
+}
+
+/* Styling for icons when pulled into center */
+.navbar.pulled .navbar-links .search-icon-button,
+.navbar.pulled .navbar-links .cart-button,
+.navbar.pulled .navbar-links .profile-icon-button {
+  margin: 0 0.1rem;
+  padding: 0.2rem;
 }
 
 .navbar-link {
   position: relative;
-  color: #000000;
+  color: inherit;
   text-decoration: none;
   font-weight: 580;
   font-size: 0.95rem;
   padding-bottom: 5px;
-  transition: color 0.2s ease;
-  white-space: nowrap; /* Prevent links from breaking */
+  transition: color 0.5s ease;
+  white-space: nowrap;
+}
+
+/* Dynamic link colors */
+.navbar.light-theme .navbar-link {
+  color: #ffffff;
+}
+
+.navbar.dark-theme .navbar-link {
+  color: #000000;
 }
 
 .navbar-link:hover {
-  color: #909090;
+  color: #e0e0e0;
 }
+
+/* Dynamic hover colors */
+.navbar.light-theme .navbar-link:hover {
+  color: #e0e0e0;
+}
+
+.navbar.dark-theme .navbar-link:hover {
+  color: #333333;
+}
+
 
 .navbar-link.active-link::after {
   content: '';
   position: absolute;
   bottom: -1px;
   left: 0;
-  width: 95%; /* Adjust width for active link underline */
+  width: 95%;
   height: 1.5px;
-  background-color: #000000;
+  background-color: currentColor;
   border-radius: 1px;
 }
 
-/* DIVIDER */
-.navbar-divider {
-  height: 24px;
-  width: 1px;
-  background-color: #e5e7eb;
-  margin: 0 1.5rem; /* Increased margin for better spacing */
-  flex-shrink: 0;
-}
+
 
 /* RIGHT SECTION (Cart, Search, Profile) */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 1.5rem; /* Space between icons/elements */
-  position: relative; /* Keep for profile dropdown positioning */
-  flex-shrink: 0; /* Prevent shrinking too much */
-  flex-grow: 0; /* Initially don't grow */
-  /* This flex-grow will be overridden for search bar */
+  gap: 1.5rem;
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cart-button {
   position: relative;
-  color: #000000;
+  color: inherit;
   text-decoration: none;
   display: flex;
   align-items: center;
-  flex-shrink: 0; /* Prevent from shrinking */
+  flex-shrink: 0;
+  transition: color 0.5s ease;
+}
+
+/* Dynamic cart button colors */
+.navbar.light-theme .cart-button {
+  color: #ffffff;
+}
+
+.navbar.dark-theme .cart-button {
+  color: #000000;
 }
 
 .cart-count {
@@ -128,36 +391,106 @@
   margin-bottom: 16px;
 }
 
+
 /* SEARCH ICON BUTTON */
 .search-icon-button {
-
   background: none;
   border: none;
   cursor: pointer;
-  color: #000000;
+  color: inherit;
   display: flex;
   align-items: center;
   padding: 0.25rem;
-  flex-shrink: 0; /* Essential to prevent shrinking when other items appear */
+  flex-shrink: 0;
+  transition: color 0.5s ease;
 }
 
-/* INTEGRATED SEARCH BAR (when open) */
+/* Dynamic search icon colors */
+.navbar.light-theme .search-icon-button {
+  color: #ffffff;
+}
+
+.navbar.dark-theme .search-icon-button {
+  color: #000000;
+}
+
+/* INTEGRATED SEARCH BAR (when open) - Below navbar for first state */
 .search-bar-integrated {
-  flex-grow: 1; /* Allows it to take available space */
-  min-width: 400px;
-  position: relative; /* For positioning suggestions dropdown */
+  position: fixed;
+  top: 100px; /* Below navbar for first state */
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  transform-origin: center;
+  width: 90%;
+  max-width: 600px;
   display: flex;
   align-items: center;
-  transition: max-width 0.3s ease-out, margin-right 0.3s ease-out; /* Smooth transition */
-
+  z-index: 1001;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent; /* No background on wrapper */
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
-/* Inner wrapper for input and close button */
+.search-bar-integrated.visible {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* Inner wrapper for input and close button - Same as navbar-links */
 .search-input-wrapper-inner {
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
+  
+  /* MAGNIFYING GLASS BASE - Very transparent (Same as navbar-links) */
+  background: 
+    linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(255, 255, 255, 0.01) 100%
+    );
+  
+  /* MAGNIFYING GLASS EFFECT - Pure magnification with slight blur (Same as navbar-links) */
+  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  
+  /* Magnifying glass border (Same as navbar-links) */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  border-radius: 2.5rem;
+  padding: 0;
+  
+  /* Magnifying glass shadows (Same as navbar-links) */
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Magnifying glass animation (Same as navbar-links) */
+  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
+}
+
+.search-input-wrapper-inner:focus-within {
+  /* Enhanced magnifying glass shadows on focus */
+  box-shadow: 
+    0 6px 18px rgba(0, 0, 0, 0.12), 
+    0 3px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  
+  /* Enhanced magnification on focus */
+  backdrop-filter: blur(10px) saturate(170%) brightness(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(170%) brightness(1.2);
+  
+  /* Subtle lift effect */
+  transform: translateY(-1px);
 }
 
 .search-input-icon {
@@ -176,29 +509,25 @@
   padding-left: 38px !important;
 }
 
-/* Glassmorphism Input */
+/* Magnifying Glass Input - Matching navbar-center style */
 .search-input-navbar {
   width: 100%;
-  padding: 0.3rem 1rem;
-  padding-right: 2.5rem; /* space for the close button */
+  padding: 0.8rem 1.5rem;
+  padding-right: 3rem;
   border: none;
-  border-radius: 1.5rem;
+  border-radius: 2.5rem;
   font-size: 1rem;
   outline: none;
-  background: rgba(255, 255, 255, 0.15); /* more transparent white */
-  backdrop-filter: blur(12px); /* stronger blur */
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* softer, glass-like shadow */
-  border: 1px solid rgba(255, 255, 255, 0.3); /* subtle frosted border */
+  background: transparent; /* Transparent background since wrapper has glass effect */
   color: #222;
   font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
-  transition: box-shadow 0.2s ease, background 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 
 .search-input-navbar:focus {
-  box-shadow: 0 6px 24px 0 rgba(71, 61, 63, 0.35);
-  background: linear-gradient(135deg, rgba(255,255,255,0.85) 60%,rgba(71, 61, 63, 0.35)100%);
+  /* No special focus styles needed - wrapper handles the glass effect */
+  outline: none;
 }
 
 /* Close Button Inside Input */
@@ -207,7 +536,7 @@
   right: 0.3rem;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.3);
   border: none;
   border-radius:10px;
   width: 1.2rem;
@@ -223,29 +552,47 @@
 }
 
 .search-bar-close:hover {
-  background: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.5);
   color: #000000;
 }
 
-/* Suggestions Dropdown */
+/* Suggestions Dropdown - Same as navbar-links */
 .search-suggestions-dropdown {
   position: absolute;
-  top: calc(100% + 5px); /* below input */
+  top: calc(100% + 10px);
   left: 0;
   width: 100%;
 
-  background: rgba(102, 102, 102, 0.347); /* very light to mimic macOS */
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border-radius: 1rem;
+  /* MAGNIFYING GLASS BASE - Very transparent (Same as navbar-links) */
+  background: 
+    linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(255, 255, 255, 0.01) 100%
+    );
+  
+  /* MAGNIFYING GLASS EFFECT - Pure magnification with slight blur (Same as navbar-links) */
+  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  
+  /* Magnifying glass border (Same as navbar-links) */
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  
+  border-radius: 2.5rem;
+  
+  /* Magnifying glass shadows (Same as navbar-links) */
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   
   z-index: 3100;
   padding: 0.5rem 0;
   max-height: 320px;
   overflow-y: auto;
-  color: #222; /* ensure text is readable */
+  color: #fff;
+  
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 
@@ -260,7 +607,7 @@
 }
 
 .search-suggestion-item:hover {
-  background: rgba(255, 255, 255, 0.427);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .search-suggestion-img {
@@ -302,14 +649,24 @@
 /* PROFILE DROPDOWN */
 .profile-dropdown-wrapper {
   position: relative;
-  flex-shrink: 0; /* Prevent profile icon from shrinking */
+  flex-shrink: 0;
 }
 .profile-icon-button{
-  background-color: #ffffff;
+  background-color: transparent;
   border: none;
   cursor: pointer;
-  color: #000;
+  color: inherit;
   margin-top: 0.2rem;
+  transition: color 0.5s ease;
+}
+
+/* Dynamic profile icon colors */
+.navbar.light-theme .profile-icon-button {
+  color: #ffffff;
+}
+
+.navbar.dark-theme .profile-icon-button {
+  color: #000000;
 }
 
 .dropdown-menu {
@@ -322,15 +679,14 @@
   pointer-events: none;
   transition: opacity 0.25s cubic-bezier(.4, 0, .2, 1), transform 0.25s cubic-bezier(.4, 0, .2, 1);
 
-  /* Glassmorphism core */
-  background: rgba(61, 61, 61, 0.347); /* very light to mimic macOS */
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  /* Clear Glass core */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
   border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-
-  color: #fff;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  color: inherit;
   font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
   padding: 1.2rem 1.5rem;
   min-width: 250px;
@@ -347,7 +703,7 @@
 }
 
 .dropdown-text-1 {
-  color: #ffffff;
+  color: inherit;
   font-weight: 400;
   margin-bottom: 1rem !important;
 
@@ -362,7 +718,7 @@
   background: none;
   border: none;
   border-radius: 0;
-  color: inherit; /* or use specific color like #222 if needed */
+  color: inherit;
   padding: 0;
   margin-top: 0.5rem;
   font-size: 1rem;
@@ -378,14 +734,14 @@
   padding: 0.6rem 0.6rem;
   font-size: 0.875rem;
   width: 100%;
-    color: #fff;
+    color: inherit;
 
 }
 
 
 .dropdown-link:hover, .logout-dropdown-button:hover {
   border-radius: 0.5rem;
-  background: #686868;
+  background: rgba(104, 104, 104, 0.3);
   color: #fff;
 }
 
@@ -395,7 +751,7 @@
 }
 
 .logout-dropdown-button {
-  color: #fff;
+  color: inherit;
   padding: 0.6rem 0.6rem;
   font-size: 0.875rem;
   border: none;
@@ -422,12 +778,10 @@
 
 @media (max-width: 1024px) {
   .navbar-container {
-    padding: 0.8rem 1rem; /* Adjust padding for smaller desktops */
+    padding: 0.8rem 1rem;
   }
 
   .navbar-center {
-    /* Let flex-grow handle it, remove fixed margin-left */
-    /* margin-left: 2rem; */
     gap: 1.5rem;
   }
 
@@ -436,32 +790,32 @@
   }
 
   .search-bar-integrated {
-    max-width: 300px; /* Adjust max width for smaller desktop screens */
-    margin-right: 1rem; /* Keep some space */
+    max-width: 300px;
+    margin-right: 1rem;
   }
 
   .navbar-divider {
-    margin: 0 1rem;
+    display: none;
   }
 }
 
 @media (max-width: 768px) {
   .navbar-container {
-    padding: 0.8rem 1rem; /* Consistent padding */
-    flex-wrap: wrap; /* Allow wrapping */
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
     justify-content: space-between;
   }
 
   .navbar-left {
-    order: 1; /* Order for mobile layout */
-    flex-grow: 1; /* Allow brand to take space */
-    justify-content: center; /* Center brand when hamburger is hidden */
+    order: 1;
+    flex-grow: 1;
+    justify-content: center;
   }
 
   /* Hamburger visible on mobile */
   .hamburger-button {
     display: flex;
-    order: 0; /* Place hamburger first */
+    order: 0;
     margin-right: 1rem;
   }
 
@@ -474,59 +828,72 @@
   position: static;
   margin-top: 1rem;
 
-  /* Glassmorphism background */
-  background: rgba(255, 255, 255, 0.4); /* Semi-transparent white */
-  backdrop-filter: blur(10px); /* Frosted effect */
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional soft shadow */
-  border-radius: 0px 0px 12px 12px; /* Optional: rounded corners */
+  /* Clear Glass background for mobile */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  backdrop-filter: blur(0px) saturate(140%); /* NO BLUR */
+  -webkit-backdrop-filter: blur(0px) saturate(140%);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  border-radius: 0px 0px 16px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 
   .navbar-center.open {
-    max-height: 500px; /* Expand height to show links */
+    max-height: 500px;
   }
 
   .navbar-links {
     flex-direction: column;
-    gap: 0; /* No gap between links vertically */
+    gap: 0;
     width: 100%;
-    padding: 0; /* No padding on container, let links have it */
+    padding: 0;
   }
 
   .navbar-link {
-    padding: 0.75rem 1.5rem; /* Padding for individual links */
+    padding: 0.75rem 1.5rem;
     width: 100%;
-    text-align: left; /* Align links to the left */
-    border-top: 1px solid #e5e7eb; /* Separator between links */
+    text-align: left;
+    border-top: 1px solid #e5e7eb;
     font-size: 1rem;
   }
   .navbar-link:first-child {
-      border-top: none; /* No top border for the first link */
+      border-top: none;
       
   }
 
   .navbar-divider {
-    display: none; /* Hide divider on mobile */
+    display: none;
   }
 
   .navbar-right {
-    order: 2; /* Place right icons next to brand */
-    flex-grow: 0; /* Don't expand as much on mobile */
-    gap: 0.8rem; /* Smaller gap for mobile icons */
+    order: 2;
+    flex-grow: 0;
+    gap: 0.8rem;
+  }
+
+  /* Hide Contact Us button on mobile to save space */
+  .contact-button {
+    display: none;
   }
 
   /* Search bar adjustments for mobile */
   .search-bar-integrated {
-    max-width: none; /* Let it expand freely on mobile */
+    max-width: none;
     margin-right: 0.5rem;
-    flex-grow: 1; /* Allow it to take up max space */
+    flex-grow: 1;
   }
 
   .search-suggestions-dropdown {
-    width: calc(100% - 20px); /* Adjust width to fit screen with some margin */
-    left: 10px; /* Offset from left edge */
-    right: 10px; /* Offset from right edge */
+    width: calc(100% - 20px);
+    left: 10px;
+    right: 10px;
   }
 
   .search-input-navbar {
@@ -542,11 +909,11 @@
 
   /* Profile dropdown on mobile: position directly relative to profile icon */
   .dropdown-menu {
-    top: 1.5rem; /* Adjusted for better alignment below icon */
+    top: 1.5rem;
     right: 0;
-    left: auto; /* Ensure it stays right-aligned */
-    transform-origin: top right; /* For better scaling animation */
-    min-width: 160px; /* Slightly smaller for mobile */
+    left: auto;
+    transform-origin: top right;
+    min-width: 160px;
     padding: 1rem;
   }
 
@@ -569,16 +936,16 @@
     flex: 1;
     font-size: 1.1em;
     padding: 10px 14px;
-    border: 1px solid #e0e0e0;
+    border: none;
     border-radius: 16px;
-    background: #f5f5f5;
+    background: none;
     outline: none;
   }
   .mobile-search-cancel {
     margin-left: 10px;
     background: none;
     border: none;
-    color: #323232;
+    color: #777575;
     font-size: 1em;
     cursor: pointer;
     padding: 6px 10px;
@@ -596,19 +963,20 @@
     border-radius: 0 0 12px 12px;
     max-height: 50vh;
     overflow-y: auto;
- /* Glassmorphism core */
-  background: rgba(61, 61, 61, 0.347); /* very light to mimic macOS */
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+ /* Clear Glass core */
+  background: rgba(61, 61, 61, 0.1);
+  backdrop-filter: blur(0px) saturate(130%); /* NO BLUR */
+  -webkit-backdrop-filter: blur(0px) saturate(130%);
   border-radius: 0rem 0rem 1rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
   }
 }
 @media (min-width: 769px) {
   .mobile-search-overlay { display: none !important; }
   .mobile-only { display: none !important; }
   .desktop-only { display: inline-flex !important; }
+  .contact-button { display: flex !important; }
 }
 
 @media (max-width: 480px) {
@@ -632,7 +1000,7 @@
   .cart-button .fa-shopping-cart,
   .search-icon-button .fa-search,
   .profile-icon-button .fa-user-circle {
-    font-size: 1rem; /* Smaller icons on very small screens */
+    font-size: 1rem;
   }
 
   .search-input-navbar {
@@ -648,10 +1016,10 @@
   }
 
   .search-suggestions-dropdown {
-    width: calc(100% - 10px); /* Even tighter on very small screens */
+    width: calc(100% - 10px);
     left: 5px;
     right: 5px;
-    border-radius: 1rem; /* Smaller radius */
+    border-radius: 1rem;
     
   }
 
@@ -688,26 +1056,251 @@
 }
 
 
-
-/* Search bar animation using scaleX for Apple-style smoothness */
-.search-bar-integrated {
-  transform: scaleX(0.85);
-  transform-origin: right center;
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.35s ease, opacity 0.35s ease;
-}
-
-.search-bar-integrated.visible {
-  transform: scaleX(1);
-  opacity: 1;
-  pointer-events: auto;
-}
-
 .navbar-center {
-  transition: transform 0.35s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.navbar-center.shifted-left {
-  transform: translateX(-40px);
+/* Hide navbar-center when search is open (ONLY in pulled state) */
+.navbar.pulled.search-open .navbar-center {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* In pulled state: Position search bar to replace navbar-center */
+.navbar.pulled.search-open .search-bar-integrated {
+  top: 16px; /* Center it in the pulled navbar */
+}
+
+/* ===========================
+   MOBILE BOTTOM NAVIGATION
+   =========================== */
+
+/* Mobile bottom navigation bar */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.2rem;
+  border-radius: 3rem;
+  margin-bottom: 5px;
+  
+  /* NAVBAR GLASS EFFECT - Same as navbar-links */
+  background: 
+    linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(255, 255, 255, 0.01) 100%
+    );
+  
+  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  
+  box-shadow: 
+    0 -4px 12px rgba(0, 0, 0, 0.08),
+    0 -2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
+
+}
+
+/* Mobile nav items */
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 1rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  min-width: 60px;
+  cursor: pointer;
+}
+
+.mobile-nav-item span {
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.mobile-nav-item:hover {
+  color: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* Active state for mobile nav items - VIBRANT TEAL ACCENT */
+
+.mobile-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #ffffff; /* White dot indicator */
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6); /* Soft white glow */
+}
+
+/* Mobile cart count badge */
+.mobile-cart-count {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  background: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  border-radius: 50%;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+}
+
+/* Mobile slide-up sheets (Menu/Profile) */
+.mobile-sheet {
+  position: fixed;
+  bottom: calc(90px + env(safe-area-inset-bottom));
+  left: 2px;
+  right: 2px;
+  z-index: 2000;
+  border-radius: 1rem 1rem 0rem 0rem;
+  overflow: visible;
+  pointer-events: auto;
+
+  /* NAVBAR GLASS EFFECT - Same as navbar-links */
+  background: 
+    linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(255, 255, 255, 0.01) 100%
+    );
+  
+  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
+  
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: sheetIn 200ms ease-out, magnifyingGlassGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes sheetIn {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.mobile-sheet-header {
+  padding: 12px 16px;
+  font-weight: 700;
+  color: inherit;
+  border-bottom: 1px solid rgba(255,255,255,0.25);
+}
+
+.mobile-sheet-links {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
+.mobile-sheet-link {
+  background: transparent;
+  border: none;
+  color: inherit;
+  text-align: left;
+  padding: 12px 12px;
+  margin: 2px 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  width: 100%;
+  display: block;
+  pointer-events: auto;
+  z-index: 1;
+  position: relative;
+}
+
+.mobile-sheet-link:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.mobile-sheet-link.danger:hover {
+  background: rgba(220, 38, 38, 0.2);
+}
+
+/* Hide desktop navbar on mobile when bottom nav is active */
+@media (max-width: 1024px) {
+  .navbar.mobile-nav .navbar-container {
+    display: none;
+  }
+  
+  .navbar.mobile-nav .search-bar-integrated {
+    display: none;
+  }
+  
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  
+  /* Mobile menu from bottom nav */
+  .navbar.mobile-nav .navbar-center {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding-bottom: 80px; /* Space for bottom nav */
+  }
+}
+
+/* Show desktop navbar on larger screens */
+@media (min-width: 1025px) {
+  .mobile-bottom-nav {
+    display: none;
+  }
+}
+
+/* Theme support for mobile navigation */
+.navbar.light-theme .mobile-bottom-nav {
+  color: #ffffff;
+}
+
+.navbar.dark-theme .mobile-bottom-nav {
+  color: #000000;
+}
+
+.navbar.light-theme .mobile-nav-item:hover {
+  color: #e0e0e0;
+}
+
+.navbar.dark-theme .mobile-nav-item:hover {
+  color: #333333;
 }

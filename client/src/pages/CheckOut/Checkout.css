@@ -3,7 +3,7 @@
   display: flex;
   justify-content: center;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  
+  padding-top: 80px; /* Add top padding to account for fixed navbar */
 }
 .disabled-label {
   color: #aaa;

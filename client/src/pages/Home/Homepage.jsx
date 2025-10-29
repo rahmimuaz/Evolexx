@@ -2,10 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Homepage.css';
 import axios from 'axios';
-import { FaShippingFast, FaRedoAlt, FaSlidersH } from 'react-icons/fa';
-import { HiShieldCheck } from 'react-icons/hi';
+import { FaSlidersH } from 'react-icons/fa';
 import Footer from '../../components/Footer/Footer';
-import bannerImage from '../Home/banner1.jpg';
 
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -21,6 +19,8 @@ const Homepage = () => {
   const productsPerPage = 12;
   const productSectionRef = useRef(null);
   const headingRef = useRef(null);
+  const categorySectionRef = useRef(null);
+  const [categoryVisible, setCategoryVisible] = useState(true);
 
   const sortOptions = [
     { value: 'price-asc', label: 'Price: Low to High' },
@@ -43,6 +43,48 @@ const Homepage = () => {
       setPriceRange([Math.min(...prices), Math.max(...prices)]);
     }
   }, [products]);
+
+  // Intersection Observer for category section animation - triggers every time it enters viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Reset to trigger animation every time
+            setCategoryVisible(false);
+            // Use requestAnimationFrame for better timing
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                setCategoryVisible(true);
+              }, 50);
+            });
+          } else {
+            // Reset when out of view
+            setCategoryVisible(false);
+          }
+        });
+      },
+      { 
+        threshold: 0.15,
+        rootMargin: '50px'
+      }
+    );
+
+    const currentRef = categorySectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
+
+
+
 
   const fetchProducts = async () => {
     try {
@@ -142,19 +184,52 @@ const Homepage = () => {
 
   return (
     <div className="home">
-      {/* Static Banner Section */}
+      {/* Hero Section with Video Background */}
       <section className="banner">
-       <img src={bannerImage} className="banner-image" alt="Homepage Banner" />
+        {/* Video Background */}
+        <div className="hero-video-container">
+          <video 
+            className="hero-video" 
+            autoPlay 
+            muted 
+            loop 
+            playsInline
+            poster="/BrandNewPhone.jpg" // Fallback image while video loads
+          >
+            <source src="/hero-video.mp4" type="video/mp4" />
+            <source src="/hero-video.webm" type="video/webm" />
+            {/* Fallback for browsers that don't support video */}
+            Your browser does not support the video tag.
+          </video>
+          <div className="hero-video-overlay"></div>
+        </div>
+        
+        <div className="hero-content">
+          <div className="hero-text">
+            <div className="brand-logo-container">
+              <svg className="hero-apple-logo" viewBox="0 0 24 24" fill="white">
+                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+              </svg>
+            </div>
+            <h1 className="hero-title-line1">The Future of Design.</h1>
+            <h1 className="hero-title-line2">In Your Hands</h1>
+            <p className="hero-subtitle">New iPhone Series - Sleeker. Smarter. Stronger.</p>
+            <button className="hero-cta-button">
+              <span className="cta-text">BUY NOW</span>
+              <span className="cta-arrow">→</span>
+            </button>
+          </div>
+          <div className="hero-product-display">
+            <img src="/iPhone17ProMax.jpg" alt="iPhone 17 Pro" className="hero-product-image" />
+          </div>
+        </div>
       </section>
 
-      <section className="features">
-        <div className="feature"><FaShippingFast /><div className="feature-text"><h3>Fast & Free Shipping</h3><p>Every single order ships for free.</p></div></div>
-        <div className="feature"><FaRedoAlt /><div className="feature-text"><h3>7 Days Returns</h3><p>Product returns accepted within 30 days.</p></div></div>
-        <div className="feature"><HiShieldCheck /><div className="feature-text"><h3>Top Quality Products</h3><p>We always provide high quality products.</p></div></div>
-      </section>
-
-      <section className="category-section">
-        <div className="category-grid-custom">
+      <section className="category-section" ref={categorySectionRef}>
+        <div className={`category-heading ${categoryVisible ? 'visible' : ''}`}>
+          <h2>Categories</h2>
+        </div>
+        <div className={`category-grid-custom ${categoryVisible ? 'visible' : ''}`}>
           <Link to="/category/Mobile%20Phone" className="category-card tall">
             <img src="/BrandNewPhone.jpg" alt="Sound System" />
             <div className="overlay-blur-bg"></div>

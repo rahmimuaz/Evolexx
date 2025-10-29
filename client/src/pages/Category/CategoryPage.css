@@ -2,6 +2,7 @@
 .product-section2 {
   height: 81vh;
   padding: 1rem 2rem;
+  padding-top: 80px; /* Add top padding to account for fixed navbar */
   text-align: center;
   background-color: #ffffff;
   margin-bottom: 100px;

@@ -5,6 +5,7 @@
   font-family: 'Segoe UI', sans-serif;
   align-items: center;
   padding: 20px 0px;
+  padding-top: 80px; /* Add top padding to account for fixed navbar */
 }
 .product-detail-main-content {
   display: flex;

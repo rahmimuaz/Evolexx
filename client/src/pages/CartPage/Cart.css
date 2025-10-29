@@ -3,7 +3,7 @@
   background-color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #000;
-
+  padding-top: 80px; /* Add top padding to account for fixed navbar */
 }
 
 /* === Title === */

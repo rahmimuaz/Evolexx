@@ -16,8 +16,8 @@ import { CartProvider } from './context/CartContext';
 import Homepage from './pages/Home/Homepage';
 import Footer from './components/Footer/Footer';
 import CategoryPage from './pages/Category/CategoryPage';
-import MyOrders from './pages/MyOrders'; // Import MyOrders
-import ToBeShippedDetailScreen from './pages/ToBeShippedDetailScreen';
+import MyOrders from './pages/MyOrders/MyOrders'; // Import MyOrders
+import ToBeShippedDetailScreen from './pages/ToBeShippedDetail/ToBeShippedDetailScreen';
 
 function App() {
   return (

@@ -6,7 +6,7 @@ import { useCart } from '../../context/CartContext';
 import './ProductDetail.css';
 import Footer from '../../components/Footer/Footer';
 import { useUser } from '../../context/UserContext';
-import Modal from '../../components/Modal';
+import Modal from '../../components/Modal/Modal';
 import Login from '../../pages/Login/Login';
 import Register from '../../pages/Login/Register';
 import ReactMarkdown from 'react-markdown';
