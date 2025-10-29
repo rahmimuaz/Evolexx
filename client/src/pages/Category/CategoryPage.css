@@ -33,7 +33,10 @@
 @media (max-width: 768px) {
 
   .product-section2 {
-    padding: 0rem 2rem; /* Adjust padding for smaller screens */
+    padding: 4.5rem 2rem; /* Adjust padding for smaller screens */
+  }
+  .filter-toggle-icon{
+    margin-top: 1rem;
   }
     .product-section2 h2{
    font-size: 1.5rem;
