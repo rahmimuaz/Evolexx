@@ -1124,8 +1124,8 @@
 
 @media screen and (max-width: 480px) {
   .banner {
-    height: 100vh;
-    max-height: 100vh;
+    height: 110vh;
+    max-height: 110vh;
   }
 
   .filter-sort-bar .filter-group {
