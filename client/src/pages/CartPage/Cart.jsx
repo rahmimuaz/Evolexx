@@ -21,7 +21,10 @@ const Cart = () => {
     }
   };
 
-  const subtotal = cartItems.reduce(
+  // Filter out invalid cart items (where product is null)
+  const validCartItems = cartItems.filter(item => item.product);
+  
+  const subtotal = validCartItems.reduce(
     (acc, item) => acc + (item.product?.price || 0) * item.quantity,
     0
   );
@@ -39,7 +42,7 @@ const Cart = () => {
     e.target.nextSibling.style.display = 'flex';
   };
 
-  const anyOutOfStock = cartItems.some(item => item.product?.stock <= 0);
+  const anyOutOfStock = validCartItems.some(item => item.product?.stock <= 0);
 
   return (
     <div className="cart">
@@ -47,10 +50,10 @@ const Cart = () => {
       <main className="cart-content max-width">
         <div className="cart-items-wrapper">
           <section className="cart-items">
-            {cartItems.length === 0 ? (
+            {validCartItems.length === 0 ? (
               <p className="empty-message">Your cart is empty.</p>
             ) : (
-              cartItems.map(item => (
+              validCartItems.map(item => (
                 <article className="cart-item" key={item._id}>
                   <div className="image-wrapper">
                     {item.product?.images?.length ? (
