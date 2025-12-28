@@ -9,6 +9,7 @@ const NewArrivals = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [draggedItem, setDraggedItem] = useState(null);
+  const [toggleAvailable, setToggleAvailable] = useState(true); // Whether the toggle endpoint is available on the server
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -85,6 +86,15 @@ const NewArrivals = () => {
         data: err?.response?.data,
         requestUrl: `${API_BASE_URL}/api/products/${productId}/toggle-new-arrival`
       });
+
+      // If the endpoint does not exist on the server, surface a clear UI message and disable future toggles
+      if (err?.response?.status === 404 && err?.response?.data?.message === 'Route not found') {
+        setToggleAvailable(false);
+        setError('Toggle endpoint unavailable on remote server. Actions are disabled until the backend is redeployed.');
+        alert('Toggle endpoint unavailable on server. Please redeploy backend.');
+        return;
+      }
+
       alert('Error updating product');
     }
   };
@@ -164,6 +174,12 @@ const NewArrivals = () => {
             >
               {saving ? 'Saving...' : 'Save Order'}
             </button>
+          )}
+          {/* Show warning if toggle endpoint is not available on server */}
+          {!toggleAvailable && (
+            <div style={{ marginTop: '0.75rem', color: '#92400e', background: '#fff7ed', padding: '0.5rem 0.75rem', borderRadius: '0.5rem' }}>
+              <strong>Notice:</strong> Toggle endpoint is not available on the deployed server. Toggle actions are disabled until the backend is redeployed.
+            </div>
           )}
         </div>
       </div>
