@@ -24,8 +24,12 @@ const Cart = () => {
   // Filter out invalid cart items (where product is null)
   const validCartItems = cartItems.filter(item => item.product);
   
+  // Calculate subtotal using discountPrice if available, otherwise use regular price
   const subtotal = validCartItems.reduce(
-    (acc, item) => acc + (item.product?.price || 0) * item.quantity,
+    (acc, item) => {
+      const itemPrice = item.product?.discountPrice || item.product?.price || 0;
+      return acc + itemPrice * item.quantity;
+    },
     0
   );
 
@@ -111,7 +115,16 @@ const Cart = () => {
                   </div>
 
                   <div className="item-price">
-                    Rs. {(item.product?.price * item.quantity).toLocaleString() || 'N/A'}
+                    {item.product?.discountPrice ? (
+                      <>
+                        <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem', marginRight: '0.5rem' }}>
+                          Rs. {(item.product.price * item.quantity).toLocaleString()}
+                        </span>
+                        <span>Rs. {(item.product.discountPrice * item.quantity).toLocaleString()}</span>
+                      </>
+                    ) : (
+                      <span>Rs. {((item.product?.price || 0) * item.quantity).toLocaleString() || 'N/A'}</span>
+                    )}
                   </div>
                 </article>
               ))

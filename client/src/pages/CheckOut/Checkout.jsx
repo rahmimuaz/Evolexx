@@ -191,11 +191,16 @@ const Checkout = () => {
       const orderItems = cartItems.map(item => ({
         product: item.product._id,
         quantity: item.quantity,
-        price: item.product.price
+        // Use discountPrice if available, otherwise use regular price
+        price: item.product.discountPrice || item.product.price
       }));
 
       const total = cartItems.reduce(
-        (acc, item) => acc + (item.product ? item.product.price * item.quantity : 0),
+        (acc, item) => {
+          if (!item.product) return acc;
+          const itemPrice = item.product.discountPrice || item.product.price || 0;
+          return acc + itemPrice * item.quantity;
+        },
         0
       );
 
@@ -245,9 +250,13 @@ const Checkout = () => {
     e.target.nextSibling.style.display = 'flex';
   };
 
-  // Calculate totals
+  // Calculate totals - use discountPrice if available
   const subtotal = cartItems.reduce(
-    (acc, item) => acc + (item.product ? item.product.price * item.quantity : 0),
+    (acc, item) => {
+      if (!item.product) return acc;
+      const itemPrice = item.product.discountPrice || item.product.price || 0;
+      return acc + itemPrice * item.quantity;
+    },
     0
   );
   const shipping = 0;
@@ -378,7 +387,16 @@ const Checkout = () => {
                       </div>
                     </div>
                     <p className="summary-item-price">
-                      Rs. {(item.product.price * item.quantity).toLocaleString()}
+                      {item.product.discountPrice ? (
+                        <>
+                          <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem', marginRight: '0.5rem' }}>
+                            Rs. {(item.product.price * item.quantity).toLocaleString()}
+                          </span>
+                          <span>Rs. {(item.product.discountPrice * item.quantity).toLocaleString()}</span>
+                        </>
+                      ) : (
+                        <span>Rs. {(item.product.price * item.quantity).toLocaleString()}</span>
+                      )}
                     </p>
                   </div>
                 ))}

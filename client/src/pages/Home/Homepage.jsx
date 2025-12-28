@@ -44,7 +44,8 @@ const Homepage = () => {
 
   useEffect(() => {
     if (products.length > 0) {
-      const prices = products.map(p => p.price || 0);
+      // Use discountPrice if available, otherwise use regular price for price range
+      const prices = products.map(p => p.discountPrice || p.price || 0);
       setPriceRange([Math.min(...prices), Math.max(...prices)]);
     }
   }, [products]);
@@ -170,7 +171,8 @@ const Homepage = () => {
   const allBrands = Array.from(new Set(products.map(p => p.details?.brand).filter(Boolean)));
 
   const filteredProducts = products.filter(product => {
-    const price = product.price || 0;
+    // Use discountPrice for filtering if available, otherwise use regular price
+    const price = product.discountPrice || product.price || 0;
     const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
     const matchesBrand = !brandFilter || product.details?.brand === brandFilter;
     const matchesStock = !inStockOnly || (product.stock && product.stock > 0);
@@ -455,7 +457,9 @@ const Homepage = () => {
           <div className="product-grid">
             {currentProducts.map((product) => {
               const imageUrl = generateImageUrl(product);
-              const fullPrice = product.price || 0;
+              // Use discountPrice as main price if available, otherwise use regular price
+              const fullPrice = product.discountPrice || product.price || 0;
+              const originalPrice = product.discountPrice ? product.price : null;
               const kokoTotal = fullPrice * 1.12;
               const kokoInstallment = kokoTotal / 3;
 
@@ -473,10 +477,21 @@ const Homepage = () => {
                       ))}
                     </div>
                     <div className="card-footer">
-                      <p className="price">
-                        Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                      </p>
-                      {product.kokoPay && product.price && (
+                      {originalPrice ? (
+                        <>
+                          <p className="price">
+                            <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem', marginRight: '0.5rem' }}>
+                              Rs. {originalPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                            </span>
+                            <span>Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+                          </p>
+                        </>
+                      ) : (
+                        <p className="price">
+                          Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                        </p>
+                      )}
+                      {product.kokoPay && fullPrice && (
                         <p className="koko-pay">
                            pay in 3 × Rs.{" "}
                           {kokoInstallment.toLocaleString("en-LK", { minimumFractionDigits: 2 })}{" "}
