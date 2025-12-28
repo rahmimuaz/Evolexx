@@ -98,12 +98,23 @@ const Homepage = () => {
 
   const fetchProducts = async () => {
     try {
-      const [productsRes, newArrivalsRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/products`),
-        axios.get(`${API_BASE_URL}/api/products/new-arrivals`)
-      ]);
+      // Fetch products first (required)
+      const productsRes = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(productsRes.data);
-      setNewArrivals(newArrivalsRes.data);
+      
+      // Try to fetch new arrivals separately (optional - won't break if it fails)
+      try {
+        const newArrivalsRes = await axios.get(`${API_BASE_URL}/api/products/new-arrivals`);
+        setNewArrivals(newArrivalsRes.data);
+      } catch (newArrivalsError) {
+        console.warn('New arrivals endpoint not available, using fallback');
+        // Fallback: use newest products from the main products list
+        const sortedByDate = [...productsRes.data].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setNewArrivals(sortedByDate.slice(0, 7));
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching products:', error);
