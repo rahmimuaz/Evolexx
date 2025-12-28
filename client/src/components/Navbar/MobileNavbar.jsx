@@ -5,12 +5,7 @@ import {
   FaBars,
   FaTimes,
   FaShoppingCart,
-  FaSearch,
-  FaSignInAlt,
-  FaUserPlus,
-  FaSignOutAlt,
-  FaCog,
-  FaClipboardList
+  FaSearch
 } from 'react-icons/fa';
 
 // Assuming paths are correct:
