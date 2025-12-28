@@ -108,12 +108,17 @@ const Homepage = () => {
       setNewArrivals(newArrivalsRes.data);
       setLoading(false);
     } catch (error) {
+      const requestUrl = API_BASE_URL ? `${API_BASE_URL}/api/products` : '/api/products';
+
       console.error('Error fetching products:', {
         message: error.message,
         responseStatus: error.response?.status,
         responseData: error.response?.data,
-        requestUrl: `${API_BASE_URL}/api/products`
+        requestUrl
       });
+
+      // Also dump the full error object for deeper inspection
+      console.error('Full Axios error object:', error);
 
       // Provide a clearer message when the server responds with 404
       if (error.response?.status === 404) {
