@@ -18,16 +18,55 @@ const NewArrivals = () => {
   }, []);
 
   const fetchProducts = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const [allRes, newArrivalsRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/products`),
-        axios.get(`${API_BASE_URL}/api/products/new-arrivals`)
+      const productsUrl = API_BASE_URL ? `${API_BASE_URL}/api/products` : '/api/products';
+      const newArrivalsUrl = API_BASE_URL ? `${API_BASE_URL}/api/products/new-arrivals` : '/api/products/new-arrivals';
+
+      const [allResult, newArrivalsResult] = await Promise.allSettled([
+        axios.get(productsUrl),
+        axios.get(newArrivalsUrl)
       ]);
-      setAllProducts(allRes.data);
-      setNewArrivals(newArrivalsRes.data);
+
+      // Handle all products response
+      if (allResult.status === 'fulfilled') {
+        setAllProducts(allResult.value.data);
+      } else {
+        console.error('Error fetching all products:', {
+          message: allResult.reason?.message,
+          status: allResult.reason?.response?.status,
+          data: allResult.reason?.response?.data,
+          requestUrl: productsUrl
+        });
+        setError('Error fetching products');
+        setLoading(false);
+        return;
+      }
+
+      // Handle new arrivals response; if the endpoint is missing (404) fall back to filtering
+      if (newArrivalsResult.status === 'fulfilled') {
+        setNewArrivals(newArrivalsResult.value.data);
+      } else {
+        console.error('Error fetching new arrivals:', {
+          message: newArrivalsResult.reason?.message,
+          status: newArrivalsResult.reason?.response?.status,
+          data: newArrivalsResult.reason?.response?.data,
+          requestUrl: newArrivalsUrl
+        });
+
+        if (newArrivalsResult.reason?.response?.status === 404) {
+          // Fall back to deriving new arrivals from all products
+          const fallback = Array.isArray(allResult.value?.data)
+            ? allResult.value.data.filter(p => p.isNewArrival)
+            : [];
+          setNewArrivals(fallback);
+        } else {
+          setError('Error fetching new arrivals');
+        }
+      }
+
     } catch (err) {
-      console.error('Error fetching products:', err);
+      console.error('Unexpected error fetching products:', err);
       setError('Error fetching products');
     } finally {
       setLoading(false);
@@ -36,10 +75,16 @@ const NewArrivals = () => {
 
   const handleToggleNewArrival = async (productId) => {
     try {
-      await axios.patch(`${API_BASE_URL}/api/products/${productId}/toggle-new-arrival`);
+      const patchUrl = API_BASE_URL ? `${API_BASE_URL}/api/products/${productId}/toggle-new-arrival` : `/api/products/${productId}/toggle-new-arrival`;
+      await axios.patch(patchUrl);
       fetchProducts(); // Refresh data
     } catch (err) {
-      console.error('Error toggling new arrival:', err);
+      console.error('Error toggling new arrival:', {
+        message: err?.message,
+        status: err?.response?.status,
+        data: err?.response?.data,
+        requestUrl: `${API_BASE_URL}/api/products/${productId}/toggle-new-arrival`
+      });
       alert('Error updating product');
     }
   };

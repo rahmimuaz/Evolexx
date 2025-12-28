@@ -3,6 +3,8 @@
 import Product from '../models/Product.js';
 import cloudinary from '../config/cloudinary.js';
 import userModel from '../models/userModel.js'; // Ensure this matches your User model file name and export
+import mongoose from 'mongoose';
+
 
 // Get all products (sorted by displayOrder, then by createdAt)
 export const getProducts = async (req, res) => {
@@ -18,6 +20,11 @@ export const getProducts = async (req, res) => {
 // Get single product by ID
 export const getProduct = async (req, res) => {
   try {
+    // Validate ObjectId to avoid Cast errors when non-id strings are passed (e.g., '/products/sorted')
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
