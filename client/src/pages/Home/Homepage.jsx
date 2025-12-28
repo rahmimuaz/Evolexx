@@ -8,6 +8,9 @@ import Footer from '../../components/Footer/Footer';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+// Debug: ensure API base URL is set and visible in console during development
+console.log('API_BASE_URL:', API_BASE_URL);
+
 const Homepage = () => {
   const [products, setProducts] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
@@ -93,16 +96,32 @@ const Homepage = () => {
 
   const fetchProducts = async () => {
     try {
+      const productsUrl = API_BASE_URL ? `${API_BASE_URL}/api/products` : '/api/products';
+      const newArrivalsUrl = API_BASE_URL ? `${API_BASE_URL}/api/products/new-arrivals` : '/api/products/new-arrivals';
+
       const [productsRes, newArrivalsRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/products`),
-        axios.get(`${API_BASE_URL}/api/products/new-arrivals`)
+        axios.get(productsUrl),
+        axios.get(newArrivalsUrl)
       ]);
+
       setProducts(productsRes.data);
       setNewArrivals(newArrivalsRes.data);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Error fetching products. Please try again later.');
+      console.error('Error fetching products:', {
+        message: error.message,
+        responseStatus: error.response?.status,
+        responseData: error.response?.data,
+        requestUrl: `${API_BASE_URL}/api/products`
+      });
+
+      // Provide a clearer message when the server responds with 404
+      if (error.response?.status === 404) {
+        setError('Products endpoint not found (404). Please check the API URL and server.');
+      } else {
+        setError('Error fetching products. Please try again later.');
+      }
+
       setLoading(false);
     }
   };
@@ -143,9 +162,9 @@ const Homepage = () => {
     if (product.images && product.images.length > 0) {
       const image = product.images[0];
       if (image.startsWith('http')) return image;
-      if (image.startsWith('/uploads/')) return `${API_BASE_URL}${image}`;
-      if (image.startsWith('uploads/')) return `${API_BASE_URL}/${image}`;
-      return `${API_BASE_URL}/uploads/${image.replace(/^\//, '')}`;
+      if (image.startsWith('/uploads/')) return API_BASE_URL ? `${API_BASE_URL}${image}` : image; // fall back to relative path
+      if (image.startsWith('uploads/')) return API_BASE_URL ? `${API_BASE_URL}/${image}` : `/${image}`;
+      return API_BASE_URL ? `${API_BASE_URL}/uploads/${image.replace(/^\//, '')}` : `/uploads/${image.replace(/^\//, '')}`;
     }
     return '/logo192.png';
   };
