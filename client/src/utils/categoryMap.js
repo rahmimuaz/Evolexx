@@ -10,10 +10,12 @@ export const SLUG_TO_CATEGORY = {
   'phone-covers': 'Phone Covers',
   'chargers': 'Chargers',
   'headphones': 'Headphones',
+  'earbuds': 'Earbuds',
   'smartwatches': 'Smartwatches',
   'tablets': 'Tablets',
   'screen-protectors': 'Screen Protectors',
   'cables': 'Cables',
+  'other-accessories': 'Other Accessories',
   'preowned-laptops': 'Preowned Laptops',
   'preowned-tablets': 'Preowned Tablets',
   'other': 'Other'
@@ -25,18 +27,20 @@ export const CATEGORY_TO_SLUG = Object.fromEntries(
 );
 
 // Display labels for each slug (for page titles, breadcrumbs, etc.)
-  export const CATEGORY_LABELS = {
+export const CATEGORY_LABELS = {
   'mobile-phones': 'Brand New Phones',
   'preowned-phones': 'Pre-Owned Phones',
   'laptops': 'Laptops',
   'mobile-accessories': 'Mobile Accessories',
   'phone-covers': 'Phone Covers',
   'chargers': 'Chargers & Adapters',
-  'headphones': 'Headphones & Earbuds',
+  'headphones': 'Headphones',
+  'earbuds': 'Earbuds & TWS',
   'smartwatches': 'Smart Watches',
   'tablets': 'Tablets',
   'screen-protectors': 'Screen Protectors',
   'cables': 'Cables & Connectors',
+  'other-accessories': 'Other Accessories',
   'preowned-laptops': 'Pre-Owned Laptops',
   'preowned-tablets': 'Pre-Owned Tablets',
   'other': 'Other Products'
@@ -54,7 +58,7 @@ export const CATEGORY_GROUPS = {
   },
   'accessories': {
     label: 'Accessories',
-    categories: ['mobile-accessories', 'phone-covers', 'chargers', 'headphones', 'smartwatches', 'screen-protectors', 'cables']
+    categories: ['mobile-accessories', 'phone-covers', 'chargers', 'headphones', 'earbuds', 'smartwatches', 'screen-protectors', 'cables', 'other-accessories']
   }
 };
 

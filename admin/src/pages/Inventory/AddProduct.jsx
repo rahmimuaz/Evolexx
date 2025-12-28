@@ -35,8 +35,8 @@ const AddProduct = () => {
 
   // Hierarchical categories structure
   const categoryHierarchy = {
-    'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches', 'Headphones'],
-    'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables'],
+    'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches'],
+    'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables', 'Headphones', 'Earbuds', 'Other Accessories'],
     'Pre-owned Devices': ['Preowned Phones', 'Preowned Laptops', 'Preowned Tablets'],
     'Other': []
   };
@@ -98,13 +98,43 @@ const AddProduct = () => {
     ],
     'Headphones': [
       { name: 'model', label: 'Model', type: 'text' },
-      { name: 'type', label: 'Type', type: 'select', options: ['Over-Ear', 'On-Ear', 'In-Ear', 'Earbuds', 'True Wireless'] },
+      { name: 'type', label: 'Type', type: 'select', options: ['Over-Ear', 'On-Ear', 'In-Ear', 'True Wireless'] },
       { name: 'connectivity', label: 'Connectivity', type: 'select', options: ['Wired', 'Wireless', 'Bluetooth', 'Hybrid'] },
       { name: 'noiseCancellation', label: 'Noise Cancellation', type: 'select', options: ['Active', 'Passive', 'None'] },
       { name: 'batteryLife', label: 'Battery Life', type: 'text', placeholder: 'e.g., 30 hours' },
       { name: 'color', label: 'Color', type: 'text' },
       { name: 'driverSize', label: 'Driver Size', type: 'text', placeholder: 'e.g., 40mm' },
       { name: 'microphone', label: 'Microphone', type: 'toggle' }
+    ],
+    'Earbuds': [
+      { name: 'model', label: 'Model', type: 'text' },
+      { name: 'type', label: 'Type', type: 'select', options: ['True Wireless', 'Wired', 'Neckband'] },
+      { name: 'connectivity', label: 'Connectivity', type: 'select', options: ['Bluetooth', 'Wired', 'USB-C'] },
+      { name: 'noiseCancellation', label: 'Noise Cancellation', type: 'select', options: ['Active', 'Passive', 'None'] },
+      { name: 'batteryLife', label: 'Battery Life', type: 'text', placeholder: 'e.g., 6 hours (24 with case)' },
+      { name: 'color', label: 'Color', type: 'text' },
+      { name: 'waterResistance', label: 'Water Resistance', type: 'text', placeholder: 'e.g., IPX4' },
+      { name: 'microphone', label: 'Microphone', type: 'toggle' }
+    ],
+    'Screen Protectors': [
+      { name: 'type', label: 'Type', type: 'select', options: ['Tempered Glass', 'Hydrogel Film', 'Matte Film', 'Privacy Screen'] },
+      { name: 'compatibility', label: 'Compatibility', type: 'text', placeholder: 'e.g., iPhone 15 Pro Max' },
+      { name: 'features', label: 'Features', type: 'text', placeholder: 'e.g., 9H Hardness, Anti-Fingerprint' },
+      { name: 'material', label: 'Material', type: 'text' }
+    ],
+    'Cables': [
+      { name: 'type', label: 'Cable Type', type: 'select', options: ['Lightning', 'USB-C', 'Micro USB', 'USB-A to USB-C', 'USB-C to USB-C', 'Lightning to USB-C'] },
+      { name: 'length', label: 'Cable Length', type: 'text', placeholder: 'e.g., 1 meter' },
+      { name: 'compatibility', label: 'Compatibility', type: 'text', placeholder: 'e.g., iPhone, Android' },
+      { name: 'color', label: 'Color', type: 'text' },
+      { name: 'material', label: 'Material', type: 'select', options: ['Braided Nylon', 'PVC', 'Silicone', 'TPE'] },
+      { name: 'fastCharging', label: 'Fast Charging Support', type: 'toggle' }
+    ],
+    'Other Accessories': [
+      { name: 'type', label: 'Accessory Type', type: 'text', placeholder: 'e.g., Phone Stand, Pop Socket' },
+      { name: 'compatibility', label: 'Compatibility', type: 'text', placeholder: 'e.g., Universal, iPhone only' },
+      { name: 'color', label: 'Color', type: 'text' },
+      { name: 'material', label: 'Material', type: 'text' }
     ]
   };
 
@@ -114,8 +144,12 @@ const AddProduct = () => {
     'Smartwatches': ['Apple', 'Samsung', 'Garmin', 'Fitbit', 'Amazfit', 'Huawei', 'Fossil', 'TicWatch'],
     'Laptops': ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MSI', 'Razer', 'Microsoft'],
     'Headphones': ['Sony', 'Bose', 'Apple', 'Samsung', 'JBL', 'Sennheiser', 'Audio-Technica', 'Beats', 'Skullcandy', 'Anker'],
-    'Chargers': ['Anker', 'Belkin', 'Samsung', 'Apple', 'RAVPower', 'Aukey'],
-    'Phone Covers': ['Spigen', 'OtterBox', 'Case-Mate', 'UAG', 'Ringke'],
+    'Earbuds': ['Apple', 'Samsung', 'Sony', 'JBL', 'Jabra', 'Beats', 'Anker', 'Xiaomi', 'OnePlus', 'Nothing'],
+    'Chargers': ['Anker', 'Belkin', 'Samsung', 'Apple', 'RAVPower', 'Aukey', 'Baseus', 'Ugreen'],
+    'Phone Covers': ['Spigen', 'OtterBox', 'Case-Mate', 'UAG', 'Ringke', 'ESR', 'Caseology'],
+    'Screen Protectors': ['Spigen', 'ESR', 'ZAGG', 'amFilm', 'JETech', 'Belkin', 'Other'],
+    'Cables': ['Anker', 'Belkin', 'Apple', 'Samsung', 'Baseus', 'Ugreen', 'Native Union', 'Other'],
+    'Other Accessories': ['Anker', 'Belkin', 'Spigen', 'PopSockets', 'Other'],
     'Preowned Phones': ['Apple', 'Samsung', 'Google', 'OnePlus', 'Xiaomi']
   };
 
