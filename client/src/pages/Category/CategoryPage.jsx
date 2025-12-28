@@ -1,10 +1,14 @@
-// Updated CategoryPage.jsx matching Homepage layout, style, and functionality
-
+// CategoryPage.jsx - SEO-friendly slug-based category page
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaSlidersH } from 'react-icons/fa';
 import './CategoryPage.css';
 import Footer from '../../components/Footer/Footer';
+import { 
+  getCategoryFromSlug, 
+  getLabelFromSlug, 
+  isValidCategorySlug 
+} from '../../utils/categoryMap';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const PRODUCTS_PER_PAGE = 12;
@@ -17,7 +21,9 @@ const sortOptions = [
 ];
 
 const CategoryPage = () => {
-  const { category } = useParams();
+  const { slug } = useParams(); // Changed from 'category' to 'slug'
+  const navigate = useNavigate();
+  
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,24 +36,46 @@ const CategoryPage = () => {
   const [animationDirection, setAnimationDirection] = useState('');
   const headingRef = useRef(null);
 
+  // Get the actual database category name from the slug
+  const categoryName = getCategoryFromSlug(slug);
+  const displayLabel = getLabelFromSlug(slug);
+
+  // Validate slug and redirect if invalid
   useEffect(() => {
+    if (!isValidCategorySlug(slug)) {
+      // Redirect to homepage or show 404
+      navigate('/', { replace: true });
+    }
+  }, [slug, navigate]);
+
+  useEffect(() => {
+    if (!categoryName) return;
+    
     const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const res = await fetch(`${API_BASE_URL}/api/products/category/${encodeURIComponent(category)}`);
+        // Fetch using the actual category name from database
+        const res = await fetch(`${API_BASE_URL}/api/products/category/${encodeURIComponent(categoryName)}`);
+        if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
         setProducts(data);
         if (data.length > 0) {
           const prices = data.map(p => p.price || 0);
           setPriceRange([Math.min(...prices), Math.max(...prices)]);
         }
+        setError(null);
       } catch (err) {
-        setError('Failed to load products.');
+        console.error('Error fetching products:', err);
+        setError('Failed to load products. Please try again.');
       } finally {
         setLoading(false);
       }
     };
+    
     fetchProducts();
-  }, [category]);
+    // Reset page when category changes
+    setCurrentPage(1);
+  }, [categoryName]);
 
   const generateImageUrl = (product) => {
     if (product.images && product.images.length > 0) {
@@ -58,6 +86,12 @@ const CategoryPage = () => {
       return `${API_BASE_URL}/uploads/${image.replace(/^\//, '')}`;
     }
     return '/logo192.png';
+  };
+
+  const getAverageRating = (reviews = []) => {
+    if (!reviews.length) return 0;
+    const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+    return total / reviews.length;
   };
 
   const allBrands = Array.from(new Set(products.map(p => p.details?.brand).filter(Boolean)));
@@ -121,17 +155,30 @@ const CategoryPage = () => {
 
   if (loading) return <div className="loader">Loading products...</div>;
   if (error) return <div className="error">{error}</div>;
+  if (!categoryName) return null; // Will redirect via useEffect
 
   return (
     <div className="product-section2">
+      {/* Breadcrumb Navigation */}
+      <nav className="breadcrumb">
+        <Link to="/">Home</Link>
+        <span className="breadcrumb-separator">/</span>
+        <span className="breadcrumb-current">{displayLabel}</span>
+      </nav>
+
       <div className="heading-with-icon">
-        <h2 ref={headingRef}>{category}</h2>
+        <h2 ref={headingRef}>{displayLabel}</h2>
         <FaSlidersH
           className="filter-toggle-icon"
           onClick={() => setShowFilters(!showFilters)}
           title="Filter & Sort"
         />
       </div>
+
+      {/* Product count */}
+      <p className="product-count">
+        {sortedProducts.length} {sortedProducts.length === 1 ? 'product' : 'products'} found
+      </p>
 
       {showFilters && (
         <div className="filter-sort-bar">
@@ -155,7 +202,7 @@ const CategoryPage = () => {
             <div className="filter-group brand-filter-group">
               <label>Brand:</label>
               <select value={brandFilter} onChange={handleBrandChange} className="brand-select-dropdown">
-                <option value="">All</option>
+                <option value="">All Brands</option>
                 {allBrands.map(brand => (
                   <option key={brand} value={brand}>{brand}</option>
                 ))}
@@ -164,7 +211,7 @@ const CategoryPage = () => {
           )}
 
           <div className="filter-group">
-            <label>
+            <label className="stock-checkbox-label">
               <input type="checkbox" checked={inStockOnly} onChange={handleStockChange} /> In Stock Only
             </label>
           </div>
@@ -173,6 +220,13 @@ const CategoryPage = () => {
         </div>
       )}
 
+      {currentProducts.length === 0 ? (
+        <div className="no-products">
+          <p>No products found in this category.</p>
+          <Link to="/" className="back-home-link">← Back to Home</Link>
+        </div>
+      ) : (
+        <>
       <div className={`product-grid-container ${animationDirection}`}>
         <div className="product-grid">
           {currentProducts.map(product => {
@@ -180,15 +234,17 @@ const CategoryPage = () => {
             const fullPrice = product.price || 0;
             const kokoTotal = fullPrice * 1.12;
             const kokoInstallment = kokoTotal / 3;
+                const avgRating = getAverageRating(product.reviews);
+                
             return (
-              <Link to={`/products/${product._id}`} className="product-card" key={product._id}>
+              <Link to={`/product/${product.slug || product._id}`} className="product-card" key={product._id}>
                 <img src={imageUrl} alt={product.name} onError={e => (e.target.src = '/logo192.png')} />
                 <div className="product-card-content">
                   <h3 className="product-name">{product.name}</h3>
                   <p className="product-description">{product.description}</p>
                   <div className="star-rating">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <span key={star}>{product.rating >= star ? '★' : '☆'}</span>
+                          <span key={star}>{avgRating >= star ? '★' : '☆'}</span>
                     ))}
                   </div>
                   <div className="card-footer">
@@ -208,6 +264,7 @@ const CategoryPage = () => {
         </div>
       </div>
 
+          {totalPages > 1 && (
       <div className="pagination-dots2">
         {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
           <div
@@ -218,6 +275,10 @@ const CategoryPage = () => {
           ></div>
         ))}
       </div>
+          )}
+        </>
+      )}
+      
       <Footer />
     </div>
   );

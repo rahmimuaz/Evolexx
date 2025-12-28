@@ -1,0 +1,397 @@
+/* MobileNavbar.css */
+
+/* --- Variables & Base --- */
+:root {
+  --mnav-height: 60px;
+  --mnav-bg-light: #ffffff;
+  --mnav-bg-dark: #1a1a1a;
+  --mnav-text-light: #333333;
+  --mnav-text-dark: #ffffff;
+  --mnav-accent: #007bff;
+  --mnav-border: #e5e5e5;
+  --mnav-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Main Container --- */
+.mnav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--mnav-height);
+  z-index: 1000;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mnav-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  position: relative; /* Vital for centering the logo */
+}
+
+/* --- Dynamic Themes --- */
+
+/* Dark Theme (Top of page) */
+.mnav.dark {
+  background-color: transparent;
+  color: var(--mnav-text-dark);
+}
+
+.mnav.dark .mnav-link,
+.mnav.dark .mnav-brand,
+.mnav.dark .mnav-hamburger-icon,
+.mnav.dark .mnav-search-button,
+.mnav.dark .mnav-cart-button {
+  color: var(--mnav-text-dark);
+}
+
+/* Light Theme (For white background pages like Category, Product, Cart, etc.) */
+.mnav.light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  color: var(--mnav-text-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Light theme text colors */
+.mnav.light .mnav-link,
+.mnav.light .mnav-brand,
+.mnav.light .mnav-hamburger,
+.mnav.light .mnav-hamburger-icon,
+.mnav.light .mnav-search-button,
+.mnav.light .mnav-cart-button {
+  color: var(--mnav-text-light);
+}
+
+/* Light theme SVG icon colors - ensure visibility on white backgrounds */
+.mnav.light .mnav-hamburger-icon svg,
+.mnav.light .mnav-search-button svg,
+.mnav.light .mnav-cart-button svg {
+  fill: var(--mnav-text-light);
+  color: var(--mnav-text-light);
+}
+
+/* Dark theme SVG icon colors */
+.mnav.dark .mnav-hamburger-icon svg,
+.mnav.dark .mnav-search-button svg,
+.mnav.dark .mnav-cart-button svg {
+  fill: var(--mnav-text-dark);
+  color: var(--mnav-text-dark);
+}
+
+/* Scrolled State - Dark theme (Homepage with dark hero) */
+.mnav.dark.scrolled {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+/* Scrolled State - Light theme (White background pages) */
+.mnav.light.scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Hidden State (Scroll Down) */
+.mnav.hidden {
+  transform: translateY(-100%);
+}
+
+/* --- Hamburger --- */
+.mnav-hamburger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  z-index: 1002;
+  display: flex;
+  align-items: center;
+}
+
+.mnav-hamburger-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.mnav-hamburger-icon.open {
+  transform: rotate(90deg);
+}
+
+/* --- Branding --- */
+.mnav-left {
+  position: absolute; /* Takes it out of the standard flow */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); /* Centers it perfectly X and Y */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: auto;
+  flex: unset; /* Remove the previous 'flex: 1' so it doesn't stretch */
+}
+
+.mnav-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* --- Right Icons --- */
+.mnav-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.mnav-cart-button,
+.mnav-search-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: inherit; /* Inherits from theme */
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #ff3b30;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Mobile Menu (Drawer/Dropdown) --- */
+.mnav-center {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: var(--mnav-bg-light); /* Default to light for readability */
+  color: var(--mnav-text-light); /* Force dark text in menu */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease-in-out, opacity 0.3s;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* When open */
+.mnav-center.open {
+  max-height: 500px; /* Arbitrary large height */
+  opacity: 1;
+  border-top: 1px solid var(--mnav-border);
+}
+
+/* If the navbar itself is dark, keep menu light or dark? 
+   Usually mobile menus are solid for readability. 
+*/
+.mnav.dark .mnav-center {
+  background-color: var(--mnav-bg-dark);
+  color: var(--mnav-text-dark);
+  border-top: 1px solid #333;
+}
+
+.mnav-links {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+}
+
+.mnav-link {
+  padding: 1rem 2rem;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  transition: background 0.2s;
+}
+
+.mnav.dark .mnav-link {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mnav-link:hover, 
+.mnav-link.is-active {
+  background-color: rgba(0,0,0,0.03);
+  color: var(--mnav-accent);
+}
+
+.mnav.dark .mnav-link:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.mnav-link-button {
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* --- Submenu (Profile) --- */
+.mnav-submenu {
+  background-color: rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+  padding-left: 1rem; /* Indent */
+}
+
+.mnav.dark .mnav-submenu {
+  background-color: rgba(255,255,255,0.02);
+}
+
+.mnav-submenu-link {
+  padding: 0.8rem 2rem;
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mnav-submenu-link:hover {
+  color: var(--mnav-accent);
+}
+
+/* --- Search Overlay --- */
+.mnav-search-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--mnav-bg-light);
+  z-index: 1005;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.mnav-search-input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: #f3f4f6;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+}
+
+.mnav-search-input-icon {
+  color: #9ca3af;
+  margin-right: 0.5rem;
+  display: flex;
+}
+
+.mnav-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1rem;
+  color: #333;
+}
+
+.mnav-search-cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  margin-left: 0.5rem;
+  padding: 4px;
+  display: flex;
+}
+
+/* --- Search Suggestions --- */
+.mnav-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-top: 1px solid var(--mnav-border);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 1004;
+}
+
+.mnav-suggestion-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mnav-suggestion-item:hover {
+  background-color: #f9fafb;
+}
+
+.mnav-suggestion-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 1rem;
+}
+
+.mnav-suggestion-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.mnav-suggestion-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #111;
+}
+
+.mnav-suggestion-price {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.mnav-suggestion-loading,
+.mnav-suggestion-error,
+.mnav-suggestion-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.mnav-suggestion-error {
+  color: #ef4444;
+}

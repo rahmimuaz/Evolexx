@@ -4,10 +4,10 @@ import Product from '../models/Product.js';
 import cloudinary from '../config/cloudinary.js';
 import userModel from '../models/userModel.js'; // Ensure this matches your User model file name and export
 
-// Get all products
+// Get all products (sorted by displayOrder, then by createdAt)
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({}); // Find all products
+    const products = await Product.find({}).sort({ displayOrder: 1, createdAt: -1 });
     res.status(200).json(products);
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -25,6 +25,20 @@ export const getProduct = async (req, res) => {
     res.status(200).json(product);
   } catch (error) {
     console.error('Error fetching product:', error);
+    res.status(500).json({ message: 'Server error: ' + error.message });
+  }
+};
+
+// Get single product by slug (SEO-friendly URL)
+export const getProductBySlug = async (req, res) => {
+  try {
+    const product = await Product.findOne({ slug: req.params.slug });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.status(200).json(product);
+  } catch (error) {
+    console.error('Error fetching product by slug:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
   }
 };
@@ -423,6 +437,107 @@ export const searchProducts = async (req, res) => {
     res.status(200).json(products);
   } catch (error) {
     console.error('Search error:', error);
+    res.status(500).json({ message: 'Server error: ' + error.message });
+  }
+};
+
+// ============== NEW ARRIVALS MANAGEMENT ==============
+
+// Get all new arrival products (sorted by newArrivalOrder)
+export const getNewArrivals = async (req, res) => {
+  try {
+    const products = await Product.find({ isNewArrival: true })
+      .sort({ newArrivalOrder: 1 });
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error fetching new arrivals:', error);
+    res.status(500).json({ message: 'Server error: ' + error.message });
+  }
+};
+
+// Toggle product as new arrival
+export const toggleNewArrival = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+    
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Toggle the isNewArrival status
+    product.isNewArrival = !product.isNewArrival;
+    
+    // If adding to new arrivals, set order to end of list
+    if (product.isNewArrival) {
+      const maxOrder = await Product.findOne({ isNewArrival: true })
+        .sort({ newArrivalOrder: -1 })
+        .select('newArrivalOrder');
+      product.newArrivalOrder = maxOrder ? maxOrder.newArrivalOrder + 1 : 1;
+    } else {
+      product.newArrivalOrder = 0;
+    }
+
+    await product.save();
+    res.status(200).json(product);
+  } catch (error) {
+    console.error('Error toggling new arrival:', error);
+    res.status(500).json({ message: 'Server error: ' + error.message });
+  }
+};
+
+// Update new arrivals order (bulk update)
+export const updateNewArrivalsOrder = async (req, res) => {
+  try {
+    const { orderedProducts } = req.body; // Array of { id, newArrivalOrder }
+    
+    if (!Array.isArray(orderedProducts)) {
+      return res.status(400).json({ message: 'orderedProducts must be an array' });
+    }
+
+    const updatePromises = orderedProducts.map((item, index) => 
+      Product.findByIdAndUpdate(item.id, { newArrivalOrder: index + 1 })
+    );
+
+    await Promise.all(updatePromises);
+    res.status(200).json({ message: 'New arrivals order updated successfully' });
+  } catch (error) {
+    console.error('Error updating new arrivals order:', error);
+    res.status(500).json({ message: 'Server error: ' + error.message });
+  }
+};
+
+// ============== PRODUCT DISPLAY ORDER MANAGEMENT ==============
+
+// Update products display order (bulk update)
+export const updateProductsOrder = async (req, res) => {
+  try {
+    const { orderedProducts } = req.body; // Array of { id, displayOrder }
+    
+    if (!Array.isArray(orderedProducts)) {
+      return res.status(400).json({ message: 'orderedProducts must be an array' });
+    }
+
+    const updatePromises = orderedProducts.map((item, index) => 
+      Product.findByIdAndUpdate(item.id, { displayOrder: index + 1 })
+    );
+
+    await Promise.all(updatePromises);
+    res.status(200).json({ message: 'Products order updated successfully' });
+  } catch (error) {
+    console.error('Error updating products order:', error);
+    res.status(500).json({ message: 'Server error: ' + error.message });
+  }
+};
+
+// Get all products sorted by display order
+export const getProductsSorted = async (req, res) => {
+  try {
+    const products = await Product.find({})
+      .sort({ displayOrder: 1, createdAt: -1 });
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error fetching sorted products:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
   }
 };

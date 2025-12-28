@@ -1,114 +1,69 @@
-/* BASE NAVBAR STYLES - CLEAR GLASS DESIGN */
+/* BASE NAVBAR STYLES */
 .navbar {
-  padding: 1.5rem 1.2rem;
+  /* Transparent at top by default */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: translateY(0);
+  padding: 0.6rem 1.2rem;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  width: 100%;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* glass separator line */
+  position: fixed;
+  transition: background 0.28s ease, backdrop-filter 0.28s ease, -webkit-backdrop-filter 0.28s ease, transform 0.25s ease;
 }
 
-/* Theme color applied at the root for cascading */
-.navbar.light-theme {
-  color: #ffffff; /* text/icon base color */
+.navbar.hidden { transform: translateY(-110%); }
+/* Theme variables */
+.navbar.light {
+  --nav-fg: #111111;
+  --nav-fg-hover: #555555;
+  --nav-divider: rgba(0, 0, 0, 0.12);
+  --nav-input-fg: #222222;
+  --nav-muted: #6b7280; /* slate-500 */
+  /* Add subtle background for visibility on white pages */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.navbar.dark {
+  --nav-fg: #ffffff;
+  --nav-fg-hover: #e5e5e5;
+  --nav-divider: rgba(255, 255, 255, 0.18);
+  --nav-input-fg: #eeeeee;
+  --nav-muted: #d1d5db; /* slate-300 */
 }
 
-.navbar.dark-theme {
-  color: #000000; /* text/icon base color */
+/* Subtle glass when scrolled - dark theme (homepage hero) */
+.navbar.dark.scrolled {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%),
+    rgba(61, 61, 61, 0.16);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
 }
 
-@keyframes slideDown {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+/* Light theme scrolled - stronger background for white pages */
+.navbar.light.scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* Dynamic color inversion based on background */
 
-/* Pulling animation for navbar elements */
-.navbar.pulled {
-  padding: 0.8rem 1.2rem;
-}
-
-.navbar.pulled .navbar-container {
-  justify-content: center;
-}
-
-.navbar.pulled .navbar-left {
-  display: none;
-}
-
-.navbar.pulled .navbar-center {
-  order: 1;
-  position: static;
-  transform: none;
-  flex-grow: 1;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.navbar.pulled .navbar-right {
-  display: none;
-}
-
-/* Pulled state for navigation links container - Same glass effect as navbar-links */
-.navbar.pulled .navbar-links {
-  gap: 0.2rem;
-  padding: 0.3rem 0.8rem;
-  transform: none;
-  width: auto;
-  max-width: 90%;
-  justify-content: center;
-  display: flex;
-  align-items: center;
-  margin: 0 auto;
-  overflow: visible; /* allow dropdown to be visible when pulled */
-  
-  /* MAGNIFYING GLASS BASE - Very transparent (Same as navbar-links) */
-  background: 
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.05) 0%, 
-      rgba(255, 255, 255, 0.01) 100%
-    );
-  
-  /* MAGNIFYING GLASS EFFECT - Pure magnification with slight blur (Same as navbar-links) */
-  backdrop-filter: blur(8px) saturate(150%) brightness(1.1); 
-  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  
-  /* Magnifying glass border (Same as navbar-links) */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  
-  border-radius: 2.5rem;
-  
-  /* Magnifying glass shadows (Same as navbar-links) */
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Magnifying glass animation (Same as navbar-links) */
-  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
-}
 
 .navbar-container {
   display: flex;
   align-items: center; 
   justify-content: space-between;
   flex-wrap: nowrap;
-  margin: 0 auto;
+  margin: 0 auto; /* Center content */
   height: 2rem;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* LEFT SECTION */
@@ -116,270 +71,108 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex-shrink: 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0; /* Prevent from shrinking */
 }
 
 .navbar-brand {
   font-size: 1.25rem;
   font-weight: 700;
-  color: inherit;
+  color: var(--nav-fg);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 0.5s ease;
-}
-
-/* Dynamic brand colors */
-.navbar.light-theme .navbar-brand {
-  color: #ffffff;
-}
-
-.navbar.dark-theme .navbar-brand {
-  color: #000000;
+  padding: 0.2rem 0.2rem;
 }
 
 /* HAMBURGER (Only visible on mobile) */
 .hamburger-button {
-  display: none;
+  display: none; /* Hidden by default */
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.6rem;
-  color: inherit;
+  color: var(--nav-fg);
   flex-shrink: 0;
-  margin-right: 1.2rem;
+  margin-right: 1.2rem; /* Space between hamburger and brand */
+}
+.hamburger-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.hamburger-icon.open {
+  transform: rotate(90deg) scale(1.05);
 }
 
-/* CENTER SECTION (Navigation Links) - CENTERED */
+/* CENTER SECTION (Navigation Links) */
 .navbar-center {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-grow: 1;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  justify-content: flex-end;
+  flex-grow: 1; /* Allow to grow and push other items */
+  /* Remove fixed margin-left, let flexbox handle it */
 }
 
-/* MAGNIFYING GLASS CORE STYLES - True Magnification */
 .navbar-links {
   display: flex;
   gap: 4rem;
   position: relative;
-  flex-wrap: nowrap;
-  overflow: hidden; /* Essential for magnification effect */
-  
-  /* MAGNIFYING GLASS BASE - Very transparent */
-  background: 
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.05) 0%, 
-      rgba(255, 255, 255, 0.01) 100%
-    );
-  
-  /* MAGNIFYING GLASS EFFECT - Pure magnification with slight blur */
-  backdrop-filter: blur(8px) saturate(150%) brightness(1.1); 
-  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  
-  /* Magnifying glass border */
-  border: 1px solid rgba(255, 255, 255, 0.2); 
-  
-  border-radius: 2.5rem;
-  padding: 0.5rem 2rem;
-  
-  /* Magnifying glass shadows */
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Magnifying glass animation */
-  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
-}
-
-/* Magnifying glass breathing animation */
-@keyframes magnifyingGlassGlow {
-  0% {
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.08),
-      0 2px 6px rgba(0, 0, 0, 0.04),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-     backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-     -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-   }
-   50% {
-     box-shadow: 
-       0 6px 16px rgba(0, 0, 0, 0.1), 
-       0 3px 8px rgba(0, 0, 0, 0.06),
-       inset 0 1px 0 rgba(255, 255, 255, 0.4), 
-       inset 0 -1px 0 rgba(0, 0, 0, 0.08);
-     backdrop-filter: blur(10px) saturate(160%) brightness(1.15);
-     -webkit-backdrop-filter: blur(10px) saturate(160%) brightness(1.15);
-   }
-   100% {
-     box-shadow: 
-       0 4px 12px rgba(0, 0, 0, 0.08),
-       0 2px 6px rgba(0, 0, 0, 0.04),
-       inset 0 1px 0 rgba(255, 255, 255, 0.3),
-       inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-     backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-     -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  }
-}
-
-/* MAGNIFYING GLASS EFFECT - Increased magnification */
-.navbar-links::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: inherit;
-  transform: scale(3.5) translateZ(0); /* Increased magnification effect */
-  transform-origin: center;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  will-change: transform;
-  clip-path: inset(0);
-  /* Pure magnification - no blur effects */
-}
-
-/* Magnifying glass bottom reflection */
-.navbar-links::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 30%;
-  background: 
-    linear-gradient(0deg, 
-      rgba(0, 0, 0, 0.08) 0%, 
-      transparent 100%
-    );
-  border-radius: 0 0 2.5rem 2.5rem;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Magnifying glass hover effect */
-.navbar-links:hover {
-  /* Subtle magnifying glass lift */
-  transform: translateY(-1px);
-  
-  /* Enhanced magnifying glass shadows */
-  box-shadow: 
-    0 6px 18px rgba(0, 0, 0, 0.12), 
-    0 3px 8px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  
-  /* Enhanced magnification on hover */
-  backdrop-filter: blur(10px) saturate(170%) brightness(1.2); 
-  -webkit-backdrop-filter: blur(10px) saturate(170%) brightness(1.2);
-}
-
-/* Reduce gap between navigation links when pulled */
-.navbar.pulled .navbar-links .navbar-link {
-  margin: 0 1rem;
-  font-size: 0.9rem;
-}
-
-/* Styling for logo when pulled into center */
-.navbar.pulled .navbar-links .navbar-brand {
-  margin: 0 0.2rem;
-  font-size: 1rem;
-}
-
-/* Styling for icons when pulled into center */
-.navbar.pulled .navbar-links .search-icon-button,
-.navbar.pulled .navbar-links .cart-button,
-.navbar.pulled .navbar-links .profile-icon-button {
-  margin: 0 0.1rem;
-  padding: 0.2rem;
+  flex-wrap: nowrap; /* Prevent wrapping on desktop */
 }
 
 .navbar-link {
   position: relative;
-  color: inherit;
+  color: var(--nav-fg);
   text-decoration: none;
   font-weight: 580;
   font-size: 0.95rem;
   padding-bottom: 5px;
-  transition: color 0.5s ease;
-  white-space: nowrap;
-}
-
-/* Dynamic link colors */
-.navbar.light-theme .navbar-link {
-  color: #ffffff;
-}
-
-.navbar.dark-theme .navbar-link {
-  color: #000000;
+  transition: color 0.2s ease;
+  white-space: nowrap; /* Prevent links from breaking */
 }
 
 .navbar-link:hover {
-  color: #e0e0e0;
+  color: var(--nav-fg-hover);
 }
-
-/* Dynamic hover colors */
-.navbar.light-theme .navbar-link:hover {
-  color: #e0e0e0;
-}
-
-.navbar.dark-theme .navbar-link:hover {
-  color: #333333;
-}
-
 
 .navbar-link.active-link::after {
   content: '';
   position: absolute;
   bottom: -1px;
   left: 0;
-  width: 95%;
+  width: 95%; /* Adjust width for active link underline */
   height: 1.5px;
   background-color: currentColor;
   border-radius: 1px;
 }
 
-
+/* DIVIDER */
+.navbar-divider {
+  height: 24px;
+  width: 1px;
+  background-color: var(--nav-divider);
+  margin: 0 1.5rem; /* Increased margin for better spacing */
+  flex-shrink: 0;
+}
 
 /* RIGHT SECTION (Cart, Search, Profile) */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  position: relative;
-  flex-shrink: 0;
-  flex-grow: 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 1.5rem; /* Space between icons/elements */
+  position: relative; /* Keep for profile dropdown positioning */
+  flex-shrink: 0; /* Prevent shrinking too much */
+  flex-grow: 0; /* Initially don't grow */
+  /* This flex-grow will be overridden for search bar */
 }
 
 .cart-button {
   position: relative;
-  color: inherit;
+  color: var(--nav-fg);
   text-decoration: none;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
-  transition: color 0.5s ease;
-}
-
-/* Dynamic cart button colors */
-.navbar.light-theme .cart-button {
-  color: #ffffff;
-}
-
-.navbar.dark-theme .cart-button {
-  color: #000000;
+  flex-shrink: 0; /* Prevent from shrinking */
 }
 
 .cart-count {
@@ -391,112 +184,60 @@
   margin-bottom: 16px;
 }
 
-
 /* SEARCH ICON BUTTON */
 .search-icon-button {
+
   background: none;
   border: none;
   cursor: pointer;
-  color: inherit;
+  color: var(--nav-fg);
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+  flex-shrink: 0; /* Essential to prevent shrinking when other items appear */
+}
+
+.theme-toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--nav-fg);
   display: flex;
   align-items: center;
   padding: 0.25rem;
   flex-shrink: 0;
-  transition: color 0.5s ease;
 }
 
-/* Dynamic search icon colors */
-.navbar.light-theme .search-icon-button {
-  color: #ffffff;
-}
-
-.navbar.dark-theme .search-icon-button {
-  color: #000000;
-}
-
-/* INTEGRATED SEARCH BAR (when open) - Below navbar for first state */
+/* INTEGRATED SEARCH BAR (when open) */
 .search-bar-integrated {
-  position: fixed;
-  top: 100px; /* Below navbar for first state */
-  left: 50%;
-  transform: translateX(-50%) scale(0.8);
-  transform-origin: center;
-  width: 90%;
-  max-width: 600px;
+  flex-grow: 1; /* Allows it to take available space */
+  min-width: 400px;
+  position: relative; /* For positioning suggestions dropdown */
   display: flex;
   align-items: center;
-  z-index: 1001;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background: transparent; /* No background on wrapper */
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
+  transition: max-width 0.3s ease-out, margin-right 0.3s ease-out; /* Smooth transition */
+
 }
 
-.search-bar-integrated.visible {
-  transform: translateX(-50%) scale(1);
-  opacity: 1;
-  pointer-events: auto;
-  visibility: visible;
-}
-
-/* Inner wrapper for input and close button - Same as navbar-links */
+/* Inner wrapper for input and close button */
 .search-input-wrapper-inner {
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
-  
-  /* MAGNIFYING GLASS BASE - Very transparent (Same as navbar-links) */
-  background: 
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.05) 0%, 
-      rgba(255, 255, 255, 0.01) 100%
-    );
-  
-  /* MAGNIFYING GLASS EFFECT - Pure magnification with slight blur (Same as navbar-links) */
-  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  
-  /* Magnifying glass border (Same as navbar-links) */
+  /* Match dropdown glass/backdrop style */
+  background: rgba(61, 61, 61, 0.347);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-radius: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  
-  border-radius: 2.5rem;
-  padding: 0;
-  
-  /* Magnifying glass shadows (Same as navbar-links) */
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Magnifying glass animation (Same as navbar-links) */
-  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
-}
-
-.search-input-wrapper-inner:focus-within {
-  /* Enhanced magnifying glass shadows on focus */
-  box-shadow: 
-    0 6px 18px rgba(0, 0, 0, 0.12), 
-    0 3px 8px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  
-  /* Enhanced magnification on focus */
-  backdrop-filter: blur(10px) saturate(170%) brightness(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(170%) brightness(1.2);
-  
-  /* Subtle lift effect */
-  transform: translateY(-1px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 .search-input-icon {
   position: absolute;
   left: 12px;
-  color: #888;
+  color: rgb(44, 43, 43);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -509,25 +250,34 @@
   padding-left: 38px !important;
 }
 
-/* Magnifying Glass Input - Matching navbar-center style */
+/* Glassmorphism Input */
 .search-input-navbar {
   width: 100%;
-  padding: 0.8rem 1.5rem;
-  padding-right: 3rem;
-  border: none;
-  border-radius: 2.5rem;
+  padding: 0.3rem 1rem;
+  padding-right: 2.5rem; /* space for the close button */
+  border: none; /* Let wrapper provide borders */
+  border-radius: 1.5rem; /* Keep consistent rounding */
   font-size: 1rem;
   outline: none;
-  background: transparent; /* Transparent background since wrapper has glass effect */
-  color: #222;
+  background: transparent; /* Use wrapper's glass effect */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  border: none;
+  color: var(--nav-input-fg);
   font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
 }
 
+.search-input-navbar::placeholder {
+  color: rgb(44, 43, 43);
+}
 
-.search-input-navbar:focus {
-  /* No special focus styles needed - wrapper handles the glass effect */
-  outline: none;
+/* Emphasize glass when focused anywhere inside the wrapper */
+.search-input-wrapper-inner:focus-within {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.24);
+  background: rgba(61, 61, 61, 0.46);
 }
 
 /* Close Button Inside Input */
@@ -536,7 +286,7 @@
   right: 0.3rem;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.5);
   border: none;
   border-radius:10px;
   width: 1.2rem;
@@ -552,47 +302,28 @@
 }
 
 .search-bar-close:hover {
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.8);
   color: #000000;
 }
 
-/* Suggestions Dropdown - Same as navbar-links */
+/* Suggestions Dropdown */
 .search-suggestions-dropdown {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 1px); /* below input */
   left: 0;
   width: 100%;
-
-  /* MAGNIFYING GLASS BASE - Very transparent (Same as navbar-links) */
-  background: 
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.05) 0%, 
-      rgba(255, 255, 255, 0.01) 100%
-    );
-  
-  /* MAGNIFYING GLASS EFFECT - Pure magnification with slight blur (Same as navbar-links) */
-  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  
-  /* Magnifying glass border (Same as navbar-links) */
+  background-color: rgba(133, 130, 130, 0.712); /* Semi-transparent color */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* For Safari support */
+  border-radius: 0.5rem ;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  
-  border-radius: 2.5rem;
-  
-  /* Magnifying glass shadows (Same as navbar-links) */
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   
   z-index: 3100;
   padding: 0.5rem 0;
   max-height: 320px;
   overflow-y: auto;
-  color: #fff;
-  
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--nav-fg); /* ensure text is readable */
 }
 
 
@@ -607,7 +338,7 @@
 }
 
 .search-suggestion-item:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.427);
 }
 
 .search-suggestion-img {
@@ -627,12 +358,12 @@
 .search-suggestion-name {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--nav-fg);
 }
 
 .search-suggestion-price {
   font-size: 0.98rem;
-  color: #ffffff;
+  color: var(--nav-fg);
   font-weight: 500;
 }
 
@@ -641,7 +372,7 @@
 .search-suggestion-empty {
   padding: 1rem;
   text-align: center;
-  color: #888;
+  color: var(--nav-muted);
   font-size: 1rem;
 }
 
@@ -649,24 +380,14 @@
 /* PROFILE DROPDOWN */
 .profile-dropdown-wrapper {
   position: relative;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Prevent profile icon from shrinking */
 }
 .profile-icon-button{
   background-color: transparent;
   border: none;
   cursor: pointer;
-  color: inherit;
+  color: var(--nav-fg);
   margin-top: 0.2rem;
-  transition: color 0.5s ease;
-}
-
-/* Dynamic profile icon colors */
-.navbar.light-theme .profile-icon-button {
-  color: #ffffff;
-}
-
-.navbar.dark-theme .profile-icon-button {
-  color: #000000;
 }
 
 .dropdown-menu {
@@ -674,19 +395,23 @@
   right: 0;
   top: 1.5rem;
   z-index: 2000;
+
   opacity: 0;
   transform: translateY(-10px) scale(0.98);
   pointer-events: none;
-  transition: opacity 0.25s cubic-bezier(.4, 0, .2, 1), transform 0.25s cubic-bezier(.4, 0, .2, 1);
+  transition: opacity 0.25s cubic-bezier(.4, 0, .2, 1),
+              transform 0.25s cubic-bezier(.4, 0, .2, 1);
 
-  /* Clear Glass core */
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px) saturate(150%);
-  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  /* Improved glassmorphism */
+  background: rgba(0, 0, 0, 0.35); /* ⬅ more solid */
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+
+  color: var(--nav-fg);
   font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
   padding: 1.2rem 1.5rem;
   min-width: 250px;
@@ -703,7 +428,7 @@
 }
 
 .dropdown-text-1 {
-  color: inherit;
+  color: #ffffff;
   font-weight: 400;
   margin-bottom: 1rem !important;
 
@@ -718,7 +443,7 @@
   background: none;
   border: none;
   border-radius: 0;
-  color: inherit;
+  color: inherit; /* or use specific color like #222 if needed */
   padding: 0;
   margin-top: 0.5rem;
   font-size: 1rem;
@@ -734,14 +459,14 @@
   padding: 0.6rem 0.6rem;
   font-size: 0.875rem;
   width: 100%;
-    color: inherit;
+    color: #fff;
 
 }
 
 
 .dropdown-link:hover, .logout-dropdown-button:hover {
   border-radius: 0.5rem;
-  background: rgba(104, 104, 104, 0.3);
+  background: #686868;
   color: #fff;
 }
 
@@ -751,7 +476,7 @@
 }
 
 .logout-dropdown-button {
-  color: inherit;
+  color: #fff;
   padding: 0.6rem 0.6rem;
   font-size: 0.875rem;
   border: none;
@@ -778,10 +503,12 @@
 
 @media (max-width: 1024px) {
   .navbar-container {
-    padding: 0.8rem 1rem;
+    padding: 0.8rem 1rem; /* Adjust padding for smaller desktops */
   }
 
   .navbar-center {
+    /* Let flex-grow handle it, remove fixed margin-left */
+    /* margin-left: 2rem; */
     gap: 1.5rem;
   }
 
@@ -790,289 +517,38 @@
   }
 
   .search-bar-integrated {
-    max-width: 300px;
-    margin-right: 1rem;
+    max-width: 300px; /* Adjust max width for smaller desktop screens */
+    margin-right: 1rem; /* Keep some space */
   }
 
   .navbar-divider {
-    display: none;
+    margin: 0 1rem;
   }
 }
 
-@media (max-width: 768px) {
+/* Mobile-specific styles removed; handled in MobileNavbar.css */
 
-  .navbar-container {
-    padding: 0.8rem 1rem;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
 
-  .navbar-left {
-    order: 1;
-    flex-grow: 1;
-    justify-content: center;
-  }
 
-  /* Hamburger visible on mobile */
-  .hamburger-button {
-    display: flex;
-    order: 0;
-    margin-right: 1rem;
-  }
-
- .navbar-center {
-  order: 3;
-  flex-basis: 100%;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-  position: static;
-  margin-top: 1rem;
+/* Search bar animation using scaleX for Apple-style smoothness */
+.search-bar-integrated {
+  transform: scaleX(0.85);
+  transform-origin: right center;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
-
-  .navbar-center.open {
-    margin-left: 6.5rem;
-    max-height: 500px;
-    /* Apply the glass when open */
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0.1) 100%
-    );
-    backdrop-filter: blur(8px) saturate(140%);
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.1),
-      0 1px 4px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    border-radius: 0px 0px 16px 16px;
-    padding: 0px 10px;
-  }
-
-  .navbar-links {
-    flex-direction: column;
-    gap: 0;
-    width: 100%;
-    padding: 0;
-    border-radius: 20px;
-
+.search-bar-integrated.visible {
+  transform: scaleX(1);
+  opacity: 1;
+  pointer-events: auto;
 }
-
-  .navbar-link {
-    padding: 0.75rem 1.5rem;
-    width: 100%;
-    text-align: left;
-    font-size: 1rem;
-  }
-  .navbar-link:first-child {
-      border-top: none;
-      
-  }
-
-  .navbar-divider {
-    display: none;
-  }
-
-  .navbar-right {
-    order: 2;
-    flex-grow: 0;
-    gap: 0.8rem;
-  }
-
-  /* Hide Contact Us button on mobile to save space */
-  .contact-button {
-    display: none;
-  }
-
-  /* Search bar adjustments for mobile */
-  .search-bar-integrated {
-    max-width: none;
-    margin-right: 0.5rem;
-    flex-grow: 1;
-  }
-
-  .search-suggestions-dropdown {
-    width: calc(100% - 20px);
-    left: 10px;
-    right: 10px;
-  }
-
-  .search-input-navbar {
-    font-size: 0.9rem;
-    padding: 0.6rem 1rem;
-    padding-right: 2.2rem;
-  }
-  .search-bar-close {
-    width: 2rem;
-    height: 2rem;
-    font-size: 1.3rem;
-  }
-
-  /* Profile dropdown on mobile: position directly relative to profile icon */
-  .dropdown-menu {
-    top: 1.5rem;
-    right: 0;
-    left: auto;
-    transform-origin: top right;
-    min-width: 160px;
-    padding: 1rem;
-  }
-
-  /* Mobile search overlay styles */
-  .mobile-search-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 70px;
-    background: none;
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    gap: 0.5rem;
-  }
-  .mobile-search-input {
-    flex: 1;
-    font-size: 1.1em;
-    padding: 10px 14px;
-    border: none;
-    border-radius: 16px;
-    background: none;
-    outline: none;
-  }
-  .mobile-search-cancel {
-    margin-left: 10px;
-    background: none;
-    border: none;
-    color: #323232;
-    font-size: 1em;
-    cursor: pointer;
-    padding: 6px 10px;
-  }
-  .mobile-only { display: inline-flex !important; }
-  .desktop-only { display: none !important; }
-  .search-suggestions-dropdown.mobile {
-    position: absolute;
-    top: 70px;
-    left: 0;
-    width: 100vw;
-    background: #fff;
-    z-index: 2100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-radius: 0 0 12px 12px;
-    max-height: 50vh;
-    overflow-y: auto;
- /* Clear Glass core */
-  background: rgba(61, 61, 61, 0.1);
-  backdrop-filter: blur(0px) saturate(130%); /* NO BLUR */
-  -webkit-backdrop-filter: blur(0px) saturate(130%);
-  border-radius: 0rem 0rem 1rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  }
-}
-@media (min-width: 769px) {
-  .mobile-search-overlay { display: none !important; }
-  .mobile-only { display: none !important; }
-  .desktop-only { display: inline-flex !important; }
-  .contact-button { display: flex !important; }
-}
-
-@media (max-width: 480px) {
-
-  .navbar-container {
-    padding: 0rem 0.5rem;
-  }
-
-  .hamburger-button {
-    font-size: 1.4rem;
-    margin-right: 0.8rem;
-  }
-
-  .navbar-brand {
-    font-size: 1.1rem;
-  }
-
-  .navbar-right {
-    gap: 0.6rem;
-  }
-
-  .cart-button .fa-shopping-cart,
-  .search-icon-button .fa-search,
-  .profile-icon-button .fa-user-circle {
-    font-size: 1rem;
-  }
-
-  .search-input-navbar {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.8rem;
-    padding-right: 1.8rem;
-  }
-  .search-bar-close {
-    width: 1.6rem;
-    height: 1.6rem;
-    font-size: 1rem;
-    right: 0.5rem;
-  }
-
-  .search-suggestions-dropdown {
-    width: calc(100% - 10px);
-    left: 5px;
-    right: 5px;
-    border-radius: 1rem;
-    
-  }
-
-  .search-suggestion-item {
-    padding: 0.5rem 0.8rem;
-    gap: 0.8rem;
-  }
-
-  .search-suggestion-img {
-    width: 40px;
-    height: 40px;
-  }
-
-  .search-suggestion-name {
-    font-size: 0.9rem;
-    color: #ffffff;
-  }
-
-  .search-suggestion-price {
-    font-size: 0.8rem;
-    color: #ffffff;
-  }
-
-  .dropdown-menu {
-    right: 0px;
-    min-width: 140px;
-    padding: 0.8rem;
-  }
-
-  .dropdown-link, .logout-dropdown-button {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
-  }
-}
-
 
 .navbar-center {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.35s ease;
 }
 
-/* Hide navbar-center when search is open (ONLY in pulled state) */
-.navbar.pulled.search-open .navbar-center {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* In pulled state: Position search bar to replace navbar-center */
-.navbar.pulled.search-open .search-bar-integrated {
-  top: 16px; /* Center it in the pulled navbar */
+.navbar-center.shifted-left {
+  transform: translateX(-40px);
 }

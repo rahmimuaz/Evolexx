@@ -4,6 +4,17 @@ const generateProductId = () => {
   return 'PID-' + Math.random().toString(36).substr(2, 5).toUpperCase();
 };
 
+// Generate URL-friendly slug from product name
+const generateSlug = (name) => {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+};
+
 const mobilePhoneSchema = new mongoose.Schema({
   brand: { type: String, required: true },
   model: { type: String, required: true },
@@ -57,6 +68,11 @@ const productSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
+  },
+  slug: {
+    type: String,
+    unique: true,
+    index: true
   },
   category: {
     type: String,
@@ -125,7 +141,50 @@ const productSchema = new mongoose.Schema({
   kokoPay: {
     type: Boolean,
     default: false
+  },
+  // New Arrivals feature
+  isNewArrival: {
+    type: Boolean,
+    default: false
+  },
+  newArrivalOrder: {
+    type: Number,
+    default: 0
+  },
+  // General display order for product listing
+  displayOrder: {
+    type: Number,
+    default: 0
   }
+});
+
+// Pre-save hook to generate slug from product name
+productSchema.pre('save', async function(next) {
+  // Only generate slug if name is modified or slug doesn't exist
+  if (this.isModified('name') || !this.slug) {
+    let baseSlug = generateSlug(this.name);
+    let slug = baseSlug;
+    let counter = 1;
+    
+    // Check for existing slugs and make unique if necessary
+    while (true) {
+      const existingProduct = await mongoose.model('Product').findOne({ 
+        slug: slug,
+        _id: { $ne: this._id } // Exclude current document
+      });
+      
+      if (!existingProduct) {
+        break;
+      }
+      
+      // Append counter to make slug unique
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    
+    this.slug = slug;
+  }
+  next();
 });
 
 const Product = mongoose.model('Product', productSchema);

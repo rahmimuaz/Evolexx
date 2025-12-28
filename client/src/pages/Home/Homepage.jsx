@@ -10,6 +10,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const Homepage = () => {
   const [products, setProducts] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,15 +21,19 @@ const Homepage = () => {
   const productSectionRef = useRef(null);
   const headingRef = useRef(null);
   const categorySectionRef = useRef(null);
+  const newArrivalsSectionRef = useRef(null);
   const [categoryVisible, setCategoryVisible] = useState(true);
+  const [newArrivalsVisible, setNewArrivalsVisible] = useState(true);
+  const [carouselIndex, setCarouselIndex] = useState(2); // Start at center
 
   const sortOptions = [
+    { value: 'default', label: 'Default' },
     { value: 'price-asc', label: 'Price: Low to High' },
     { value: 'price-desc', label: 'Price: High to Low' },
     { value: 'newest', label: 'Newest' },
     { value: 'oldest', label: 'Oldest' },
   ];
-  const [sort, setSort] = useState('price-asc');
+  const [sort, setSort] = useState('default');
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [brandFilter, setBrandFilter] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -88,8 +93,12 @@ const Homepage = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/products`);
-      setProducts(response.data);
+      const [productsRes, newArrivalsRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/products`),
+        axios.get(`${API_BASE_URL}/api/products/new-arrivals`)
+      ]);
+      setProducts(productsRes.data);
+      setNewArrivals(newArrivalsRes.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -97,6 +106,38 @@ const Homepage = () => {
       setLoading(false);
     }
   };
+
+  // Intersection Observer for new arrivals section animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setNewArrivalsVisible(false);
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                setNewArrivalsVisible(true);
+              }, 50);
+            });
+          } else {
+            setNewArrivalsVisible(false);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '50px' }
+    );
+
+    const currentRef = newArrivalsSectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
 
   const generateImageUrl = (product) => {
     if (product.images && product.images.length > 0) {
@@ -119,13 +160,15 @@ const Homepage = () => {
     return matchesPrice && matchesBrand && matchesStock;
   });
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sort === 'price-asc') return (a.price || 0) - (b.price || 0);
-    if (sort === 'price-desc') return (b.price || 0) - (a.price || 0);
-    if (sort === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
-    if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
-    return 0;
-  });
+  const sortedProducts = sort === 'default' 
+    ? filteredProducts // Keep server order (sorted by displayOrder)
+    : [...filteredProducts].sort((a, b) => {
+        if (sort === 'price-asc') return (a.price || 0) - (b.price || 0);
+        if (sort === 'price-desc') return (b.price || 0) - (a.price || 0);
+        if (sort === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
+        if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
+        return 0;
+      });
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -230,28 +273,109 @@ const Homepage = () => {
           <h2>Categories</h2>
         </div>
         <div className={`category-grid-custom ${categoryVisible ? 'visible' : ''}`}>
-          <Link to="/category/Mobile%20Phone" className="category-card tall">
-            <img src="/BrandNewPhone.jpg" alt="Sound System" />
+          <Link to="/category/mobile-phones" className="category-card tall">
+            <img src="/BrandNewPhone.jpg" alt="Brand New Phones" />
             <div className="overlay-blur-bg"></div>
             <div className="overlay-text bottom"><p>Brand New Phone</p></div>
           </Link>
-          <Link to="/category/Preowned%20Phones" className="category-card square">
-            <img src="/PreOwnedPhone.jpg" alt="Smart Watch" />
+          <Link to="/category/preowned-phones" className="category-card square">
+            <img src="/PreOwnedPhone.jpg" alt="Pre-Owned Phones" />
             <div className="overlay-blur-bg"></div>
             <div className="overlay-text bottom"><p>Pre Owned Phone</p></div>
           </Link>
-          <Link to="/category/Laptops" className="category-card square">
-            <img src="/Laptop.jpg" alt="Tablet" />
+          <Link to="/category/laptops" className="category-card square">
+            <img src="/Laptop.jpg" alt="Laptops" />
             <div className="overlay-blur-bg"></div>
             <div className="overlay-text bottom"><p>Laptop</p></div>
           </Link>
-          <Link to="/category/Mobile%20Accessories" className="category-card wide">
-            <img src="/MobileAccessories.jpg" alt="Game Controller" />
+          <Link to="/category/mobile-accessories" className="category-card wide">
+            <img src="/MobileAccessories.jpg" alt="Mobile Accessories" />
             <div className="overlay-blur-bg"></div>
             <div className="overlay-text bottom"><p>Accessories</p></div>
           </Link>
         </div>
       </section>
+
+      {/* New Arrivals Section - 3D Carousel */}
+      {newArrivals.length > 0 && (
+        <section className="new-arrivals-section" ref={newArrivalsSectionRef}>
+          <div className={`new-arrivals-heading ${newArrivalsVisible ? 'visible' : ''}`}>
+            <h2>New Arrivals</h2>
+            <p className="new-arrivals-subtitle desktop-subtitle">Check out our latest products, where style meets quality and innovation to bring you exclusive <br /> new arrivals that elevate your shopping experience</p>
+            <p className="new-arrivals-subtitle mobile-subtitle">Check out our latest products, combining style, quality, and innovation to deliver exclusive new arrivals.</p>
+          </div>
+          
+          <div className={`carousel-container ${newArrivalsVisible ? 'visible' : ''}`}>
+            <div className="carousel-track">
+              {newArrivals.slice(0, 7).map((product, index) => {
+                const imageUrl = generateImageUrl(product);
+                const fullPrice = product.discountPrice || product.price || 0;
+                const position = index - carouselIndex;
+                
+                // Calculate card visibility and positioning
+                const isCenter = position === 0;
+                const isCardVisible = Math.abs(position) <= 2;
+                
+                if (!isCardVisible) return null;
+                
+                // Stagger animation delay based on position
+                const animDelay = Math.abs(position) * 0.15 + 0.4;
+                
+                return (
+                  <div
+                    key={product._id}
+                    className={`carousel-card ${isCenter ? 'center' : ''} pos-${position}`}
+                    style={{
+                      '--position': position,
+                      '--anim-delay': `${animDelay}s`,
+                      zIndex: 10 - Math.abs(position)
+                    }}
+                  >
+                    <Link to={`/product/${product.slug || product._id}`} className="carousel-card-inner">
+                      <div className="carousel-card-image">
+                        <img src={imageUrl} alt={product.name} onError={(e) => (e.target.src = '/logo192.png')} />
+                      </div>
+                      <div className="carousel-card-label">{product.name}</div>
+                      {isCenter && (
+                        <div className="carousel-card-details">
+                          <h3>{product.name}</h3>
+                          <div className="carousel-price-row">
+                            <span className="carousel-price">Rs. {fullPrice.toLocaleString()}</span>
+                            {product.discountPrice && (
+                              <span className="carousel-old-price">Rs. {product.price?.toLocaleString()}</span>
+                            )}
+                          </div>
+                          <button className="carousel-cart-btn" onClick={(e) => e.preventDefault()}>
+                            🛒
+                          </button>
+                        </div>
+                      )}
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Navigation Arrows */}
+            <div className="carousel-nav">
+              <button 
+                className="carousel-nav-btn prev" 
+                onClick={() => setCarouselIndex(prev => Math.max(0, prev - 1))}
+                disabled={carouselIndex === 0}
+              >
+                ←
+              </button>
+              <button 
+                className="carousel-nav-btn next" 
+                onClick={() => setCarouselIndex(prev => Math.min(newArrivals.length - 1, prev + 1))}
+                disabled={carouselIndex === newArrivals.length - 1}
+              >
+                →
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="product-section" ref={productSectionRef}>
         <div className="heading-with-icon">
@@ -319,7 +443,7 @@ const Homepage = () => {
               const kokoInstallment = kokoTotal / 3;
 
               return (
-                <Link to={`/products/${product._id}`} className="product-card" key={product._id}>
+                <Link to={`/product/${product.slug || product._id}`} className="product-card" key={product._id}>
                   <img src={imageUrl} alt={product.name} onError={(e) => (e.target.src = '/logo192.png')} />
                   <div className="product-card-content">
                     <h3 className="product-name">{product.name}</h3>
@@ -362,7 +486,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      <Footer />
+      <Footer showBrands={true} />
     </div>
   );
 };

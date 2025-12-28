@@ -1,23 +1,92 @@
-
 .product-section2 {
-  height: 81vh;
+  min-height: 81vh;
   padding: 1rem 2rem;
-  padding-top: 80px; /* Add top padding to account for fixed navbar */
+  padding-top: 80px;
   text-align: center;
   background-color: #ffffff;
   margin-bottom: 100px;
 }
-/* Center the heading in the middle of the page */
+
+/* Breadcrumb Navigation */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding-left: 0.2rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: #d1d5db;
+}
+
+.breadcrumb-current {
+  color: #111;
+  font-weight: 500;
+}
+
+/* Category heading */
 .product-section2 h2 {
   font-size: 2rem;
   font-weight: 800;
-  margin-top: 20px;
+  margin-top: 10px;
   position: relative;
-  display: block; /* Ensures it takes full width for margin auto to work */
+  display: block;
   text-align: center;
-  flex-grow: 1; /* Allows the heading to take available space */
+  flex-grow: 1;
 }
 
+/* Product count */
+.product-count {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* No products found */
+.no-products {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.no-products p {
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.back-home-link {
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.back-home-link:hover {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+/* Stock checkbox label */
+.stock-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
 
 /* Pagination dots container */
 .pagination-dots2 {
@@ -28,17 +97,36 @@
   margin-bottom: 50px;
 }
 
-
-
+/* Responsive styles */
 @media (max-width: 768px) {
-
   .product-section2 {
-    padding: 4.5rem 2rem; /* Adjust padding for smaller screens */
+    padding: 4.5rem 1rem;
   }
-  .filter-toggle-icon{
+  
+  .filter-toggle-icon {
     margin-top: 1rem;
   }
-    .product-section2 h2{
-   font-size: 1.5rem;
+  
+  .product-section2 h2 {
+    font-size: 1.5rem;
+  }
+  
+  .breadcrumb {
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+  }
+  
+  .product-count {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-section2 {
+    padding: 4rem 0.5rem;
+  }
+  
+  .breadcrumb {
+    font-size: 0.75rem;
   }
 }

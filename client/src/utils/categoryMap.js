@@ -1,16 +1,85 @@
 // src/utils/categoryMap.js
+// Complete slug-based category mapping for SEO-friendly URLs
 
-export const CATEGORY_MAP = {
-    'brand-new-phone': ['Mobile Phone'],
-    'pre-owned-phone': ['Preowned Phones'],
-    'laptop': ['Laptops'],
-    'accessories': ['Mobile Accessories', 'Phone Covers', 'Chargers'],
-  };
-  
+// Slug to database category name mapping
+export const SLUG_TO_CATEGORY = {
+  'mobile-phones': 'Mobile Phone',
+  'preowned-phones': 'Preowned Phones',
+  'laptops': 'Laptops',
+  'mobile-accessories': 'Mobile Accessories',
+  'phone-covers': 'Phone Covers',
+  'chargers': 'Chargers',
+  'headphones': 'Headphones',
+  'smartwatches': 'Smartwatches',
+  'tablets': 'Tablets',
+  'screen-protectors': 'Screen Protectors',
+  'cables': 'Cables',
+  'preowned-laptops': 'Preowned Laptops',
+  'preowned-tablets': 'Preowned Tablets',
+  'other': 'Other'
+};
+
+// Database category name to slug mapping (reverse lookup)
+export const CATEGORY_TO_SLUG = Object.fromEntries(
+  Object.entries(SLUG_TO_CATEGORY).map(([slug, category]) => [category, slug])
+);
+
+// Display labels for each slug (for page titles, breadcrumbs, etc.)
   export const CATEGORY_LABELS = {
-    'brand-new-phone': 'Brand New Phones',
-    'pre-owned-phone': 'Pre Owned Phones',
-    'laptop': 'Laptops',
-    'accessories': 'Accessories',
+  'mobile-phones': 'Brand New Phones',
+  'preowned-phones': 'Pre-Owned Phones',
+  'laptops': 'Laptops',
+  'mobile-accessories': 'Mobile Accessories',
+  'phone-covers': 'Phone Covers',
+  'chargers': 'Chargers & Adapters',
+  'headphones': 'Headphones & Earbuds',
+  'smartwatches': 'Smart Watches',
+  'tablets': 'Tablets',
+  'screen-protectors': 'Screen Protectors',
+  'cables': 'Cables & Connectors',
+  'preowned-laptops': 'Pre-Owned Laptops',
+  'preowned-tablets': 'Pre-Owned Tablets',
+  'other': 'Other Products'
+};
+
+// Category groups for navigation menus
+export const CATEGORY_GROUPS = {
+  'phones': {
+    label: 'Phones',
+    categories: ['mobile-phones', 'preowned-phones']
+  },
+  'computers': {
+    label: 'Computers',
+    categories: ['laptops', 'tablets', 'preowned-laptops', 'preowned-tablets']
+  },
+  'accessories': {
+    label: 'Accessories',
+    categories: ['mobile-accessories', 'phone-covers', 'chargers', 'headphones', 'smartwatches', 'screen-protectors', 'cables']
+  }
+};
+
+// Helper function to get category name from slug
+export const getCategoryFromSlug = (slug) => {
+  return SLUG_TO_CATEGORY[slug] || null;
+};
+
+// Helper function to get slug from category name
+export const getSlugFromCategory = (category) => {
+  return CATEGORY_TO_SLUG[category] || null;
+};
+
+// Helper function to get display label from slug
+export const getLabelFromSlug = (slug) => {
+  return CATEGORY_LABELS[slug] || slug;
+};
+
+// Helper function to generate category URL
+export const getCategoryUrl = (slug) => {
+  return `/category/${slug}`;
+};
+
+// Validate if a slug is valid
+export const isValidCategorySlug = (slug) => {
+  return slug in SLUG_TO_CATEGORY;
   };
   

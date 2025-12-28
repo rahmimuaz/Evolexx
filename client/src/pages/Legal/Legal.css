@@ -1,0 +1,340 @@
+/* Legal.css - Shared styles for legal/policy pages */
+
+.legal-page {
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding-top: 80px;
+}
+
+.legal-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* Header */
+.legal-header {
+  text-align: center;
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.legal-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #111111;
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+}
+
+.legal-header p {
+  font-size: 1.05rem;
+  color: #6b7280;
+  margin: 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.last-updated {
+  font-size: 0.9rem !important;
+  color: #9ca3af !important;
+}
+
+/* Content */
+.legal-content {
+  line-height: 1.7;
+}
+
+.legal-section {
+  margin-bottom: 40px;
+}
+
+.legal-section h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.legal-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 20px 0 10px;
+}
+
+.legal-section p {
+  font-size: 1rem;
+  color: #4b5563;
+  margin: 0 0 16px;
+}
+
+.legal-section ul {
+  margin: 0 0 16px;
+  padding-left: 24px;
+}
+
+.legal-section li {
+  font-size: 1rem;
+  color: #4b5563;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.legal-section a {
+  color: #111111;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.legal-section a:hover {
+  color: #6b7280;
+}
+
+.contact-list {
+  list-style: none;
+  padding-left: 0;
+  background: #f9fafb;
+  padding: 20px 24px;
+  border-radius: 8px;
+}
+
+.contact-list li {
+  margin-bottom: 8px;
+}
+
+.contact-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   CONTACT PAGE SPECIFIC STYLES
+   ============================================ */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 48px;
+}
+
+.contact-info h2,
+.contact-form-wrapper h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0 0 24px;
+}
+
+.contact-item {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.contact-icon {
+  width: 44px;
+  height: 44px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111111;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.contact-details h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0 0 4px;
+}
+
+.contact-details p {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Contact Form */
+.contact-form-wrapper {
+  background: #fafafa;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  color: #111111;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #111111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #9ca3af;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.submit-btn {
+  background: #111111;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  margin-top: 8px;
+}
+
+.submit-btn:hover {
+  background: #333333;
+  transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+.form-success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.form-success p {
+  color: #047857;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 900px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .legal-container {
+    padding: 32px 20px 60px;
+  }
+
+  .legal-header h1 {
+    font-size: 2rem;
+  }
+
+  .legal-header p {
+    font-size: 1rem;
+  }
+
+  .legal-section h2 {
+    font-size: 1.25rem;
+  }
+
+  .contact-form-wrapper {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .legal-page {
+    padding-top: 70px;
+  }
+
+  .legal-container {
+    padding: 24px 16px 48px;
+  }
+
+  .legal-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+  }
+
+  .legal-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .legal-section {
+    margin-bottom: 32px;
+  }
+
+  .legal-section h2 {
+    font-size: 1.15rem;
+  }
+
+  .legal-section p,
+  .legal-section li {
+    font-size: 0.95rem;
+  }
+
+  .contact-item {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .contact-icon {
+    margin: 0 auto;
+  }
+
+  .contact-form-wrapper {
+    padding: 20px 16px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 10px 14px;
+  }
+}
+

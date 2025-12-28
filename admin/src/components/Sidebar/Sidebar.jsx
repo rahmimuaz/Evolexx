@@ -148,6 +148,24 @@ const Sidebar = ({ children }) => {
             {isSidebarOpen && <span className="sidebar-text">Out of Stock</span>}
           </NavLink>
 
+          <NavLink
+            to="/admin/new-arrivals"
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            title="New Arrivals"
+          >
+            <span className="sidebar-icon">✨</span>
+            {isSidebarOpen && <span className="sidebar-text">New Arrivals</span>}
+          </NavLink>
+
+          <NavLink
+            to="/admin/product-order"
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            title="Product Order"
+          >
+            <span className="sidebar-icon">📋</span>
+            {isSidebarOpen && <span className="sidebar-text">Product Order</span>}
+          </NavLink>
+
           {/* Orders Section */}
           <div className="sidebar-section-title">
             {isSidebarOpen && <span>ORDERS</span>}

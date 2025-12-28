@@ -254,11 +254,13 @@
 }
 
 .category-heading h2 {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 2.5rem;
+  font-weight: 700;
   margin: 0;
   text-align: center;
   color: #111827;
+  letter-spacing: 0.07em;
+
 }
 
 .category-grid-custom {
@@ -421,6 +423,578 @@
   left: 15px;
 }
 
+/* ============ NEW ARRIVALS SECTION - 3D CAROUSEL ============ */
+.new-arrivals-section {
+  margin-top: 40px;
+  padding: 120px 2rem 100px;
+  background: black;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Scroll Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px) rotateY(-30deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) rotateY(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px) rotateY(30deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) rotateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(80px);
+  }
+  50% {
+    transform: scale(1.05) translateY(-10px);
+  }
+  70% {
+    transform: scale(0.95) translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Heading - Initial hidden state */
+.new-arrivals-heading {
+  margin-bottom: 50px;
+  opacity: 0;
+  transform: translateY(60px);
+  transition: none;
+}
+
+/* Heading - Visible animated state */
+.new-arrivals-heading.visible {
+  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.new-arrivals-heading.visible h2 {
+  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+  opacity: 0;
+}
+
+.new-arrivals-heading.visible .new-arrivals-subtitle {
+  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
+  opacity: 0;
+}
+
+.new-arrivals-heading h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: 0.07em;
+}
+
+.new-arrivals-subtitle {
+  font-size: 1.1rem;
+  color: #aaaaad;
+  font-weight: 400;
+}
+
+/* Desktop subtitle visible, mobile subtitle hidden by default */
+.new-arrivals-subtitle.desktop-subtitle {
+  display: block;
+}
+
+.new-arrivals-subtitle.mobile-subtitle {
+  display: none;
+}
+
+/* 3D Carousel Container */
+.carousel-container {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  perspective: 1200px;
+  height: 500px;
+}
+
+.carousel-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+/* Navigation arrows - hidden initially */
+.carousel-nav {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 0.9s;
+}
+
+/* Navigation arrows - visible */
+.carousel-container.visible .carousel-nav {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Individual Carousel Card */
+.carousel-card {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  /* Initial hidden state for scroll animation */
+  opacity: 0;
+  filter: blur(8px);
+}
+
+/* Card entrance animation when visible */
+.carousel-container.visible .carousel-card {
+  animation: cardReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--anim-delay, 0.4s);
+}
+
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* Outer cards have lower opacity when revealed */
+.carousel-container.visible .carousel-card.pos--2,
+.carousel-container.visible .carousel-card.pos-2 {
+  animation: cardRevealFaded 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--anim-delay, 0.7s);
+}
+
+@keyframes cardRevealFaded {
+  0% {
+    opacity: 0;
+    filter: blur(12px);
+  }
+  100% {
+    opacity: 0.7;
+    filter: blur(0);
+  }
+}
+
+.carousel-card-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+/* Card positioning based on position from center */
+.carousel-card.pos-0 {
+  transform: translateX(0) translateZ(80px) scale(1.15);
+  z-index: 10;
+}
+
+.carousel-card.pos--1 {
+  transform: translateX(-200px) translateZ(0) rotateY(15deg) scale(0.9);
+  z-index: 5;
+}
+
+.carousel-card.pos-1 {
+  transform: translateX(200px) translateZ(0) rotateY(-15deg) scale(0.9);
+  z-index: 5;
+}
+
+.carousel-card.pos--2 {
+  transform: translateX(-380px) translateZ(-80px) rotateY(25deg) scale(0.75);
+  z-index: 2;
+}
+
+.carousel-card.pos-2 {
+  transform: translateX(380px) translateZ(-80px) rotateY(-25deg) scale(0.75);
+  z-index: 2;
+}
+
+/* Card Image */
+.carousel-card-image {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  transition: transform 0.4s ease;
+}
+
+.carousel-card:hover .carousel-card-image img {
+  transform: scale(1.05);
+}
+
+/* Card Label (shown on side cards) */
+.carousel-card-label {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  text-align: left;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.carousel-card.center .carousel-card-label {
+  opacity: 0;
+}
+
+/* Center Card Details Panel */
+.carousel-card-details {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.441) 0%, rgba(255, 255, 255, 0.134) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 0 0 24px 24px;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.carousel-card-details h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-clamp: 2;
+}
+
+.carousel-price-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.carousel-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #e01111;
+}
+
+.carousel-old-price {
+  font-size: 0.9rem;
+  color: #1e1e1e;
+  text-decoration: line-through;
+}
+
+.carousel-cart-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #1d1d1f;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-cart-btn:hover {
+  background: #333;
+  transform: scale(1.05);
+}
+
+/* Navigation Arrows */
+.carousel-nav {
+  position: absolute;
+  bottom: -60px;
+  left: 46%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  z-index: 20;
+}
+
+.carousel-nav-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.carousel-nav-btn.prev {
+  background: #e8e8ed;
+  color: #1d1d1f;
+}
+
+.carousel-nav-btn.next {
+  background: #1d1d1f;
+  color: #fff;
+}
+
+.carousel-nav-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.carousel-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.carousel-nav-btn.prev:hover:not(:disabled) {
+  background: #d1d1d6;
+}
+
+.carousel-nav-btn.next:hover:not(:disabled) {
+  background: #333;
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+  .carousel-container {
+    height: 450px;
+  }
+  
+  .carousel-card {
+    width: 200px;
+    height: 320px;
+  }
+  
+  .carousel-card.pos--1 {
+    transform: translateX(-170px) translateZ(0) rotateY(15deg) scale(0.9);
+  }
+  
+  .carousel-card.pos-1 {
+    transform: translateX(170px) translateZ(0) rotateY(-15deg) scale(0.9);
+  }
+  
+  .carousel-card.pos--2 {
+    transform: translateX(-320px) translateZ(-80px) rotateY(25deg) scale(0.75);
+  }
+  
+  .carousel-card.pos-2 {
+    transform: translateX(320px) translateZ(-80px) rotateY(-25deg) scale(0.75);
+  }
+}
+
+@media (max-width: 900px) {
+  .new-arrivals-section {
+    padding: 60px 1rem 90px;
+  }
+  
+  .carousel-container {
+    height: 400px;
+  }
+  
+  .carousel-card {
+    width: 180px;
+    height: 280px;
+    border-radius: 20px;
+  }
+  
+  .carousel-card.pos-0 {
+    transform: translateX(0) translateZ(60px) scale(1.1);
+  }
+  
+  .carousel-card.pos--1 {
+    transform: translateX(-140px) translateZ(0) rotateY(12deg) scale(0.85);
+  }
+  
+  .carousel-card.pos-1 {
+    transform: translateX(140px) translateZ(0) rotateY(-12deg) scale(0.85);
+  }
+  
+  .carousel-card.pos--2,
+  .carousel-card.pos-2 {
+    display: none;
+  }
+  
+  .new-arrivals-heading h2 {
+    font-size: 2rem;
+  }
+  
+  .carousel-card-details {
+    padding: 16px;
+  }
+  
+  .carousel-card-details h3 {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .new-arrivals-section {
+    padding: 50px 1rem 80px;
+  }
+  
+  .carousel-container {
+    height: 350px;
+  }
+  
+  .carousel-card {
+    width: 150px;
+    height: 200px;
+    border-radius: 18px;
+  }
+  
+  /* Fix stretched images in mobile */
+  .carousel-card-image {
+    height: 100%;
+  }
+  
+  .carousel-card-image img {
+    object-fit: contain;
+    padding: 8px;
+    background: #fff;
+  }
+  
+  .carousel-card.pos-0 {
+    transform: translateX(0) translateZ(40px) scale(1.05);
+  }
+  
+  .carousel-card.pos--1 {
+    transform: translateX(-110px) translateZ(0) rotateY(10deg) scale(0.8);
+  }
+  
+  .carousel-card.pos-1 {
+    transform: translateX(110px) translateZ(0) rotateY(-10deg) scale(0.8);
+  }
+  
+  .new-arrivals-heading h2 {
+    font-size: 1.75rem;
+  }
+  
+  /* Swap subtitles for mobile */
+  .new-arrivals-subtitle.desktop-subtitle {
+    display: none;
+  }
+  
+  .new-arrivals-subtitle.mobile-subtitle {
+    display: block;
+  }
+  
+  .new-arrivals-heading {
+    margin-bottom: 2px;
+  }
+  
+  .carousel-card-label {
+    font-size: 0.75rem;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  
+  .carousel-card-details {
+    padding: 12px;
+  }
+  
+  .carousel-card-details h3 {
+    font-size: 0.8rem;
+  }
+  
+  .carousel-price {
+    font-size: 1rem;
+  }
+  
+  .carousel-cart-btn {
+    display: none;
+  }
+  
+  /* Center carousel nav buttons */
+  .carousel-nav {
+    left: 38%;
+  }
+  
+  .carousel-nav-btn {
+    margin-bottom: 40px;
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+}
+
 /* ============ PRODUCT SECTION ============ */
 .product-section {
   margin-top: 40px;
@@ -448,13 +1022,14 @@
 }
 
 .product-section h2 {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 2.5rem;
+  font-weight: 700;
   margin: 0 auto; /* Centers the heading */
   position: relative;
   display: block; /* Ensures it takes full width for margin auto to work */
   text-align: center;
   flex-grow: 1; /* Allows the heading to take available space */
+  letter-spacing: 0.07em;
 }
 
 /* Filter toggle icon styling */
@@ -510,8 +1085,8 @@
 
 .product-card img {
   width: 100%;
-  height: 300px;
-  object-fit: cover;
+  height: 280px;
+  object-fit: fill;
   background-color: #f0f0f094;
   border-radius: 8px;
 }
@@ -549,12 +1124,12 @@
   font-size: 0.7rem;
   color: #a9afb9;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .card-footer .koko-logo {
   width: 17%;
-  height: 17px;
+  height: 20px;
   margin-left: 80px;
   border-radius: 0px;
 }
@@ -641,27 +1216,9 @@
   flex-grow: 1;
   position: relative;
   overflow: hidden; /* for glass inner reflections */
-
-  /* NAVBAR GLASS BASE */
-  background:
-    linear-gradient(135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.01) 100%
-    );
-  backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  -webkit-backdrop-filter: blur(8px) saturate(150%) brightness(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 2.5rem;
-
-  /* Shadows like navbar */
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: magnifyingGlassGlow 4s ease-in-out infinite alternate;
+  background-color: #eeeeee;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -766,12 +1323,12 @@
 }
 
 .filter-done-button {
-  padding: 0.7rem 1.5rem;
+  padding: 0.4rem 1.5rem;
   font-size: 1rem;
   background: transparent;
   color: #111827;
   border: 1.5px solid #6b7280; /* gray outline */
-  border-radius: 9999px; /* fully rounded */
+  border-radius: 8px; /* fully rounded */
   cursor: pointer;
   margin-left: auto;
   transition: all 0.25s ease;
@@ -802,7 +1359,7 @@
     linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
   color: #0f172a;
   padding: 0.55rem 0.9rem;
-  border-radius: 9999px; /* pill */
+  border-radius: 8px; /* pill */
   min-width: 140px;
   max-width: 220px;
   outline: none;
@@ -852,6 +1409,10 @@
     text-align: center;
     padding: 0 1rem;
     padding-top: 0; /* Remove extra top gap under navbar */
+  }
+  .product-section h2 {
+    font-size: 1.9rem;
+    
   }
 
   /* Optimize video for mobile */
@@ -907,6 +1468,10 @@
 }
 
 @media (max-width: 480px) {
+  .product-section h2 {
+    font-size: 1.9rem;
+    
+  }
   .hero-text{
     gap: 0.2rem;
     margin-bottom: -2rem;
@@ -960,6 +1525,10 @@
 }
 
 @media (max-width: 768px) {
+  .product-section h2 {
+    font-size: 1.9rem;
+    
+  }
   .product-card p {
     text-align: left;
     padding: 0.2rem;
@@ -1123,6 +1692,10 @@
 
 
 @media screen and (max-width: 480px) {
+  .product-section h2 {
+    font-size: 1.9rem;
+    
+  }
   .banner {
     height: 110vh;
     max-height: 110vh;

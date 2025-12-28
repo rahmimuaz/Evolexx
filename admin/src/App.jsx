@@ -15,6 +15,8 @@ import './styles/admin-global.css';
 import LowStockProducts from './pages/Inventory/LowStockProducts';
 import OutOfStockProducts from './pages/Inventory/OutOfStockProducts';
 import UserList from './pages/AdminDashboard/UserList';
+import NewArrivals from './pages/Inventory/NewArrivals';
+import ProductOrder from './pages/Inventory/ProductOrder';
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -43,6 +45,8 @@ function AppContent() {
             <Route path="/admin/low-stock" element={<LowStockProducts />} />
             <Route path="/admin/out-of-stock" element={<OutOfStockProducts />} />
             <Route path="/admin/users" element={<UserList />} />
+            <Route path="/admin/new-arrivals" element={<NewArrivals />} />
+            <Route path="/admin/product-order" element={<ProductOrder />} />
             <Route path="*" element={<AdminDashboard />} />
           </Routes>
         </Sidebar>

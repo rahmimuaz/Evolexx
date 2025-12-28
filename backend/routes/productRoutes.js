@@ -3,6 +3,7 @@ import upload from '../middleware/upload.js';
 import {
   getProducts,
   getProduct,
+  getProductBySlug,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -11,12 +12,19 @@ import {
   getReviews,
   getLowStockProducts,
   getOutOfStockProducts,
-  searchProducts
+  searchProducts,
+  getNewArrivals,
+  toggleNewArrival,
+  updateNewArrivalsOrder,
+  updateProductsOrder,
+  getProductsSorted
 } from '../controllers/productController.js';
 
 import { protect } from '../middleware/authMiddleware.js'; 
 
 const router = express.Router();
+
+// ============== STATIC ROUTES (must come before dynamic :id routes) ==============
 
 // Create a new product with image upload (Cloudinary)
 router.post('/', upload.array('images', 5), createProduct);
@@ -24,13 +32,34 @@ router.post('/', upload.array('images', 5), createProduct);
 // Get all products
 router.get('/', getProducts);
 
-// Get products by category — must come BEFORE getProduct('/:id') route
-router.get('/category/:category', getProductsByCategory);
-
-// Product search (by name) - must come before /:id
+// Product search (by name)
 router.get('/search', searchProducts);
 
-// Get a single product by ID
+// Get products sorted by display order
+router.get('/sorted', getProductsSorted);
+
+// Update products display order (admin)
+router.put('/order', updateProductsOrder);
+
+// Get products by category
+router.get('/category/:category', getProductsByCategory);
+
+// Get a single product by slug (SEO-friendly URL)
+router.get('/p/:slug', getProductBySlug);
+
+// Admin routes
+router.get('/admin/low-stock', getLowStockProducts);
+router.get('/admin/out-of-stock', getOutOfStockProducts);
+
+// ============== NEW ARRIVALS ROUTES ==============
+// Get all new arrival products (public)
+router.get('/new-arrivals', getNewArrivals);
+// Update new arrivals order (admin)
+router.put('/new-arrivals/order', updateNewArrivalsOrder);
+
+// ============== DYNAMIC :id ROUTES ==============
+
+// Get a single product by ID (legacy support)
 router.get('/:id', getProduct);
 
 // Update a product (with optional image upload)
@@ -39,14 +68,13 @@ router.put('/:id', upload.array('images', 5), updateProduct);
 // Delete a product and its images
 router.delete('/:id', deleteProduct);
 
-// Add a review to a product
-router.post('/:id/reviews', protect, addReview); // <--- THIS IS THE CRUCIAL CHANGE!
-// Get all reviews for a product
-router.get('/:id/reviews', getReviews);
+// Toggle product as new arrival (admin)
+router.patch('/:id/toggle-new-arrival', toggleNewArrival);
 
-// Get low-stock products
-router.get('/admin/low-stock', getLowStockProducts);
-// Get out-of-stock products
-router.get('/admin/out-of-stock', getOutOfStockProducts);
+// Add a review to a product (by ID)
+router.post('/:id/reviews', protect, addReview);
+
+// Get all reviews for a product (by ID)
+router.get('/:id/reviews', getReviews);
 
 export default router;
