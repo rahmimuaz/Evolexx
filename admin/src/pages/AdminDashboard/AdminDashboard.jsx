@@ -33,15 +33,13 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('authToken');
 
       // Fetch all necessary data
-      const [ordersRes, productsRes, usersRes] = await Promise.all([
+      const [ordersRes, productsRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/orders`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE_URL}/api/products`),
-        fetch(`${API_BASE_URL}/api/users`, { headers: { Authorization: `Bearer ${token}` } }).catch(() => null)
+        fetch(`${API_BASE_URL}/api/products`)
       ]);
 
       const orders = await ordersRes.json();
       const products = await productsRes.json();
-      const users = usersRes ? await usersRes.json() : [];
 
       // Calculate stats
       const stats = {
@@ -52,7 +50,7 @@ const AdminDashboard = () => {
         completedOrders: orders.filter(o => o.status === 'delivered').length,
         lowStockProducts: products.filter(p => p.stock > 0 && p.stock < 5).length,
         outOfStockProducts: products.filter(p => p.stock === 0).length,
-        totalUsers: users.length || 0
+        totalUsers: 0
       };
 
       setDashboardStats(stats);

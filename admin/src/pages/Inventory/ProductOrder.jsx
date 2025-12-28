@@ -18,7 +18,14 @@ const ProductOrder = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/api/products/sorted`);
+      // Try /sorted endpoint first, fallback to /products if not available
+      let response;
+      try {
+        response = await axios.get(`${API_BASE_URL}/api/products/sorted`);
+      } catch {
+        // Fallback to regular products endpoint
+        response = await axios.get(`${API_BASE_URL}/api/products`);
+      }
       setProducts(response.data);
     } catch (err) {
       console.error('Error fetching products:', err);
