@@ -102,21 +102,11 @@ const Homepage = () => {
       const productsRes = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(productsRes.data);
       
-      // Try to fetch new arrivals separately (optional - won't break if it fails)
-      try {
-        const newArrivalsRes = await axios.get(`${API_BASE_URL}/api/products/new-arrivals`);
-        if (newArrivalsRes.data && Array.isArray(newArrivalsRes.data)) {
-          setNewArrivals(newArrivalsRes.data);
-        } else {
-          throw new Error('Invalid response');
-        }
-      } catch {
-        // Fallback: use newest products from the main products list
-        const sortedByDate = [...productsRes.data].sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        setNewArrivals(sortedByDate.slice(0, 7));
-      }
+      // Use newest products as new arrivals (sorted by creation date)
+      const sortedByDate = [...productsRes.data].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setNewArrivals(sortedByDate.slice(0, 7));
       
       setLoading(false);
     } catch (error) {
