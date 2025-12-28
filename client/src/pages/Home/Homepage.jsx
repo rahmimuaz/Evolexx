@@ -8,9 +8,6 @@ import Footer from '../../components/Footer/Footer';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-// Debug: ensure API base URL is set and visible in console during development
-console.log('API_BASE_URL:', API_BASE_URL);
-
 const Homepage = () => {
   const [products, setProducts] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
@@ -54,20 +51,24 @@ const Homepage = () => {
 
   // Intersection Observer for category section animation - triggers every time it enters viewport
   useEffect(() => {
+    let isMounted = true;
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          if (!isMounted) return;
           if (entry.isIntersecting) {
-            // Reset to trigger animation every time
             setCategoryVisible(false);
-            // Use requestAnimationFrame for better timing
             requestAnimationFrame(() => {
-              setTimeout(() => {
-                setCategoryVisible(true);
-              }, 50);
+              if (isMounted) {
+                setTimeout(() => {
+                  if (isMounted) {
+                    setCategoryVisible(true);
+                  }
+                }, 50);
+              }
             });
           } else {
-            // Reset when out of view
             setCategoryVisible(false);
           }
         });
@@ -84,6 +85,7 @@ const Homepage = () => {
     }
 
     return () => {
+      isMounted = false;
       if (currentRef) {
         observer.unobserve(currentRef);
       }
@@ -96,52 +98,38 @@ const Homepage = () => {
 
   const fetchProducts = async () => {
     try {
-      const productsUrl = API_BASE_URL ? `${API_BASE_URL}/api/products` : '/api/products';
-      const newArrivalsUrl = API_BASE_URL ? `${API_BASE_URL}/api/products/new-arrivals` : '/api/products/new-arrivals';
-
       const [productsRes, newArrivalsRes] = await Promise.all([
-        axios.get(productsUrl),
-        axios.get(newArrivalsUrl)
+        axios.get(`${API_BASE_URL}/api/products`),
+        axios.get(`${API_BASE_URL}/api/products/new-arrivals`)
       ]);
-
       setProducts(productsRes.data);
       setNewArrivals(newArrivalsRes.data);
       setLoading(false);
     } catch (error) {
-      const requestUrl = API_BASE_URL ? `${API_BASE_URL}/api/products` : '/api/products';
-
-      console.error('Error fetching products:', {
-        message: error.message,
-        responseStatus: error.response?.status,
-        responseData: error.response?.data,
-        requestUrl
-      });
-
-      // Also dump the full error object for deeper inspection
-      console.error('Full Axios error object:', error);
-
-      // Provide a clearer message when the server responds with 404
-      if (error.response?.status === 404) {
-        setError('Products endpoint not found (404). Please check the API URL and server.');
-      } else {
-        setError('Error fetching products. Please try again later.');
-      }
-
+      console.error('Error fetching products:', error);
+      setError('Error fetching products. Please try again later.');
       setLoading(false);
     }
   };
 
   // Intersection Observer for new arrivals section animation
   useEffect(() => {
+    let isMounted = true;
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          if (!isMounted) return;
           if (entry.isIntersecting) {
             setNewArrivalsVisible(false);
             requestAnimationFrame(() => {
-              setTimeout(() => {
-                setNewArrivalsVisible(true);
-              }, 50);
+              if (isMounted) {
+                setTimeout(() => {
+                  if (isMounted) {
+                    setNewArrivalsVisible(true);
+                  }
+                }, 50);
+              }
             });
           } else {
             setNewArrivalsVisible(false);
@@ -157,6 +145,7 @@ const Homepage = () => {
     }
 
     return () => {
+      isMounted = false;
       if (currentRef) {
         observer.unobserve(currentRef);
       }
@@ -167,9 +156,9 @@ const Homepage = () => {
     if (product.images && product.images.length > 0) {
       const image = product.images[0];
       if (image.startsWith('http')) return image;
-      if (image.startsWith('/uploads/')) return API_BASE_URL ? `${API_BASE_URL}${image}` : image; // fall back to relative path
-      if (image.startsWith('uploads/')) return API_BASE_URL ? `${API_BASE_URL}/${image}` : `/${image}`;
-      return API_BASE_URL ? `${API_BASE_URL}/uploads/${image.replace(/^\//, '')}` : `/uploads/${image.replace(/^\//, '')}`;
+      if (image.startsWith('/uploads/')) return `${API_BASE_URL}${image}`;
+      if (image.startsWith('uploads/')) return `${API_BASE_URL}/${image}`;
+      return `${API_BASE_URL}/uploads/${image.replace(/^\//, '')}`;
     }
     return '/logo192.png';
   };
