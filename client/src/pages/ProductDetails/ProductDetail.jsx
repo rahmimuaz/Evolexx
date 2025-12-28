@@ -42,22 +42,32 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         let response;
-        if (slug) {
-          response = await axios.get(`${API_BASE_URL}/api/products/p/${slug}`);
-        } else if (id) {
-          response = await axios.get(`${API_BASE_URL}/api/products/${id}`);
+        const identifier = slug || id;
+        
+        if (identifier) {
+          // Try slug endpoint first, fallback to ID endpoint
+          try {
+            response = await axios.get(`${API_BASE_URL}/api/products/p/${identifier}`);
+          } catch {
+            // Fallback to direct ID lookup
+            response = await axios.get(`${API_BASE_URL}/api/products/${identifier}`);
+          }
         }
         
         if (response?.data) {
-        setProduct(response.data);
+          setProduct(response.data);
           setProductId(response.data._id);
-        if (response.data.images && response.data.images.length > 0) {
-          setMainImage(response.data.images[0]);
-        }
+          if (response.data.images && response.data.images.length > 0) {
+            setMainImage(response.data.images[0]);
+          }
           // Fetch related products from same category
           if (response.data.category) {
-            const relatedRes = await axios.get(`${API_BASE_URL}/api/products/category/${response.data.category}`);
-            setRelatedProducts(relatedRes.data.filter(p => p._id !== response.data._id).slice(0, 5));
+            try {
+              const relatedRes = await axios.get(`${API_BASE_URL}/api/products/category/${response.data.category}`);
+              setRelatedProducts(relatedRes.data.filter(p => p._id !== response.data._id).slice(0, 5));
+            } catch {
+              setRelatedProducts([]);
+            }
           }
         }
         setLoading(false);
