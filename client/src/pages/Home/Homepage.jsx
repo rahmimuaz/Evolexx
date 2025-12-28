@@ -105,9 +105,12 @@ const Homepage = () => {
       // Try to fetch new arrivals separately (optional - won't break if it fails)
       try {
         const newArrivalsRes = await axios.get(`${API_BASE_URL}/api/products/new-arrivals`);
-        setNewArrivals(newArrivalsRes.data);
-      } catch (newArrivalsError) {
-        console.warn('New arrivals endpoint not available, using fallback');
+        if (newArrivalsRes.data && Array.isArray(newArrivalsRes.data)) {
+          setNewArrivals(newArrivalsRes.data);
+        } else {
+          throw new Error('Invalid response');
+        }
+      } catch {
         // Fallback: use newest products from the main products list
         const sortedByDate = [...productsRes.data].sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
