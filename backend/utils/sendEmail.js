@@ -1,38 +1,25 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-// Initialize Gmail email service
-let transporter = null;
+// Initialize Resend email service (HTTP API - works on Railway)
+let resend = null;
 
-// Initialize Gmail transporter if credentials are provided
-if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-  transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, // Use Gmail App Password, not regular password
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
-  });
-  
-  // Verify transporter configuration on startup (non-blocking)
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error('❌ Gmail email transporter verification failed:', error.message);
-      console.error('Make sure you are using a Gmail App Password, not your regular password.');
-      console.error('Get App Password: https://myaccount.google.com/apppasswords');
-    } else {
-      console.log('✅ Gmail transporter ready');
-    }
-  });
+// Initialize Resend if API key is provided
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+  console.log('✅ Resend email service initialized (HTTP API - works on Railway)');
 } else {
-  console.warn('⚠️ Gmail email service not configured. Set EMAIL_USER and EMAIL_PASS environment variables');
+  console.warn('⚠️ Resend email service not configured. Set RESEND_API_KEY environment variable');
+  console.warn('⚠️ Get your API key at: https://resend.com/api-keys');
+  console.warn('⚠️ Free tier: 3,000 emails/month');
 }
 
-// ✅ Send email using Gmail
+// Get the "from" email address
+const getFromEmail = () => {
+  // Use RESEND_FROM_EMAIL if set, otherwise use EMAIL_USER, or default Resend email
+  return process.env.RESEND_FROM_EMAIL || process.env.EMAIL_USER || 'onboarding@resend.dev';
+};
+
+// ✅ Send email using Resend (HTTP API)
 export const sendEmail = async (to, subject, htmlContent) => {
   // Check if email is disabled
   if (process.env.DISABLE_EMAIL === 'true') {
@@ -40,26 +27,32 @@ export const sendEmail = async (to, subject, htmlContent) => {
     return;
   }
 
-  // Check if email service is configured
-  if (!transporter) {
-    console.warn('⚠️ Gmail email service not configured. Skipping email send.');
+  // Check if Resend is configured
+  if (!resend) {
+    console.warn('⚠️ Resend email service not configured. Skipping email send.');
     return;
   }
 
-  // Check if email credentials are configured
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.warn('⚠️ Gmail credentials not configured. Skipping email send.');
+  // Check if API key is configured
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('⚠️ RESEND_API_KEY not configured. Skipping email send.');
     return;
   }
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
+    const { data, error } = await resend.emails.send({
+      from: getFromEmail(),
+      to: to,
+      subject: subject,
       html: htmlContent,
     });
-    console.log(`✅ Email sent successfully to: ${to} (via Gmail)`);
+
+    if (error) {
+      console.error(`❌ Failed to send email to ${to}:`, error.message);
+      return;
+    }
+
+    console.log(`✅ Email sent successfully to: ${to} (via Resend)`);
   } catch (error) {
     console.error(`❌ Failed to send email to ${to}:`, error.message);
     // Don't throw - let it fail silently so it doesn't break order creation
