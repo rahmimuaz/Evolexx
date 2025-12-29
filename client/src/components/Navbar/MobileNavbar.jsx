@@ -146,35 +146,35 @@ const MobileNavbar = () => {
             >
               <FaTimes size={16} />
             </button>
-            {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
-              <div className="mnav-suggestions">
-                {searchLoading && <div className="mnav-suggestion-loading">Searching...</div>}
-                {searchError && <div className="mnav-suggestion-error">{searchError}</div>}
-                {!searchLoading && !searchError && searchResults.length === 0 && (
-                  <div className="mnav-suggestion-empty">No products found</div>
-                )}
-                {searchResults.map((product) => (
-                  <div
-                    className="mnav-suggestion-item"
-                    key={product._id}
-                    onClick={() => handleSearchSelect(product.slug || product._id)}
-                  >
-                    <img
-                      src={product.images?.[0]}
-                      alt={product.name}
-                      className="mnav-suggestion-img"
-                      onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/6b7280/ffffff?text=N/A'; }}
-                    />
-                    <div className="mnav-suggestion-info">
-                      <div className="mnav-suggestion-name">{product.name}</div>
-                      <div className="mnav-suggestion-price">
-                        Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                      </div>
+          {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
+            <div className="mnav-suggestions">
+              {searchLoading && <div className="mnav-suggestion-loading">Searching...</div>}
+              {searchError && <div className="mnav-suggestion-error">{searchError}</div>}
+              {!searchLoading && !searchError && searchResults.length === 0 && (
+                <div className="mnav-suggestion-empty">No products found</div>
+              )}
+              {searchResults.map((product) => (
+                <div
+                  className="mnav-suggestion-item"
+                  key={product._id}
+                  onClick={() => handleSearchSelect(product.slug || product._id)}
+                >
+                  <img
+                    src={product.images?.[0]}
+                    alt={product.name}
+                    className="mnav-suggestion-img"
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/6b7280/ffffff?text=N/A'; }}
+                  />
+                  <div className="mnav-suggestion-info">
+                    <div className="mnav-suggestion-name">{product.name}</div>
+                    <div className="mnav-suggestion-price">
+                      Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
+          )}
           </div>
         </div>
       )}
@@ -250,7 +250,7 @@ const MobileNavbar = () => {
             <Link to="/cart" className="mnav-cart-button">
               <FaShoppingCart size={18} />
               {cartItems.length > 0 && (
-                <span className="cart-count">{cartItems.length}</span>
+              <span className="cart-count">{cartItems.length}</span>
               )}
             </Link>
           )}

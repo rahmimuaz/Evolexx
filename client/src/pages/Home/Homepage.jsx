@@ -25,7 +25,7 @@ const Homepage = () => {
   const [categoryVisible, setCategoryVisible] = useState(true);
   const [newArrivalsVisible, setNewArrivalsVisible] = useState(true);
   const [carouselIndex, setCarouselIndex] = useState(2); // Start at center
-  
+
   // Touch/swipe state for carousel
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -284,7 +284,17 @@ const Homepage = () => {
 };
 
 
-  if (loading) return <div className="loader">Loading products...</div>;
+  if (loading) return (
+    <div className="loader">
+      <div className="loader-container">
+        <div className="loader-logo">EVOLEXX</div>
+        <div className="spinner-container">
+          <div className="spinner-circle"></div>
+        </div>
+        <p className="loading-text">Loading products...</p>
+      </div>
+    </div>
+  );
   if (error) return <div className="error">{error}</div>;
 
   return (
@@ -299,7 +309,8 @@ const Homepage = () => {
             muted 
             loop 
             playsInline
-            poster="/BrandNewPhone.jpg" // Fallback image while video loads
+            preload="auto"
+  
           >
             <source src="/hero-video.mp4" type="video/mp4" />
             <source src="/hero-video.webm" type="video/webm" />
@@ -525,11 +536,10 @@ const Homepage = () => {
                       {originalPrice ? (
                         <>
                           <p className="price">
-                          <span style={{ fontSize: '1.2rem', fontWeight: '600', marginRight: '0.5rem' }}>Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
-                            <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem' }}>
+                            <span className="price-current">Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+                            <span className="price-old">
                               Rs. {originalPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                             </span>
-                            
                           </p>
                         </>
                       ) : (
@@ -541,7 +551,7 @@ const Homepage = () => {
                         <p className="koko-pay">
                            pay in 3 × Rs.{" "}
                           {kokoInstallment.toLocaleString("en-LK", { minimumFractionDigits: 2 })}{" "}
-                          with <img src="/koko.webp" alt="Koko" className="koko-logo" />
+                           <img src="/koko.webp" alt="Koko" className="koko-logo" />
                         </p>
                       )}
                     </div>

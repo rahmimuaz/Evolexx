@@ -283,21 +283,21 @@ const Checkout = () => {
                     };
                     
                     return (
-                      <div className="form-group" key={field}>
-                        <label htmlFor={field} className="form-label">
-                          {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')}
-                        </label>
-                        <input
-                          type={field === 'email' ? 'email' : 'text'}
-                          id={field}
-                          name={field}
-                          value={formData[field]}
-                          onChange={field === 'phone' ? handlePhoneChange : handleInputChange}
-                          className="form-input"
+                    <div className="form-group" key={field}>
+                      <label htmlFor={field} className="form-label">
+                        {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')}
+                      </label>
+                      <input
+                        type={field === 'email' ? 'email' : 'text'}
+                        id={field}
+                        name={field}
+                        value={formData[field]}
+                        onChange={field === 'phone' ? handlePhoneChange : handleInputChange}
+                        className="form-input"
                           placeholder={placeholders[field]}
-                          required
-                        />
-                      </div>
+                        required
+                      />
+                    </div>
                     );
                   })}
 
