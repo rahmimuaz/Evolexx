@@ -213,53 +213,44 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     const order = await Order.create(orderData);
 
-    // Send new order email to admin (don't fail order creation if email fails)
-    try {
-      await sendEmail(
-        process.env.ALERT_EMAIL_USER,
-        'New Order Received',
-        `Evolexx Store\nNew Order Received\nA new order has been placed. Order ID: ${order._id}\n\nView Order: http://localhost:3000/admin/orders/${order._id}`
-      );
-    } catch (emailError) {
-      console.error('Failed to send admin notification email:', emailError);
-      // Don't throw - order creation should succeed even if email fails
-    }
+    // Send emails asynchronously without blocking order creation (fire-and-forget)
+    // Admin notification email
+    sendEmail(
+      process.env.ALERT_EMAIL_USER,
+      'New Order Received',
+      `Evolexx Store\nNew Order Received\nA new order has been placed. Order ID: ${order._id}\n\nView Order: http://localhost:3000/admin/orders/${order._id}`
+    ).catch(err => console.error('Failed to send admin notification email:', err));
 
-    // Send order confirmation to user (don't fail order creation if email fails)
-    try {
-      await sendEmail(
-        order.shippingAddress.email,
-        'Your Order Confirmation - Evolexx',
-        `
-        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 8px;">
-          <h2 style="color: #4CAF50;">✅ Thank you for your order!</h2>
-          <p>Hi there,</p>
-          <p>We've received your order and it's currently being processed.</p>
-          
-          <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #4CAF50;">
-            <strong>Order ID:</strong> ${order._id}<br>
-            <strong>Placed on:</strong> ${new Date(order.createdAt).toLocaleDateString()}
-          </div>
-
-          <p>You'll receive another email once your order is shipped.</p>
-          <p>You can track your order status using the link below:</p>
-
-          <a href="https://evolexx.vercel.app/order/${order._id}" 
-             style="display: inline-block; padding: 12px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; margin: 10px 0;">
-             View My Order
-          </a>
-
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;" />
-
-          <p style="font-size: 14px;">If you have any questions, feel free to reply to this email or contact our support.</p>
-          <p style="font-size: 14px;">Thank you for shopping with <strong>Evolexx Store</strong>!</p>
+    // User confirmation email
+    sendEmail(
+      order.shippingAddress.email,
+      'Your Order Confirmation - Evolexx',
+      `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 8px;">
+        <h2 style="color: #4CAF50;">✅ Thank you for your order!</h2>
+        <p>Hi there,</p>
+        <p>We've received your order and it's currently being processed.</p>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #4CAF50;">
+          <strong>Order ID:</strong> ${order._id}<br>
+          <strong>Placed on:</strong> ${new Date(order.createdAt).toLocaleDateString()}
         </div>
-        `
-      );
-    } catch (emailError) {
-      console.error('Failed to send order confirmation email:', emailError);
-      // Don't throw - order creation should succeed even if email fails
-    }
+
+        <p>You'll receive another email once your order is shipped.</p>
+        <p>You can track your order status using the link below:</p>
+
+        <a href="https://evolexx.vercel.app/order/${order._id}" 
+           style="display: inline-block; padding: 12px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; margin: 10px 0;">
+           View My Order
+        </a>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;" />
+
+        <p style="font-size: 14px;">If you have any questions, feel free to reply to this email or contact our support.</p>
+        <p style="font-size: 14px;">Thank you for shopping with <strong>Evolexx Store</strong>!</p>
+      </div>
+      `
+    ).catch(err => console.error('Failed to send order confirmation email:', err));
 
 
     // Clear cart only if we used cart items (i.e., orderItems were not provided in request body)
