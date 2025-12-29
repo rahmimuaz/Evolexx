@@ -757,7 +757,7 @@
 
 .pd-related-img {
   aspect-ratio: 1;
-  background: #f8f8f8;
+  background: none;
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -766,7 +766,7 @@
 .pd-related-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit:fill;
 }
 
 .pd-related-brand {

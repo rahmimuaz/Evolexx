@@ -7,20 +7,11 @@ import {
   FaShoppingCart,
   FaSearch
 } from 'react-icons/fa';
-
-// Assuming paths are correct:
-// import { useUser } from '../../context/UserContext';
-// import { useCart } from '../../context/CartContext';
-// import Modal from '../Modal/Modal';
-// import Login from '../../pages/Login/Login';
-// import Register from '../../pages/Login/Register';
-
-// Mock imports for runnable component structure
-const useUser = () => ({ user: { name: 'John Doe' }, logout: () => console.log('logout') });
-const useCart = () => ({ cartItems: [{ id: 1 }, { id: 2 }] });
-const Modal = ({ children, isOpen, onClose, title }) => isOpen ? (<div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'white', padding: '20px', zIndex: 9999, border: '1px solid #ccc' }}><h3>{title}</h3>{children}<button onClick={onClose}>Close</button></div>) : null;
-const Login = ({ onSuccess, onSwitchRegister }) => (<div>Login Form <button onClick={onSwitchRegister}>Switch to Register</button></div>);
-const Register = ({ onSuccess, onSwitchLogin }) => (<div>Register Form <button onClick={onSwitchLogin}>Switch to Login</button></div>);
+import { useUser } from '../../context/UserContext';
+import { useCart } from '../../context/CartContext';
+import Modal from '../Modal/Modal';
+import Login from '../../pages/Login/Login';
+import Register from '../../pages/Login/Register';
 
 
 const MobileNavbar = () => {
@@ -108,24 +99,6 @@ const MobileNavbar = () => {
     }
     setSearchLoading(true);
     const delayDebounce = setTimeout(() => {
-      // NOTE: Using a placeholder endpoint for demonstration since the real one is undefined here
-      
-      // Mock fetch logic for demonstration
-      new Promise(resolve => setTimeout(() => {
-          if (searchQuery.toLowerCase().includes('cable')) {
-              resolve([{ _id: '1', name: 'Lightning Cable', price: 2490, images: ['https://placehold.co/40x40/007bff/ffffff?text=LC'] }]);
-          } else {
-              resolve([]);
-          }
-      }, 350)).then(data => {
-          setSearchResults(Array.isArray(data) ? data : []);
-          setSearchError(null);
-      })
-      .catch(() => setSearchError('Error fetching results'))
-      .finally(() => setSearchLoading(false));
-
-      // Original fetch logic (uncomment when running in actual environment):
-      /*
       fetch(`${API_BASE_URL}/api/products/search?query=${encodeURIComponent(searchQuery)}`)
         .then((res) => res.json())
         .then((data) => {
@@ -134,7 +107,6 @@ const MobileNavbar = () => {
         })
         .catch(() => setSearchError('Error fetching results'))
         .finally(() => setSearchLoading(false));
-      */
     }, 350);
     return () => clearTimeout(delayDebounce);
   }, [searchQuery, API_BASE_URL]);
@@ -174,36 +146,36 @@ const MobileNavbar = () => {
             >
               <FaTimes size={16} />
             </button>
-          </div>
-          {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
-            <div className="mnav-suggestions">
-              {searchLoading && <div className="mnav-suggestion-loading">Searching...</div>}
-              {searchError && <div className="mnav-suggestion-error">{searchError}</div>}
-              {!searchLoading && !searchError && searchResults.length === 0 && (
-                <div className="mnav-suggestion-empty">No products found</div>
-              )}
-              {searchResults.map((product) => (
-                <div
-                  className="mnav-suggestion-item"
-                  key={product._id}
-                  onClick={() => handleSearchSelect(product.slug || product._id)}
-                >
-                  <img
-                    src={product.images?.[0]}
-                    alt={product.name}
-                    className="mnav-suggestion-img"
-                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/6b7280/ffffff?text=N/A'; }}
-                  />
-                  <div className="mnav-suggestion-info">
-                    <div className="mnav-suggestion-name">{product.name}</div>
-                    <div className="mnav-suggestion-price">
-                      Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+            {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
+              <div className="mnav-suggestions">
+                {searchLoading && <div className="mnav-suggestion-loading">Searching...</div>}
+                {searchError && <div className="mnav-suggestion-error">{searchError}</div>}
+                {!searchLoading && !searchError && searchResults.length === 0 && (
+                  <div className="mnav-suggestion-empty">No products found</div>
+                )}
+                {searchResults.map((product) => (
+                  <div
+                    className="mnav-suggestion-item"
+                    key={product._id}
+                    onClick={() => handleSearchSelect(product.slug || product._id)}
+                  >
+                    <img
+                      src={product.images?.[0]}
+                      alt={product.name}
+                      className="mnav-suggestion-img"
+                      onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/6b7280/ffffff?text=N/A'; }}
+                    />
+                    <div className="mnav-suggestion-info">
+                      <div className="mnav-suggestion-name">{product.name}</div>
+                      <div className="mnav-suggestion-price">
+                        Rs. {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -239,7 +211,12 @@ const MobileNavbar = () => {
                     </Link>
                     <button
                       className="mnav-submenu-link mnav-submenu-button"
-                      onClick={() => { logout(); setMenuOpen(false); setMobileProfileOpen(false); }}
+                      onClick={() => { 
+                        logout(); 
+                        setMenuOpen(false); 
+                        setMobileProfileOpen(false);
+                        navigate('/');
+                      }}
                     >
                       Logout
                     </button>
@@ -272,7 +249,9 @@ const MobileNavbar = () => {
           {user && (
             <Link to="/cart" className="mnav-cart-button">
               <FaShoppingCart size={18} />
-              <span className="cart-count">{cartItems.length}</span>
+              {cartItems.length > 0 && (
+                <span className="cart-count">{cartItems.length}</span>
+              )}
             </Link>
           )}
           <button
@@ -289,7 +268,11 @@ const MobileNavbar = () => {
       <Modal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} title="Login">
         <Login
           asModal
-          onSuccess={() => setLoginModalOpen(false)}
+          onSuccess={() => {
+            setLoginModalOpen(false);
+            setMenuOpen(false);
+            setMobileProfileOpen(false);
+          }}
           onSwitchRegister={() => {
             setLoginModalOpen(false);
             setRegisterModalOpen(true);
@@ -299,7 +282,11 @@ const MobileNavbar = () => {
       <Modal isOpen={registerModalOpen} onClose={() => setRegisterModalOpen(false)} title="Register">
         <Register
           asModal
-          onSuccess={() => setRegisterModalOpen(false)}
+          onSuccess={() => {
+            setRegisterModalOpen(false);
+            setMenuOpen(false);
+            setMobileProfileOpen(false);
+          }}
           onSwitchLogin={() => {
             setRegisterModalOpen(false);
             setLoginModalOpen(true);

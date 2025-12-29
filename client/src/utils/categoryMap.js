@@ -3,10 +3,14 @@
 
 // Slug to database category name mapping
 export const SLUG_TO_CATEGORY = {
+  'electronics': 'Electronics',
+  'mobile-accessories': 'Mobile Accessories',
+  'pre-owned-devices': 'Pre-owned Devices',
+  'other': 'Other',
+  // Legacy subcategory mappings (for backward compatibility)
   'mobile-phones': 'Mobile Phone',
   'preowned-phones': 'Preowned Phones',
   'laptops': 'Laptops',
-  'mobile-accessories': 'Mobile Accessories',
   'phone-covers': 'Phone Covers',
   'chargers': 'Chargers',
   'headphones': 'Headphones',
@@ -17,8 +21,7 @@ export const SLUG_TO_CATEGORY = {
   'cables': 'Cables',
   'other-accessories': 'Other Accessories',
   'preowned-laptops': 'Preowned Laptops',
-  'preowned-tablets': 'Preowned Tablets',
-  'other': 'Other'
+  'preowned-tablets': 'Preowned Tablets'
 };
 
 // Database category name to slug mapping (reverse lookup)
@@ -28,10 +31,14 @@ export const CATEGORY_TO_SLUG = Object.fromEntries(
 
 // Display labels for each slug (for page titles, breadcrumbs, etc.)
 export const CATEGORY_LABELS = {
+  'electronics': 'Electronics',
+  'mobile-accessories': 'Mobile Accessories',
+  'pre-owned-devices': 'Pre-Owned Devices',
+  'other': 'Other Products',
+  // Legacy subcategory labels (for backward compatibility)
   'mobile-phones': 'Brand New Phones',
   'preowned-phones': 'Pre-Owned Phones',
   'laptops': 'Laptops',
-  'mobile-accessories': 'Mobile Accessories',
   'phone-covers': 'Phone Covers',
   'chargers': 'Chargers & Adapters',
   'headphones': 'Headphones',
@@ -42,8 +49,7 @@ export const CATEGORY_LABELS = {
   'cables': 'Cables & Connectors',
   'other-accessories': 'Other Accessories',
   'preowned-laptops': 'Pre-Owned Laptops',
-  'preowned-tablets': 'Pre-Owned Tablets',
-  'other': 'Other Products'
+  'preowned-tablets': 'Pre-Owned Tablets'
 };
 
 // Category groups for navigation menus

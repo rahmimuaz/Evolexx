@@ -257,9 +257,9 @@ const AddProduct = () => {
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
       
-      // Use subcategory as the actual category for backend compatibility
-      // For "Other" category, use "Other" as the category value
-      const categoryValue = formData.category === 'Other' ? 'Other' : (formData.subcategory || formData.category);
+      // Use main category for filtering (subcategory is not necessary for category filtering)
+      // Save the main category as the category value
+      const categoryValue = formData.category;
       formDataToSend.append('category', categoryValue);
       
       formDataToSend.append('price', formData.price);
@@ -445,10 +445,9 @@ const AddProduct = () => {
                               name="subcategory"
                               value={formData.subcategory}
                               onChange={handleInputChange}
-                              required
                               className="modern-input category-select-second"
                             >
-                              <option value="">Select subcategory</option>
+                              <option value="">Select subcategory (optional)</option>
                               {categoryHierarchy[formData.category]?.map(subcat => (
                                 <option key={subcat} value={subcat}>{subcat}</option>
                               ))}
@@ -459,7 +458,7 @@ const AddProduct = () => {
                       <small className="field-hint">
                         {formData.category === 'Other' 
                           ? 'No subcategory needed for "Other" category' 
-                          : 'Select main category first, then choose subcategory'}
+                          : 'Subcategory is optional - main category is used for filtering'}
                       </small>
                     </div>
                   </div>
@@ -827,9 +826,7 @@ const AddProduct = () => {
                       <div className="review-item">
                         <span className="review-label">Category:</span>
                         <span className="review-value">
-                          {formData.category === 'Other' 
-                            ? 'Other' 
-                            : (formData.subcategory || formData.category || 'Not set')}
+                          {formData.category || 'Not set'}
                         </span>
                       </div>
                       <div className="review-item">
@@ -851,7 +848,7 @@ const AddProduct = () => {
                     </div>
                   </div>
 
-                  {!formData.name || (!formData.subcategory && formData.category !== 'Other') || !formData.price || !formData.stock ? (
+                  {!formData.name || !formData.category || !formData.price || !formData.stock ? (
                     <div className="warning-box">
                       ⚠️ Please complete all required fields before publishing
                     </div>
@@ -879,7 +876,7 @@ const AddProduct = () => {
               <button
                 type="submit"
                 className="btn-primary"
-                disabled={loading || !formData.name || (!formData.subcategory && formData.category !== 'Other') || !formData.price || !formData.stock}
+                disabled={loading || !formData.name || !formData.category || !formData.price || !formData.stock}
               >
                 {loading ? 'Publishing...' : 'Publish Product'}
               </button>

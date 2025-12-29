@@ -25,6 +25,49 @@ const Homepage = () => {
   const [categoryVisible, setCategoryVisible] = useState(true);
   const [newArrivalsVisible, setNewArrivalsVisible] = useState(true);
   const [carouselIndex, setCarouselIndex] = useState(2); // Start at center
+  
+  // Touch/swipe state for carousel
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  
+  // Minimum swipe distance (in pixels)
+  const minSwipeDistance = 50;
+
+  // Touch handlers for carousel swipe
+  const onTouchStart = (e) => {
+    setTouchEnd(null); // Reset touch end
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = (e) => {
+    if (!touchStart || !touchEnd) {
+      setTouchStart(null);
+      setTouchEnd(null);
+      return;
+    }
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe && carouselIndex < newArrivals.length - 1) {
+      // Swipe left - go to next
+      e.preventDefault(); // Prevent link click
+      setCarouselIndex(prev => Math.min(newArrivals.length - 1, prev + 1));
+    } else if (isRightSwipe && carouselIndex > 0) {
+      // Swipe right - go to previous
+      e.preventDefault(); // Prevent link click
+      setCarouselIndex(prev => Math.max(0, prev - 1));
+    }
+    
+    // Reset touch states
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
 
   const sortOptions = [
     { value: 'default', label: 'Default' },
@@ -325,7 +368,12 @@ const Homepage = () => {
           </div>
           
           <div className={`carousel-container ${newArrivalsVisible ? 'visible' : ''}`}>
-            <div className="carousel-track">
+            <div 
+              className="carousel-track"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
               {newArrivals.slice(0, 7).map((product, index) => {
                 const imageUrl = generateImageUrl(product);
                 const fullPrice = product.discountPrice || product.price || 0;

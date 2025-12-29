@@ -169,6 +169,7 @@
   width: 80px;
   height: 80px;
   object-fit: fill;
+  border: 1px solid #eee;
   border-radius: 4px;
 }
 

@@ -305,6 +305,7 @@
   background-color: #f3f4f6;
   border-radius: 20px;
   padding: 0.5rem 1rem;
+  position: relative;
 }
 
 .mnav-search-input-icon {
@@ -335,15 +336,17 @@
 /* --- Search Suggestions --- */
 .mnav-suggestions {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 0.5rem);
   left: 0;
+  right: 0;
   width: 100%;
   background-color: white;
-  border-top: 1px solid var(--mnav-border);
+  border: 1px solid var(--mnav-border);
+  border-radius: 8px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  max-height: 70vh;
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
-  z-index: 1004;
+  z-index: 1006;
 }
 
 .mnav-suggestion-item {

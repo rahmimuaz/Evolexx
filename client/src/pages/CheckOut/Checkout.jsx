@@ -273,22 +273,33 @@ const Checkout = () => {
               <form onSubmit={handleSubmit}>
                 <div className="form-grid">
                   {/* Render fields except city */}
-                  {['fullName', 'email', 'phone', 'address', 'postalCode'].map((field) => (
-                    <div className="form-group" key={field}>
-                      <label htmlFor={field} className="form-label">
-                        {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')}
-                      </label>
-                      <input
-                        type={field === 'email' ? 'email' : 'text'}
-                        id={field}
-                        name={field}
-                        value={formData[field]}
-                        onChange={field === 'phone' ? handlePhoneChange : handleInputChange}
-                        className="form-input"
-                        required
-                      />
-                    </div>
-                  ))}
+                  {['fullName', 'email', 'phone', 'address', 'postalCode'].map((field) => {
+                    const placeholders = {
+                      fullName: 'Enter your full name',
+                      email: 'your.email@example.com',
+                      phone: '07X XXX XXXX',
+                      address: '123 Main Street, Apartment 4B',
+                      postalCode: '10100'
+                    };
+                    
+                    return (
+                      <div className="form-group" key={field}>
+                        <label htmlFor={field} className="form-label">
+                          {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')}
+                        </label>
+                        <input
+                          type={field === 'email' ? 'email' : 'text'}
+                          id={field}
+                          name={field}
+                          value={formData[field]}
+                          onChange={field === 'phone' ? handlePhoneChange : handleInputChange}
+                          className="form-input"
+                          placeholder={placeholders[field]}
+                          required
+                        />
+                      </div>
+                    );
+                  })}
 
                   {/* City input with autocomplete */}
                   <div className="form-group" ref={cityRef} style={{ position: 'relative' }}>
@@ -300,6 +311,7 @@ const Checkout = () => {
                       value={cityInput}
                       onChange={handleCityChange}
                       className="form-input"
+                      placeholder="Start typing city name (e.g., Colombo, Kandy)"
                       autoComplete="off"
                       required
                     />
