@@ -102,9 +102,10 @@ export const createProduct = async (req, res) => {
     }
 
     // Validate category-specific details (as per your Product.js schema)
+    // Main categories (Electronics, Mobile Accessories, Pre-owned Devices, Other) don't require specific fields
+    // Only subcategories have required fields
     const requiredCategoryFields = {
       'Mobile Phone': ['brand', 'model', 'storage', 'ram', 'color', 'screenSize', 'batteryCapacity', 'processor', 'camera', 'operatingSystem'],
-      'Mobile Accessories': ['brand', 'type', 'compatibility', 'color', 'material'],
       'Preowned Phones': ['brand', 'model', 'condition', 'storage', 'ram', 'color', 'batteryHealth', 'warranty'],
       'Laptops': ['brand', 'model', 'processor', 'ram', 'storage', 'display', 'graphics', 'operatingSystem'],
       'Chargers': ['brand', 'type', 'wattage', 'compatibility', 'color', 'cableLength', 'material'],

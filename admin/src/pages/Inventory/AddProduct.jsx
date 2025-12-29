@@ -323,7 +323,6 @@ const AddProduct = () => {
             name={field.name}
             value={fieldValue}
             onChange={handleDetailChange}
-            required
             className="form-input"
           >
             <option value="">Select {field.label}</option>
@@ -354,7 +353,6 @@ const AddProduct = () => {
             name={field.name}
             value={fieldValue}
             onChange={handleDetailChange}
-            required
             className="form-input"
             placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
           />
@@ -564,13 +562,18 @@ const AddProduct = () => {
                         {categoryFields[formData.subcategory].map(field => (
                           <div key={field.name} className="form-field-group">
                             <label className="modern-label">
-                              {field.label} <span className="required-star">*</span>
+                              {field.label}
                             </label>
                             {renderFieldByType(field)}
                           </div>
                         ))}
                       </div>
                     </>
+                  ) : formData.category ? (
+                    <div className="empty-state">
+                      <p>Subcategory-specific fields are optional. You can add custom specifications below or proceed without them.</p>
+                      <p className="empty-state-hint">If you want category-specific fields, please select a subcategory in the previous step.</p>
+                    </div>
                   ) : (
                     <div className="empty-state">
                       <p>Please select a category in the previous step to see category-specific fields</p>
