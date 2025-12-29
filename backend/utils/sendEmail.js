@@ -1,55 +1,37 @@
-import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 
-// Initialize email service (Resend preferred, nodemailer as fallback)
-let emailService = null;
-let useResend = false;
+// Initialize Gmail email service
+let transporter = null;
 
-// Initialize Resend if API key is provided (recommended for Railway)
-if (process.env.RESEND_API_KEY) {
-  emailService = new Resend(process.env.RESEND_API_KEY);
-  useResend = true;
-  console.log('✅ Resend email service initialized (HTTP API - works on Railway)');
-} else if (process.env.ALERT_EMAIL_USER && process.env.ALERT_EMAIL_PASS) {
-  // Fallback to nodemailer if Resend is not configured
-  console.warn('⚠️ RESEND_API_KEY not found. Using nodemailer (may not work on Railway).');
-  console.warn('⚠️ For Railway, use Resend: https://resend.com (free tier: 3,000 emails/month)');
-  
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+// Initialize Gmail transporter if credentials are provided
+if (process.env.ALERT_EMAIL_USER && process.env.ALERT_EMAIL_PASS) {
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
     auth: {
       user: process.env.ALERT_EMAIL_USER,
-      pass: process.env.ALERT_EMAIL_PASS,
+      pass: process.env.ALERT_EMAIL_PASS, // Use Gmail App Password, not regular password
     },
-    connectionTimeout: 5000,
-    greetingTimeout: 5000,
-    socketTimeout: 5000,
-    pool: false,
+    // Connection timeout settings
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
   
-  transporter.verify((error) => {
+  // Verify transporter configuration on startup (non-blocking)
+  transporter.verify((error, success) => {
     if (error) {
-      console.error('❌ Email transporter verification failed:', error.message);
+      console.error('❌ Gmail email transporter verification failed:', error.message);
+      console.error('Make sure you are using a Gmail App Password, not your regular password.');
+      console.error('Get App Password: https://myaccount.google.com/apppasswords');
     } else {
-      console.log('✅ Email transporter ready (nodemailer fallback)');
+      console.log('✅ Gmail email transporter ready');
     }
   });
-  
-  emailService = transporter;
-  useResend = false;
 } else {
-  console.warn('⚠️ Email service not configured. Set RESEND_API_KEY or ALERT_EMAIL_USER/ALERT_EMAIL_PASS');
+  console.warn('⚠️ Gmail email service not configured. Set ALERT_EMAIL_USER and ALERT_EMAIL_PASS environment variables');
 }
 
-// Get the "from" email address
-const getFromEmail = () => {
-  // Use RESEND_FROM_EMAIL if set, otherwise use ALERT_EMAIL_USER, or default
-  return process.env.RESEND_FROM_EMAIL || process.env.ALERT_EMAIL_USER || 'onboarding@resend.dev';
-};
-
-// ✅ Send email using Resend (HTTP API) or nodemailer fallback
+// ✅ Send email using Gmail
 export const sendEmail = async (to, subject, htmlContent) => {
   // Check if email is disabled
   if (process.env.DISABLE_EMAIL === 'true') {
@@ -58,37 +40,25 @@ export const sendEmail = async (to, subject, htmlContent) => {
   }
 
   // Check if email service is configured
-  if (!emailService) {
-    console.warn('⚠️ Email service not configured. Skipping email send.');
+  if (!transporter) {
+    console.warn('⚠️ Gmail email service not configured. Skipping email send.');
+    return;
+  }
+
+  // Check if email credentials are configured
+  if (!process.env.ALERT_EMAIL_USER || !process.env.ALERT_EMAIL_PASS) {
+    console.warn('⚠️ Gmail credentials not configured. Skipping email send.');
     return;
   }
 
   try {
-    if (useResend) {
-      // Use Resend (HTTP API) - works on Railway
-      const { data, error } = await emailService.emails.send({
-        from: getFromEmail(),
-        to: to,
-        subject: subject,
-        html: htmlContent,
-      });
-
-      if (error) {
-        console.error(`❌ Failed to send email to ${to}:`, error.message);
-        return;
-      }
-
-      console.log(`✅ Email sent successfully to: ${to} (via Resend)`);
-    } else {
-      // Fallback to nodemailer (likely won't work on Railway)
-      await emailService.sendMail({
-        from: process.env.ALERT_EMAIL_USER,
-        to,
-        subject,
-        html: htmlContent,
-      });
-      console.log(`✅ Email sent successfully to: ${to} (via nodemailer fallback)`);
-    }
+    await transporter.sendMail({
+      from: process.env.ALERT_EMAIL_USER,
+      to,
+      subject,
+      html: htmlContent,
+    });
+    console.log(`✅ Email sent successfully to: ${to} (via Gmail)`);
   } catch (error) {
     console.error(`❌ Failed to send email to ${to}:`, error.message);
     // Don't throw - let it fail silently so it doesn't break order creation
