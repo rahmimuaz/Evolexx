@@ -73,8 +73,8 @@ const Footer = ({ showBrands = false }) => {
   return (
     <div className="footer-wrapper">
       {/* Featured Brands Section - Only shown on Homepage */}
-      {/* TODO: Add brands slider in future
-      {showBrands && (
+      {/* TODO: Add brands slider in future */}
+      {false && showBrands && (
         <section className="brands-section">       
           <div className="brands-slider">
             <div className="brands-track">
@@ -94,7 +94,6 @@ const Footer = ({ showBrands = false }) => {
           </div>
         </section>
       )}
-      */}
 
       {/* CTA Section */}
       <section className="footer-cta">
