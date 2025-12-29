@@ -49,12 +49,6 @@ const getFromEmail = () => {
   return process.env.RESEND_FROM_EMAIL || process.env.ALERT_EMAIL_USER || 'onboarding@resend.dev';
 };
 
-// Get the "from" email address
-const getFromEmail = () => {
-  // Use RESEND_FROM_EMAIL if set, otherwise use ALERT_EMAIL_USER, or default
-  return process.env.RESEND_FROM_EMAIL || process.env.ALERT_EMAIL_USER || 'onboarding@resend.dev';
-};
-
 // ✅ Send email using Resend (HTTP API) or nodemailer fallback
 export const sendEmail = async (to, subject, htmlContent) => {
   // Check if email is disabled
