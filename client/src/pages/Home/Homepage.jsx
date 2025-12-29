@@ -477,10 +477,11 @@ const Homepage = () => {
                       {originalPrice ? (
                         <>
                           <p className="price">
-                            <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem', marginRight: '0.5rem' }}>
+                          <span style={{ fontSize: '1.2rem', fontWeight: '600', marginRight: '0.5rem' }}>Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+                            <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem' }}>
                               Rs. {originalPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                             </span>
-                            <span>Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+                            
                           </p>
                         </>
                       ) : (

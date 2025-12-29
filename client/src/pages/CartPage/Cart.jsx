@@ -117,9 +117,6 @@ const Cart = () => {
                   <div className="item-price">
                     {item.product?.discountPrice ? (
                       <>
-                        <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem', marginRight: '0.5rem' }}>
-                          Rs. {(item.product.price * item.quantity).toLocaleString()}
-                        </span>
                         <span>Rs. {(item.product.discountPrice * item.quantity).toLocaleString()}</span>
                       </>
                     ) : (
@@ -133,14 +130,40 @@ const Cart = () => {
         </div>
 
         <aside className="cart-summary">
-          <h2 className="summary-title">Add a Note</h2>
+          <h2 className="summary-title">Order Summary</h2>
+          
+          {/* Products List */}
+          {validCartItems.length > 0 && (
+            <div className="summary-products">
+              {validCartItems.map(item => {
+                const itemPrice = item.product?.discountPrice || item.product?.price || 0;
+                return (
+                  <div key={item._id} className="summary-product-item">
+                    {item.product?.images?.[0] && (
+                      <img 
+                        src={getImageUrl(item.product.images[0])} 
+                        alt={item.product.name}
+                        className="summary-product-image"
+                        onError={(e) => (e.target.src = '/logo192.png')}
+                      />
+                    )}
+                    <div className="summary-product-info">
+                      <p className="summary-product-name">{item.product?.name}</p>
+                      <p className="summary-product-qty">Qty: {item.quantity}</p>
+                    </div>
+                    <p className="summary-product-price">
+                      Rs. {(itemPrice * item.quantity).toLocaleString()}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <h2 className="summary-title" style={{ marginTop: '1.5rem' }}>Add a Note</h2>
           <p className="note-instruction">Write something here for the seller</p>
 
           <div className="summary-details">
-            <div className="summary-row">
-              <span>Discount</span>
-              <span>Rs. 0</span>
-            </div>
             <div className="summary-row subtotal">
               <span>Subtotal</span>
               <span>Rs. {subtotal.toLocaleString()}</span>
