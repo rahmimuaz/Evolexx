@@ -4,17 +4,18 @@ import nodemailer from 'nodemailer';
 let transporter = null;
 
 // Initialize Gmail transporter if credentials are provided
-if (process.env.ALERT_EMAIL_USER && process.env.ALERT_EMAIL_PASS) {
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
     auth: {
-      user: process.env.ALERT_EMAIL_USER,
-      pass: process.env.ALERT_EMAIL_PASS, // Use Gmail App Password, not regular password
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS, // Use Gmail App Password, not regular password
     },
-    // Connection timeout settings
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
   
   // Verify transporter configuration on startup (non-blocking)
@@ -24,11 +25,11 @@ if (process.env.ALERT_EMAIL_USER && process.env.ALERT_EMAIL_PASS) {
       console.error('Make sure you are using a Gmail App Password, not your regular password.');
       console.error('Get App Password: https://myaccount.google.com/apppasswords');
     } else {
-      console.log('✅ Gmail email transporter ready');
+      console.log('✅ Gmail transporter ready');
     }
   });
 } else {
-  console.warn('⚠️ Gmail email service not configured. Set ALERT_EMAIL_USER and ALERT_EMAIL_PASS environment variables');
+  console.warn('⚠️ Gmail email service not configured. Set EMAIL_USER and EMAIL_PASS environment variables');
 }
 
 // ✅ Send email using Gmail
@@ -46,14 +47,14 @@ export const sendEmail = async (to, subject, htmlContent) => {
   }
 
   // Check if email credentials are configured
-  if (!process.env.ALERT_EMAIL_USER || !process.env.ALERT_EMAIL_PASS) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.warn('⚠️ Gmail credentials not configured. Skipping email send.');
     return;
   }
 
   try {
     await transporter.sendMail({
-      from: process.env.ALERT_EMAIL_USER,
+      from: process.env.EMAIL_USER,
       to,
       subject,
       html: htmlContent,

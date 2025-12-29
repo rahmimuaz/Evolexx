@@ -179,7 +179,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     if (updatedProduct.stock > 0 && updatedProduct.stock < 5) {
       // Send email asynchronously without awaiting
       sendEmail(
-        process.env.ALERT_EMAIL_USER,
+        process.env.EMAIL_USER,
         'Low Stock Alert',
         `Product "${updatedProduct.name}" is low on stock. Only ${updatedProduct.stock} left.`
       ).catch(err => console.error('Failed to send low stock alert email:', err));
@@ -216,7 +216,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     // Send emails asynchronously without blocking order creation (fire-and-forget)
     // Admin notification email
     sendEmail(
-      process.env.ALERT_EMAIL_USER,
+      process.env.EMAIL_USER,
       'New Order Received',
       `Evolexx Store\nNew Order Received\nA new order has been placed. Order ID: ${order._id}\n\nView Order: http://localhost:3000/admin/orders/${order._id}`
     ).catch(err => console.error('Failed to send admin notification email:', err));
