@@ -92,10 +92,17 @@ export const createOrder = asyncHandler(async (req, res) => {
   let finalTotalPrice;
 
   // Fetch product details for orderItems
+  let productMap = new Map();
+  
   if (orderItems && orderItems.length > 0) {
-    // For each item, fetch product details to ensure name, image, price, selectedColor are correct
-    finalOrderItems = await Promise.all(orderItems.map(async (item) => {
-      const product = await Product.findById(item.product);
+    // Fetch all products at once for better performance
+    const productIds = orderItems.map(item => item.product);
+    const products = await Product.find({ _id: { $in: productIds } });
+    productMap = new Map(products.map(p => [p._id.toString(), p]));
+    
+    // Build finalOrderItems using fetched products
+    finalOrderItems = orderItems.map((item) => {
+      const product = productMap.get(item.product.toString());
       if (!product) {
         res.status(400);
         throw new Error(`Product not found: ${item.product}`);
@@ -112,7 +119,7 @@ export const createOrder = asyncHandler(async (req, res) => {
         image: product.images && product.images.length > 0 ? product.images[0] : '', // Copy main image
         selectedColor: item.selectedColor || '' // Copy selected color if present
       };
-    }));
+    });
     finalTotalPrice = finalOrderItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     console.log('Using orderItems from request body (with product details fetched)');
   } else {
@@ -122,6 +129,13 @@ export const createOrder = asyncHandler(async (req, res) => {
       res.status(400);
       throw new Error('No items in cart');
     }
+
+    // Build product map from cart items for inventory check
+    userWithCart.cart.forEach(item => {
+      if (item.product) {
+        productMap.set(item.product._id.toString(), item.product);
+      }
+    });
 
     finalOrderItems = userWithCart.cart.map(item => ({
       product: item.product._id,
@@ -135,9 +149,9 @@ export const createOrder = asyncHandler(async (req, res) => {
     console.log('Using cart items as fallback (with product details from populated cart)');
   }
 
-  // Inventory check and deduction
+  // Inventory check using already-fetched products (no additional DB query)
   for (const item of finalOrderItems) {
-    const product = await Product.findById(item.product);
+    const product = productMap.get(item.product.toString());
     if (!product) {
       res.status(400);
       throw new Error(`Product not found: ${item.product}`);
@@ -147,21 +161,30 @@ export const createOrder = asyncHandler(async (req, res) => {
       throw new Error(`Insufficient stock for product: ${product.name}`);
     }
   }
-  // Deduct stock and check for low stock
-  for (const item of finalOrderItems) {
+  
+  // Deduct stock in parallel for better performance
+  const stockUpdatePromises = finalOrderItems.map(async (item) => {
     const updatedProduct = await Product.findByIdAndUpdate(
       item.product,
       { $inc: { stock: -item.quantity } },
       { new: true }
     );
+    return updatedProduct;
+  });
+  
+  const updatedProducts = await Promise.all(stockUpdatePromises);
+  
+  // Check for low stock and send emails asynchronously (don't block order creation)
+  updatedProducts.forEach((updatedProduct) => {
     if (updatedProduct.stock > 0 && updatedProduct.stock < 5) {
-      await sendEmail(
-        process.env.ALERT_EMAIL_USER, // Ensure this ENV var is set for admin alerts
+      // Send email asynchronously without awaiting
+      sendEmail(
+        process.env.ALERT_EMAIL_USER,
         'Low Stock Alert',
         `Product "${updatedProduct.name}" is low on stock. Only ${updatedProduct.stock} left.`
-      );
+      ).catch(err => console.error('Failed to send low stock alert email:', err));
     }
-  }
+  });
 
   try {
     const orderNumber = await Order.generateOrderNumber(); // Assuming this is a static method on Order model
