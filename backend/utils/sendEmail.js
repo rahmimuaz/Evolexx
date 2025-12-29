@@ -1,72 +1,102 @@
+import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 
-// Create transporter with explicit Gmail SMTP settings
-// Try port 465 (SSL) first, as Railway may block port 587
-const createTransporter = () => {
-  // Check if email is disabled via environment variable
-  if (process.env.DISABLE_EMAIL === 'true') {
-    return null;
-  }
+// Initialize email service (Resend preferred, nodemailer as fallback)
+let emailService = null;
+let useResend = false;
 
-  return nodemailer.createTransport({
+// Initialize Resend if API key is provided (recommended for Railway)
+if (process.env.RESEND_API_KEY) {
+  emailService = new Resend(process.env.RESEND_API_KEY);
+  useResend = true;
+  console.log('✅ Resend email service initialized (HTTP API - works on Railway)');
+} else if (process.env.ALERT_EMAIL_USER && process.env.ALERT_EMAIL_PASS) {
+  // Fallback to nodemailer if Resend is not configured
+  console.warn('⚠️ RESEND_API_KEY not found. Using nodemailer (may not work on Railway).');
+  console.warn('⚠️ For Railway, use Resend: https://resend.com (free tier: 3,000 emails/month)');
+  
+  const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465, // Use SSL port (465) instead of TLS port (587)
-    secure: true, // true for 465, false for other ports
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.ALERT_EMAIL_USER,
       pass: process.env.ALERT_EMAIL_PASS,
     },
-    // Shorter timeouts to fail fast
-    connectionTimeout: 5000, // 5 seconds
+    connectionTimeout: 5000,
     greetingTimeout: 5000,
     socketTimeout: 5000,
-    // Disable pooling to avoid connection issues
     pool: false,
   });
-};
-
-const transporter = createTransporter();
-
-// Verify transporter configuration on startup
-if (transporter) {
-  transporter.verify((error, success) => {
+  
+  transporter.verify((error) => {
     if (error) {
       console.error('❌ Email transporter verification failed:', error.message);
-      console.error('Check your ALERT_EMAIL_USER and ALERT_EMAIL_PASS environment variables');
-      console.error('Note: Railway may block SMTP connections. Consider using an email API service like SendGrid or Resend.');
     } else {
-      console.log('✅ Email transporter ready');
+      console.log('✅ Email transporter ready (nodemailer fallback)');
     }
   });
+  
+  emailService = transporter;
+  useResend = false;
 } else {
-  console.warn('⚠️ Email sending is disabled (DISABLE_EMAIL=true or missing credentials)');
+  console.warn('⚠️ Email service not configured. Set RESEND_API_KEY or ALERT_EMAIL_USER/ALERT_EMAIL_PASS');
 }
 
-// ✅ Fix: change `text` to `htmlContent`
+// Get the "from" email address
+const getFromEmail = () => {
+  // Use RESEND_FROM_EMAIL if set, otherwise use ALERT_EMAIL_USER, or default
+  return process.env.RESEND_FROM_EMAIL || process.env.ALERT_EMAIL_USER || 'onboarding@resend.dev';
+};
+
+// Get the "from" email address
+const getFromEmail = () => {
+  // Use RESEND_FROM_EMAIL if set, otherwise use ALERT_EMAIL_USER, or default
+  return process.env.RESEND_FROM_EMAIL || process.env.ALERT_EMAIL_USER || 'onboarding@resend.dev';
+};
+
+// ✅ Send email using Resend (HTTP API) or nodemailer fallback
 export const sendEmail = async (to, subject, htmlContent) => {
   // Check if email is disabled
-  if (!transporter) {
-    console.warn('⚠️ Email sending is disabled. Skipping email send.');
+  if (process.env.DISABLE_EMAIL === 'true') {
+    console.warn('⚠️ Email sending is disabled (DISABLE_EMAIL=true). Skipping email send.');
     return;
   }
 
-  // Check if email credentials are configured
-  if (!process.env.ALERT_EMAIL_USER || !process.env.ALERT_EMAIL_PASS) {
-    console.warn('⚠️ Email credentials not configured. Skipping email send.');
+  // Check if email service is configured
+  if (!emailService) {
+    console.warn('⚠️ Email service not configured. Skipping email send.');
     return;
   }
 
   try {
-    await transporter.sendMail({
-      from: process.env.ALERT_EMAIL_USER,
-      to,
-      subject,
-      html: htmlContent, // ✅ This now matches the function param
-    });
-    console.log(`✅ Email sent successfully to: ${to}`);
+    if (useResend) {
+      // Use Resend (HTTP API) - works on Railway
+      const { data, error } = await emailService.emails.send({
+        from: getFromEmail(),
+        to: to,
+        subject: subject,
+        html: htmlContent,
+      });
+
+      if (error) {
+        console.error(`❌ Failed to send email to ${to}:`, error.message);
+        return;
+      }
+
+      console.log(`✅ Email sent successfully to: ${to} (via Resend)`);
+    } else {
+      // Fallback to nodemailer (likely won't work on Railway)
+      await emailService.sendMail({
+        from: process.env.ALERT_EMAIL_USER,
+        to,
+        subject,
+        html: htmlContent,
+      });
+      console.log(`✅ Email sent successfully to: ${to} (via nodemailer fallback)`);
+    }
   } catch (error) {
     console.error(`❌ Failed to send email to ${to}:`, error.message);
     // Don't throw - let it fail silently so it doesn't break order creation
-    // The caller already handles errors with .catch()
   }
 };
