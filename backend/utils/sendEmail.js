@@ -27,6 +27,12 @@ export const sendEmail = async (to, subject, htmlContent) => {
     return;
   }
 
+  // Validate recipient email
+  if (!to || to === 'undefined' || !to.includes('@')) {
+    console.warn(`⚠️ Invalid recipient email: ${to}. Skipping email send.`);
+    return;
+  }
+
   // Check if Resend is configured
   if (!resend) {
     console.warn('⚠️ Resend email service not configured. Skipping email send.');
