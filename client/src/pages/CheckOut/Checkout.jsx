@@ -220,7 +220,7 @@ const Checkout = () => {
 
       clearCart();
       toast.success('Order placed successfully!');
-      navigate('/my-orders');
+      navigate(`/order/${data._id}`);
     } catch (error) {
       console.error('Order creation error:', error.response?.data || error);
       toast.error(error.response?.data?.message || 'Failed to place order');
