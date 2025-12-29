@@ -201,11 +201,11 @@
 .summary-product-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px;
-  background-color: #fff;
-  border-radius: 6px;
-  border: 1px solid #eee;
+  
+  padding: 5px 5px 0px 0px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
 }
 
 .summary-product-image {

@@ -220,7 +220,7 @@ const Checkout = () => {
 
       clearCart();
       toast.success('Order placed successfully!');
-      navigate(`/order/${data._id}`);
+      navigate('/my-orders');
     } catch (error) {
       console.error('Order creation error:', error.response?.data || error);
       toast.error(error.response?.data?.message || 'Failed to place order');
@@ -389,9 +389,7 @@ const Checkout = () => {
                     <p className="summary-item-price">
                       {item.product.discountPrice ? (
                         <>
-                          <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem', marginRight: '0.5rem' }}>
-                            Rs. {(item.product.price * item.quantity).toLocaleString()}
-                          </span>
+                          
                           <span>Rs. {(item.product.discountPrice * item.quantity).toLocaleString()}</span>
                         </>
                       ) : (

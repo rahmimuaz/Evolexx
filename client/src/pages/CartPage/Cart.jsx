@@ -132,6 +132,7 @@ const Cart = () => {
         <aside className="cart-summary">
           <h2 className="summary-title">Order Summary</h2>
           
+          
           {/* Products List */}
           {validCartItems.length > 0 && (
             <div className="summary-products">
@@ -160,8 +161,7 @@ const Cart = () => {
             </div>
           )}
 
-          <h2 className="summary-title" style={{ marginTop: '1.5rem' }}>Add a Note</h2>
-          <p className="note-instruction">Write something here for the seller</p>
+         
 
           <div className="summary-details">
             <div className="summary-row subtotal">
