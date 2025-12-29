@@ -364,9 +364,6 @@ const Homepage = () => {
                               <span className="carousel-old-price">Rs. {product.price?.toLocaleString()}</span>
                             )}
                           </div>
-                          <button className="carousel-cart-btn" onClick={(e) => e.preventDefault()}>
-                            🛒
-                          </button>
                         </div>
                       )}
                     </Link>
