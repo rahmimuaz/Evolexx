@@ -35,8 +35,9 @@ const EditProduct = () => {
   // Hierarchical categories structure
   const categoryHierarchy = {
     'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches'],
-    'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables'],
-    'Pre-owned Devices': ['Preowned Phones', 'Preowned Laptops', 'Preowned Tablets']
+    'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables', 'Headphones', 'Earbuds', 'Other Accessories'],
+    'Pre-owned Devices': ['Preowned Phones', 'Preowned Laptops', 'Preowned Tablets'],
+    'Other': []
   };
 
   const categories = Object.keys(categoryHierarchy);
@@ -140,33 +141,52 @@ const EditProduct = () => {
       const product = response.data;
       
       // Determine main category and subcategory
+      // Check if the product category is a main category first
       let mainCategory = '';
-      let subCategory = product.category;
+      let subCategory = '';
       
-      for (const [main, subs] of Object.entries(categoryHierarchy)) {
-        if (subs.includes(product.category)) {
-          mainCategory = main;
-          break;
+      if (categories.includes(product.category)) {
+        // Product was saved with a main category
+        mainCategory = product.category;
+        subCategory = ''; // No subcategory for main categories
+      } else {
+        // Product was saved with a subcategory, find the main category
+        for (const [main, subs] of Object.entries(categoryHierarchy)) {
+          if (subs.includes(product.category)) {
+            mainCategory = main;
+            subCategory = product.category;
+            break;
+          }
+        }
+        // If not found in hierarchy, it might be a legacy category
+        if (!mainCategory) {
+          mainCategory = product.category;
+          subCategory = '';
         }
       }
 
+      // Store original image URLs (as they are in the database)
+      const originalImages = product.images || [];
+      
       setFormData({
         ...product,
-        category: mainCategory,
+        category: mainCategory || product.category,
         subcategory: subCategory,
         brand: product.details?.brand || '',
-        kokoPay: product.kokoPay || false
+        kokoPay: product.kokoPay || false,
+        images: originalImages // Store original URLs exactly as they are in DB
       });
 
       // Extract custom specifications
       const customSpecsFromDetails = extractCustomSpecs(product.details);
       setCustomSpecs(customSpecsFromDetails);
 
-      const previewList = product.images.map(img => {
+      // Create preview URLs for display (add API_BASE_URL prefix if needed)
+      const previewList = originalImages.map(img => {
         if (img.startsWith('http')) {
-          return img;
+          return img; // Already a full URL (Cloudinary)
         } else {
-          return `${API_BASE_URL}/${img.replace(/^\//, '')}`;
+          return `${API_BASE_URL}/${img.replace(/^\//, '')}`; // Add base URL for relative paths
         }
       });
       setPreviewUrls(previewList);
@@ -204,9 +224,14 @@ const EditProduct = () => {
       }
     }
 
-    // Reset subcategory when main category changes
-    if (name === 'category') {
-      setFormData(prev => ({ ...prev, subcategory: '', details: {} }));
+    // Reset subcategory when main category changes (only if category actually changed)
+    if (name === 'category' && value !== formData.category) {
+      setFormData(prev => ({ 
+        ...prev, 
+        subcategory: '', 
+        // Preserve brand in details if it exists
+        details: prev.details?.brand ? { brand: prev.details.brand } : {} 
+      }));
     }
   };
 
@@ -262,20 +287,33 @@ const EditProduct = () => {
     const totalExisting = formData.images.length;
 
     if (index < totalExisting) {
+      // Remove existing image
       const updatedExistingImages = [...formData.images];
       updatedExistingImages.splice(index, 1);
       setFormData(prev => ({ ...prev, images: updatedExistingImages }));
+      
+      // Update previewUrls - remove the corresponding preview
+      const updatedPreviews = [...previewUrls];
+      updatedPreviews.splice(index, 1);
+      setPreviewUrls(updatedPreviews);
     } else {
+      // Remove new image (not yet uploaded)
       const newImageIndex = index - totalExisting;
       const updatedNewImages = [...newImages];
+      
+      // Revoke blob URL before removing
+      if (previewUrls[index]) {
+        URL.revokeObjectURL(previewUrls[index]);
+      }
+      
       updatedNewImages.splice(newImageIndex, 1);
       setNewImages(updatedNewImages);
-      URL.revokeObjectURL(previewUrls[index]);
+      
+      // Update previewUrls - remove the corresponding preview
+      const updatedPreviews = [...previewUrls];
+      updatedPreviews.splice(index, 1);
+      setPreviewUrls(updatedPreviews);
     }
-
-    const updatedPreviews = [...previewUrls];
-    updatedPreviews.splice(index, 1);
-    setPreviewUrls(updatedPreviews);
   };
 
   const renderFieldByType = (field) => {
@@ -288,7 +326,6 @@ const EditProduct = () => {
             name={field.name}
             value={fieldValue}
             onChange={handleDetailChange}
-            required
             className="modern-input"
           >
             <option value="">Select {field.label}</option>
@@ -319,7 +356,6 @@ const EditProduct = () => {
             name={field.name}
             value={fieldValue}
             onChange={handleDetailChange}
-            required
             className="modern-input"
             placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
           />
@@ -356,31 +392,38 @@ const EditProduct = () => {
 
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
-      formDataToSend.append('category', formData.subcategory || formData.category);
-      formDataToSend.append('price', formData.price);
+      // Use main category for filtering (subcategory is not necessary for category filtering)
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('price', formData.price.toString());
       formDataToSend.append('description', formData.description);
-      formDataToSend.append('longDescription', formData.longDescription);
+      formDataToSend.append('longDescription', formData.longDescription || '');
       formDataToSend.append('warrantyPeriod', formData.warrantyPeriod);
-      formDataToSend.append('discountPrice', formData.discountPrice);
-      formDataToSend.append('stock', formData.stock);
+      formDataToSend.append('discountPrice', formData.discountPrice || '');
+      formDataToSend.append('stock', formData.stock.toString());
       formDataToSend.append('details', JSON.stringify(combinedDetails));
-      formDataToSend.append('kokoPay', formData.kokoPay);
+      formDataToSend.append('kokoPay', formData.kokoPay.toString());
       formDataToSend.append('existingImages', JSON.stringify(formData.images));
 
       newImages.forEach(file => {
         formDataToSend.append('images', file);
       });
 
-      await axios.put(`${API_BASE_URL}/api/products/${id}`, formDataToSend, {
+      const response = await axios.put(`${API_BASE_URL}/api/products/${id}`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      alert('Product updated successfully!');
-      navigate('/Products');
+      
+      if (response.data) {
+        alert('Product updated successfully!');
+        navigate('/Products');
+      } else {
+        throw new Error('No response data received');
+      }
     } catch (err) {
       console.error('Update failed:', err);
-      alert('Error updating product. Please try again.');
+      const errorMessage = err.response?.data?.message || err.message || 'Error updating product. Please try again.';
+      alert(errorMessage);
     }
   };
 
@@ -445,17 +488,16 @@ const EditProduct = () => {
                       ))}
                     </select>
                     
-                    {formData.category && (
+                    {formData.category && formData.category !== 'Other' && (
                       <>
                         <div className="category-arrow">→</div>
                         <select
                           name="subcategory"
                           value={formData.subcategory}
                           onChange={handleInputChange}
-                          required
                           className="modern-input category-select-second"
                         >
-                          <option value="">Select subcategory</option>
+                          <option value="">Select subcategory (optional)</option>
                           {categoryHierarchy[formData.category]?.map(subcat => (
                             <option key={subcat} value={subcat}>{subcat}</option>
                           ))}
@@ -463,11 +505,30 @@ const EditProduct = () => {
                       </>
                     )}
                   </div>
-                  <small className="field-hint">Select main category first, then choose subcategory</small>
+                  <small className="field-hint">
+                    {formData.category === 'Other' 
+                      ? 'No subcategory needed for "Other" category' 
+                      : 'Subcategory is optional - main category is used for filtering'}
+                  </small>
                 </div>
               </div>
 
-              {formData.subcategory && brandOptions[formData.subcategory] && (
+              {formData.category === 'Other' ? (
+                <div className="form-field-group">
+                  <label className="modern-label">
+                    Brand <span className="required-star">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleInputChange}
+                    required
+                    className="modern-input"
+                    placeholder="Enter brand name"
+                  />
+                </div>
+              ) : formData.subcategory && brandOptions[formData.subcategory] ? (
                 <div className="form-field-group">
                   <label className="modern-label">
                     Brand <span className="required-star">*</span>
@@ -485,7 +546,7 @@ const EditProduct = () => {
                     ))}
                   </select>
                 </div>
-              )}
+              ) : null}
 
               <div className="form-field-group">
                 <label className="modern-label">
@@ -537,18 +598,26 @@ const EditProduct = () => {
                     <span className="subsection-icon">⚙️</span>
                     Category-Specific Specifications
                   </h3>
+                  <p className="subsection-hint">
+                    These fields are automatically loaded based on your selected category: <strong>{formData.subcategory}</strong>
+                  </p>
 
                   <div className="specs-grid">
                     {categoryFields[formData.subcategory].map(field => (
                       <div key={field.name} className="form-field-group">
                         <label className="modern-label">
-                          {field.label} <span className="required-star">*</span>
+                          {field.label}
                         </label>
                         {renderFieldByType(field)}
                       </div>
                     ))}
                   </div>
                 </>
+              ) : formData.category ? (
+                <div className="empty-state">
+                  <p>Subcategory-specific fields are optional. You can add custom specifications below or proceed without them.</p>
+                  <p className="empty-state-hint">If you want category-specific fields, please select a subcategory above.</p>
+                </div>
               ) : (
                 <div className="empty-state">
                   <p>Please select a category to see category-specific fields</p>

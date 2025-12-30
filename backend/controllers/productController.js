@@ -206,6 +206,11 @@ export const updateProduct = async (req, res) => {
     }
 
     const updatedImages = [...existingImages, ...newImages];
+    
+    console.log('Update Product - Existing images from DB:', productToUpdate.images);
+    console.log('Update Product - Existing images from request:', existingImages);
+    console.log('Update Product - New images:', newImages);
+    console.log('Update Product - Final updated images:', updatedImages);
 
     // Image validation after combining
     if (updatedImages.length === 0 || updatedImages.length > 5) {
@@ -221,8 +226,18 @@ export const updateProduct = async (req, res) => {
     }
 
     // Find images that were removed from the product and delete them from Cloudinary
+    // Normalize URLs for comparison (remove trailing slashes, normalize encoding)
+    const normalizeUrl = (url) => {
+      if (!url) return '';
+      return url.trim().replace(/\/$/, '');
+    };
+    
+    const normalizedUpdatedImages = updatedImages.map(normalizeUrl);
     const imagesToDeleteFromCloudinary = productToUpdate.images.filter(
-      (img) => img.startsWith('http') && !updatedImages.includes(img)
+      (img) => {
+        const normalizedImg = normalizeUrl(img);
+        return img.startsWith('http') && !normalizedUpdatedImages.includes(normalizedImg);
+      }
     );
 
     if (imagesToDeleteFromCloudinary.length > 0) {
