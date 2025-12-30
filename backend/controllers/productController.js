@@ -226,19 +226,35 @@ export const updateProduct = async (req, res) => {
     }
 
     // Find images that were removed from the product and delete them from Cloudinary
-    // Normalize URLs for comparison (remove trailing slashes, normalize encoding)
+    // Normalize URLs for comparison (remove trailing slashes, query params, normalize encoding)
     const normalizeUrl = (url) => {
       if (!url) return '';
-      return url.trim().replace(/\/$/, '');
+      try {
+        // Remove query parameters and fragments for comparison
+        const urlObj = new URL(url.trim());
+        return `${urlObj.origin}${urlObj.pathname}`.replace(/\/$/, '');
+      } catch (e) {
+        // If URL parsing fails, just trim and remove trailing slash
+        return url.trim().replace(/\/$/, '').split('?')[0].split('#')[0];
+      }
     };
     
     const normalizedUpdatedImages = updatedImages.map(normalizeUrl);
     const imagesToDeleteFromCloudinary = productToUpdate.images.filter(
       (img) => {
         const normalizedImg = normalizeUrl(img);
-        return img.startsWith('http') && !normalizedUpdatedImages.includes(normalizedImg);
+        const isIncluded = normalizedUpdatedImages.includes(normalizedImg);
+        const shouldDelete = img.startsWith('http') && !isIncluded;
+        
+        if (shouldDelete) {
+          console.log(`Image marked for deletion: ${img} (normalized: ${normalizedImg})`);
+        }
+        
+        return shouldDelete;
       }
     );
+    
+    console.log('Images to delete from Cloudinary:', imagesToDeleteFromCloudinary);
 
     if (imagesToDeleteFromCloudinary.length > 0) {
       const deletePromises = imagesToDeleteFromCloudinary.map(async (imageUrl) => {

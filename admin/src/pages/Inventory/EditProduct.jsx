@@ -26,6 +26,7 @@ const EditProduct = () => {
   const [customSpecs, setCustomSpecs] = useState([]);
   const [newImages, setNewImages] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [imageKeys, setImageKeys] = useState([]); // Track unique keys for each image
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [discountError, setDiscountError] = useState('');
@@ -190,6 +191,10 @@ const EditProduct = () => {
         }
       });
       setPreviewUrls(previewList);
+      
+      // Create unique keys for each image (use image URL as key for existing, timestamp for new)
+      const keys = originalImages.map((img, idx) => `existing-${idx}-${img}`);
+      setImageKeys(keys);
       setLoading(false);
     } catch (err) {
       setError('Failed to load product');
@@ -279,40 +284,49 @@ const EditProduct = () => {
 
     const validFiles = files.slice(0, filesToAdd);
 
-    setNewImages(prev => [...prev, ...validFiles]);
-    setPreviewUrls(prev => [...prev, ...validFiles.map(file => URL.createObjectURL(file))]);
+    const newFiles = [...validFiles];
+    const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
+    const newKeys = newFiles.map((file, idx) => `new-${Date.now()}-${idx}-${file.name}`);
+    
+    setNewImages(prev => [...prev, ...newFiles]);
+    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    setImageKeys(prev => [...prev, ...newKeys]);
   };
 
   const removeImage = (index) => {
     const totalExisting = formData.images.length;
 
     if (index < totalExisting) {
-      // Remove existing image
-      const updatedExistingImages = [...formData.images];
-      updatedExistingImages.splice(index, 1);
-      setFormData(prev => ({ ...prev, images: updatedExistingImages }));
+      // Remove existing image from database
+      const updatedExistingImages = formData.images.filter((_, i) => i !== index);
       
-      // Update previewUrls - remove the corresponding preview
-      const updatedPreviews = [...previewUrls];
-      updatedPreviews.splice(index, 1);
+      // Remove corresponding preview URL and key
+      const updatedPreviews = previewUrls.filter((_, i) => i !== index);
+      const updatedKeys = imageKeys.filter((_, i) => i !== index);
+      
+      // Update all states
+      setFormData(prev => ({ ...prev, images: updatedExistingImages }));
       setPreviewUrls(updatedPreviews);
+      setImageKeys(updatedKeys);
     } else {
       // Remove new image (not yet uploaded)
       const newImageIndex = index - totalExisting;
-      const updatedNewImages = [...newImages];
+      const updatedNewImages = newImages.filter((_, i) => i !== newImageIndex);
       
       // Revoke blob URL before removing
-      if (previewUrls[index]) {
-        URL.revokeObjectURL(previewUrls[index]);
+      const urlToRevoke = previewUrls[index];
+      if (urlToRevoke && urlToRevoke.startsWith('blob:')) {
+        URL.revokeObjectURL(urlToRevoke);
       }
       
-      updatedNewImages.splice(newImageIndex, 1);
-      setNewImages(updatedNewImages);
+      // Remove corresponding preview URL and key
+      const updatedPreviews = previewUrls.filter((_, i) => i !== index);
+      const updatedKeys = imageKeys.filter((_, i) => i !== index);
       
-      // Update previewUrls - remove the corresponding preview
-      const updatedPreviews = [...previewUrls];
-      updatedPreviews.splice(index, 1);
+      // Update all states
+      setNewImages(updatedNewImages);
       setPreviewUrls(updatedPreviews);
+      setImageKeys(updatedKeys);
     }
   };
 
@@ -371,6 +385,18 @@ const EditProduct = () => {
       return;
     }
 
+    // Validate that we have at least one image
+    if (formData.images.length === 0 && newImages.length === 0) {
+      alert('Product must have at least one image.');
+      return;
+    }
+
+    // Validate total images count
+    if (formData.images.length + newImages.length > 5) {
+      alert('Product cannot have more than 5 images.');
+      return;
+    }
+
     try {
       // Merge custom specs into details
       const customSpecsObj = {};
@@ -402,7 +428,12 @@ const EditProduct = () => {
       formDataToSend.append('stock', formData.stock.toString());
       formDataToSend.append('details', JSON.stringify(combinedDetails));
       formDataToSend.append('kokoPay', formData.kokoPay.toString());
+      // Send existing images exactly as they are stored in formData.images
+      // These are the original URLs from the database
       formDataToSend.append('existingImages', JSON.stringify(formData.images));
+      
+      console.log('Frontend - Sending existing images:', formData.images);
+      console.log('Frontend - Sending new images count:', newImages.length);
 
       newImages.forEach(file => {
         formDataToSend.append('images', file);
@@ -787,7 +818,7 @@ const EditProduct = () => {
               {previewUrls.length > 0 && (
                 <div className="images-grid">
                   {previewUrls.map((url, index) => (
-                    <div key={index} className="image-card">
+                    <div key={imageKeys[index] || `img-${index}`} className="image-card">
                       <img src={url} alt={`Preview ${index + 1}`} className="preview-image" />
                       <button
                         type="button"
