@@ -1135,33 +1135,26 @@
     font-size: 0.8rem;
   }
 
-  /* Trust Badges */
-  .pd-trust-badges {
-    padding: 24px 16px;
-    gap: 16px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+  /* Policy Accordion */
+  .pd-policy-accordion {
+    gap: 8px;
   }
 
-  .pd-badge {
-    flex: 1 1 calc(33% - 12px);
-    min-width: 90px;
-    max-width: 110px;
+  .pd-accordion-header {
+    padding: 12px 16px;
   }
 
-  .pd-badge-icon {
-    font-size: 1.3rem;
-    margin-bottom: 6px;
+  .pd-accordion-title {
+    font-size: 0.85rem;
   }
 
-  .pd-badge-title {
-    font-size: 0.7rem;
+  .pd-accordion-icon {
+    font-size: 1rem;
   }
 
-  .pd-badge-text {
-    font-size: 0.6rem;
-    display: none;
+  .pd-accordion-content {
+    padding: 0 16px 12px 40px;
+    font-size: 0.8rem;
   }
 
   /* Tabs */
