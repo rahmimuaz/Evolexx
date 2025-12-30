@@ -10,7 +10,7 @@ import Modal from '../../components/Modal/Modal';
 import Login from '../../pages/Login/Login';
 import Register from '../../pages/Login/Register';
 import ReactMarkdown from 'react-markdown';
-import { FaShieldAlt, FaTruck, FaUndo, FaHeart, FaRegHeart, FaCheck, FaStar, FaRegStar } from 'react-icons/fa';
+import { FaShieldAlt, FaTruck, FaUndo, FaHeart, FaRegHeart, FaCheck, FaStar, FaRegStar, FaPlus, FaMinus } from 'react-icons/fa';
 
 const ProductDetail = () => {
   const { slug, id } = useParams();
@@ -32,6 +32,7 @@ const ProductDetail = () => {
   const [activeTab, setActiveTab] = useState('DESCRIPTION');
   const [wishlist, setWishlist] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [openAccordion, setOpenAccordion] = useState(null); // Track which accordion is open
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
@@ -310,22 +311,63 @@ const ProductDetail = () => {
             )}
           </div>
 
-          {/* Trust Badges */}
-          <div className="pd-trust-badges">
-            <div className="pd-badge">
-              <FaShieldAlt className="pd-badge-icon" />
-              <p className="pd-badge-title">Security Policy</p>
-              <p className="pd-badge-text">Safe & Secure Checkout</p>
+          {/* Policy Accordion */}
+          <div className="pd-policy-accordion">
+            <div className="pd-accordion-item">
+              <button 
+                className="pd-accordion-header"
+                onClick={() => setOpenAccordion(openAccordion === 'security' ? null : 'security')}
+              >
+                <div className="pd-accordion-title-wrapper">
+                  <FaShieldAlt className="pd-accordion-icon" />
+                  <span className="pd-accordion-title">Security Policy</span>
+                </div>
+                {openAccordion === 'security' ? <FaMinus /> : <FaPlus />}
+              </button>
+              {openAccordion === 'security' && (
+                <div className="pd-accordion-content">
+                  <p>Safe & Secure Checkout</p>
+                  <p>Your payment information is encrypted and secure. We use industry-standard SSL encryption to protect your data during checkout.</p>
+                </div>
+              )}
             </div>
-            <div className="pd-badge">
-              <FaTruck className="pd-badge-icon" />
-              <p className="pd-badge-title">Delivery Policy</p>
-              <p className="pd-badge-text">Island-wide delivery within 3-7 days</p>
+
+            <div className="pd-accordion-item">
+              <button 
+                className="pd-accordion-header"
+                onClick={() => setOpenAccordion(openAccordion === 'delivery' ? null : 'delivery')}
+              >
+                <div className="pd-accordion-title-wrapper">
+                  <FaTruck className="pd-accordion-icon" />
+                  <span className="pd-accordion-title">Delivery Policy</span>
+                </div>
+                {openAccordion === 'delivery' ? <FaMinus /> : <FaPlus />}
+              </button>
+              {openAccordion === 'delivery' && (
+                <div className="pd-accordion-content">
+                  <p>Island-wide delivery within 3-7 days</p>
+                  <p>We deliver to all locations across Sri Lanka. Standard delivery takes 3-7 business days. Express delivery options are available for major cities.</p>
+                </div>
+              )}
             </div>
-            <div className="pd-badge">
-              <FaUndo className="pd-badge-icon" />
-              <p className="pd-badge-title">Return Policy</p>
-              <p className="pd-badge-text">7-day hassle-free returns</p>
+
+            <div className="pd-accordion-item">
+              <button 
+                className="pd-accordion-header"
+                onClick={() => setOpenAccordion(openAccordion === 'return' ? null : 'return')}
+              >
+                <div className="pd-accordion-title-wrapper">
+                  <FaUndo className="pd-accordion-icon" />
+                  <span className="pd-accordion-title">Return Policy</span>
+                </div>
+                {openAccordion === 'return' ? <FaMinus /> : <FaPlus />}
+              </button>
+              {openAccordion === 'return' && (
+                <div className="pd-accordion-content">
+                  <p>7-day hassle-free returns</p>
+                  <p>Not satisfied with your purchase? Return it within 7 days of delivery for a full refund. Items must be in original condition with all packaging intact.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
