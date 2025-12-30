@@ -22,6 +22,7 @@ import Contact from './pages/Legal/Contact';
 import RefundPolicy from './pages/Legal/RefundPolicy';
 import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
 import TermsConditions from './pages/Legal/TermsConditions';
+import WhatsAppButton from './components/WhatsAppButton/WhatsAppButton';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsConditions />} />
               </Routes>
+            <WhatsAppButton />
           </div>
         </CartProvider>
       </UserProvider>

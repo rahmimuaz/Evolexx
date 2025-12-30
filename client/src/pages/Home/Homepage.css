@@ -564,70 +564,7 @@
   overflow: hidden;
 }
 
-/* ============ FIXED WHATSAPP CHAT BUTTON - BOTTOM RIGHT CORNER ============ */
-.whatsapp-chat-button-fixed {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.whatsapp-link-fixed {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  background: white;
-  padding: 8px 16px 8px 8px;
-  border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-}
-
-.whatsapp-link-fixed:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-}
-
-.whatsapp-link-fixed:active {
-  transform: translateY(0);
-}
-
-.whatsapp-icon-wrapper-fixed {
-  width: 50px;
-  height: 50px;
-  background: #25D366;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-}
-
-.whatsapp-link-fixed:hover .whatsapp-icon-wrapper-fixed {
-  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.5);
-  background: #20BA5A;
-  transform: scale(1.05);
-}
-
-.whatsapp-icon-fixed {
-  width: 28px;
-  height: 28px;
-  color: white;
-}
-
-.whatsapp-text-fixed {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  white-space: nowrap;
-  padding-right: 4px;
-}
+/* WhatsApp button styles moved to WhatsAppButton component */
 
 /* Scroll Animation Keyframes */
 @keyframes fadeInUp {
@@ -1113,30 +1050,6 @@
 @media (max-width: 600px) {
   .new-arrivals-section {
     padding: 70px 1rem 100px;
-  }
-  
-  .whatsapp-chat-button-fixed {
-    bottom: 15px;
-    right: 15px;
-  }
-  
-  .whatsapp-link-fixed {
-    padding: 6px 12px 6px 6px;
-    gap: 10px;
-  }
-  
-  .whatsapp-icon-wrapper-fixed {
-    width: 45px;
-    height: 45px;
-  }
-  
-  .whatsapp-icon-fixed {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .whatsapp-text-fixed {
-    font-size: 0.85rem;
   }
   
   .carousel-container {
@@ -1741,30 +1654,6 @@
 }
 
 @media (max-width: 480px) {
-  .whatsapp-chat-button-fixed {
-    bottom: 15px;
-    right: 15px;
-  }
-  
-  .whatsapp-link-fixed {
-    padding: 6px 10px 6px 6px;
-    gap: 8px;
-  }
-  
-  .whatsapp-icon-wrapper-fixed {
-    width: 42px;
-    height: 42px;
-  }
-  
-  .whatsapp-icon-fixed {
-    width: 22px;
-    height: 22px;
-  }
-  
-  .whatsapp-text-fixed {
-    font-size: 0.75rem;
-  }
-  
   .product-section h2 {
     font-size: 1.9rem;
     
