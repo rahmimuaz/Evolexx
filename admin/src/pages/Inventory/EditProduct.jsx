@@ -3,6 +3,16 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import './EditProduct.css';
 
+// Hierarchical categories structure - moved outside component to prevent recreation
+const categoryHierarchy = {
+  'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches'],
+  'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables', 'Headphones', 'Earbuds', 'Other Accessories'],
+  'Pre-owned Devices': ['Preowned Phones', 'Preowned Laptops', 'Preowned Tablets'],
+  'Other': []
+};
+
+const categories = Object.keys(categoryHierarchy);
+
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,16 +42,6 @@ const EditProduct = () => {
   const [discountError, setDiscountError] = useState('');
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
-  // Hierarchical categories structure
-  const categoryHierarchy = {
-    'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches'],
-    'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables', 'Headphones', 'Earbuds', 'Other Accessories'],
-    'Pre-owned Devices': ['Preowned Phones', 'Preowned Laptops', 'Preowned Tablets'],
-    'Other': []
-  };
-
-  const categories = Object.keys(categoryHierarchy);
 
   const categoryFields = {
     'Mobile Phone': [
@@ -146,7 +146,9 @@ const EditProduct = () => {
       let mainCategory = '';
       let subCategory = '';
       
-      if (categories.includes(product.category)) {
+      // Check if product category is a main category
+      const mainCategories = Object.keys(categoryHierarchy);
+      if (mainCategories.includes(product.category)) {
         // Product was saved with a main category
         mainCategory = product.category;
         subCategory = ''; // No subcategory for main categories
@@ -201,7 +203,7 @@ const EditProduct = () => {
       setLoading(false);
       console.error("Error fetching product:", err);
     }
-  }, [id, API_BASE_URL, categoryHierarchy]);
+  }, [id, API_BASE_URL]);
 
   useEffect(() => {
     fetchProduct();
@@ -209,10 +211,15 @@ const EditProduct = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    const newValue = type === 'checkbox' ? checked : value;
+    
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [name]: newValue
+      };
+      return updated;
+    });
 
     if (name === 'discountPrice') {
       if (value && Number(value) > Number(formData.price)) {
@@ -233,9 +240,8 @@ const EditProduct = () => {
     if (name === 'category' && value !== formData.category) {
       setFormData(prev => ({ 
         ...prev, 
-        subcategory: '', 
-        // Preserve brand in details if it exists
-        details: prev.details?.brand ? { brand: prev.details.brand } : {} 
+        subcategory: ''
+        // Don't reset details - preserve all existing details when category changes
       }));
     }
   };
