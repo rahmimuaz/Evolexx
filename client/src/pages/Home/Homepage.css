@@ -562,6 +562,72 @@
   background: black;
   text-align: center;
   overflow: hidden;
+  position: relative;
+}
+
+/* ============ WHATSAPP CHAT BUTTON ============ */
+.whatsapp-chat-button {
+  position: absolute;
+  left: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.whatsapp-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: white;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.whatsapp-link:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.whatsapp-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s ease;
+}
+
+.whatsapp-link:hover .whatsapp-icon-wrapper {
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+  transform: scale(1.1);
+}
+
+.whatsapp-icon {
+  width: 32px;
+  height: 32px;
+  color: white;
+}
+
+.whatsapp-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.whatsapp-help-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: white;
+  margin: 0;
+  white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Scroll Animation Keyframes */
@@ -715,7 +781,7 @@
 /* Individual Carousel Card */
 .carousel-card {
   position: absolute;
-  width: 380px;
+  width: 330px;
   height: 380px;
   border-radius: 24px;
   overflow: hidden;
@@ -878,7 +944,7 @@
 }
 
 .carousel-price-row {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
@@ -1004,6 +1070,25 @@
     padding: 80px 1rem 110px;
   }
   
+  .whatsapp-chat-button {
+    left: 1rem;
+    top: 40%;
+  }
+  
+  .whatsapp-icon-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .whatsapp-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .whatsapp-help-text {
+    font-size: 0.8rem;
+  }
+  
   .carousel-container {
     height: 400px;
   }
@@ -1047,6 +1132,30 @@
 @media (max-width: 600px) {
   .new-arrivals-section {
     padding: 70px 1rem 100px;
+  }
+  
+  .whatsapp-chat-button {
+    left: 0.5rem;
+    top: 30%;
+    gap: 0.5rem;
+  }
+  
+  .whatsapp-link {
+    gap: 0.75rem;
+  }
+  
+  .whatsapp-icon-wrapper {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .whatsapp-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .whatsapp-help-text {
+    font-size: 0.75rem;
   }
   
   .carousel-container {
@@ -1201,7 +1310,7 @@
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 2rem 2rem;
+  gap: 2rem 2.3rem;
 
   transform: translateX(0);
   transition: transform 0.4s ease;
@@ -1651,6 +1760,25 @@
 }
 
 @media (max-width: 480px) {
+  .whatsapp-chat-button {
+    left: 0.25rem;
+    top: 25%;
+  }
+  
+  .whatsapp-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .whatsapp-icon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .whatsapp-help-text {
+    font-size: 0.7rem;
+  }
+  
   .product-section h2 {
     font-size: 1.9rem;
     
