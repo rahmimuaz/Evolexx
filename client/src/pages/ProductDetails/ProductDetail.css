@@ -402,16 +402,16 @@
 /* Policy Accordion */
 .pd-policy-accordion {
   margin-top: 30px;
-  padding-top: 30px;
+  padding-top: 10px;
   border-top: 1px solid #e0e0e0;
   display: flex;
+  
   flex-direction: column;
   gap: 12px;
 }
 
 .pd-accordion-item {
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border-bottom: 1px solid #e0e0e0;
   overflow: hidden;
   background: #fff;
   transition: box-shadow 0.2s ease;
@@ -984,8 +984,8 @@
   .pd-tabs,
   .pd-tab-content,
   .pd-related {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 0px;
+    padding-right: 0px;
   }
 
   /* Thumbnails - Horizontal scroll on mobile */

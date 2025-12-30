@@ -2,8 +2,8 @@ import React from 'react';
 import './WhatsAppButton.css';
 
 const WhatsAppButton = () => {
-  const whatsappNumber = process.env.REACT_APP_WHATSAPP_NUMBER || '94771234567';
-  const message = encodeURIComponent('Hi Xclusive.lk, I need help with your products.');
+  const whatsappNumber = process.env.REACT_APP_WHATSAPP_NUMBER || '94756031924';
+  const message = encodeURIComponent('Hi Evolexx.lk, I need help with your products.');
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
   return (
@@ -22,7 +22,7 @@ const WhatsAppButton = () => {
         </div>
         <div className="whatsapp-chat-bubble">
           <p className="whatsapp-bubble-text">
-            Need Help? <strong>Chat</strong>
+            Place order? <strong>Chat</strong>
           </p>
           <p className="whatsapp-bubble-text">with us</p>
         </div>

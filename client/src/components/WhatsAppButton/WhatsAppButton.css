@@ -127,9 +127,11 @@
 }
 
 @media (max-width: 480px) {
+  
   .whatsapp-chat-button-fixed {
     bottom: 15px;
     right: 15px;
+    margin-bottom: 30px;
   }
   
   .whatsapp-icon-wrapper-fixed {
