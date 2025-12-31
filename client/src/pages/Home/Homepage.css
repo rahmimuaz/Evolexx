@@ -235,8 +235,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 100px;
-  min-height: calc(100vh - 120px);
+  margin-top: 0;
+  min-height: 100vh;
 }
 
 .hero-text {
@@ -1581,7 +1581,8 @@
     gap: 2rem;
     text-align: center;
     padding: 0 1rem;
-    padding-top: 0; /* Remove extra top gap under navbar */
+    padding-top: 0; /* Use complete frame from top */
+    margin-top: 0;
   }
   .product-section h2 {
     font-size: 1.9rem;
@@ -1652,7 +1653,7 @@
   .hero-content {
     margin-top: 0;
     min-height: 100vh;
-    padding-top: 80px; /* Account for navbar */
+    padding-top: 0; /* Use complete frame from top */
   }
 }
 
@@ -1672,16 +1673,16 @@
   .hero-video-container,
   .hero-video,
   .hero-video-overlay {
-    min-height: 115vh;
-    height: 115vh;
+    min-height: 100vh;
+    height: 100vh;
     height: -webkit-fill-available;
     height: 100dvh; /* Dynamic viewport height for mobile */
   }
   
   .hero-content {
     margin-top: 0;
-    min-height: 115dvh; /* Dynamic viewport height for mobile */
-    padding-top: 60px; /* Smaller padding for very small screens */
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    padding-top: 0; /* Use complete frame from top */
   }
   
   .hero-text{
