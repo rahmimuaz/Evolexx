@@ -1049,7 +1049,7 @@
 
 @media (max-width: 600px) {
   .new-arrivals-section {
-    padding: 70px 1rem 100px;
+    padding: 80px 2rem 160px;
   }
   
   .carousel-container {
@@ -1057,6 +1057,7 @@
   }
   
   .carousel-card {
+    margin-bottom: -50px;
     width: 200px;
     height: 280px;
     border-radius: 18px;
@@ -1132,11 +1133,12 @@
   
   /* Center carousel nav buttons */
   .carousel-nav {
+    bottom: -80px;
     left: 38%;
   }
   
   .carousel-nav-btn {
-    margin-bottom: 40px;
+    margin-bottom: 0px;
     width: 34px;
     height: 34px;
     font-size: 1rem;
@@ -1916,8 +1918,8 @@
     
   }
   .banner {
-    height: 110vh;
-    max-height: 110vh;
+    height: 100vh;
+    max-height: 100vh;
   }
 
   .filter-sort-bar .filter-group {
