@@ -2,7 +2,7 @@
 
 /* --- Variables & Base --- */
 :root {
-  --mnav-height: 60px;
+  --mnav-height: 45px;
   --mnav-bg-light: #ffffff;
   --mnav-bg-dark: #1a1a1a;
   --mnav-text-light: #333333;
@@ -29,7 +29,7 @@
 .mnav-container {
   width: 100%;
   max-width: 1200px;
-  padding: 0 1rem;
+  padding: 0rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -304,7 +304,7 @@
   width: 100%;
   background-color: #f3f4f6;
   border-radius: 20px;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 1rem;
   position: relative;
 }
 
