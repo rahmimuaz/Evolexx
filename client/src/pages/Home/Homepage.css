@@ -1672,8 +1672,8 @@
   .hero-video-container,
   .hero-video,
   .hero-video-overlay {
-    min-height: 100vh;
-    height: 100vh;
+    min-height: 115vh;
+    height: 115vh;
     height: -webkit-fill-available;
     height: 100dvh; /* Dynamic viewport height for mobile */
   }
