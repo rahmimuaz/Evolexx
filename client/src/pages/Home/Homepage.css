@@ -1672,15 +1672,15 @@
   .hero-video-container,
   .hero-video,
   .hero-video-overlay {
-    min-height: 100vh;
-    height: 100vh;
+    min-height: 115vh;
+    height: 115vh;
     height: -webkit-fill-available;
     height: 100dvh; /* Dynamic viewport height for mobile */
   }
   
   .hero-content {
     margin-top: 0;
-    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    min-height: 115dvh; /* Dynamic viewport height for mobile */
     padding-top: 60px; /* Smaller padding for very small screens */
   }
   
@@ -1918,8 +1918,8 @@
     
   }
   .banner {
-    height: 100vh;
-    max-height: 100vh;
+    height: 115vh;
+    max-height: 115vh;
   }
 
   .filter-sort-bar .filter-group {
