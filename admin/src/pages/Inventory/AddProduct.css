@@ -2,6 +2,51 @@
    Modern Add Product Page - Professional UI
    ======================================== */
 
+/* Rich Text Editor Wrapper */
+.rich-text-editor-wrapper {
+  margin-top: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: white;
+}
+
+.rich-text-editor-wrapper .EasyMDEContainer {
+  border: none;
+}
+
+.rich-text-editor-wrapper .EasyMDEContainer .CodeMirror {
+  border: none;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  min-height: 300px;
+}
+
+.rich-text-editor-wrapper .EasyMDEContainer .editor-toolbar {
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 0.5rem;
+}
+
+.rich-text-editor-wrapper .EasyMDEContainer .editor-toolbar button {
+  color: #475569;
+  border: none;
+  background: transparent;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.rich-text-editor-wrapper .EasyMDEContainer .editor-toolbar button:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.rich-text-editor-wrapper .EasyMDEContainer .editor-toolbar button.active {
+  background: #3b82f6;
+  color: white;
+}
+
 /* Page Container */
 .modern-add-product-page {
   min-height: 100vh;

@@ -133,3 +133,14 @@
     font-size: 0.75rem;
   }
 }
+
+/* Product description truncation */
+.product-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  max-height: calc(1.5em * 2); /* 2 lines max */
+}

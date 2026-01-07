@@ -1286,14 +1286,16 @@
   font-size: 0.7rem;
   color: #a9afb9;
   align-items: center;
-  margin-bottom: 10px;
+  margin-top: 5px;
+  margin-bottom: 15px;
 }
 
 .card-footer .koko-logo {
   width: 17%;
   height: 20px;
-  margin-left: 80px;
+  margin-left: 100px;
   border-radius: 0px;
+  margin-bottom: 5px;
 }
 
 .star-rating {
@@ -1301,7 +1303,7 @@
   font-size: 1rem;
   margin: 5px 0;
   text-align: left;
-  margin-left: 10px;
+  margin-left: 15px;
 }
 
 .koko-pay {
@@ -1793,6 +1795,13 @@
     color: #4b5563;
     margin: 0;
     text-align: left !important; /* Force text alignment to left */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+    max-height: calc(1.5em * 2); /* 2 lines max */
   }
 
   .star-rating {

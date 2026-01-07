@@ -113,12 +113,47 @@
   justify-content: center;
   min-height: 540px;
   overflow: hidden;
+  position: relative;
+  cursor: zoom-in;
+  user-select: none;
 }
 
 .pd-main-image img {
   max-width: 100%;
   max-height: 540px;
   object-fit: cover;
+  transition: transform 0.3s ease-out;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Image zoom when clicked - scales the image based on cursor position */
+.pd-main-image.zoom-active {
+  cursor: zoom-out;
+}
+
+.pd-main-image.zoom-active img {
+  transform: scale(2.5);
+}
+
+/* Zoom overlay that shows magnified view */
+.pd-zoom-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.pd-main-image.zoom-active .pd-zoom-overlay {
+  opacity: 1;
 }
 
 .pd-no-image {
@@ -403,7 +438,6 @@
 .pd-policy-accordion {
   margin-top: 30px;
   padding-top: 10px;
-  border-top: 1px solid #e0e0e0;
   display: flex;
   
   flex-direction: column;
@@ -411,7 +445,7 @@
 }
 
 .pd-accordion-item {
-  border-bottom: 1px solid #e0e0e0;
+  border-top: 1px solid #e0e0e0;
   overflow: hidden;
   background: #fff;
   transition: box-shadow 0.2s ease;
@@ -426,7 +460,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 16px 0px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -467,7 +501,7 @@
 }
 
 .pd-accordion-content {
-  padding: 0 20px 16px 48px;
+  padding: 0 20px 16px 33px;
   color: #666;
   font-size: 0.9rem;
   line-height: 1.6;
@@ -540,9 +574,17 @@
 }
 
 .pd-description-content {
+  white-space: pre-wrap; /* Preserve line breaks and whitespace */
+  word-wrap: break-word; /* Break long words */
   max-width: 800px;
   line-height: 1.8;
   color: #555;
+}
+
+/* Override line-height for lists specifically */
+.pd-description-content ul,
+.pd-description-content ol {
+  line-height: 1.1 !important;
 }
 
 .pd-description-content h1,
@@ -550,16 +592,129 @@
 .pd-description-content h3 {
   color: #222;
   margin-top: 24px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
+}
+
+/* Reduce gap between headings and lists */
+.pd-description-content h1 + ul,
+.pd-description-content h1 + ol,
+.pd-description-content h2 + ul,
+.pd-description-content h2 + ol,
+.pd-description-content h3 + ul,
+.pd-description-content h3 + ol,
+.pd-description-content strong + ul,
+.pd-description-content strong + ol {
+  margin-top: 4px !important;
+}
+
+/* Also target when heading is inside a paragraph or strong tag */
+.pd-description-content p strong + br + ul,
+.pd-description-content p strong + br + ol {
+  margin-top: 4px !important;
 }
 
 .pd-description-content ul {
   padding-left: 24px;
   margin: 16px 0;
+  list-style-type: disc;
+}
+
+.pd-description-content ol {
+  padding-left: 24px;
+  margin: 16px 0;
+  list-style-type: decimal;
 }
 
 .pd-description-content li {
-  margin-bottom: 8px;
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: 1.1 !important;
+  display: list-item;
+  height: auto !important;
+  min-height: 0 !important;
+  list-style-position: outside;
+}
+
+/* Remove ALL spacing from paragraphs inside list items */
+.pd-description-content li p {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline !important;
+  line-height: 1.1 !important;
+  height: auto !important;
+  vertical-align: baseline !important;
+  font-size: inherit !important;
+}
+
+/* Remove any spacing between list items - use larger negative margin */
+.pd-description-content li + li {
+  margin-top: -1.8em !important;
+  padding-top: 0 !important;
+  margin-bottom: 0 !important;
+  line-height: 1.1 !important;
+}
+
+/* Target all direct children of list items */
+.pd-description-content li > * {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: inline !important;
+  vertical-align: baseline !important;
+  line-height: 1.1 !important;
+  font-size: inherit !important;
+}
+
+/* Ensure list items have no internal spacing */
+.pd-description-content li > *:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.pd-description-content li > *:last-child {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Remove any default browser spacing */
+.pd-description-content ul li,
+.pd-description-content ol li {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Force tight spacing on the ul/ol itself */
+.pd-description-content ul,
+.pd-description-content ol {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+  line-height: 1.1 !important;
+}
+
+.pd-description-content ul ul,
+.pd-description-content ol ol,
+.pd-description-content ul ol,
+.pd-description-content ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.pd-description-content p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.pd-description-content p:last-child {
+  margin-bottom: 0;
 }
 
 /* Specs Table */
@@ -772,6 +927,35 @@
 .pd-review-error {
   color: #c62828;
   font-size: 0.85rem;
+}
+
+.pd-checking-purchase {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.pd-purchase-required {
+  padding: 1.5rem;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.pd-purchase-message {
+  color: #856404;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.pd-purchase-hint {
+  color: #856404;
+  font-size: 0.85rem;
+  margin: 0;
 }
 
 .pd-login-notice {

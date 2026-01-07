@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import SimpleMDE from 'react-simplemde-editor';
+import 'easymde/dist/easymde.min.css';
 import './AddProduct.css';
 
 const AddProduct = () => {
@@ -140,17 +142,20 @@ const AddProduct = () => {
 
   // Brand options by category
   const brandOptions = {
-    'Mobile Phone': ['Apple', 'Samsung', 'Google', 'OnePlus', 'Xiaomi', 'Oppo', 'Vivo', 'Huawei', 'Nokia', 'Motorola'],
-    'Smartwatches': ['Apple', 'Samsung', 'Garmin', 'Fitbit', 'Amazfit', 'Huawei', 'Fossil', 'TicWatch'],
-    'Laptops': ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MSI', 'Razer', 'Microsoft'],
-    'Headphones': ['Sony', 'Bose', 'Apple', 'Samsung', 'JBL', 'Sennheiser', 'Audio-Technica', 'Beats', 'Skullcandy', 'Anker'],
-    'Earbuds': ['Apple', 'Samsung', 'Sony', 'JBL', 'Jabra', 'Beats', 'Anker', 'Xiaomi', 'OnePlus', 'Nothing'],
-    'Chargers': ['Anker', 'Belkin', 'Samsung', 'Apple', 'RAVPower', 'Aukey', 'Baseus', 'Ugreen'],
-    'Phone Covers': ['Spigen', 'OtterBox', 'Case-Mate', 'UAG', 'Ringke', 'ESR', 'Caseology'],
+    'Mobile Phone': ['Apple', 'Samsung', 'Google', 'OnePlus', 'Xiaomi', 'Oppo', 'Vivo', 'Huawei', 'Nokia', 'Motorola', 'Other'],
+    'Smartwatches': ['Apple', 'Samsung', 'Garmin', 'Fitbit', 'Amazfit', 'Huawei', 'Fossil', 'TicWatch', 'Other'],
+    'Laptops': ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MSI', 'Razer', 'Microsoft', 'Other'],
+    'Headphones': ['Sony', 'Bose', 'Apple', 'Samsung', 'JBL', 'Sennheiser', 'Audio-Technica', 'Beats', 'Skullcandy', 'Anker', 'Other'],
+    'Earbuds': ['Apple', 'Samsung', 'Sony', 'JBL', 'Jabra', 'Beats', 'Anker', 'Xiaomi', 'OnePlus', 'Nothing', 'Other'],
+    'Chargers': ['Anker', 'Belkin', 'Samsung', 'Apple', 'RAVPower', 'Aukey', 'Baseus', 'Ugreen', 'Other'],
+    'Phone Covers': ['Spigen', 'OtterBox', 'Case-Mate', 'UAG', 'Ringke', 'ESR', 'Caseology', 'Other'],
     'Screen Protectors': ['Spigen', 'ESR', 'ZAGG', 'amFilm', 'JETech', 'Belkin', 'Other'],
     'Cables': ['Anker', 'Belkin', 'Apple', 'Samsung', 'Baseus', 'Ugreen', 'Native Union', 'Other'],
     'Other Accessories': ['Anker', 'Belkin', 'Spigen', 'PopSockets', 'Other'],
-    'Preowned Phones': ['Apple', 'Samsung', 'Google', 'OnePlus', 'Xiaomi']
+    'Preowned Phones': ['Apple', 'Samsung', 'Google', 'OnePlus', 'Xiaomi', 'Other'],
+    'Tablets': ['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'Amazon', 'Huawei', 'Other'],
+    'Preowned Laptops': ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MSI', 'Other'],
+    'Preowned Tablets': ['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'Other']
   };
 
   const steps = [
@@ -513,22 +518,33 @@ const AddProduct = () => {
 
                   <div className="form-field-group">
                     <label className="modern-label">Long Description</label>
-                    <textarea
-                      name="longDescription"
-                      value={formData.longDescription}
-                      onChange={handleInputChange}
-                      rows="8"
-                      className="modern-textarea"
-                      placeholder="Enter a detailed description of the product..."
-                      style={{ 
-                        resize: 'vertical',
-                        minHeight: '150px',
-                        fontFamily: 'inherit',
-                        lineHeight: '1.5'
-                      }}
-                    />
+                    <div className="rich-text-editor-wrapper">
+                      <SimpleMDE
+                        value={formData.longDescription || ''}
+                        onChange={(value) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            longDescription: value
+                          }));
+                        }}
+                        options={{
+                          placeholder: 'Enter a detailed description of the product...',
+                          spellChecker: false,
+                          toolbar: [
+                            'bold', 'italic', 'heading', '|',
+                            'quote', 'unordered-list', 'ordered-list', '|',
+                            'link', 'image', '|',
+                            'preview', 'side-by-side', 'fullscreen', '|',
+                            'guide'
+                          ],
+                          minHeight: '300px',
+                          status: false,
+                          autofocus: false
+                        }}
+                      />
+                    </div>
                     <small style={{ display: 'block', marginTop: '0.5rem', color: '#64748b', fontSize: '0.8125rem' }}>
-                      You can type or paste detailed product information here
+                      Use the toolbar above to format your text. Supports markdown formatting.
                     </small>
                   </div>
                 </div>

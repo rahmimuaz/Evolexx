@@ -33,6 +33,9 @@ const ProductDetail = () => {
   const [wishlist, setWishlist] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [openAccordion, setOpenAccordion] = useState(null); // Track which accordion is open
+  const [imageZoom, setImageZoom] = useState({ x: 0, y: 0, show: false, active: false });
+  const [hasPurchasedProduct, setHasPurchasedProduct] = useState(false);
+  const [checkingPurchase, setCheckingPurchase] = useState(false);
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
@@ -80,6 +83,16 @@ const ProductDetail = () => {
     fetchProduct();
   }, [slug, id, API_BASE_URL]);
 
+  // Scroll to top when product changes (when navigating to a new product)
+  useEffect(() => {
+    if (product) {
+      // Small delay to ensure page has rendered
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    }
+  }, [slug, id, product]);
+
   useEffect(() => {
     if (product && product.images && product.images.length > 0 && !mainImage) {
       setMainImage(product.images[0]);
@@ -94,6 +107,52 @@ const ProductDetail = () => {
         .catch(() => setReviews([]));
     }
   }, [product, productId, API_BASE_URL]);
+
+  // Check if user has purchased this product
+  useEffect(() => {
+    const checkUserPurchase = async () => {
+      if (!user || !productId) {
+        setHasPurchasedProduct(false);
+        return;
+      }
+
+      setCheckingPurchase(true);
+      try {
+        // Fetch user's orders from both Order and ToBeShipped collections
+        const [ordersRes, shippedOrdersRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/api/orders/myorders`, {
+            headers: { Authorization: `Bearer ${user.token}` }
+          }).catch(() => ({ data: [] })),
+          axios.get(`${API_BASE_URL}/api/tobeshipped/myorders`, {
+            headers: { Authorization: `Bearer ${user.token}` }
+          }).catch(() => ({ data: [] }))
+        ]);
+
+        const allOrders = [...ordersRes.data, ...shippedOrdersRes.data];
+        
+        // Check if any order contains this product
+        const hasPurchased = allOrders.some(order => {
+          if (order.orderItems && Array.isArray(order.orderItems)) {
+            return order.orderItems.some(item => {
+              // Handle both populated and non-populated product references
+              const itemProductId = item.product?._id || item.product;
+              return itemProductId && itemProductId.toString() === productId.toString();
+            });
+          }
+          return false;
+        });
+
+        setHasPurchasedProduct(hasPurchased);
+      } catch (error) {
+        console.error('Error checking purchase status:', error);
+        setHasPurchasedProduct(false);
+      } finally {
+        setCheckingPurchase(false);
+      }
+    };
+
+    checkUserPurchase();
+  }, [user, productId, API_BASE_URL]);
 
   useEffect(() => {
     if (product && Array.isArray(product.details?.color) && product.details.color.length > 0) {
@@ -151,6 +210,13 @@ const ProductDetail = () => {
       setLoginModalOpen(true);
       return;
     }
+    
+    // Check if user has purchased the product
+    if (!hasPurchasedProduct) {
+      setReviewError('You can only review products you have purchased.');
+      return;
+    }
+    
     setReviewSubmitting(true);
     setReviewError(null);
     try {
@@ -217,9 +283,50 @@ const ProductDetail = () => {
             </div>
 
         {/* Main Image */}
-        <div className="pd-main-image">
+        <div 
+          className={`pd-main-image ${imageZoom.active ? 'zoom-active' : ''}`}
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            setImageZoom({ x, y, show: true, active: !imageZoom.active });
+          }}
+          onMouseMove={(e) => {
+            if (imageZoom.active) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = ((e.clientX - rect.left) / rect.width) * 100;
+              const y = ((e.clientY - rect.top) / rect.height) * 100;
+              setImageZoom(prev => ({ ...prev, x, y, show: true }));
+            }
+          }}
+          onMouseLeave={() => {
+            if (!imageZoom.active) {
+              setImageZoom({ x: 0, y: 0, show: false, active: false });
+            }
+          }}
+        >
           {currentMainImageUrl ? (
-            <img src={currentMainImageUrl} alt={product.name} onError={(e) => (e.target.src = '/logo192.png')} />
+            <>
+              <img 
+                src={currentMainImageUrl} 
+                alt={product.name} 
+                onError={(e) => (e.target.src = '/logo192.png')}
+                style={{
+                  transform: imageZoom.active ? `scale(2.5)` : 'scale(1)',
+                  transformOrigin: `${imageZoom.x}% ${imageZoom.y}%`,
+                }}
+              />
+              {imageZoom.active && imageZoom.show && (
+                <div 
+                  className="pd-zoom-overlay"
+                  style={{
+                    backgroundImage: `url(${currentMainImageUrl})`,
+                    backgroundPosition: `${imageZoom.x}% ${imageZoom.y}%`,
+                    backgroundSize: '250%',
+                  }}
+                />
+              )}
+            </>
           ) : (
             <div className="pd-no-image">No Image Available</div>
           )}
@@ -390,9 +497,88 @@ const ProductDetail = () => {
       <div className="pd-tab-content">
         {activeTab === 'DESCRIPTION' && (
           <div className="pd-description-content">
-            {product.longDescription ? (
-              <ReactMarkdown>{product.longDescription}</ReactMarkdown>
-            ) : (
+            {product.longDescription ? (() => {
+              // Process markdown to remove blank lines between list items
+              const processedMarkdown = product.longDescription
+                .split('\n')
+                .reduce((acc, line, index, array) => {
+                  const prevLine = array[index - 1];
+                  const nextLine = array[index + 1];
+                  // Match list items: - * + or numbered lists
+                  const isListItem = /^[\s]*[-*+]\s/.test(line) || /^[\s]*\d+\.\s/.test(line);
+                  const prevIsListItem = prevLine && (/^[\s]*[-*+]\s/.test(prevLine) || /^[\s]*\d+\.\s/.test(prevLine));
+                  const nextIsListItem = nextLine && (/^[\s]*[-*+]\s/.test(nextLine) || /^[\s]*\d+\.\s/.test(nextLine));
+                  
+                  // If current line is blank and it's between list items, skip it
+                  if (line.trim() === '' && (prevIsListItem && nextIsListItem)) {
+                    return acc;
+                  }
+                  
+                  // If current line is blank and previous is a list item, skip it
+                  if (line.trim() === '' && prevIsListItem) {
+                    return acc;
+                  }
+                  
+                  acc.push(line);
+                  return acc;
+                }, [])
+                .join('\n');
+              
+              return (
+                <ReactMarkdown 
+                  components={{
+                    p: ({node, ...props}) => {
+                      // Check if paragraph is inside a list item
+                      const isInList = node?.parent?.tagName === 'li';
+                      if (isInList) {
+                        // For paragraphs inside list items, render as span to avoid any block-level spacing
+                        return <span style={{display: 'inline'}} {...props} />;
+                      }
+                      return <p style={{
+                        marginBottom: '1em', 
+                        marginTop: '0'
+                      }} {...props} />;
+                    },
+                    h1: ({node, ...props}) => <h1 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props} />,
+                    h2: ({node, ...props}) => <h2 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props} />,
+                    h3: ({node, ...props}) => <h3 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props} />,
+                    ul: ({node, ...props}) => {
+                      // Check if this list follows a heading
+                      const prevSibling = node?.previousSibling;
+                      const isAfterHeading = prevSibling && (prevSibling.tagName === 'h1' || prevSibling.tagName === 'h2' || prevSibling.tagName === 'h3' || prevSibling.tagName === 'strong');
+                      return <ul style={{
+                        marginTop: isAfterHeading ? '4px' : '0.5em', 
+                        marginBottom: '0.5em', 
+                        paddingLeft: '1.5em'
+                      }} {...props} />;
+                    },
+                    ol: ({node, ...props}) => {
+                      // Check if this list follows a heading
+                      const prevSibling = node?.previousSibling;
+                      const isAfterHeading = prevSibling && (prevSibling.tagName === 'h1' || prevSibling.tagName === 'h2' || prevSibling.tagName === 'h3' || prevSibling.tagName === 'strong');
+                      return <ol style={{
+                        marginTop: isAfterHeading ? '4px' : '0.5em', 
+                        marginBottom: '0.5em', 
+                        paddingLeft: '1.5em'
+                      }} {...props} />;
+                    },
+                    li: ({node, ...props}) => <li style={{
+                      margin: '0',
+                      padding: '0',
+                      marginTop: '0', 
+                      marginBottom: '0',
+                      paddingTop: '0',
+                      paddingBottom: '0',
+                      lineHeight: '1.1'
+                    }} {...props} />,
+                    strong: ({node, ...props}) => <strong style={{fontWeight: '600'}} {...props} />,
+                    em: ({node, ...props}) => <em style={{fontStyle: 'italic'}} {...props} />,
+                  }}
+                >
+                  {processedMarkdown}
+                </ReactMarkdown>
+              );
+            })() : (
               <p>{product.description}</p>
             )}
           </div>
@@ -403,12 +589,30 @@ const ProductDetail = () => {
             {product.details ? (
               <table className="pd-specs-table">
                 <tbody>
-                {Object.entries(product.details).map(([key, value]) => (
+                {Object.entries(product.details).map(([key, value]) => {
+                  // Format the value for display
+                  let displayValue = value;
+                  
+                  // Handle boolean values (toggle fields) - show "Yes" or "No"
+                  if (typeof value === 'boolean') {
+                    displayValue = value ? 'Yes' : 'No';
+                  }
+                  // Handle arrays
+                  else if (Array.isArray(value)) {
+                    displayValue = value.join(', ');
+                  }
+                  // Handle string values
+                  else {
+                    displayValue = value;
+                  }
+                  
+                  return (
                     <tr key={key}>
-                      <td className="pd-spec-key">{key.charAt(0).toUpperCase() + key.slice(1)}</td>
-                      <td className="pd-spec-value">{Array.isArray(value) ? value.join(', ') : value}</td>
+                      <td className="pd-spec-key">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim()}</td>
+                      <td className="pd-spec-value">{displayValue}</td>
                     </tr>
-                ))}
+                  );
+                })}
                   <tr>
                     <td className="pd-spec-key">Warranty</td>
                     <td className="pd-spec-value">{product.warrantyPeriod || 'No Warranty'}</td>
@@ -467,38 +671,52 @@ const ProductDetail = () => {
               {/* Write Review Form */}
               <div className="pd-write-review">
                 <h3>WRITE YOUR REVIEW</h3>
-                <form onSubmit={handleReviewSubmit}>
-                  <div className="pd-form-group">
-                    <label>Your Rating*</label>
-                    <div className="pd-rating-select">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <button
-                          key={star}
-                          type="button"
-                          className={reviewRating >= star ? 'active' : ''}
-                          onClick={() => setReviewRating(star)}
-                        >
-                          {reviewRating >= star ? <FaStar /> : <FaRegStar />}
-                        </button>
-                    ))}
-                    </div>
-                </div>
-                  <div className="pd-form-group">
-                    <label>Write your review*</label>
-                <textarea
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                      placeholder="Share your experience with this product..."
-                  required
-                      rows={4}
-                />
+                {!user ? (
+                  <p className="pd-login-notice">Please log in to submit a review.</p>
+                ) : checkingPurchase ? (
+                  <p className="pd-checking-purchase">Checking purchase status...</p>
+                ) : !hasPurchasedProduct ? (
+                  <div className="pd-purchase-required">
+                    <p className="pd-purchase-message">
+                      You must purchase this product before you can write a review.
+                    </p>
+                    <p className="pd-purchase-hint">
+                      Only customers who have purchased this product can submit reviews.
+                    </p>
                   </div>
-                  <button type="submit" className="pd-submit-review" disabled={reviewSubmitting}>
-                    {reviewSubmitting ? 'SUBMITTING...' : 'SUBMIT REVIEW'}
-                </button>
-                  {reviewError && <p className="pd-review-error">{reviewError}</p>}
-                  {!user && <p className="pd-login-notice">Please log in to submit a review.</p>}
-              </form>
+                ) : (
+                  <form onSubmit={handleReviewSubmit}>
+                    <div className="pd-form-group">
+                      <label>Your Rating*</label>
+                      <div className="pd-rating-select">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <button
+                            key={star}
+                            type="button"
+                            className={reviewRating >= star ? 'active' : ''}
+                            onClick={() => setReviewRating(star)}
+                          >
+                            {reviewRating >= star ? <FaStar /> : <FaRegStar />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="pd-form-group">
+                      <label>Write your review*</label>
+                      <textarea
+                        value={reviewComment}
+                        onChange={(e) => setReviewComment(e.target.value)}
+                        placeholder="Share your experience with this product..."
+                        required
+                        rows={4}
+                      />
+                    </div>
+                    <button type="submit" className="pd-submit-review" disabled={reviewSubmitting}>
+                      {reviewSubmitting ? 'SUBMITTING...' : 'SUBMIT REVIEW'}
+                    </button>
+                    {reviewError && <p className="pd-review-error">{reviewError}</p>}
+                  </form>
+                )}
               </div>
             </div>
           </div>
@@ -511,7 +729,15 @@ const ProductDetail = () => {
           <h2 className="pd-related-title">RELATED PRODUCTS</h2>
           <div className="pd-related-grid">
             {relatedProducts.map(rp => (
-              <Link to={`/product/${rp.slug || rp._id}`} key={rp._id} className="pd-related-card">
+              <Link 
+                to={`/product/${rp.slug || rp._id}`} 
+                key={rp._id} 
+                className="pd-related-card"
+                onClick={() => {
+                  // Scroll to top immediately when clicking related product
+                  window.scrollTo({ top: 0, behavior: 'auto' });
+                }}
+              >
                 <div className="pd-related-img">
                   <img src={cleanImagePath(rp.images?.[0])} alt={rp.name} onError={(e) => (e.target.src = '/logo192.png')} />
           </div>

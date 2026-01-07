@@ -377,6 +377,32 @@ export const addReview = async (req, res) => {
       return res.status(404).json({ message: 'Product not found.' });
     }
 
+    // Check if the user has purchased this product
+    const { default: Order } = await import('../models/Order.js');
+    const { default: ToBeShipped } = await import('../models/ToBeShipped.js');
+    
+    const [userOrders, userShippedOrders] = await Promise.all([
+      Order.find({ user: req.user._id }).populate('orderItems.product'),
+      ToBeShipped.find({ user: req.user._id }).populate('orderItems.product')
+    ]);
+
+    const allOrders = [...userOrders, ...userShippedOrders];
+    
+    // Check if any order contains this product
+    const hasPurchased = allOrders.some(order => {
+      if (order.orderItems && Array.isArray(order.orderItems)) {
+        return order.orderItems.some(item => {
+          const itemProductId = item.product?._id || item.product;
+          return itemProductId && itemProductId.toString() === productId.toString();
+        });
+      }
+      return false;
+    });
+
+    if (!hasPurchased) {
+      return res.status(403).json({ message: 'You can only review products you have purchased.' });
+    }
+
     // Check if the user has already reviewed this product
     const alreadyReviewed = product.reviews.find(
       (r) => r.user && r.user.toString() === req.user._id.toString()

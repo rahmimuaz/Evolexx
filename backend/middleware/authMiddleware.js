@@ -44,6 +44,10 @@ export const protect = asyncHandler(async (req, res, next) => {
     } catch (error) {
       console.error('Token verification error:', error);
       res.status(401);
+      // Check if token is expired
+      if (error.name === 'TokenExpiredError') {
+        throw new Error('Your session has expired. Please log in again.');
+      }
       throw new Error('Not authorized, token failed');
     }
   }
@@ -86,6 +90,10 @@ export const adminProtect = asyncHandler(async (req, res, next) => {
     } catch (error) {
       console.error('Admin token verification error:', error);
       res.status(401);
+      // Check if token is expired
+      if (error.name === 'TokenExpiredError') {
+        throw new Error('Your session has expired. Please log in again.');
+      }
       throw new Error('Not authorized, token failed');
     }
   }
