@@ -501,10 +501,10 @@
 }
 
 .pd-accordion-content {
-  padding: 0 20px 16px 33px;
+  padding: 0 20px 16px 29px;
   color: #666;
   font-size: 0.9rem;
-  line-height: 1.6;
+  line-height: 1.7;
   animation: slideDown 0.3s ease;
   max-height: 500px;
   overflow: hidden;
