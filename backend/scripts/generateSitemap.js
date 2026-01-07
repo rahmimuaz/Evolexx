@@ -39,14 +39,15 @@ const generateSitemap = async () => {
     const baseUrl = process.env.CLIENT_BASE_URL || 'https://www.evolexx.lk';
     
     // Get all products that have slugs (active products)
+    // Sort by displayOrder first (if set), then by isNewArrival, then by updatedAt
     const products = await Product.find({ slug: { $exists: true, $ne: null, $ne: '' } })
-      .select('slug updatedAt')
-      .sort({ updatedAt: -1 })
+      .select('slug updatedAt displayOrder isNewArrival')
+      .sort({ displayOrder: 1, isNewArrival: -1, updatedAt: -1 })
       .limit(500);
     
     console.log(`Found ${products.length} products with slugs`);
     
-    // Get current date for lastmod
+    // Get current date for lastmod (use today's date to force Google to re-crawl)
     const currentDate = new Date().toISOString().split('T')[0];
     
     // Build sitemap XML
@@ -62,17 +63,25 @@ const generateSitemap = async () => {
     sitemap += `  </url>\n`;
 
     // Add product URLs
-    products.forEach(product => {
+    // Prioritize first 6 products (most likely to appear as sitelinks)
+    products.forEach((product, index) => {
       if (product.slug) {
-        const lastmod = product.updatedAt 
-          ? new Date(product.updatedAt).toISOString().split('T')[0]
-          : currentDate;
+        // Use current date to force Google to see this as fresh content
+        const lastmod = currentDate;
         const productUrl = `${baseUrl}/product/${escapeXml(product.slug)}`;
+        
+        // Give higher priority to first few products (more likely to be sitelinks)
+        // Also prioritize new arrivals
+        let priority = '0.7';
+        if (index < 6 || product.isNewArrival) {
+          priority = '0.9'; // Higher priority for top products and new arrivals
+        }
+        
         sitemap += `  <url>\n`;
         sitemap += `    <loc>${productUrl}</loc>\n`;
         sitemap += `    <lastmod>${lastmod}</lastmod>\n`;
         sitemap += `    <changefreq>weekly</changefreq>\n`;
-        sitemap += `    <priority>0.7</priority>\n`;
+        sitemap += `    <priority>${priority}</priority>\n`;
         sitemap += `  </url>\n`;
       }
     });
