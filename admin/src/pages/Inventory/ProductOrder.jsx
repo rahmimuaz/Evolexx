@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBox } from '@fortawesome/free-solid-svg-icons';
 
 const ProductOrder = () => {
   const [products, setProducts] = useState([]);
@@ -104,7 +106,12 @@ const ProductOrder = () => {
             className="btn btn-primary"
             style={{ background: '#22c55e', border: 'none' }}
           >
-            {saving ? 'Saving...' : 'Save Order'}
+            {saving ? (
+              <>
+                <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
+                Saving...
+              </>
+            ) : 'Save Order'}
           </button>
         </div>
       </div>
@@ -186,7 +193,7 @@ const ProductOrder = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
-                }}>📦</div>
+                }}><FontAwesomeIcon icon={faBox} /></div>
               )}
               
               <div>

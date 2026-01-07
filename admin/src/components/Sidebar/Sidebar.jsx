@@ -2,6 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faChartBar, 
+  faBox, 
+  faPlus, 
+  faExclamationTriangle, 
+  faTimesCircle, 
+  faStar, 
+  faClipboardList,
+  faShoppingCart, 
+  faTruck, 
+  faUsers, 
+  faUser, 
+  faSignOutAlt, 
+  faBell,
+  faChevronLeft,
+  faChevronRight,
+  faTimes
+} from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
 
 const Sidebar = ({ children }) => {
@@ -103,7 +122,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Dashboard"
           >
-            <span className="sidebar-icon">📊</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faChartBar} /></span>
             {isSidebarOpen && <span className="sidebar-text">Dashboard</span>}
           </NavLink>
 
@@ -117,7 +136,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Products"
           >
-            <span className="sidebar-icon">📦</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faBox} /></span>
             {isSidebarOpen && <span className="sidebar-text">Products</span>}
           </NavLink>
 
@@ -126,7 +145,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Add Product"
           >
-            <span className="sidebar-icon">➕</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faPlus} /></span>
             {isSidebarOpen && <span className="sidebar-text">Add Product</span>}
           </NavLink>
 
@@ -135,7 +154,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Low Stock"
           >
-            <span className="sidebar-icon">⚠️</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faExclamationTriangle} /></span>
             {isSidebarOpen && <span className="sidebar-text">Low Stock</span>}
           </NavLink>
 
@@ -144,7 +163,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Out of Stock"
           >
-            <span className="sidebar-icon">❌</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faTimesCircle} /></span>
             {isSidebarOpen && <span className="sidebar-text">Out of Stock</span>}
           </NavLink>
 
@@ -153,7 +172,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="New Arrivals"
           >
-            <span className="sidebar-icon">✨</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faStar} /></span>
             {isSidebarOpen && <span className="sidebar-text">New Arrivals</span>}
           </NavLink>
 
@@ -162,7 +181,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Product Order"
           >
-            <span className="sidebar-icon">📋</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faClipboardList} /></span>
             {isSidebarOpen && <span className="sidebar-text">Product Order</span>}
           </NavLink>
 
@@ -176,7 +195,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Orders"
           >
-            <span className="sidebar-icon">🛒</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faShoppingCart} /></span>
             {isSidebarOpen && <span className="sidebar-text">Orders</span>}
           </NavLink>
 
@@ -185,7 +204,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Shipments"
           >
-            <span className="sidebar-icon">🚚</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faTruck} /></span>
             {isSidebarOpen && <span className="sidebar-text">Shipments</span>}
           </NavLink>
 
@@ -199,7 +218,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Customers"
           >
-            <span className="sidebar-icon">👥</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faUsers} /></span>
             {isSidebarOpen && <span className="sidebar-text">Customers</span>}
           </NavLink>
 
@@ -208,7 +227,7 @@ const Sidebar = ({ children }) => {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             title="Register Admin"
           >
-            <span className="sidebar-icon">👤</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faUser} /></span>
             {isSidebarOpen && <span className="sidebar-text">Register Admin</span>}
           </NavLink>
         </nav>
@@ -216,7 +235,7 @@ const Sidebar = ({ children }) => {
         {/* Bottom Section */}
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="sidebar-link logout-link" title="Sign Out">
-            <span className="sidebar-icon">🚪</span>
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faSignOutAlt} /></span>
             {isSidebarOpen && <span className="sidebar-text">Sign Out</span>}
           </button>
         </div>
@@ -227,14 +246,14 @@ const Sidebar = ({ children }) => {
         {/* Top Bar */}
         <header className="admin-topbar">
           <button onClick={toggleSidebar} className="sidebar-toggle-btn" title="Toggle Sidebar">
-            {isSidebarOpen ? '◀' : '▶'}
+            <FontAwesomeIcon icon={isSidebarOpen ? faChevronLeft : faChevronRight} />
           </button>
 
           <div className="topbar-right">
             {/* Notifications */}
             <div className="notifications-container">
               <button onClick={toggleNotifications} className="notification-btn" title="Notifications">
-                <span className="notification-icon">🔔</span>
+                <span className="notification-icon"><FontAwesomeIcon icon={faBell} /></span>
                 {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
               </button>
 
@@ -242,7 +261,9 @@ const Sidebar = ({ children }) => {
                 <div className="notification-dropdown">
                   <div className="notification-header">
                     <h4>Notifications</h4>
-                    <button onClick={() => setShowNotifications(false)} className="close-btn">×</button>
+                    <button onClick={() => setShowNotifications(false)} className="close-btn">
+                      <FontAwesomeIcon icon={faTimes} />
+                    </button>
                   </div>
                   <div className="notification-body">
                     {alerts.length === 0 ? (
@@ -267,7 +288,7 @@ const Sidebar = ({ children }) => {
 
             {/* User Info */}
             <div className="user-info">
-              <span className="user-icon">👤</span>
+              <span className="user-icon"><FontAwesomeIcon icon={faUser} /></span>
               <span className="user-name">Admin</span>
             </div>
           </div>

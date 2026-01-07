@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -73,7 +75,7 @@ const UserList = () => {
     <div>
       {/* Page Header */}
       <div className="mb-5">
-        <h1 className="page-title">👥 Customer Management</h1>
+        <h1 className="page-title"><FontAwesomeIcon icon={faUsers} /> Customer Management</h1>
         <p className="page-subtitle">View and manage all registered users</p>
       </div>
 
@@ -82,7 +84,7 @@ const UserList = () => {
         <div className="stat-card">
           <div className="stat-card-header">
             <div className="stat-card-title">Total Customers</div>
-            <div className="stat-card-icon">👥</div>
+            <div className="stat-card-icon"><FontAwesomeIcon icon={faUsers} /></div>
           </div>
           <div className="stat-card-value">{users.length}</div>
         </div>
@@ -139,7 +141,7 @@ const UserList = () => {
               <tr>
                 <td colSpan="5">
                   <div className="empty-state">
-                    <div className="empty-state-icon">👥</div>
+                    <div className="empty-state-icon"><FontAwesomeIcon icon={faUsers} /></div>
                     <div className="empty-state-title">No users found</div>
                     <div className="empty-state-text">
                       {searchTerm ? 'Try adjusting your search' : 'No registered users yet'}

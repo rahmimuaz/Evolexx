@@ -21,6 +21,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import toBeShippedRoutes from './routes/toBeShippedRoutes.js'; // <--- NEW: Import the ToBeShipped routes
+import { generateSitemap } from './controllers/sitemapController.js';
 
 
 dotenv.config();
@@ -51,6 +52,9 @@ mongoose.connect(process.env.MONGODB_URI)
     console.error('❌ MongoDB connection error:', err);
     process.exit(1);
   });
+
+// Sitemap route (before other routes for better SEO)
+app.get('/sitemap.xml', generateSitemap);
 
 // Use routers for modular routes
 app.use('/api/products', productRoutes);

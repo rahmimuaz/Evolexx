@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import SimpleMDE from 'react-simplemde-editor';
 import 'easymde/dist/easymde.min.css';
 import './AddProduct.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClipboardList, faCog, faDollarSign, faImage, faCheck, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -159,11 +161,11 @@ const AddProduct = () => {
   };
 
   const steps = [
-    { id: 1, name: 'Product Information', icon: '📋' },
-    { id: 2, name: 'Specifications', icon: '⚙️' },
-    { id: 3, name: 'Pricing & Stock', icon: '💰' },
-    { id: 4, name: 'Media & Images', icon: '🖼️' },
-    { id: 5, name: 'Review & Publish', icon: '✓' }
+    { id: 1, name: 'Product Information', icon: faClipboardList },
+    { id: 2, name: 'Specifications', icon: faCog },
+    { id: 3, name: 'Pricing & Stock', icon: faDollarSign },
+    { id: 4, name: 'Media & Images', icon: faImage },
+    { id: 5, name: 'Review & Publish', icon: faCheck }
   ];
 
   // Reset subcategory when category changes
@@ -382,7 +384,7 @@ const AddProduct = () => {
                 onClick={() => setCurrentStep(step.id)}
               >
                 <div className="progress-circle">
-                  {currentStep > step.id ? '✓' : step.id}
+                  {currentStep > step.id ? <FontAwesomeIcon icon={faCheck} /> : step.id}
                 </div>
                 <div className="progress-label">
                   <span className="progress-step-name">{step.name}</span>
@@ -869,7 +871,7 @@ const AddProduct = () => {
 
                   {!formData.name || !formData.category || !formData.price || !formData.stock ? (
                     <div className="warning-box">
-                      ⚠️ Please complete all required fields before publishing
+                      <FontAwesomeIcon icon={faExclamationTriangle} /> Please complete all required fields before publishing
                     </div>
                   ) : null}
                 </div>
@@ -890,14 +892,24 @@ const AddProduct = () => {
                 className="btn-secondary"
                 disabled={loading}
               >
-                Save as Draft
+                {loading ? (
+                  <>
+                    <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
+                    Saving...
+                  </>
+                ) : 'Save as Draft'}
               </button>
               <button
                 type="submit"
                 className="btn-primary"
                 disabled={loading || !formData.name || !formData.category || !formData.price || !formData.stock}
               >
-                {loading ? 'Publishing...' : 'Publish Product'}
+                {loading ? (
+                  <>
+                    <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
+                    Publishing...
+                  </>
+                ) : 'Publish Product'}
               </button>
             </div>
           </form>

@@ -86,6 +86,50 @@ const Homepage = () => {
     fetchProducts();
   }, []);
 
+  // Add structured data for homepage (Organization schema)
+  useEffect(() => {
+    const baseUrl = window.location.origin;
+    
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Evolexx",
+      "url": baseUrl,
+      "logo": `${baseUrl}/logo192.png`,
+      "description": "Premium Mobile Devices, Accessories, and Electronics in Sri Lanka. Shop the latest smartphones, laptops, headphones, and more with Koko Pay installment options.",
+      "sameAs": [
+        "https://www.instagram.com/exos_mauritius"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+94-75-603-1924",
+        "contactType": "Customer Service",
+        "email": "evolexxlk@gmail.com"
+      }
+    };
+
+    // Remove existing structured data script if any
+    const existingScript = document.getElementById('homepage-structured-data');
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    // Add new structured data script
+    const script = document.createElement('script');
+    script.id = 'homepage-structured-data';
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(structuredData);
+    document.head.appendChild(script);
+
+    // Cleanup on unmount
+    return () => {
+      const scriptToRemove = document.getElementById('homepage-structured-data');
+      if (scriptToRemove) {
+        scriptToRemove.remove();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (products.length > 0) {
       // Use discountPrice if available, otherwise use regular price for price range

@@ -40,6 +40,7 @@ const EditProduct = () => {
   const [previewUrls, setPreviewUrls] = useState([]);
   const [imageKeys, setImageKeys] = useState([]); // Track unique keys for each image
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [discountError, setDiscountError] = useState('');
 
@@ -413,6 +414,7 @@ const EditProduct = () => {
       return;
     }
 
+    setSubmitting(true);
     try {
       // Merge custom specs into details
       const customSpecsObj = {};
@@ -471,13 +473,15 @@ const EditProduct = () => {
       console.error('Update failed:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Error updating product. Please try again.';
       alert(errorMessage);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="spinner" />
+        <div className="loading-spinner"></div>
         <p className="loading-text">Loading product...</p>
       </div>
     );
@@ -897,8 +901,14 @@ const EditProduct = () => {
             <button
               type="submit"
               className="btn-primary"
+              disabled={submitting}
             >
-              Update Product
+              {submitting ? (
+                <>
+                  <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
+                  Updating...
+                </>
+              ) : 'Update Product'}
             </button>
           </div>
         </form>

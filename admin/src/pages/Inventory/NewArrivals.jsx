@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar } from '@fortawesome/free-solid-svg-icons';
 
 const NewArrivals = () => {
   const [allProducts, setAllProducts] = useState([]);
@@ -172,7 +174,12 @@ const NewArrivals = () => {
               className="btn btn-primary"
               style={{ background: '#22c55e', border: 'none' }}
             >
-              {saving ? 'Saving...' : 'Save Order'}
+              {saving ? (
+                <>
+                  <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
+                  Saving...
+                </>
+              ) : 'Save Order'}
             </button>
           )}
           {/* Show warning if toggle endpoint is not available on server */}
@@ -203,7 +210,7 @@ const NewArrivals = () => {
           }}>
             {newArrivals.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</div>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}><FontAwesomeIcon icon={faStar} /></div>
                 <p>No new arrivals yet</p>
                 <p style={{ fontSize: '0.875rem' }}>Add products from the right panel</p>
               </div>

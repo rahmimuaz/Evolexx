@@ -2,6 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Filler } from 'chart.js';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faBox, 
+  faShoppingCart, 
+  faClock, 
+  faExclamationTriangle, 
+  faCheckCircle, 
+  faChartBar, 
+  faSync,
+  faCheck
+} from '@fortawesome/free-solid-svg-icons';
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Filler);
 
@@ -96,7 +107,7 @@ const AdminDashboard = () => {
         <div className="stat-card" onClick={() => navigate('/Products')} style={{ cursor: 'pointer' }}>
           <div className="stat-card-header">
             <div className="stat-card-title">Total Products</div>
-            <div className="stat-card-icon">📦</div>
+            <div className="stat-card-icon"><FontAwesomeIcon icon={faBox} /></div>
           </div>
           <div className="stat-card-value">{dashboardStats.totalProducts}</div>
           <div className="stat-card-change positive">→ View all products</div>
@@ -105,7 +116,7 @@ const AdminDashboard = () => {
         <div className="stat-card" onClick={() => navigate('/OrderList')} style={{ cursor: 'pointer' }}>
           <div className="stat-card-header">
             <div className="stat-card-title">Total Orders</div>
-            <div className="stat-card-icon">🛒</div>
+            <div className="stat-card-icon"><FontAwesomeIcon icon={faShoppingCart} /></div>
           </div>
           <div className="stat-card-value">{dashboardStats.totalOrders}</div>
           <div className="stat-card-change positive">→ View all orders</div>
@@ -114,16 +125,16 @@ const AdminDashboard = () => {
         <div className="stat-card" onClick={() => navigate('/OrderList')} style={{ cursor: 'pointer' }}>
           <div className="stat-card-header">
             <div className="stat-card-title">Pending Orders</div>
-            <div className="stat-card-icon">⏳</div>
+            <div className="stat-card-icon"><FontAwesomeIcon icon={faClock} /></div>
           </div>
           <div className="stat-card-value">{dashboardStats.pendingOrders}</div>
-          <div className="stat-card-change">⚠ Needs attention</div>
+          <div className="stat-card-change"><FontAwesomeIcon icon={faExclamationTriangle} /> Needs attention</div>
         </div>
 
         <div className="stat-card" onClick={() => navigate('/admin/low-stock')} style={{ cursor: 'pointer' }}>
           <div className="stat-card-header">
             <div className="stat-card-title">Low Stock</div>
-            <div className="stat-card-icon">⚠️</div>
+            <div className="stat-card-icon"><FontAwesomeIcon icon={faExclamationTriangle} /></div>
           </div>
           <div className="stat-card-value">{dashboardStats.lowStockProducts}</div>
           <div className="stat-card-change">→ View products</div>
@@ -132,10 +143,10 @@ const AdminDashboard = () => {
         <div className="stat-card">
           <div className="stat-card-header">
             <div className="stat-card-title">Completed</div>
-            <div className="stat-card-icon">✅</div>
+            <div className="stat-card-icon"><FontAwesomeIcon icon={faCheckCircle} /></div>
           </div>
           <div className="stat-card-value">{dashboardStats.completedOrders}</div>
-          <div className="stat-card-change positive">✓ Delivered orders</div>
+          <div className="stat-card-change positive"><FontAwesomeIcon icon={faCheck} /> Delivered orders</div>
         </div>
       </div>
 
@@ -144,13 +155,13 @@ const AdminDashboard = () => {
         <div className="admin-card-header">
           <h2 className="admin-card-title">Orders Overview (Last 7 Days)</h2>
           <button onClick={fetchDashboardData} className="btn btn-sm btn-secondary">
-            🔄 Refresh
+            <FontAwesomeIcon icon={faSync} /> Refresh
           </button>
         </div>
         <div className="admin-card-body">
           {orderStats.labels.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">📊</div>
+              <div className="empty-state-icon"><FontAwesomeIcon icon={faChartBar} /></div>
               <div className="empty-state-title">No order data available</div>
               <div className="empty-state-text">Orders will appear here once they are placed</div>
             </div>

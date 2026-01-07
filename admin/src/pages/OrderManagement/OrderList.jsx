@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 
 const OrderList = () => {
   const { token } = useAuth();
@@ -364,7 +366,7 @@ const OrderList = () => {
       {sortedFilteredOrders.length === 0 ? (
         <div className="admin-card">
           <div className="empty-state">
-            <div className="empty-state-icon">🛒</div>
+            <div className="empty-state-icon"><FontAwesomeIcon icon={faShoppingCart} /></div>
             <div className="empty-state-title">No orders found</div>
             <div className="empty-state-text">No orders match your current filters</div>
           </div>

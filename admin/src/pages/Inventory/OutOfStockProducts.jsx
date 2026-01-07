@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimesCircle, faCheckCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 
 const OutOfStockProducts = () => {
   const [products, setProducts] = useState([]);
@@ -32,7 +34,7 @@ const OutOfStockProducts = () => {
       {/* Page Header */}
       <div className="flex-between mb-5">
         <div>
-          <h1 className="page-title">❌ Out of Stock Products</h1>
+          <h1 className="page-title"><FontAwesomeIcon icon={faTimesCircle} /> Out of Stock Products</h1>
           <p className="page-subtitle">Products that need immediate restocking</p>
         </div>
         <button onClick={() => navigate('/Products')} className="btn btn-secondary">
@@ -109,7 +111,7 @@ const OutOfStockProducts = () => {
                         className="btn btn-sm btn-danger"
                         title="Restock Immediately"
                       >
-                        🚨 Restock Now
+                        <FontAwesomeIcon icon={faExclamationCircle} /> Restock Now
                       </button>
                     </div>
                   </td>

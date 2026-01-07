@@ -87,7 +87,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-container" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="loading-spinner"></div>
+        <p className="loading-text" style={{ marginLeft: '1rem' }}>Loading...</p>
+      </div>
+    );
   }
 
   return (

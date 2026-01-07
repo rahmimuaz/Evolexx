@@ -103,7 +103,12 @@ const LoginForm = () => {
               disabled={loading}
               className="login-button"
             >
-              {loading ? 'Logging In...' : 'Login'}
+              {loading ? (
+                <>
+                  <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
+                  Logging In...
+                </>
+              ) : 'Login'}
             </button>
           </div>
         </form>

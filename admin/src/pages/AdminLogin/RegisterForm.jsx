@@ -130,7 +130,12 @@ const RegisterForm = () => {
               disabled={loading}
               className="register-button"
             >
-              {loading ? 'Registering...' : 'Register Admin'}
+              {loading ? (
+                <>
+                  <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
+                  Registering...
+                </>
+              ) : 'Register Admin'}
             </button>
           </div>
         </form>

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExclamationTriangle, faCheckCircle, faBox } from '@fortawesome/free-solid-svg-icons';
 
 const LowStockProducts = () => {
   const [products, setProducts] = useState([]);
@@ -32,7 +34,7 @@ const LowStockProducts = () => {
       {/* Page Header */}
       <div className="flex-between mb-5">
         <div>
-          <h1 className="page-title">⚠️ Low Stock Products</h1>
+          <h1 className="page-title"><FontAwesomeIcon icon={faExclamationTriangle} /> Low Stock Products</h1>
           <p className="page-subtitle">Products running low on inventory</p>
         </div>
         <button onClick={() => navigate('/Products')} className="btn btn-secondary">
@@ -65,7 +67,7 @@ const LowStockProducts = () => {
               <tr>
                 <td colSpan="6">
                   <div className="empty-state">
-                    <div className="empty-state-icon">✅</div>
+                    <div className="empty-state-icon"><FontAwesomeIcon icon={faCheckCircle} /></div>
                     <div className="empty-state-title">All Good!</div>
                     <div className="empty-state-text">No products with low stock found</div>
                   </div>
@@ -109,7 +111,7 @@ const LowStockProducts = () => {
                         className="btn btn-sm btn-primary"
                         title="Restock Product"
                       >
-                        📦 Restock
+                        <FontAwesomeIcon icon={faBox} /> Restock
                       </button>
                     </div>
                   </td>

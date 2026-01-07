@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBox } from '@fortawesome/free-solid-svg-icons';
 
 const getImageUrl = (imagePath) => {
   const baseUrl = process.env.REACT_APP_API_BASE_URL;
@@ -292,7 +294,7 @@ const ToBeShippedList = () => {
       {orders.length === 0 ? (
         <div className="admin-card">
           <div className="empty-state">
-            <div className="empty-state-icon">📦</div>
+            <div className="empty-state-icon"><FontAwesomeIcon icon={faBox} /></div>
             <div className="empty-state-title">No orders to ship</div>
             <div className="empty-state-text">Orders will appear here once they are accepted</div>
           </div>

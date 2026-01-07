@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBox } from '@fortawesome/free-solid-svg-icons';
 
 const Products = () => {
   const navigate = useNavigate();
@@ -150,7 +152,7 @@ const Products = () => {
               <tr>
                 <td colSpan="7">
                   <div className="empty-state">
-                    <div className="empty-state-icon">📦</div>
+                    <div className="empty-state-icon"><FontAwesomeIcon icon={faBox} /></div>
                     <div className="empty-state-title">No products found</div>
                     <div className="empty-state-text">
                       {searchTerm || categoryFilter !== 'all' 
@@ -188,7 +190,7 @@ const Products = () => {
                         fontSize: '1.25rem',
                         border: '1px solid #e2e8f0'
                       }}>
-                        📦
+                        <FontAwesomeIcon icon={faBox} />
                       </div>
                     )}
                   </td>

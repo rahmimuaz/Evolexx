@@ -252,6 +252,76 @@ const ProductDetail = () => {
     return colors[colorName?.toLowerCase()] || '#cccccc';
   };
 
+  // Add structured data (JSON-LD) for SEO
+  useEffect(() => {
+    if (!product) return;
+
+    const baseUrl = window.location.origin;
+    const productUrl = `${baseUrl}/product/${product.slug || product._id}`;
+    const productImage = product.images && product.images[0] 
+      ? (product.images[0].startsWith('http') ? product.images[0] : `${API_BASE_URL}/${product.images[0]}`)
+      : `${baseUrl}/logo192.png`;
+    
+    const averageRating = reviews.length > 0 
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+      : 0;
+    
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": product.name,
+      "description": product.description,
+      "image": product.images?.map(img => img.startsWith('http') ? img : `${API_BASE_URL}/${img}`) || [productImage],
+      "brand": {
+        "@type": "Brand",
+        "name": product.details?.brand || "Evolexx"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": productUrl,
+        "priceCurrency": "LKR",
+        "price": product.discountPrice || product.price,
+        "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "Evolexx"
+        }
+      },
+      "category": product.category
+    };
+
+    // Add aggregate rating if reviews exist
+    if (reviews.length > 0) {
+      structuredData.aggregateRating = {
+        "@type": "AggregateRating",
+        "ratingValue": averageRating,
+        "reviewCount": reviews.length
+      };
+    }
+
+    // Remove existing structured data script if any
+    const existingScript = document.getElementById('product-structured-data');
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    // Add new structured data script
+    const script = document.createElement('script');
+    script.id = 'product-structured-data';
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(structuredData);
+    document.head.appendChild(script);
+
+    // Cleanup on unmount
+    return () => {
+      const scriptToRemove = document.getElementById('product-structured-data');
+      if (scriptToRemove) {
+        scriptToRemove.remove();
+      }
+    };
+  }, [product, reviews, API_BASE_URL]);
+
   if (loading) return <div className="pd-loading"><div className="pd-spinner"></div></div>;
   if (error) return <div className="pd-error">{error}</div>;
   if (!product) return <div className="pd-not-found">Product not found.</div>;

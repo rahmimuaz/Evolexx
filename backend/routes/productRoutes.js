@@ -19,6 +19,7 @@ import {
   updateProductsOrder,
   getProductsSorted
 } from '../controllers/productController.js';
+import { generateSitemap } from '../controllers/sitemapController.js';
 
 import { protect } from '../middleware/authMiddleware.js'; 
 
@@ -31,6 +32,9 @@ router.post('/', upload.array('images', 5), createProduct);
 
 // Get all products
 router.get('/', getProducts);
+
+// Sitemap generation
+router.get('/sitemap.xml', generateSitemap);
 
 // Product search (by name)
 router.get('/search', searchProducts);
