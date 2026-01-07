@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "generate-sitemap": "node scripts/generateSitemap.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
