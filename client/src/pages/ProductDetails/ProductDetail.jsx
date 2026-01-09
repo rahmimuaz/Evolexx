@@ -189,9 +189,11 @@ const ProductDetail = () => {
 
   // Get current images (variation images if selected, otherwise product images)
   const getCurrentImages = () => {
+    // If variation has images, use them; otherwise fall back to product images
     if (selectedVariation && selectedVariation.images && selectedVariation.images.length > 0) {
       return selectedVariation.images;
     }
+    // Always fall back to product images if variation doesn't have specific images
     return product?.images || [];
   };
 

@@ -395,6 +395,21 @@ export const updateProduct = async (req, res) => {
     let totalStock = parseInt(stock) || 0;
     let formattedVariations = undefined;
 
+    // Process variation images if provided
+    const variationImageMap = {};
+    if (req.files && Array.isArray(req.files)) {
+      // Group files by variation ID
+      req.files.forEach(file => {
+        if (file.fieldname && file.fieldname.startsWith('variation-') && file.fieldname.endsWith('-images')) {
+          const variationId = file.fieldname.replace('variation-', '').replace('-images', '');
+          if (!variationImageMap[variationId]) {
+            variationImageMap[variationId] = [];
+          }
+          variationImageMap[variationId].push(file.path); // Cloudinary URL
+        }
+      });
+    }
+
     if (hasVariations === 'true' || hasVariations === true) {
       try {
         parsedVariations = typeof variations === 'string' ? JSON.parse(variations) : variations;
@@ -414,14 +429,21 @@ export const updateProduct = async (req, res) => {
           totalStock = parsedVariations.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
 
           // Convert variations attributes to Map format for MongoDB
-          formattedVariations = parsedVariations.map(variation => ({
-            attributes: new Map(Object.entries(variation.attributes || {})),
-            stock: parseInt(variation.stock) || 0,
-            price: variation.price ? parseFloat(variation.price) : undefined,
-            discountPrice: variation.discountPrice ? parseFloat(variation.discountPrice) : undefined,
-            images: variation.images || [],
-            sku: variation.sku || undefined
-          }));
+          formattedVariations = parsedVariations.map(variation => {
+            // Get images for this variation if uploaded, otherwise use existing images
+            const variationImages = variation._variationId && variationImageMap[variation._variationId]
+              ? variationImageMap[variation._variationId]
+              : (variation.images || []);
+            
+            return {
+              attributes: new Map(Object.entries(variation.attributes || {})),
+              stock: parseInt(variation.stock) || 0,
+              price: variation.price ? parseFloat(variation.price) : undefined,
+              discountPrice: variation.discountPrice ? parseFloat(variation.discountPrice) : undefined,
+              images: variationImages,
+              sku: variation.sku || undefined
+            };
+          });
         }
       } catch (err) {
         return res.status(400).json({ message: 'Invalid JSON format for variations: ' + err.message });

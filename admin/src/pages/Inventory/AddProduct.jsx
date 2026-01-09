@@ -264,23 +264,31 @@ const AddProduct = () => {
     }));
   };
 
-  // Handle variation image upload
+  // Handle variation image upload (single image only)
   const handleVariationImageChange = (variationId, e) => {
     const files = Array.from(e.target.files);
-    if (files.length > 5) {
-      alert('You can only upload up to 5 images per variation.');
+    if (files.length > 1) {
+      alert('You can only upload 1 image per variation.');
       return;
     }
 
-    const currentImages = variationImages[variationId] || { files: [], previews: [] };
-    const newFiles = [...currentImages.files, ...files];
-    const newPreviews = [...currentImages.previews, ...files.map(file => URL.createObjectURL(file))];
+    if (files.length === 0) return;
+
+    // Replace existing image with new one (single image only)
+    const file = files[0];
+    const preview = URL.createObjectURL(file);
+
+    // Clean up old preview URL if exists
+    const currentImages = variationImages[variationId];
+    if (currentImages && currentImages.previews.length > 0) {
+      URL.revokeObjectURL(currentImages.previews[0]);
+    }
 
     setVariationImages(prev => ({
       ...prev,
       [variationId]: {
-        files: newFiles,
-        previews: newPreviews
+        files: [file],
+        previews: [preview]
       }
     }));
   };
@@ -1156,7 +1164,6 @@ const AddProduct = () => {
                                   <input
                                     type="file"
                                     accept="image/*"
-                                    multiple
                                     onChange={(e) => handleVariationImageChange(variation.id, e)}
                                     style={{ display: 'none' }}
                                     id={`variation-image-input-${variation.id}`}
@@ -1175,62 +1182,56 @@ const AddProduct = () => {
                                       marginBottom: '0.75rem'
                                     }}
                                   >
-                                    + Upload Images (Max 5)
+                                    + Upload Image (1 image only)
                                   </label>
 
-                                  {/* Image Previews */}
+                                  {/* Image Preview (Single Image) */}
                                   {variationImages[variation.id]?.previews && variationImages[variation.id].previews.length > 0 && (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.75rem', marginTop: '0.75rem' }}>
-                                      {variationImages[variation.id].previews.map((preview, imgIdx) => (
-                                        <div
-                                          key={imgIdx}
+                                    <div style={{ marginTop: '0.75rem' }}>
+                                      <div
+                                        style={{
+                                          position: 'relative',
+                                          width: '150px',
+                                          height: '150px',
+                                          border: '1px solid #e5e7eb',
+                                          borderRadius: '4px',
+                                          overflow: 'hidden',
+                                          background: '#f9fafb'
+                                        }}
+                                      >
+                                        <img
+                                          src={variationImages[variation.id].previews[0]}
+                                          alt={`Variation ${idx + 1} image`}
                                           style={{
-                                            position: 'relative',
                                             width: '100%',
-                                            paddingBottom: '100%',
-                                            border: '1px solid #e5e7eb',
-                                            borderRadius: '4px',
-                                            overflow: 'hidden',
-                                            background: '#f9fafb'
+                                            height: '100%',
+                                            objectFit: 'cover'
                                           }}
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => removeVariationImage(variation.id, 0)}
+                                          style={{
+                                            position: 'absolute',
+                                            top: '0.25rem',
+                                            right: '0.25rem',
+                                            background: '#ef4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '50%',
+                                            width: '24px',
+                                            height: '24px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.75rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                          }}
+                                          title="Remove image"
                                         >
-                                          <img
-                                            src={preview}
-                                            alt={`Variation ${idx + 1} image ${imgIdx + 1}`}
-                                            style={{
-                                              position: 'absolute',
-                                              top: 0,
-                                              left: 0,
-                                              width: '100%',
-                                              height: '100%',
-                                              objectFit: 'cover'
-                                            }}
-                                          />
-                                          <button
-                                            type="button"
-                                            onClick={() => removeVariationImage(variation.id, imgIdx)}
-                                            style={{
-                                              position: 'absolute',
-                                              top: '0.25rem',
-                                              right: '0.25rem',
-                                              background: '#ef4444',
-                                              color: 'white',
-                                              border: 'none',
-                                              borderRadius: '50%',
-                                              width: '24px',
-                                              height: '24px',
-                                              cursor: 'pointer',
-                                              fontSize: '0.75rem',
-                                              display: 'flex',
-                                              alignItems: 'center',
-                                              justifyContent: 'center'
-                                            }}
-                                            title="Remove image"
-                                          >
-                                            ×
-                                          </button>
-                                        </div>
-                                      ))}
+                                          ×
+                                        </button>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
