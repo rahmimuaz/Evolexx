@@ -187,14 +187,36 @@ const ProductDetail = () => {
     }
   }, [product]);
 
-  // Get current images (variation images if selected, otherwise product images)
+  // Get current images (show all images: product images + all variation images)
   const getCurrentImages = () => {
-    // If variation has images, use them; otherwise fall back to product images
-    if (selectedVariation && selectedVariation.images && selectedVariation.images.length > 0) {
-      return selectedVariation.images;
+    const allImages = [];
+    const imageSet = new Set(); // Use Set to avoid duplicates
+    
+    // Add product images first
+    if (product?.images && product.images.length > 0) {
+      product.images.forEach(img => {
+        if (!imageSet.has(img)) {
+          allImages.push(img);
+          imageSet.add(img);
+        }
+      });
     }
-    // Always fall back to product images if variation doesn't have specific images
-    return product?.images || [];
+    
+    // Add all variation images (from all variations, not just selected)
+    if (product?.variations && product.variations.length > 0) {
+      product.variations.forEach(variation => {
+        if (variation.images && variation.images.length > 0) {
+          variation.images.forEach(img => {
+            if (!imageSet.has(img)) {
+              allImages.push(img);
+              imageSet.add(img);
+            }
+          });
+        }
+      });
+    }
+    
+    return allImages.length > 0 ? allImages : [];
   };
 
   const handleQuantityChange = (type) => {
@@ -357,8 +379,16 @@ const ProductDetail = () => {
     ? (reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length).toFixed(1)
     : '0';
 
-  // Color mapping for swatches
-  const getColorHex = (colorName) => {
+  // Color mapping for swatches - handles both color names and hex codes
+  const getColorHex = (colorValue) => {
+    if (!colorValue) return '#cccccc';
+    
+    // If it's already a hex color code, use it directly
+    if (colorValue.startsWith('#')) {
+      return colorValue;
+    }
+    
+    // Otherwise, try to match color names
     const colors = {
       'white': '#ffffff', 'black': '#000000', 'red': '#e53935', 'blue': '#1976d2',
       'green': '#388e3c', 'yellow': '#fbc02d', 'gray': '#9e9e9e', 'grey': '#9e9e9e',
@@ -366,7 +396,7 @@ const ProductDetail = () => {
       'gold': '#ffd700', 'silver': '#c0c0c0', 'navy': '#001f3f', 'beige': '#f5f5dc',
       'cream': '#fffdd0', 'midnight': '#191970', 'space gray': '#4a4a4a', 'rose gold': '#b76e79'
     };
-    return colors[colorName?.toLowerCase()] || '#cccccc';
+    return colors[colorValue?.toLowerCase()] || '#cccccc';
   };
 
   // Add structured data (JSON-LD) for SEO
@@ -525,19 +555,34 @@ const ProductDetail = () => {
           <h1 className="pd-title">{product.name}</h1>
           
           <div className="pd-price-row">
-            {product.discountPrice ? (
-              <>
-                <span className="pd-old-price">Rs. {product.price?.toLocaleString()}</span>
-                <span className="pd-current-price">Rs. {product.discountPrice?.toLocaleString()}</span>
-              </>
-            ) : (
-              <span className="pd-current-price">Rs. {product.price?.toLocaleString()}</span>
-            )}
+            {(() => {
+              // Get price from selected variation if available, otherwise use product price
+              const currentPrice = selectedVariation?.price || selectedVariation?.discountPrice || product.price;
+              const currentDiscountPrice = selectedVariation?.discountPrice || product.discountPrice;
+              const basePrice = selectedVariation?.price || product.price;
+              
+              if (currentDiscountPrice && currentDiscountPrice < basePrice) {
+                return (
+                  <>
+                    <span className="pd-old-price">Rs. {basePrice?.toLocaleString()}</span>
+                    <span className="pd-current-price">Rs. {currentDiscountPrice?.toLocaleString()}</span>
+                  </>
+                );
+              } else {
+                return (
+                  <span className="pd-current-price">Rs. {currentPrice?.toLocaleString()}</span>
+                );
+              }
+            })()}
           </div>
              {/* Koko Payment Option */}
           <div className="pd-koko-payment">
             <span className="pd-koko-text">
-            3 x <strong>Rs. {Math.ceil((product.discountPrice || product.price) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
+            3 x <strong>Rs. {Math.ceil(((() => {
+              const currentDiscountPrice = selectedVariation?.discountPrice || product.discountPrice;
+              const currentPrice = selectedVariation?.price || product.price;
+              return currentDiscountPrice || currentPrice;
+            })()) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
             </span>
           </div>
           <div className="pd-rating-row">

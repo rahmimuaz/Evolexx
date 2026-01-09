@@ -497,6 +497,42 @@ const EditProduct = () => {
   const renderFieldByType = (field) => {
     const fieldValue = formData.details[field.name] || '';
     
+    // Check if this is a color field (by name, not type)
+    if (field.name.toLowerCase() === 'color') {
+      return (
+        <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <input
+              type="text"
+              name={field.name}
+              value={fieldValue}
+              onChange={handleDetailChange}
+              className="modern-input"
+              placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+              style={{ flex: 1 }}
+            />
+            <input
+              type="color"
+              value={fieldValue && fieldValue.startsWith('#') ? fieldValue : '#000000'}
+              onChange={(e) => {
+                const colorValue = e.target.value;
+                handleDetailChange({ target: { name: field.name, value: colorValue } });
+              }}
+              style={{
+                width: '50px',
+                height: '40px',
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                padding: '2px'
+              }}
+              title="Pick a color"
+            />
+          </div>
+        </div>
+      );
+    }
+    
     switch (field.type) {
       case 'select':
         return (
@@ -1131,19 +1167,53 @@ const EditProduct = () => {
                                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, marginBottom: '0.25rem', color: '#374151' }}>
                                     {attr.charAt(0).toUpperCase() + attr.slice(1)}
                                   </label>
-                                  <input
-                                    type="text"
-                                    value={variation.attributes[attr] || ''}
-                                    onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
-                                    placeholder={`e.g., ${attr === 'storage' ? '128GB' : attr === 'color' ? 'Black' : 'Value'}`}
-                                    style={{
-                                      width: '100%',
-                                      padding: '0.5rem',
-                                      border: '1px solid #d1d5db',
-                                      borderRadius: '4px',
-                                      fontSize: '0.875rem'
-                                    }}
-                                  />
+                                  {attr.toLowerCase() === 'color' ? (
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                      <input
+                                        type="text"
+                                        value={variation.attributes[attr] || ''}
+                                        onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
+                                        placeholder="e.g., Black or #000000"
+                                        style={{
+                                          flex: 1,
+                                          padding: '0.5rem',
+                                          border: '1px solid #d1d5db',
+                                          borderRadius: '4px',
+                                          fontSize: '0.875rem'
+                                        }}
+                                      />
+                                      <input
+                                        type="color"
+                                        value={variation.attributes[attr] && variation.attributes[attr].startsWith('#') 
+                                          ? variation.attributes[attr] 
+                                          : '#000000'}
+                                        onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
+                                        style={{
+                                          width: '50px',
+                                          height: '40px',
+                                          border: '1px solid #d1d5db',
+                                          borderRadius: '4px',
+                                          cursor: 'pointer',
+                                          padding: '2px'
+                                        }}
+                                        title="Pick a color"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <input
+                                      type="text"
+                                      value={variation.attributes[attr] || ''}
+                                      onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
+                                      placeholder={`e.g., ${attr === 'storage' ? '128GB' : 'Value'}`}
+                                      style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        border: '1px solid #d1d5db',
+                                        borderRadius: '4px',
+                                        fontSize: '0.875rem'
+                                      }}
+                                    />
+                                  )}
                                 </div>
                               ))}
                             </div>
