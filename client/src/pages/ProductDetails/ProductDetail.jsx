@@ -163,28 +163,74 @@ const ProductDetail = () => {
     
     // Initialize variation selection if product has variations
     if (product?.hasVariations && product?.variations && product.variations.length > 0) {
-      // Select first variation by default
-      const firstVariation = product.variations[0];
-      setSelectedVariation(firstVariation);
-      // Initialize selected attributes from first variation
+      // Try to find a variation that matches the primary product image
+      const primaryImage = product.images && product.images.length > 0 ? product.images[0] : null;
+      let matchingVariation = null;
+      
+      if (primaryImage) {
+        // Check if primary image belongs to any variation
+        matchingVariation = product.variations.find(v => 
+          v.images && v.images.length > 0 && v.images.includes(primaryImage)
+        );
+      }
+      
+      // If no match found, use first variation
+      const variationToSelect = matchingVariation || product.variations[0];
+      setSelectedVariation(variationToSelect);
+      
+      // Initialize selected attributes from selected variation
       const attrs = {};
-      if (firstVariation.attributes) {
-        Object.keys(firstVariation.attributes).forEach(key => {
-          attrs[key] = firstVariation.attributes[key];
+      if (variationToSelect.attributes) {
+        Object.keys(variationToSelect.attributes).forEach(key => {
+          attrs[key] = variationToSelect.attributes[key];
         });
       }
       setSelectedVariationAttributes(attrs);
       
-      // Set main image from first variation if it has images, otherwise use product images
-      if (firstVariation.images && firstVariation.images.length > 0) {
-        setMainImage(firstVariation.images[0]);
+      // Set main image based on selected variation
+      // If the selected variation has images, use the first one
+      // Otherwise, if primary image matches this variation, use primary image
+      // Otherwise, use primary product image
+      if (variationToSelect.images && variationToSelect.images.length > 0) {
+        setMainImage(variationToSelect.images[0]);
+      } else if (primaryImage && matchingVariation) {
+        // Primary image matches this variation, use it
+        setMainImage(primaryImage);
       } else if (product.images && product.images.length > 0) {
+        // Fallback to primary product image
         setMainImage(product.images[0]);
       }
-    } else if (product && product.images && product.images.length > 0 && !mainImage) {
-      // Regular product without variations
-      setMainImage(product.images[0]);
+    } else if (product) {
+      // Regular product without variations - initialize basic product details
+      // Always set primary product image first
+      if (product.images && product.images.length > 0) {
+        setMainImage(product.images[0]);
+      }
+      
+      const basicAttrs = {};
+      
+      // Extract basic product details that might be used as attributes
+      if (product.details) {
+        // Common attributes that might be in product details
+        const attributeFields = ['storage', 'color', 'ram', 'size', 'model'];
+        attributeFields.forEach(field => {
+          if (product.details[field]) {
+            // Handle both string and array values
+            if (Array.isArray(product.details[field])) {
+              basicAttrs[field] = product.details[field][0]; // Use first value if array
+            } else {
+              basicAttrs[field] = product.details[field];
+            }
+          }
+        });
+      }
+      
+      // Set basic attributes if any found
+      if (Object.keys(basicAttrs).length > 0) {
+        setSelectedVariationAttributes(basicAttrs);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
   // Get current images (show all images: product images + all variation images)
@@ -263,13 +309,26 @@ const ProductDetail = () => {
 
   // Get available values for an attribute
   const getAvailableValues = (attributeName) => {
-    if (!product?.variations) return [];
     const values = new Set();
-    product.variations.forEach(v => {
-      if (v.attributes && v.attributes[attributeName]) {
-        values.add(v.attributes[attributeName]);
+    
+    // Add values from variations
+    if (product?.variations) {
+      product.variations.forEach(v => {
+        if (v.attributes && v.attributes[attributeName]) {
+          values.add(v.attributes[attributeName]);
+        }
+      });
+    }
+    
+    // For color attribute, also include basic product color if it exists
+    if (attributeName.toLowerCase() === 'color' && product?.details?.color) {
+      if (Array.isArray(product.details.color)) {
+        product.details.color.forEach(color => values.add(color));
+      } else if (typeof product.details.color === 'string') {
+        values.add(product.details.color);
       }
-    });
+    }
+    
     return Array.from(values);
   };
 
@@ -281,22 +340,58 @@ const ProductDetail = () => {
     return product?.stock || 0;
   };
 
+  // Check if all required attributes are selected
+  const areAllAttributesSelected = () => {
+    if (!product?.hasVariations || !product?.variations || product.variations.length === 0) {
+      return true; // No variations required
+    }
+    
+    // Get all attribute names that exist in variations
+    const requiredAttributes = new Set();
+    product.variations.forEach(v => {
+      if (v.attributes) {
+        Object.keys(v.attributes).forEach(key => requiredAttributes.add(key));
+      }
+    });
+    
+    // Check if all required attributes have been selected
+    return Array.from(requiredAttributes).every(attr => 
+      selectedVariationAttributes[attr] && selectedVariationAttributes[attr].trim() !== ''
+    );
+  };
+
   const handleAddToCart = () => {
     if (!user) {
       setLoginModalOpen(true);
       return;
     }
     if (product) {
-      // Check if variation is required and selected
-      if (product.hasVariations && !selectedVariation) {
-        alert('Please select a variation (storage, color, etc.) before adding to cart.');
-        return;
+      // Check if all required attributes are selected (for products with variations)
+      if (product.hasVariations && product.variations && product.variations.length > 0) {
+        if (!areAllAttributesSelected()) {
+          alert('Please select all required attributes (storage, color, etc.) before adding to cart.');
+          return;
+        }
       }
+      
+      // Create variation object from selected attributes if no exact match found
+      let variationToAdd = selectedVariation;
+      if (product.hasVariations && !selectedVariation && Object.keys(selectedVariationAttributes).length > 0) {
+        // Create a virtual variation from selected attributes
+        variationToAdd = {
+          attributes: selectedVariationAttributes,
+          stock: product.stock || 0,
+          price: product.price,
+          discountPrice: product.discountPrice,
+          images: product.images || []
+        };
+      }
+      
       const productToAdd = {
         ...product,
         selectedColor,
-        selectedVariation: selectedVariation ? {
-          ...selectedVariation,
+        selectedVariation: variationToAdd ? {
+          ...variationToAdd,
           selectedAttributes: selectedVariationAttributes
         } : null
       };
@@ -311,16 +406,32 @@ const ProductDetail = () => {
       return;
     }
     if (product) {
-      // Check if variation is required and selected
-      if (product.hasVariations && !selectedVariation) {
-        alert('Please select a variation (storage, color, etc.) before buying.');
-        return;
+      // Check if all required attributes are selected (for products with variations)
+      if (product.hasVariations && product.variations && product.variations.length > 0) {
+        if (!areAllAttributesSelected()) {
+          alert('Please select all required attributes (storage, color, etc.) before buying.');
+          return;
+        }
       }
+      
+      // Create variation object from selected attributes if no exact match found
+      let variationToAdd = selectedVariation;
+      if (product.hasVariations && !selectedVariation && Object.keys(selectedVariationAttributes).length > 0) {
+        // Create a virtual variation from selected attributes
+        variationToAdd = {
+          attributes: selectedVariationAttributes,
+          stock: product.stock || 0,
+          price: product.price,
+          discountPrice: product.discountPrice,
+          images: product.images || []
+        };
+      }
+      
       const productToAdd = {
         ...product,
         selectedColor,
-        selectedVariation: selectedVariation ? {
-          ...selectedVariation,
+        selectedVariation: variationToAdd ? {
+          ...variationToAdd,
           selectedAttributes: selectedVariationAttributes
         } : null
       };
@@ -331,6 +442,33 @@ const ProductDetail = () => {
 
   const handleThumbnailClick = (imagePath) => {
     setMainImage(imagePath);
+    
+    // If product has variations, try to find which variation this image belongs to
+    if (product?.hasVariations && product?.variations) {
+      const matchingVariation = product.variations.find(v => {
+        return v.images && v.images.includes(imagePath);
+      });
+      
+      if (matchingVariation) {
+        // Auto-select this variation and update all details
+        setSelectedVariation(matchingVariation);
+        
+        // Update selected attributes
+        const attrs = {};
+        if (matchingVariation.attributes) {
+          Object.keys(matchingVariation.attributes).forEach(key => {
+            attrs[key] = matchingVariation.attributes[key];
+          });
+        }
+        setSelectedVariationAttributes(attrs);
+      } else {
+        // If image is from main product images, clear variation selection
+        if (product.images && product.images.includes(imagePath)) {
+          setSelectedVariation(null);
+          setSelectedVariationAttributes({});
+        }
+      }
+    }
   };
 
   const cleanImagePath = (imagePath) => {
@@ -703,14 +841,14 @@ const ProductDetail = () => {
             <button 
               className="pd-add-cart-btn" 
               onClick={handleAddToCart}
-              disabled={getCurrentStock() <= 0 || (product.hasVariations && !selectedVariation)}
+              disabled={getCurrentStock() <= 0 || (product.hasVariations && product.variations && product.variations.length > 0 && !areAllAttributesSelected())}
             >
               ADD TO CART
             </button>
             <button 
               className="pd-buy-now-btn" 
               onClick={handleBuyNow} 
-              disabled={getCurrentStock() <= 0 || (product.hasVariations && !selectedVariation)}
+              disabled={getCurrentStock() <= 0 || (product.hasVariations && product.variations && product.variations.length > 0 && !areAllAttributesSelected())}
             >
               BUY NOW
             </button>
@@ -819,7 +957,6 @@ const ProductDetail = () => {
                   const prevLine = array[index - 1];
                   const nextLine = array[index + 1];
                   // Match list items: - * + or numbered lists
-                  const isListItem = /^[\s]*[-*+]\s/.test(line) || /^[\s]*\d+\.\s/.test(line);
                   const prevIsListItem = prevLine && (/^[\s]*[-*+]\s/.test(prevLine) || /^[\s]*\d+\.\s/.test(prevLine));
                   const nextIsListItem = nextLine && (/^[\s]*[-*+]\s/.test(nextLine) || /^[\s]*\d+\.\s/.test(nextLine));
                   
@@ -853,9 +990,9 @@ const ProductDetail = () => {
                         marginTop: '0'
                       }} {...props} />;
                     },
-                    h1: ({node, ...props}) => <h1 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props} />,
-                    h2: ({node, ...props}) => <h2 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props} />,
-                    h3: ({node, ...props}) => <h3 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props} />,
+                    h1: ({node, children, ...props}) => <h1 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props}>{children}</h1>,
+                    h2: ({node, children, ...props}) => <h2 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props}>{children}</h2>,
+                    h3: ({node, children, ...props}) => <h3 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props}>{children}</h3>,
                     ul: ({node, ...props}) => {
                       // Check if this list follows a heading
                       const prevSibling = node?.previousSibling;

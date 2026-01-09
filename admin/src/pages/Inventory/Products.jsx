@@ -46,15 +46,6 @@ const Products = () => {
     }
   };
 
-  const getStockBadge = (stock) => {
-    if (stock === 0) {
-      return <span className="badge badge-error">Out of Stock</span>;
-    } else if (stock < 5) {
-      return <span className="badge badge-warning">Low Stock ({stock})</span>;
-    }
-    return <span className="badge badge-success">{stock} in stock</span>;
-  };
-
   // Filter products
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

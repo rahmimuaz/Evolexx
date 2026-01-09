@@ -88,7 +88,7 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem('userInfo');
     setUser(null);
     if (!silent) {
-      toast.success('Logged out successfully');
+    toast.success('Logged out successfully');
     }
   };
 

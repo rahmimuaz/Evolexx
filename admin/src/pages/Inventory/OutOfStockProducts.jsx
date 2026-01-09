@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimesCircle, faCheckCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+import { faTimesCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 
 const OutOfStockProducts = () => {
   const [products, setProducts] = useState([]);

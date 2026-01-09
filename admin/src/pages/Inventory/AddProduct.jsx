@@ -11,7 +11,6 @@ const AddProduct = () => {
   const navigate = useNavigate();
   
   const [currentStep, setCurrentStep] = useState(1);
-  const [isDraft, setIsDraft] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -35,7 +34,7 @@ const AddProduct = () => {
   const [discountError, setDiscountError] = useState('');
   const [hasVariations, setHasVariations] = useState(false);
   const [variations, setVariations] = useState([]);
-  const [variationAttributes, setVariationAttributes] = useState(['storage', 'color']); // Default attributes
+  const [variationAttributes] = useState(['storage', 'color']); // Default attributes
   const [variationImages, setVariationImages] = useState({}); // { variationId: { files: [], previews: [] } }
 
   // Define the API base URL from environment variables
@@ -177,6 +176,7 @@ const AddProduct = () => {
     if (formData.category && !categoryHierarchy[formData.category]?.includes(formData.subcategory)) {
       setFormData(prev => ({ ...prev, subcategory: '', details: {} }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.category]);
 
   const handleInputChange = (e) => {
@@ -1271,7 +1271,7 @@ const AddProduct = () => {
                                       >
                                         <img
                                           src={variationImages[variation.id].previews[0]}
-                                          alt={`Variation ${idx + 1} image`}
+                                          alt={`Variation ${idx + 1}`}
                                           style={{
                                             width: '100%',
                                             height: '100%',
