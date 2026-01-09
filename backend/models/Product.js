@@ -97,7 +97,38 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
-  // Color variants with their own images
+  // Product variations (e.g., storage, color combinations)
+  variations: [{
+    // Variation attributes (e.g., { storage: '128GB', color: 'Black' })
+    attributes: {
+      type: Map,
+      of: String,
+      required: true
+    },
+    // Stock for this specific variation
+    stock: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    // Optional price override for this variation (if different from base price)
+    price: {
+      type: Number
+    },
+    // Optional discount price override for this variation
+    discountPrice: {
+      type: Number
+    },
+    // Optional images specific to this variation
+    images: [{
+      type: String
+    }],
+    // SKU for this variation (optional)
+    sku: {
+      type: String
+    }
+  }],
+  // Legacy color variants (kept for backward compatibility)
   variants: [{
     color: {
       type: String,
@@ -112,6 +143,11 @@ const productSchema = new mongoose.Schema({
       default: 0
     }
   }],
+  // Flag to indicate if product has variations
+  hasVariations: {
+    type: Boolean,
+    default: false
+  },
   stock: {
     type: Number,
     required: true,

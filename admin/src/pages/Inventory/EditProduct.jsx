@@ -638,8 +638,8 @@ const EditProduct = () => {
                       minHeight: '300px',
                       status: false,
                       autofocus: false
-                    }}
-                  />
+                  }}
+                />
                 </div>
                 <small style={{ display: 'block', marginTop: '0.5rem', color: '#64748b', fontSize: '0.8125rem' }}>
                   Use the toolbar above to format your text. Supports markdown formatting.
