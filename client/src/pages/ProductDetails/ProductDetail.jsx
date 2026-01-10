@@ -11,7 +11,6 @@ import Login from '../../pages/Login/Login';
 import Register from '../../pages/Login/Register';
 import ReactMarkdown from 'react-markdown';
 import { FaShieldAlt, FaTruck, FaUndo, FaHeart, FaRegHeart, FaCheck, FaStar, FaRegStar, FaPlus, FaMinus } from 'react-icons/fa';
-import { toast } from 'react-toastify';
 
 const ProductDetail = () => {
   const { slug, id } = useParams();
@@ -22,8 +21,6 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState('');
-  const [selectedVariation, setSelectedVariation] = useState(null);
-  const [selectedVariationAttributes, setSelectedVariationAttributes] = useState({});
   const { addToCart } = useCart();
   const { user } = useUser();
   const [reviews, setReviews] = useState([]);
@@ -31,12 +28,15 @@ const ProductDetail = () => {
   const [reviewComment, setReviewComment] = useState('');
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState(null);
+  const [selectedColor, setSelectedColor] = useState('');
   const [activeTab, setActiveTab] = useState('DESCRIPTION');
   const [wishlist, setWishlist] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [openAccordion, setOpenAccordion] = useState(null);
+  const [openAccordion, setOpenAccordion] = useState(null); // Track which accordion is open
   const [hasPurchasedProduct, setHasPurchasedProduct] = useState(false);
   const [checkingPurchase, setCheckingPurchase] = useState(false);
+  const [selectedVariation, setSelectedVariation] = useState(null); // Selected variation object
+  const [selectedVariationAttributes, setSelectedVariationAttributes] = useState({}); // Selected attributes for variation
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
@@ -100,38 +100,6 @@ const ProductDetail = () => {
     }
   }, [product, mainImage]);
 
-  // Initialize variation selection when product loads
-  useEffect(() => {
-    if (product?.hasVariations && product.variations && product.variations.length > 0) {
-      // Initialize with first variation if none selected
-      if (!selectedVariation) {
-        const firstVariation = product.variations.find(v => v.isActive !== false) || product.variations[0];
-        if (firstVariation) {
-          setSelectedVariation(firstVariation);
-          // Handle both Map and object formats for attributes
-          const attrs = firstVariation.attributes || {};
-          const attrsObj = attrs instanceof Map ? Object.fromEntries(attrs.entries()) : attrs;
-          setSelectedVariationAttributes(attrsObj);
-          // Set main image to variation image if available
-          if (firstVariation.images && firstVariation.images.length > 0) {
-            setMainImage(firstVariation.images[0]);
-          } else if (product.images && product.images.length > 0) {
-            setMainImage(product.images[0]);
-          }
-        }
-      }
-    } else {
-      // Reset variation selection if product doesn't have variations
-      setSelectedVariation(null);
-      setSelectedVariationAttributes({});
-      // Reset to main product images
-      if (product?.images && product.images.length > 0) {
-        setMainImage(product.images[0]);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product?._id]); // Only re-run when product ID changes
-
   useEffect(() => {
     if (product && productId) {
       axios
@@ -187,44 +155,162 @@ const ProductDetail = () => {
     checkUserPurchase();
   }, [user, productId, API_BASE_URL]);
 
-  // Get current images (variation images or product images)
+  // Helper function to validate if a value is appropriate for an attribute type
+  // This helps filter out obviously incorrect values (e.g., color names in storage field)
+  const isValidAttributeValue = (attributeName, value) => {
+    if (!value || typeof value !== 'string' || value.trim() === '') return false;
+    const attrLower = attributeName.toLowerCase().trim();
+    const valueLower = value.toLowerCase().trim();
+    
+    // Only validate storage/memory attributes to reject pure color names
+    if (attrLower === 'storage' || attrLower === 'memory' || attrLower.includes('storage') || attrLower.includes('memory')) {
+      // Common pure color names (without numbers/units) that shouldn't be in storage
+      const pureColorNames = ['black', 'white', 'blue', 'red', 'green', 'yellow', 'pink', 'purple', 'orange', 'gray', 'grey', 'brown', 'gold', 'silver', 'rose'];
+      
+      // If the value is EXACTLY a color name (and doesn't contain GB/TB/MB), it's likely wrong
+      if (pureColorNames.includes(valueLower) && !valueLower.match(/\d+.*(gb|tb|mb)/i)) {
+        return false; // Pure color name in storage field is invalid
+      }
+      
+      // Accept values that contain storage units or numbers
+      if (valueLower.match(/\d+.*(gb|tb|mb)/i) || valueLower.match(/\d+/)) {
+        return true;
+      }
+    }
+    
+    // For all other attributes (including color), accept all non-empty values
+    return true;
+  };
+
+  useEffect(() => {
+    if (product && Array.isArray(product.details?.color) && product.details.color.length > 0) {
+      setSelectedColor(product.details.color[0]);
+    }
+    
+    // Initialize variation selection if product has variations
+    if (product?.hasVariations && product?.variations && product.variations.length > 0) {
+      // Try to find a variation that matches the primary product image
+      const primaryImage = product.images && product.images.length > 0 ? product.images[0] : null;
+      let matchingVariation = null;
+      
+      if (primaryImage) {
+        // Check if primary image belongs to any variation
+        matchingVariation = product.variations.find(v => 
+          v.images && v.images.length > 0 && v.images.includes(primaryImage)
+        );
+      }
+      
+      // If no match found, use first variation
+      const variationToSelect = matchingVariation || product.variations[0];
+      setSelectedVariation(variationToSelect);
+      
+      // Initialize selected attributes from selected variation (with validation)
+      const attrs = {};
+      if (variationToSelect.attributes) {
+        Object.keys(variationToSelect.attributes).forEach(key => {
+          const value = variationToSelect.attributes[key];
+          // Only set valid attribute values
+          if (isValidAttributeValue(key, value)) {
+            attrs[key] = value;
+          }
+        });
+      }
+      setSelectedVariationAttributes(attrs);
+      
+      // Set main image based on selected variation
+      // If the selected variation has images, use the first one
+      // Otherwise, if primary image matches this variation, use primary image
+      // Otherwise, use primary product image
+      if (variationToSelect.images && variationToSelect.images.length > 0) {
+        setMainImage(variationToSelect.images[0]);
+      } else if (primaryImage && matchingVariation) {
+        // Primary image matches this variation, use it
+        setMainImage(primaryImage);
+      } else if (product.images && product.images.length > 0) {
+        // Fallback to primary product image
+        setMainImage(product.images[0]);
+      }
+    } else if (product) {
+      // Regular product without variations - initialize basic product details
+      // Always set primary product image first
+      if (product.images && product.images.length > 0) {
+        setMainImage(product.images[0]);
+      }
+      
+      const basicAttrs = {};
+      
+      // Extract basic product details that might be used as attributes
+      if (product.details) {
+        // Common attributes that might be in product details
+        const attributeFields = ['storage', 'color', 'ram', 'size', 'model'];
+        attributeFields.forEach(field => {
+          if (product.details[field]) {
+            // Handle both string and array values
+            if (Array.isArray(product.details[field])) {
+              basicAttrs[field] = product.details[field][0]; // Use first value if array
+            } else {
+              basicAttrs[field] = product.details[field];
+            }
+          }
+        });
+      }
+      
+      // Set basic attributes if any found
+      if (Object.keys(basicAttrs).length > 0) {
+        setSelectedVariationAttributes(basicAttrs);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product]);
+
+  // Get current images (show all images: product images + all variation images)
   const getCurrentImages = () => {
-    if (selectedVariation?.images && selectedVariation.images.length > 0) {
-      return selectedVariation.images;
-    }
+    const allImages = [];
+    const imageSet = new Set(); // Use Set to avoid duplicates
+    
+    // Add product images first
     if (product?.images && product.images.length > 0) {
-      return product.images;
+      product.images.forEach(img => {
+        if (!imageSet.has(img)) {
+          allImages.push(img);
+          imageSet.add(img);
+        }
+      });
     }
-    return [];
+    
+    // Add all variation images (from all variations, not just selected)
+    if (product?.variations && product.variations.length > 0) {
+      product.variations.forEach(variation => {
+        if (variation.images && variation.images.length > 0) {
+          variation.images.forEach(img => {
+            if (!imageSet.has(img)) {
+              allImages.push(img);
+              imageSet.add(img);
+            }
+          });
+        }
+      });
+    }
+    
+    return allImages.length > 0 ? allImages : [];
   };
 
-  // Get current price (variation price or product price)
-  const getCurrentPrice = () => {
-    if (selectedVariation?.price !== undefined && selectedVariation.price !== null) {
-      return selectedVariation.price;
-    }
-    return product?.price || 0;
-  };
-
-  // Get current discount price
-  const getCurrentDiscountPrice = () => {
-    if (selectedVariation?.discountPrice !== undefined && selectedVariation.discountPrice !== null) {
-      return selectedVariation.discountPrice;
-    }
-    return product?.discountPrice;
-  };
-
-  // Get current stock (variation stock or product stock)
-  const getCurrentStock = () => {
-    if (product?.hasVariations && selectedVariation) {
-      return selectedVariation.stock || 0;
-    }
-    return product?.stock || 0;
+  const handleQuantityChange = (type) => {
+    setQuantity((prev) => {
+      const maxStock = selectedVariation?.stock || product?.stock || 99;
+      if (type === 'increment' && prev < maxStock) return prev + 1;
+      if (type === 'decrement' && prev > 1) return prev - 1;
+      return prev;
+    });
   };
 
   // Handle variation attribute selection
   const handleVariationAttributeChange = (attributeName, value) => {
-    if (!product?.hasVariations || !product.variations) return;
+    // Validate the value is appropriate for this attribute before setting
+    if (!isValidAttributeValue(attributeName, value)) {
+      console.warn(`Invalid value "${value}" for attribute "${attributeName}"`);
+      return; // Don't set invalid values
+    }
 
     const newAttributes = {
       ...selectedVariationAttributes,
@@ -232,79 +318,122 @@ const ProductDetail = () => {
     };
     setSelectedVariationAttributes(newAttributes);
 
-    // Find matching variation - handle both Map and object formats
-    const matchingVariation = product.variations.find(variant => {
-      if (variant.isActive === false) return false;
-      const variantAttrs = variant.attributes || {};
-      // Convert Map to object if needed
-      const attrsObj = variantAttrs instanceof Map 
-        ? Object.fromEntries(variantAttrs.entries())
-        : variantAttrs;
-      
-      // Check if all selected attributes match
-      const selectedKeys = Object.keys(newAttributes);
-      const variantKeys = Object.keys(attrsObj);
-      
-      if (selectedKeys.length !== variantKeys.length) return false;
-      
-      return selectedKeys.every(key => attrsObj[key] === newAttributes[key]);
+    // Find matching variation
+    const matchingVariation = product.variations.find(v => {
+      return Object.keys(newAttributes).every(key => 
+        v.attributes && v.attributes[key] === newAttributes[key]
+      );
     });
 
     if (matchingVariation) {
       setSelectedVariation(matchingVariation);
-      // Update main image if variation has images
+      // Update main image to first image of selected variation
       if (matchingVariation.images && matchingVariation.images.length > 0) {
         setMainImage(matchingVariation.images[0]);
       } else if (product.images && product.images.length > 0) {
+        // Fallback to product images if variation doesn't have specific images
+        setMainImage(product.images[0]);
+      }
+    } else {
+      setSelectedVariation(null);
+      // Reset to product images if no matching variation
+      if (product.images && product.images.length > 0) {
         setMainImage(product.images[0]);
       }
     }
   };
 
-  // Get available values for an attribute (filtered by other selections)
+  // Get available values for an attribute
   const getAvailableValues = (attributeName) => {
-    if (!product?.hasVariations || !product.variations) return [];
-
-    const availableVariations = product.variations.filter(v => {
-      if (v.isActive === false) return false;
-      // Check if variation matches already selected attributes (except current one)
-      const variantAttrs = v.attributes || {};
-      // Convert Map to object if needed
-      const attrsObj = variantAttrs instanceof Map 
-        ? Object.fromEntries(variantAttrs.entries())
-        : variantAttrs;
-      
-      return Object.keys(selectedVariationAttributes)
-        .filter(key => key !== attributeName)
-        .every(key => attrsObj[key] === selectedVariationAttributes[key]);
-    });
-
     const values = new Set();
-    availableVariations.forEach(v => {
-      const variantAttrs = v.attributes || {};
-      const attrsObj = variantAttrs instanceof Map 
-        ? Object.fromEntries(variantAttrs.entries())
-        : variantAttrs;
-      const value = attrsObj[attributeName];
-      if (value) values.add(value);
-    });
+    
+    // Add values from variations (with validation)
+    if (product?.variations) {
+      product.variations.forEach(v => {
+        if (v.attributes && v.attributes[attributeName]) {
+          const value = v.attributes[attributeName];
+          // Only add valid values
+          if (isValidAttributeValue(attributeName, value)) {
+            values.add(value);
+          }
+        }
+      });
+    }
+    
+    // For color attribute, also include basic product color if it exists
+    if (attributeName.toLowerCase() === 'color' && product?.details?.color) {
+      if (Array.isArray(product.details.color)) {
+        product.details.color.forEach(color => {
+          if (isValidAttributeValue(attributeName, color)) {
+            values.add(color);
+          }
+        });
+      } else if (typeof product.details.color === 'string') {
+        if (isValidAttributeValue(attributeName, product.details.color)) {
+          values.add(product.details.color);
+        }
+      }
+    }
+    
+    return Array.from(values).filter(v => v && v.trim() !== ''); // Filter out empty values
+  };
 
-    return Array.from(values);
+  // Get variation image for a specific attribute value (e.g., get image for "Black" color)
+  const getVariationImage = (attributeName, attributeValue) => {
+    if (!product?.variations) return null;
+    
+    // Find variation with this specific attribute value
+    const matchingVariation = product.variations.find(v => {
+      return v.attributes && v.attributes[attributeName] === attributeValue;
+    });
+    
+    // Return first image from matching variation, or fallback to product image
+    if (matchingVariation?.images && matchingVariation.images.length > 0) {
+      return matchingVariation.images[0];
+    }
+    
+    // Fallback to main product images
+    if (product.images && product.images.length > 0) {
+      return product.images[0];
+    }
+    
+    return null;
+  };
+
+  // Get variation object for a specific attribute value
+  const getVariationForValue = (attributeName, attributeValue) => {
+    if (!product?.variations) return null;
+    return product.variations.find(v => {
+      return v.attributes && v.attributes[attributeName] === attributeValue;
+    });
+  };
+
+  // Get current stock (from selected variation or product)
+  const getCurrentStock = () => {
+    if (selectedVariation) {
+      return selectedVariation.stock || 0;
+    }
+    return product?.stock || 0;
   };
 
   // Check if all required attributes are selected
   const areAllAttributesSelected = () => {
-    if (!product?.hasVariations || !product.variationAttributes) return true;
-    return product.variationAttributes.every(attr => selectedVariationAttributes[attr.name]);
-  };
-
-  const handleQuantityChange = (type) => {
-    setQuantity((prev) => {
-      const maxStock = getCurrentStock();
-      if (type === 'increment' && prev < maxStock) return prev + 1;
-      if (type === 'decrement' && prev > 1) return prev - 1;
-      return prev;
+    if (!product?.hasVariations || !product?.variations || product.variations.length === 0) {
+      return true; // No variations required
+    }
+    
+    // Get all attribute names that exist in variations
+    const requiredAttributes = new Set();
+    product.variations.forEach(v => {
+      if (v.attributes) {
+        Object.keys(v.attributes).forEach(key => requiredAttributes.add(key));
+      }
     });
+    
+    // Check if all required attributes have been selected
+    return Array.from(requiredAttributes).every(attr => 
+      selectedVariationAttributes[attr] && selectedVariationAttributes[attr].trim() !== ''
+    );
   };
 
   const handleAddToCart = () => {
@@ -312,26 +441,37 @@ const ProductDetail = () => {
       setLoginModalOpen(true);
       return;
     }
-    
-    // Validate variation selection if product has variations
-    if (product?.hasVariations) {
-      if (!selectedVariation || !areAllAttributesSelected()) {
-        toast.error('Please select all variation options before adding to cart.');
-        return;
-      }
-      if (selectedVariation.stock <= 0) {
-        toast.error('This variation is out of stock.');
-        return;
-      }
-    } else {
-      if (product?.stock <= 0) {
-        toast.error('This product is out of stock.');
-        return;
-      }
-    }
-
     if (product) {
-      addToCart(product, quantity, selectedVariation);
+      // Check if all required attributes are selected (for products with variations)
+      if (product.hasVariations && product.variations && product.variations.length > 0) {
+        if (!areAllAttributesSelected()) {
+          alert('Please select all required attributes (storage, color, etc.) before adding to cart.');
+          return;
+        }
+      }
+      
+      // Create variation object from selected attributes if no exact match found
+      let variationToAdd = selectedVariation;
+      if (product.hasVariations && !selectedVariation && Object.keys(selectedVariationAttributes).length > 0) {
+        // Create a virtual variation from selected attributes
+        variationToAdd = {
+          attributes: selectedVariationAttributes,
+          stock: product.stock || 0,
+          price: product.price,
+          discountPrice: product.discountPrice,
+          images: product.images || []
+        };
+      }
+      
+      const productToAdd = {
+        ...product,
+        selectedColor,
+        selectedVariation: variationToAdd ? {
+          ...variationToAdd,
+          selectedAttributes: selectedVariationAttributes
+        } : null
+      };
+      addToCart(productToAdd, quantity);
       navigate('/cart');
     }
   };
@@ -341,44 +481,71 @@ const ProductDetail = () => {
       setLoginModalOpen(true);
       return;
     }
-    
-    // Validate variation selection if product has variations
-    if (product?.hasVariations) {
-      if (!selectedVariation || !areAllAttributesSelected()) {
-        toast.error('Please select all variation options before purchasing.');
-        return;
-      }
-      if (selectedVariation.stock <= 0) {
-        toast.error('This variation is out of stock.');
-        return;
-      }
-    } else {
-      if (product?.stock <= 0) {
-        toast.error('This product is out of stock.');
-        return;
-      }
-    }
-
     if (product) {
-      addToCart(product, quantity, selectedVariation);
+      // Check if all required attributes are selected (for products with variations)
+      if (product.hasVariations && product.variations && product.variations.length > 0) {
+        if (!areAllAttributesSelected()) {
+          alert('Please select all required attributes (storage, color, etc.) before buying.');
+          return;
+        }
+      }
+      
+      // Create variation object from selected attributes if no exact match found
+      let variationToAdd = selectedVariation;
+      if (product.hasVariations && !selectedVariation && Object.keys(selectedVariationAttributes).length > 0) {
+        // Create a virtual variation from selected attributes
+        variationToAdd = {
+          attributes: selectedVariationAttributes,
+          stock: product.stock || 0,
+          price: product.price,
+          discountPrice: product.discountPrice,
+          images: product.images || []
+        };
+      }
+      
+      const productToAdd = {
+        ...product,
+        selectedColor,
+        selectedVariation: variationToAdd ? {
+          ...variationToAdd,
+          selectedAttributes: selectedVariationAttributes
+        } : null
+      };
+      addToCart(productToAdd, quantity);
       navigate('/checkout');
     }
   };
 
   const handleThumbnailClick = (imagePath) => {
     setMainImage(imagePath);
-  };
-
-  // Reset quantity when variation changes
-  useEffect(() => {
-    if (selectedVariation) {
-      const stock = getCurrentStock();
-      if (quantity > stock && stock > 0) {
-        setQuantity(Math.max(1, stock));
+    
+    // If product has variations, try to find which variation this image belongs to
+    if (product?.hasVariations && product?.variations) {
+      const matchingVariation = product.variations.find(v => {
+        return v.images && v.images.includes(imagePath);
+      });
+      
+      if (matchingVariation) {
+        // Auto-select this variation and update all details
+        setSelectedVariation(matchingVariation);
+        
+        // Update selected attributes
+        const attrs = {};
+        if (matchingVariation.attributes) {
+          Object.keys(matchingVariation.attributes).forEach(key => {
+            attrs[key] = matchingVariation.attributes[key];
+          });
+        }
+        setSelectedVariationAttributes(attrs);
+      } else {
+        // If image is from main product images, clear variation selection
+        if (product.images && product.images.includes(imagePath)) {
+          setSelectedVariation(null);
+          setSelectedVariationAttributes({});
+        }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedVariation]);
+  };
 
   const cleanImagePath = (imagePath) => {
     if (!imagePath) return '';
@@ -594,66 +761,36 @@ const ProductDetail = () => {
           
           <div className="pd-price-row">
             {(() => {
-              const currentPrice = getCurrentPrice();
-              const discountPrice = getCurrentDiscountPrice();
+              // Get price from selected variation if available, otherwise use product price
+              const currentPrice = selectedVariation?.price || selectedVariation?.discountPrice || product.price;
+              const currentDiscountPrice = selectedVariation?.discountPrice || product.discountPrice;
+              const basePrice = selectedVariation?.price || product.price;
               
-              if (discountPrice && discountPrice < currentPrice) {
+              if (currentDiscountPrice && currentDiscountPrice < basePrice) {
                 return (
-                  <>
-                    <span className="pd-current-price">Rs. {discountPrice?.toLocaleString()}</span>
-                    <span className="pd-old-price">Rs. {currentPrice?.toLocaleString()}</span>
-                  </>
+              <>
+                    <span className="pd-current-price">Rs. {currentDiscountPrice?.toLocaleString()}</span>
+                    <span className="pd-old-price">Rs. {basePrice?.toLocaleString()}</span>
+                    
+              </>
+                );
+              } else {
+                return (
+                  <span className="pd-current-price">Rs. {currentPrice?.toLocaleString()}</span>
                 );
               }
-              return <span className="pd-current-price">Rs. {currentPrice?.toLocaleString()}</span>;
             })()}
           </div>
-          {/* Koko Payment Option */}
-          {product.kokoPay && (
-            <div className="pd-koko-payment">
-              <span className="pd-koko-text">
-                3 x <strong>Rs. {Math.ceil((getCurrentDiscountPrice() || getCurrentPrice()) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
-              </span>
-            </div>
-          )}
-          
-          {/* Variation Selection */}
-          {product?.hasVariations && product.variationAttributes && product.variationAttributes.length > 0 && (
-            <div className="pd-variations-section">
-              {product.variationAttributes.map((attr) => (
-                <div key={attr.name} className="pd-variation-attribute">
-                  <label className="pd-variation-label">
-                    {attr.name}: <span className="pd-variation-selected">
-                      {selectedVariationAttributes[attr.name] || 'Select ' + attr.name}
-                    </span>
-                  </label>
-                  <div className="pd-variation-values">
-                    {getAvailableValues(attr.name).map((value) => {
-                      const isSelected = selectedVariationAttributes[attr.name] === value;
-                      const isColor = attr.name.toLowerCase() === 'color';
-                      
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          className={`pd-variation-value ${isSelected ? 'selected' : ''} ${isColor ? 'color-swatch' : ''}`}
-                          onClick={() => handleVariationAttributeChange(attr.name, value)}
-                          style={isColor ? { backgroundColor: getColorHex(value) } : {}}
-                          title={value}
-                        >
-                          {!isColor && value}
-                          {isSelected && <FaCheck className="pd-variation-check" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-              {!areAllAttributesSelected() && (
-                <p className="pd-variation-warning">Please select all options to continue</p>
-              )}
-            </div>
-          )}
+             {/* Koko Payment Option */}
+          <div className="pd-koko-payment">
+            <span className="pd-koko-text">
+            3 x <strong>Rs. {Math.ceil(((() => {
+              const currentDiscountPrice = selectedVariation?.discountPrice || product.discountPrice;
+              const currentPrice = selectedVariation?.price || product.price;
+              return currentDiscountPrice || currentPrice;
+            })()) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
+            </span>
+          </div>
           <div className="pd-rating-row">
             <div className="pd-stars">
               {[...Array(5)].map((_, i) => (
@@ -663,6 +800,187 @@ const ProductDetail = () => {
             <span className="pd-rating-text">{reviews.length > 0 ? `${averageRating} (${reviews.length} reviews)` : 'No reviews yet'}</span>
             </div>
           <p className="pd-description">{product.description}</p>
+
+          {/* Variations Selection */}
+          {product.hasVariations && product.variations && product.variations.length > 0 ? (
+            <div className="pd-variations-section">
+              <div className="pd-variations-row">
+                {(() => {
+                  // Get all unique attribute names from variations
+                  const attributeNames = new Set();
+                  product.variations.forEach(v => {
+                    if (v.attributes) {
+                      Object.keys(v.attributes).forEach(key => attributeNames.add(key));
+                    }
+                  });
+                  return Array.from(attributeNames);
+                })().map((attrName, index, array) => {
+                  const availableValues = getAvailableValues(attrName);
+                  const isColor = attrName.toLowerCase() === 'color';
+                  
+                  return (
+                    <React.Fragment key={attrName}>
+                      <div className="pd-option-section">
+                        <p className="pd-option-label">
+                          {isColor ? (
+                            selectedVariationAttributes[attrName] 
+                              ? `${attrName.charAt(0).toUpperCase() + attrName.slice(1)} Family ${selectedVariationAttributes[attrName]}`
+                              : `Select ${attrName.charAt(0).toUpperCase() + attrName.slice(1)}`
+                          ) : (
+                            `Select ${attrName.charAt(0).toUpperCase() + attrName.slice(1)}`
+                          )}
+                          {!selectedVariation && <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>}
+                        </p>
+                        {isColor ? (
+                          <div className="pd-variant-thumbnails">
+                            {availableValues.map((value, idx) => {
+                              const variantImage = getVariationImage(attrName, value);
+                              const isSelected = selectedVariationAttributes[attrName] === value;
+                              return (
+                                <button
+                                  key={idx}
+                                  className={`pd-variant-thumbnail ${isSelected ? 'active' : ''}`}
+                                  onClick={() => handleVariationAttributeChange(attrName, value)}
+                                  title={value}
+                                  style={{
+                                    position: 'relative',
+                                    width: '80px',
+                                    height: '80px',
+                                    padding: '2px',
+                                    border: `2px solid ${isSelected ? '#f97316' : '#e5e7eb'}`,
+                                    borderRadius: '4px',
+                                    background: 'white',
+                                    cursor: 'pointer',
+                                    overflow: 'hidden',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  {variantImage ? (
+                                    <>
+                                      <img 
+                                        src={cleanImagePath(variantImage)} 
+                                        alt={value}
+                                        style={{
+                                          width: '100%',
+                                          height: '100%',
+                                          objectFit: 'cover',
+                                          borderRadius: '2px',
+                                          display: 'block'
+                                        }}
+                                        onError={(e) => {
+                                          // Fallback to color swatch if image fails to load
+                                          const imgElement = e.target;
+                                          const fallbackDiv = imgElement.nextElementSibling;
+                                          imgElement.style.display = 'none';
+                                          if (fallbackDiv) {
+                                            fallbackDiv.style.display = 'block';
+                                          }
+                                        }}
+                                      />
+                                      <div
+                                        style={{
+                                          display: 'none',
+                                          width: '100%',
+                                          height: '100%',
+                                          backgroundColor: getColorHex(value),
+                                          borderRadius: '2px',
+                                          position: 'absolute',
+                                          top: 0,
+                                          left: 0
+                                        }}
+                                      />
+                                    </>
+                                  ) : (
+                                    <div
+                                      style={{
+                                        display: 'block',
+                                        width: '100%',
+                                        height: '100%',
+                                        backgroundColor: getColorHex(value),
+                                        borderRadius: '2px'
+                                      }}
+                                    />
+                                  )}
+                                  {isSelected && (
+                                    <div
+                                      style={{
+                                        position: 'absolute',
+                                        bottom: '4px',
+                                        right: '4px',
+                                        width: '20px',
+                                        height: '20px',
+                                        borderRadius: '50%',
+                                        background: '#f97316',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        border: '2px solid white',
+                                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                                      }}
+                                    >
+                                      <FaCheck style={{ color: 'white', fontSize: '0.75rem' }} />
+                                    </div>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="pd-variation-options" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            {availableValues.map((value, idx) => {
+                              const variantImage = getVariationImage(attrName, value);
+                              const isSelected = selectedVariationAttributes[attrName] === value;
+                              return (
+                                <button
+                                  key={idx}
+                                  className={`pd-variation-option ${isSelected ? 'active' : ''}`}
+                                  onClick={() => handleVariationAttributeChange(attrName, value)}
+                                  style={{
+                                    padding: '0.5rem 1rem',
+                                    border: `2px solid ${isSelected ? '#f97316' : '#d1d5db'}`,
+                                    borderRadius: '4px',
+                                    background: isSelected ? '#f97316' : '#fff',
+                                    color: isSelected ? '#fff' : '#333',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem',
+                                    fontWeight: isSelected ? 600 : 400,
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  {value}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                      {index < array.length - 1 && <hr className="pd-variation-divider" />}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* Legacy Color Selection */
+            Array.isArray(product.details?.color) && product.details.color.length > 0 && (
+            <div className="pd-option-section">
+              <p className="pd-option-label">Select color</p>
+              <div className="pd-color-swatches">
+                {product.details.color.map((color, idx) => (
+                  <button
+                    key={idx}
+                    className={`pd-color-swatch ${selectedColor === color ? 'active' : ''}`}
+                    style={{ backgroundColor: getColorHex(color) }}
+                    onClick={() => setSelectedColor(color)}
+                    title={color}
+                          >
+                    {selectedColor === color && <FaCheck className="pd-swatch-check" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+            )
+          )}
 
           {/* Quantity & Wishlist */}
           <div className="pd-quantity-row">
@@ -681,14 +999,14 @@ const ProductDetail = () => {
             <button 
               className="pd-add-cart-btn" 
               onClick={handleAddToCart}
-              disabled={getCurrentStock() <= 0 || (product?.hasVariations && !areAllAttributesSelected())}
+              disabled={getCurrentStock() <= 0 || (product.hasVariations && product.variations && product.variations.length > 0 && !areAllAttributesSelected())}
             >
               ADD TO CART
             </button>
             <button 
               className="pd-buy-now-btn" 
               onClick={handleBuyNow} 
-              disabled={getCurrentStock() <= 0 || (product?.hasVariations && !areAllAttributesSelected())}
+              disabled={getCurrentStock() <= 0 || (product.hasVariations && product.variations && product.variations.length > 0 && !areAllAttributesSelected())}
             >
               BUY NOW
             </button>
@@ -696,21 +1014,17 @@ const ProductDetail = () => {
 
           {/* Stock Status */}
           <div className="pd-stock-status">
-            {(() => {
-              const stock = getCurrentStock();
-              if (stock > 0) {
-                return (
-                  <span className="pd-in-stock">
-                    <FaCheck /> In stock ({stock} available)
-                  </span>
-                );
-              }
-              return (
-                <span className="pd-out-stock">
-                  Out of stock
-                </span>
-              );
-            })()}
+            {getCurrentStock() > 0 ? (
+              <span className="pd-in-stock">
+                <FaCheck /> In stock ({getCurrentStock()} available)
+              </span>
+            ) : (
+              <span className="pd-out-stock">
+                {product.hasVariations && !selectedVariation 
+                  ? 'Please select a variation to check availability' 
+                  : 'Out of stock'}
+              </span>
+            )}
           </div>
 
           {/* Policy Accordion */}
@@ -884,7 +1198,7 @@ const ProductDetail = () => {
               <table className="pd-specs-table">
                 <tbody>
                 {Object.entries(product.details).map(([key, value]) => {
-                  // Skip color field if it's a hex code
+                  // Skip color field if it's a hex code (user-friendly display handled in variations)
                   if (key.toLowerCase() === 'color' && isHexColorCode(value)) {
                     // Try to convert hex to color name
                     const colorName = hexToColorName(value);

@@ -97,6 +97,57 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
+  // Product variations (e.g., storage, color combinations)
+  variations: [{
+    // Variation attributes (e.g., { storage: '128GB', color: 'Black' })
+    attributes: {
+      type: Map,
+      of: String,
+      required: true
+    },
+    // Stock for this specific variation
+    stock: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    // Optional price override for this variation (if different from base price)
+    price: {
+      type: Number
+    },
+    // Optional discount price override for this variation
+    discountPrice: {
+      type: Number
+    },
+    // Optional images specific to this variation
+    images: [{
+      type: String
+    }],
+    // SKU for this variation (optional)
+    sku: {
+      type: String
+    }
+  }],
+  // Legacy color variants (kept for backward compatibility)
+  variants: [{
+    color: {
+      type: String,
+      required: true
+    },
+    images: [{
+      type: String,
+      required: true
+    }],
+    stock: {
+      type: Number,
+      default: 0
+    }
+  }],
+  // Flag to indicate if product has variations
+  hasVariations: {
+    type: Boolean,
+    default: false
+  },
   stock: {
     type: Number,
     required: true,
@@ -140,64 +191,7 @@ const productSchema = new mongoose.Schema({
   displayOrder: {
     type: Number,
     default: 0
-  },
-  // Product variations system
-  hasVariations: {
-    type: Boolean,
-    default: false
-  },
-  // Variation attributes (e.g., [{ name: "Color", values: ["Black", "White"] }])
-  variationAttributes: [{
-    name: {
-      type: String,
-      required: true
-    },
-    values: [{
-      type: String,
-      required: true
-    }]
-  }],
-  // Generated variation combinations
-  variations: [{
-    // Unique identifier for this variation
-    variationId: {
-      type: String,
-      required: true
-    },
-    // Attributes as a Map for flexible key-value storage
-    attributes: {
-      type: Map,
-      of: String,
-      required: true
-    },
-    // Price override (uses base price if not set)
-    price: {
-      type: Number
-    },
-    // Discount price override
-    discountPrice: {
-      type: Number
-    },
-    // Stock for this specific variation
-    stock: {
-      type: Number,
-      required: true,
-      default: 0
-    },
-    // SKU for this variation
-    sku: {
-      type: String
-    },
-    // Optional images specific to this variation
-    images: [{
-      type: String
-    }],
-    // Whether this variation is available/active
-    isActive: {
-      type: Boolean,
-      default: true
-    }
-  }]
+  }
 });
 
 // Pre-save hook to generate slug from product name

@@ -51,29 +51,27 @@
 .modern-add-product-page {
   min-height: 100vh;
   background: #f5f5f5;
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
-/* Page Header - Daraz Style */
+/* Page Header */
 .page-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 2.5rem;
+  text-align: center;
 }
 
 .page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.25rem;
-  line-height: 1.4;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
 }
 
 .page-subtitle {
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 1rem;
+  color: #64748b;
   font-weight: 400;
-  line-height: 1.5;
 }
 
 /* ========================================
@@ -81,13 +79,13 @@
    ======================================== */
 
 .steps-progress-bar {
-  max-width: 1400px;
-  margin: 0 auto 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto 2.5rem;
   background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  border-radius: 0.5rem;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .steps-wrapper {
@@ -126,7 +124,7 @@
 .progress-step.progress-active .progress-circle {
   background: #f97316;
   color: white;
-  border-color: #ea580c;
+  border-color: #f97316;
   box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
   transform: scale(1.05);
 }
@@ -206,22 +204,23 @@
 
 .content-column {
   background: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  max-width: 1400px;
-  margin: 0 auto;
+  border-radius: 0.5rem;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .product-form {
   padding: 0;
 }
 
-/* Form Steps - Daraz Style */
+/* Form Steps */
 .form-step {
   padding: 2rem;
   animation: fadeIn 0.3s ease;
+  background: white;
 }
 
 @keyframes fadeIn {
@@ -240,14 +239,13 @@
   font-weight: 600;
   color: #1f2937;
   margin-bottom: 0.5rem;
-  line-height: 1.4;
 }
 
 .form-section-subtitle {
   font-size: 0.875rem;
   color: #6b7280;
   margin-bottom: 1.5rem;
-  line-height: 1.5;
+  font-weight: 400;
 }
 
 .form-section-content {
@@ -264,17 +262,15 @@
 
 .modern-label {
   display: block;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
   margin-bottom: 0.5rem;
-  line-height: 1.4;
 }
 
 .required-star {
   color: #ef4444;
-  margin-left: 3px;
-  font-weight: 600;
+  margin-left: 2px;
 }
 
 .modern-input,
@@ -282,7 +278,7 @@
   width: 100%;
   padding: 0.625rem 0.875rem;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 0.375rem;
   font-size: 0.875rem;
   background: white;
   transition: all 0.2s ease;
@@ -295,12 +291,7 @@
   outline: none;
   border-color: #f97316;
   background: white;
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
-}
-
-.modern-input:hover,
-.modern-textarea:hover {
-  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
 .modern-textarea {
@@ -319,38 +310,13 @@
 .form-row-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 @media (max-width: 768px) {
   .form-row-2col {
     grid-template-columns: 1fr;
-    gap: 1rem;
   }
-}
-
-/* Select Dropdowns - Daraz Style */
-.modern-input select,
-select.modern-input {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 12px;
-  padding-right: 2.5rem;
-  cursor: pointer;
-}
-
-.modern-input select:focus,
-select.modern-input:focus {
-  outline: none;
-  border-color: #f97316;
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
-}
-
-.modern-input select:hover,
-select.modern-input:hover {
-  border-color: #9ca3af;
 }
 
 /* ========================================
@@ -390,7 +356,7 @@ select.modern-input:hover {
 
 .category-select-second {
   border-color: #f97316;
-  background: #fffbeb;
+  background: #fff7ed;
 }
 
 /* ========================================
@@ -415,11 +381,10 @@ select.modern-input:hover {
   font-size: 0.875rem;
   color: #6b7280;
   margin-bottom: 1.5rem;
-  padding: 0.875rem 1rem;
-  background: #fffbeb;
+  padding: 1rem;
+  background: #fff7ed;
   border-left: 3px solid #f97316;
-  border-radius: 4px;
-  line-height: 1.5;
+  border-radius: 0.375rem;
 }
 
 .specs-grid {
@@ -502,7 +467,7 @@ select.modern-input:hover {
   background: #f97316;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -513,7 +478,6 @@ select.modern-input:hover {
 
 .btn-add-spec:hover {
   background: #ea580c;
-  transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
 }
 
@@ -534,17 +498,17 @@ select.modern-input:hover {
   grid-template-columns: 2fr 2fr 1.5fr auto;
   gap: 0.75rem;
   align-items: center;
-  padding: 0.875rem;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
   transition: all 0.2s ease;
 }
 
 .custom-spec-row:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: white;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.08);
 }
 
 .spec-input {
@@ -559,7 +523,7 @@ select.modern-input:hover {
 .spec-input:focus {
   outline: none;
   border-color: #f97316;
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
 .spec-name {
@@ -646,18 +610,18 @@ select.modern-input:hover {
 
 .upload-area {
   display: block;
-  border: 2px dashed #cbd5e1;
-  border-radius: 1rem;
-  padding: 3rem 2rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2.5rem 2rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #f8fafc;
+  background: #fafafa;
 }
 
 .upload-area:hover {
   border-color: #f97316;
-  background: #fffbeb;
+  background: #fff7ed;
 }
 
 .upload-input-hidden {
@@ -750,9 +714,9 @@ select.modern-input:hover {
   background: #f97316;
   color: white;
   padding: 0.25rem 0.625rem;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* ========================================
@@ -760,9 +724,9 @@ select.modern-input:hover {
    ======================================== */
 
 .review-card {
-  background: white;
+  background: #fafafa;
   border: 1px solid #e5e7eb;
-  border-radius: 4px;
+  border-radius: 0.5rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
@@ -801,31 +765,21 @@ select.modern-input:hover {
 }
 
 .warning-box {
-  background: #fffbeb;
+  background: #fef3c7;
   border: 1px solid #fbbf24;
   color: #92400e;
   padding: 0.875rem 1.25rem;
-  border-radius: 4px;
+  border-radius: 0.375rem;
   font-weight: 500;
   font-size: 0.875rem;
   text-align: center;
-  border-left: 3px solid #fbbf24;
 }
 
 .empty-state {
   text-align: center;
-  padding: 2rem 1.5rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-}
-
-.empty-state-hint {
-  font-size: 0.8125rem;
-  color: #9ca3af;
-  margin-top: 0.5rem;
+  padding: 3rem 2rem;
+  color: #64748b;
+  font-size: 1rem;
 }
 
 /* ========================================
@@ -843,36 +797,39 @@ select.modern-input:hover {
 
 .btn-back,
 .btn-next {
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 2rem;
   border: none;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-back {
-  background: #f1f5f9;
-  color: #475569;
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  padding: 0.75rem 1.5rem;
 }
 
 .btn-back:hover {
-  background: #e2e8f0;
-  transform: translateX(-2px);
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #374151;
 }
 
 .btn-next {
   background: #f97316;
   color: white;
-  box-shadow: 0 1px 3px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 1px 3px rgba(249, 115, 22, 0.2);
   margin-left: auto;
 }
 
 .btn-next:hover {
   background: #ea580c;
   transform: translateX(2px);
-  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
 }
 
 /* ========================================
@@ -883,26 +840,27 @@ select.modern-input:hover {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding: 1.5rem 2rem;
-  background: white;
+  padding: 1.5rem 2.5rem;
+  background: #fafafa;
   border-top: 1px solid #e5e7eb;
 }
 
 .btn-secondary,
 .btn-primary {
-  padding: 0.75rem 2rem;
+  padding: 1rem 2.5rem;
   border: none;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-secondary {
   background: white;
-  color: #475569;
-  border: 1px solid #cbd5e1;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  padding: 0.75rem 1.5rem;
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -914,14 +872,13 @@ select.modern-input:hover {
 .btn-primary {
   background: #f97316;
   color: white;
-  box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2);
-  margin-left: auto;
+  box-shadow: 0 1px 3px rgba(249, 115, 22, 0.2);
+  padding: 0.75rem 2rem;
 }
 
 .btn-primary:hover:not(:disabled) {
   background: #ea580c;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
 }
 
 .btn-primary:disabled,
@@ -938,157 +895,9 @@ select.modern-input:hover {
 .error-text {
   display: block;
   margin-top: 0.5rem;
-  font-size: 0.8125rem;
+  font-size: 0.85rem;
   color: #ef4444;
   font-weight: 500;
-}
-
-
-/* Table Input Styling */
-.table-input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  background: white;
-  transition: all 0.2s ease;
-  color: #374151;
-}
-
-.table-input:focus {
-  outline: none;
-  border-color: #f97316;
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
-}
-
-.table-input:hover {
-  border-color: #9ca3af;
-}
-
-/* Special Price Add Button */
-.special-price-add-btn {
-  padding: 0.375rem 0.75rem;
-  background: transparent;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8125rem;
-  color: #374151;
-  transition: all 0.2s ease;
-}
-
-.special-price-add-btn:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-  color: #1f2937;
-}
-
-/* Toggle Switch - Orange Style */
-.toggle-switch-orange {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
-
-.toggle-switch-orange input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-switch-orange .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-  border-radius: 24px;
-}
-
-.toggle-switch-orange .slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.toggle-switch-orange input:checked + .slider {
-  background-color: #f97316;
-}
-
-.toggle-switch-orange input:checked + .slider:before {
-  transform: translateX(20px);
-}
-
-/* ========================================
-   Additional Daraz-Style Improvements
-   ======================================== */
-
-/* Better spacing for form sections */
-.form-section-content {
-  margin-bottom: 1.5rem;
-}
-
-.form-field-group {
-  margin-bottom: 1.25rem;
-}
-
-/* Input placeholder styling */
-.modern-input::placeholder,
-.modern-textarea::placeholder {
-  color: #9ca3af;
-  opacity: 1;
-}
-
-/* Info icon styling */
-.info-icon {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #d1d5db;
-  color: #6b7280;
-  font-size: 0.75rem;
-  text-align: center;
-  line-height: 16px;
-  margin-left: 0.25rem;
-  cursor: help;
-}
-
-/* Character counter styling */
-.char-counter {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  margin-top: 0.25rem;
-  text-align: right;
-}
-
-/* Section divider */
-.section-divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 1.5rem 0;
-  border: none;
-}
-
-/* Card-style sections */
-.section-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
 }
 
 /* ========================================
@@ -1165,10 +974,209 @@ select.modern-input:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d1d5db;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #9ca3af;
+}
+
+/* ========================================
+   Daraz-Style Variant Management
+   ======================================== */
+
+.variations-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.variations-section table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.variations-section table thead th {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 0.875rem 0.75rem;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.variations-section table tbody td {
+  padding: 0.875rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.variations-section table tbody tr:hover {
+  background: #fafafa;
+}
+
+.variations-section table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Variant input styling */
+.variations-section input[type="text"],
+.variations-section input[type="number"] {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background: white;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.variations-section input[type="text"]:focus,
+.variations-section input[type="number"]:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.variations-section select {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.variations-section select:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* Bulk operations section */
+.variations-section .bulk-section {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Variant value input row */
+.variant-value-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.variant-value-row:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Availability toggle - Orange Daraz style */
+.availability-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.availability-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.availability-toggle .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #d1d5db;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.availability-toggle .slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.availability-toggle input:checked + .slider {
+  background-color: #f97316;
+}
+
+.availability-toggle input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Add variant button */
+.add-variant-btn {
+  width: 60px;
+  height: 60px;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.375rem;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #9ca3af;
+  transition: all 0.2s ease;
+}
+
+.add-variant-btn:hover {
+  border-color: #f97316;
+  background: #fff7ed;
+  color: #f97316;
+}
+
+/* Variant image preview */
+.variant-image-preview {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.variant-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.variant-image-preview:hover {
+  border-color: #f97316;
 }

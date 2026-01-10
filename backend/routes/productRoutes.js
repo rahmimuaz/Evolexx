@@ -28,7 +28,7 @@ const router = express.Router();
 // ============== STATIC ROUTES (must come before dynamic :id routes) ==============
 
 // Create a new product with image upload (Cloudinary)
-// Using upload.any() to handle product images
+// Using upload.any() to handle both main product images and variation images
 router.post('/', upload.any(), createProduct);
 
 // Get all products

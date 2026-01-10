@@ -220,6 +220,164 @@
   margin-bottom: 24px;
 }
 
+/* Variations Section */
+.pd-variations-section {
+  margin-bottom: 12px;
+}
+
+.pd-variations-row {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.pd-variation-divider {
+  width: 1px;
+  height: 100%;
+  min-height: 60px;
+  border: none;
+  background-color: #e0e0e0;
+  margin: 0 2rem;
+  align-self: stretch;
+}
+
+/* Color Selection - Daraz Style */
+.pd-option-section {
+  flex: 1;
+  min-width: 150px;
+  margin-bottom: 0;
+}
+
+.pd-option-label {
+  font-size: 0.875rem;
+  color: #374151;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+/* Variant Thumbnails - Daraz Style (for color variants) */
+.pd-variant-thumbnails {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.pd-variant-thumbnail {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border: 2px solid #e5e7eb;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  overflow: visible;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pd-variant-thumbnail:hover {
+  border-color: #f97316;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
+  transform: translateY(-2px);
+}
+
+.pd-variant-thumbnail.active {
+  border-color: #f97316;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+.pd-variant-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+}
+
+.pd-variant-thumbnail > div {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Legacy Color Swatches (kept for backward compatibility) */
+.pd-color-swatches {
+  display: flex;
+  gap: 10px;
+}
+
+.pd-color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50px;
+  border: 1.5px solid #e0e0e0;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.pd-color-swatch:hover {
+  border-color: #999;
+}
+
+.pd-color-swatch.active {
+  border-color: #f97316;
+}
+
+.pd-swatch-check {
+  display: none;
+  color: #fff;
+  font-size: 0.7rem;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+/* Variation Options (for non-color attributes like storage) */
+.pd-variation-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.pd-variation-option {
+  padding: 0.625rem 1.25rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  text-align: center;
+}
+
+.pd-variation-option:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+
+.pd-variation-option.active {
+  background: #f97316;
+  color: white;
+  border-color: #f97316;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(249, 115, 22, 0.2);
+}
 
 /* Actions */
 /* Quantity Row */
@@ -336,101 +494,6 @@
 .pd-wishlist-btn:hover {
   border-color: #e53935;
   color: #e53935;
-}
-
-/* Variation Selection */
-.pd-variations-section {
-  margin-top: 24px;
-  padding: 20px 0;
-  border-top: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.pd-variation-attribute {
-  margin-bottom: 20px;
-}
-
-.pd-variation-attribute:last-child {
-  margin-bottom: 0;
-}
-
-.pd-variation-label {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.pd-variation-selected {
-  font-weight: 600;
-  color: #000;
-}
-
-.pd-variation-values {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.pd-variation-value {
-  padding: 8px 16px;
-  border: 2px solid #e0e0e0;
-  background: #fff;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  min-width: 60px;
-  text-align: center;
-  position: relative;
-}
-
-.pd-variation-value:hover {
-  border-color: #999;
-  background: #f9f9f9;
-}
-
-.pd-variation-value.selected {
-  border-color: #000;
-  background: #000;
-  color: #fff;
-  font-weight: 500;
-}
-
-.pd-variation-value.color-swatch {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  border-width: 3px;
-  position: relative;
-  min-width: 40px;
-}
-
-.pd-variation-value.color-swatch.selected {
-  border-color: #000;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000;
-}
-
-.pd-variation-check {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 0.8rem;
-  z-index: 1;
-}
-
-.pd-variation-warning {
-  margin-top: 12px;
-  padding: 8px 12px;
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 4px;
-  color: #856404;
-  font-size: 0.85rem;
 }
 
 /* Stock Status */
@@ -1273,6 +1336,56 @@
     line-height: 1.5;
   }
 
+  /* Variations Section */
+  .pd-variations-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .pd-variation-divider {
+    width: 100%;
+    height: 1px;
+    min-height: 1px;
+    margin: 1rem 0;
+    align-self: stretch;
+  }
+
+  /* Color Selection */
+  .pd-option-section {
+    margin-bottom: 14px;
+    min-width: 100%;
+  }
+
+  .pd-option-label {
+    
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+  }
+
+  .pd-color-swatch {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Variant Thumbnails - Mobile */
+  .pd-variant-thumbnails {
+    gap: 10px;
+  }
+
+  .pd-variant-thumbnail {
+    width: 70px;
+    height: 70px;
+  }
+
+  .pd-variation-options {
+    gap: 0.5rem;
+  }
+
+  .pd-variation-option {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    min-width: 50px;
+  }
 
   /* Quantity & Actions */
   .pd-quantity-row {

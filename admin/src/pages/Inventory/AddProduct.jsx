@@ -6,7 +6,6 @@ import 'easymde/dist/easymde.min.css';
 import './AddProduct.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClipboardList, faCog, faDollarSign, faImage, faCheck, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
-import VariationManager from '../../components/VariationManager/VariationManager';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -33,12 +32,13 @@ const AddProduct = () => {
   const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [discountError, setDiscountError] = useState('');
-  
-  // Variation state
   const [hasVariations, setHasVariations] = useState(false);
-  const [variationAttributes, setVariationAttributes] = useState([]);
   const [variations, setVariations] = useState([]);
-  const [variationValidation, setVariationValidation] = useState({ isValid: true, errors: [], getImageFiles: () => [] });
+  const [variationAttributes, setVariationAttributes] = useState(['storage', 'color']); // Dynamic attributes based on category
+  const [variationImages, setVariationImages] = useState({}); // { variationId: { files: [], previews: [] } }
+  const [variantName, setVariantName] = useState(''); // Variant attribute name (e.g., "Color Family") - deprecated, kept for compatibility
+  const [variantAttributeValues, setVariantAttributeValues] = useState([]); // Array of variant values (e.g., ["Black", "Blue"]) - deprecated
+  const [newVariantValue, setNewVariantValue] = useState(''); // Input for adding new variant values - deprecated
 
   // Define the API base URL from environment variables
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -53,6 +53,23 @@ const AddProduct = () => {
 
   const categories = Object.keys(categoryHierarchy);
 
+  // Category-based suggested variation attributes
+  const categoryVariationAttributes = {
+    'Mobile Phone': ['storage', 'color', 'ram'],
+    'Laptops': ['storage', 'ram', 'color'],
+    'Tablets': ['storage', 'color', 'ram'],
+    'Smartwatches': ['size', 'color', 'bandMaterial'],
+    'Preowned Phones': ['storage', 'color', 'condition'],
+    'Preowned Laptops': ['storage', 'ram', 'condition'],
+    'Preowned Tablets': ['storage', 'color', 'condition'],
+    'Chargers': ['type', 'wattage', 'color'],
+    'Phone Covers': ['compatibility', 'color', 'material'],
+    'Screen Protectors': ['compatibility', 'type', 'material'],
+    'Cables': ['type', 'length', 'color'],
+    'Headphones': ['color', 'type', 'connectivity'],
+    'Earbuds': ['color', 'type', 'connectivity'],
+    'Other Accessories': ['color', 'type', 'compatibility']
+  };
 
   const categoryFields = {
     'Mobile Phone': [
@@ -172,6 +189,25 @@ const AddProduct = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.category]);
 
+  // Update variation attributes based on category/subcategory
+  useEffect(() => {
+    if (hasVariations && formData.subcategory) {
+      const suggestedAttrs = categoryVariationAttributes[formData.subcategory] || ['color'];
+      // Only update if current attributes don't match suggested (to preserve custom attributes)
+      const currentAttrsSet = new Set(variationAttributes);
+      const isDifferent = suggestedAttrs.length !== variationAttributes.length || 
+                         !suggestedAttrs.every(attr => currentAttrsSet.has(attr));
+      
+      if (isDifferent && variations.length === 0) {
+        // Only auto-update if no variations exist yet
+        setVariationAttributes(suggestedAttrs);
+      }
+    } else if (hasVariations && !formData.subcategory && variationAttributes.length === 0) {
+      // Default attributes if no subcategory selected
+      setVariationAttributes(['color']);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.subcategory, hasVariations]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -221,6 +257,240 @@ const AddProduct = () => {
     ));
   };
 
+  // Variation attributes management functions
+  const addVariationAttribute = () => {
+    const newAttr = prompt('Enter attribute name (e.g., size, material, type):');
+    if (newAttr && newAttr.trim() && !variationAttributes.includes(newAttr.trim().toLowerCase())) {
+      const attrName = newAttr.trim().toLowerCase();
+      setVariationAttributes(prev => [...prev, attrName]);
+      // Update existing variations to include new attribute
+      setVariations(prev => prev.map(v => ({
+        ...v,
+        attributes: { ...v.attributes, [attrName]: '' }
+      })));
+    } else if (newAttr && variationAttributes.includes(newAttr.trim().toLowerCase())) {
+      alert('This attribute already exists.');
+    }
+  };
+
+  const removeVariationAttribute = (attrToRemove) => {
+    if (variationAttributes.length <= 1) {
+      alert('You must have at least one variation attribute.');
+      return;
+    }
+    if (window.confirm(`Remove "${attrToRemove}" attribute? This will remove this attribute from all variations.`)) {
+      setVariationAttributes(prev => prev.filter(attr => attr !== attrToRemove));
+      // Remove attribute from existing variations
+      setVariations(prev => prev.map(v => {
+        const newAttrs = { ...v.attributes };
+        delete newAttrs[attrToRemove];
+        return { ...v, attributes: newAttrs };
+      }));
+    }
+  };
+
+  // Helper function to normalize variant name to standard attribute key
+  const normalizeAttributeKey = (variantName) => {
+    if (!variantName) return '';
+    const normalized = variantName.toLowerCase().trim();
+    // Map common variant names to standard attribute keys
+    if (normalized.includes('color') || normalized.includes('colour')) return 'color';
+    if (normalized.includes('storage') || normalized.includes('memory')) return 'storage';
+    if (normalized.includes('size')) return 'size';
+    if (normalized.includes('ram')) return 'ram';
+    if (normalized.includes('material')) return 'material';
+    if (normalized.includes('type')) return 'type';
+    // Remove spaces and special characters for other attributes
+    return normalized.replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+  };
+
+  // Variations management functions
+  const addVariation = (variantValue = '') => {
+    const newVariation = {
+      id: Date.now() + Math.random(),
+      attributes: {},
+      stock: 0,
+      price: '',
+      discountPrice: '',
+      sku: '',
+      wearingType: '',
+      availability: true,
+      images: []
+    };
+    
+    // Initialize attributes based on variantName or variationAttributes
+    if (variantName && variantValue) {
+      // Use normalized attribute key (e.g., "Color Family" -> "color")
+      const attrKey = normalizeAttributeKey(variantName);
+      if (attrKey) {
+        newVariation.attributes[attrKey] = variantValue;
+      }
+      // Also initialize other attributes from variationAttributes if they exist
+      if (variationAttributes.length > 0) {
+        variationAttributes.forEach(attr => {
+          if (attr !== attrKey && !newVariation.attributes[attr]) {
+            newVariation.attributes[attr] = '';
+          }
+        });
+      }
+    } else if (variationAttributes.length > 0) {
+      // If variationAttributes exist, initialize all of them
+      variationAttributes.forEach((attr, index) => {
+        // If variantValue provided and this is the first attribute, use it
+        if (variantValue && index === 0) {
+          newVariation.attributes[attr] = variantValue;
+        } else {
+          newVariation.attributes[attr] = '';
+        }
+      });
+    } else {
+      // Fallback: use "color" as default
+      newVariation.attributes['color'] = variantValue || '';
+    }
+    
+    setVariations(prev => [...prev, newVariation]);
+  };
+
+
+
+
+  const updateVariation = (id, field, value) => {
+    setVariations(prev => prev.map(v => {
+      if (v.id === id) {
+        if (field.startsWith('attr.')) {
+          const attrName = field.replace('attr.', '');
+          return {
+            ...v,
+            attributes: {
+              ...v.attributes,
+              [attrName]: value
+            }
+          };
+        }
+        // Handle boolean fields
+        if (field === 'availability') {
+          return { ...v, [field]: value === true || value === 'true' || value === 'on' };
+        }
+        return { ...v, [field]: value };
+      }
+      return v;
+    }));
+  };
+
+  // Auto-generate SKU based on product name and variant attributes
+  const generateSKU = (variation) => {
+    if (!formData.name || !variation.attributes) return '';
+    const baseName = formData.name.replace(/\s+/g, '').substring(0, 6).toUpperCase();
+    const attrs = Object.values(variation.attributes).filter(v => v).join('-').replace(/\s+/g, '').substring(0, 10).toUpperCase();
+    return `${baseName}-${attrs || 'VAR'}-${Date.now().toString().slice(-4)}`;
+  };
+
+  // Handle variation image upload (single image only)
+  const handleVariationImageChange = (variationId, e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 1) {
+      alert('You can only upload 1 image per variation.');
+      return;
+    }
+
+    if (files.length === 0) return;
+
+    // Replace existing image with new one (single image only)
+    const file = files[0];
+    const preview = URL.createObjectURL(file);
+
+    // Clean up old preview URL if exists
+    const currentImages = variationImages[variationId];
+    if (currentImages && currentImages.previews.length > 0) {
+      URL.revokeObjectURL(currentImages.previews[0]);
+    }
+
+    setVariationImages(prev => ({
+      ...prev,
+      [variationId]: {
+        files: [file],
+        previews: [preview]
+      }
+    }));
+  };
+
+  // Remove variation image
+  const removeVariationImage = (variationId, index) => {
+    const currentImages = variationImages[variationId] || { files: [], previews: [] };
+    const newFiles = currentImages.files.filter((_, i) => i !== index);
+    const newPreviews = currentImages.previews.filter((_, i) => i !== index);
+
+    // Revoke object URL to free memory
+    URL.revokeObjectURL(currentImages.previews[index]);
+
+    setVariationImages(prev => ({
+      ...prev,
+      [variationId]: {
+        files: newFiles,
+        previews: newPreviews
+      }
+    }));
+  };
+
+  // Clean up variation images when variation is removed
+  const removeVariation = (id) => {
+    // Clean up image URLs
+    if (variationImages[id]) {
+      variationImages[id].previews.forEach(url => URL.revokeObjectURL(url));
+      setVariationImages(prev => {
+        const newImages = { ...prev };
+        delete newImages[id];
+        return newImages;
+      });
+    }
+    setVariations(prev => prev.filter(v => v.id !== id));
+  };
+
+  const generateVariationCombinations = () => {
+    // Get all unique values for each attribute from existing variations
+    const attributeValues = {};
+    variationAttributes.forEach(attr => {
+      attributeValues[attr] = [...new Set(variations.map(v => v.attributes[attr]).filter(Boolean))];
+    });
+
+    // Generate all combinations
+    const combinations = [];
+    const generate = (current, remainingAttrs) => {
+      if (remainingAttrs.length === 0) {
+        combinations.push(current);
+        return;
+      }
+      const [attr, ...rest] = remainingAttrs;
+      const values = attributeValues[attr] || [];
+      if (values.length === 0) {
+        generate({ ...current, [attr]: '' }, rest);
+      } else {
+        values.forEach(value => {
+          generate({ ...current, [attr]: value }, rest);
+        });
+      }
+    };
+
+    generate({}, variationAttributes);
+
+    // Create variations for each combination that doesn't already exist
+    combinations.forEach(combo => {
+      const exists = variations.some(v => 
+        variationAttributes.every(attr => v.attributes[attr] === combo[attr])
+      );
+      if (!exists) {
+        const newVariation = {
+          id: Date.now() + Math.random(),
+          attributes: combo,
+          stock: 0,
+          price: '',
+          discountPrice: '',
+          images: []
+        };
+        setVariations(prev => [...prev, newVariation]);
+      }
+    });
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -236,13 +506,7 @@ const AddProduct = () => {
   const handleSubmit = async (e, saveAsDraft = false) => {
     e.preventDefault();
 
-    // Validation: Check if variations are enabled and valid
-    if (hasVariations && !variationValidation.isValid) {
-      alert('Please fix variation errors before submitting:\n' + variationValidation.errors.join('\n'));
-      return;
-    }
-
-    if (!saveAsDraft && selectedFiles.length === 0 && !hasVariations) {
+    if (!saveAsDraft && selectedFiles.length === 0) {
       alert('Please upload at least one image.');
       return;
     }
@@ -251,17 +515,10 @@ const AddProduct = () => {
       return;
     }
 
-    // Validate stock - only required if not using variations
-    if (!hasVariations && (!formData.stock || Number(formData.stock) <= 0)) {
-      alert('Please enter a valid stock quantity (must be greater than 0).');
-      setLoading(false);
-      return;
-    }
-
-    // Validate variations if enabled
-    if (hasVariations) {
-      if (variationAttributes.length === 0 || variations.length === 0) {
-        alert('Please define at least one variation attribute and generate variations.');
+    // Validate stock for products without variations
+    if (!hasVariations) {
+      if (!formData.stock || Number(formData.stock) <= 0) {
+        alert('Please enter a valid stock quantity (must be greater than 0).');
         setLoading(false);
         return;
       }
@@ -305,36 +562,58 @@ const AddProduct = () => {
       formDataToSend.append('kokoPay', formData.kokoPay);
 
       // Handle variations
-      formDataToSend.append('hasVariations', hasVariations ? 'true' : 'false');
-      
-      if (hasVariations && variationAttributes.length > 0 && variations.length > 0) {
-        // Format attributes for backend (remove internal IDs)
-        const formattedAttributes = variationAttributes.map(attr => ({
-          name: attr.name,
-          values: attr.values.filter(v => v.trim())
-        })).filter(attr => attr.name && attr.values.length > 0);
+      if (hasVariations && variations.length > 0) {
+        // Validate variations
+        const validVariations = variations.filter(v => {
+          // Check if at least one attribute has a value
+          return Object.values(v.attributes).some(val => val && val.trim() !== '');
+        });
 
-        // Format variations for backend (convert attributes to plain object)
-        const formattedVariations = variations.map(variant => ({
-          variationId: variant.variationId,
-          attributes: variant.attributes,
-          price: variant.price,
-          discountPrice: variant.discountPrice,
-          stock: variant.stock,
-          sku: variant.sku,
-          isActive: variant.isActive !== false
+        if (validVariations.length === 0) {
+          alert('Please add at least one valid variation with attributes.');
+          setLoading(false);
+          return;
+        }
+
+        // Calculate total stock from variations (allow 0 stock - stock is optional)
+        const totalStock = validVariations.reduce((sum, v) => {
+          return sum + (parseInt(v.stock) || 0);
+        }, 0);
+        
+        // Set stock to calculated total from variations (can be 0 if no stock set)
+        formDataToSend.append('stock', totalStock.toString());
+
+        // Upload variation images and get URLs
+        // For now, we'll upload variation images with a special naming convention
+        // The backend will need to handle these
+        validVariations.forEach((v, index) => {
+          const varImages = variationImages[v.id];
+          if (varImages && varImages.files.length > 0) {
+            varImages.files.forEach((file, fileIndex) => {
+              formDataToSend.append(`variation-${v.id}-images`, file);
+            });
+          }
+        });
+
+        // Include variation image file references in variation data
+        // The backend will process these files and return URLs
+        const variationsWithImageRefs = validVariations.map(v => ({
+          attributes: v.attributes,
+          stock: parseInt(v.stock) || 0,
+          price: v.price ? parseFloat(v.price) : undefined,
+          discountPrice: v.discountPrice ? parseFloat(v.discountPrice) : undefined,
+          sku: v.sku || generateSKU(v),
+          wearingType: v.wearingType || '',
+          availability: v.availability !== false,
+          images: [], // Will be populated by backend after upload
+          _hasImages: variationImages[v.id]?.files.length > 0,
+          _variationId: v.id // Temporary ID for backend to match files
         }));
 
-        formDataToSend.append('variationAttributes', JSON.stringify(formattedAttributes));
-        formDataToSend.append('variations', JSON.stringify(formattedVariations));
-
-        // Add variation images
-        const variationImageFiles = variationValidation.getImageFiles ? variationValidation.getImageFiles() : [];
-        variationImageFiles.forEach(({ fieldname, file }) => {
-          formDataToSend.append(fieldname, file);
-        });
+        formDataToSend.append('hasVariations', 'true');
+        formDataToSend.append('variations', JSON.stringify(variationsWithImageRefs));
       } else {
-        // Add stock only if not using variations
+        // No variations - use the stock from formData
         formDataToSend.append('stock', formData.stock || '0');
       }
         
@@ -348,9 +627,7 @@ const AddProduct = () => {
         name: formData.name,
         category: categoryValue,
         price: formData.price,
-        stock: hasVariations ? 'Variations' : formData.stock,
-        hasVariations,
-        variationsCount: variations.length,
+        stock: formData.stock,
         brand: formData.brand,
         details: combinedDetails,
         imagesCount: selectedFiles.length
@@ -817,86 +1094,30 @@ const AddProduct = () => {
                     </div>
                   </div>
 
-                  {/* Variation Toggle */}
-                  <div className="form-field-group">
-                    <label className="modern-label checkbox-label">
+                  <div className="form-row-2col">
+                    <div className="form-field-group">
+                      <label className="modern-label">
+                        Stock Quantity {!hasVariations && <span className="required-star">*</span>}
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={hasVariations}
-                        onChange={(e) => {
-                          setHasVariations(e.target.checked);
-                          if (!e.target.checked) {
-                            setVariationAttributes([]);
-                            setVariations([]);
-                          }
-                        }}
-                        className="modern-checkbox"
+                        type="number"
+                        name="stock"
+                        value={hasVariations ? '' : (formData.stock || '')}
+                        onChange={handleInputChange}
+                        required={!hasVariations}
+                        disabled={hasVariations}
+                        className="modern-input"
+                        placeholder={hasVariations ? "Calculated from variations" : "0"}
+                        min="0"
+                        style={hasVariations ? { background: '#f3f4f6', cursor: 'not-allowed' } : {}}
                       />
-                      <span className="checkbox-text">
-                        Enable Product Variations (e.g., different colors, sizes, storage options)
-                      </span>
-                    </label>
-                    <small style={{ display: 'block', marginTop: '0.5rem', color: '#64748b', fontSize: '0.8125rem' }}>
-                      When enabled, you can define attributes like Color, Size, Storage, etc., and create multiple variations with different prices and stock levels.
-                    </small>
-                  </div>
-
-                  {/* Variation Manager Component */}
-                  <VariationManager
-                    hasVariations={hasVariations}
-                    onChange={(hasVars, attrs, vars, validation) => {
-                      setHasVariations(hasVars);
-                      setVariationAttributes(attrs);
-                      setVariations(vars);
-                      if (validation) {
-                        setVariationValidation(validation);
-                      }
-                    }}
-                    initialAttributes={variationAttributes}
-                    initialVariations={variations}
-                    basePrice={formData.price ? parseFloat(formData.price) : 0}
-                    baseDiscountPrice={formData.discountPrice ? parseFloat(formData.discountPrice) : null}
-                  />
-
-                  {/* Stock Quantity - only shown when variations are disabled */}
-                  {!hasVariations && (
-                    <div className="form-row-2col">
-                      <div className="form-field-group">
-                        <label className="modern-label">
-                          Stock Quantity <span className="required-star">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          name="stock"
-                          value={formData.stock || ''}
-                          onChange={handleInputChange}
-                          required={!hasVariations}
-                          className="modern-input"
-                          placeholder="0"
-                          min="0"
-                        />
-                      </div>
-
-                      <div className="form-field-group">
-                        <label className="modern-label">Warranty Period</label>
-                        <select
-                          name="warrantyPeriod"
-                          value={formData.warrantyPeriod}
-                          onChange={handleInputChange}
-                          className="modern-input"
-                        >
-                          <option value="No Warranty">No Warranty</option>
-                          <option value="6 months">6 months</option>
-                          <option value="1 year">1 year</option>
-                          <option value="2 years">2 years</option>
-                          <option value="3 years">3 years</option>
-                        </select>
-                      </div>
+                      {hasVariations && (
+                        <small style={{ display: 'block', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.75rem' }}>
+                          Stock will be calculated automatically from your variations
+                        </small>
+                      )}
                     </div>
-                  )}
 
-                  {/* Warranty Period - shown separately when variations are enabled */}
-                  {hasVariations && (
                     <div className="form-field-group">
                       <label className="modern-label">Warranty Period</label>
                       <select
@@ -912,7 +1133,7 @@ const AddProduct = () => {
                         <option value="3 years">3 years</option>
                       </select>
                     </div>
-                  )}
+                  </div>
 
                   <div className="form-field-group">
                     <label className="modern-label checkbox-label">
@@ -929,6 +1150,333 @@ const AddProduct = () => {
                     </label>
                   </div>
 
+                  {/* Price, Stock & Variants Section - Daraz Style */}
+                  <div className="variations-section" style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '2px solid #e5e7eb' }}>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem' }}>
+                      Price, Stock & Variants
+                    </h2>
+                    <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+                      You can add variants to a product that has more than one option, such as size or color.
+                    </p>
+
+                    <div className="form-field-group" style={{ marginBottom: '1.5rem' }}>
+                      <label className="modern-label checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={hasVariations}
+                          onChange={(e) => {
+                            setHasVariations(e.target.checked);
+                            if (!e.target.checked) {
+                              setVariations([]);
+                              setVariantName('');
+                            } else {
+                              // Initialize with default variant name if available
+                              if (!variantName) {
+                                if (variationAttributes.length > 0) {
+                                  const defaultName = variationAttributes[0].charAt(0).toUpperCase() + variationAttributes[0].slice(1) + ' Family';
+                                  setVariantName(defaultName);
+                                } else {
+                                  setVariantName('Color Family');
+                                }
+                              }
+                              // Add first empty variation if none exist
+                              if (variations.length === 0) {
+                                addVariation('');
+                              }
+                            }
+                          }}
+                          className="modern-checkbox"
+                        />
+                        <span className="checkbox-text" style={{ fontWeight: 600, fontSize: '1rem' }}>
+                          This product has variations
+                        </span>
+                      </label>
+                    </div>
+
+                    {hasVariations && (
+                      <div style={{ marginTop: '1.5rem' }}>
+                        {/* Simplified Variations Section */}
+                        <div style={{ marginBottom: '2rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                              <span style={{ color: '#ef4444' }}>*</span> Product Variations
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newVariation = {
+                                  id: Date.now() + Math.random(),
+                                  attributes: {},
+                                  stock: 0,
+                                  price: '',
+                                  discountPrice: '',
+                                  sku: '',
+                                  wearingType: '',
+                                  availability: true,
+                                  images: []
+                                };
+                                variationAttributes.forEach(attr => {
+                                  newVariation.attributes[attr] = '';
+                                });
+                                setVariations(prev => [...prev, newVariation]);
+                              }}
+                              style={{
+                                padding: '0.5rem 1rem',
+                                background: '#f97316',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '0.875rem',
+                                fontWeight: 500
+                              }}
+                            >
+                              + Add Variation
+                            </button>
+                          </div>
+                          
+                          {variations.length === 0 ? (
+                            <div style={{ padding: '2rem', textAlign: 'center', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #d1d5db', color: '#6b7280' }}>
+                              <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>No variations added yet.</p>
+                              <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                                Click "Add Variation" above to create your first variation. You can then edit Storage, Color, Price, and Stock for each variation in the table.
+                              </p>
+                            </div>
+                          ) : (
+                            <div style={{ overflowX: 'auto', border: '1px solid #e5e7eb', borderRadius: '8px', background: 'white' }}>
+                              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                  <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+                                    <th style={{ padding: '0.75rem', textAlign: 'left', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', minWidth: '280px' }}>
+                                      {variationAttributes.length > 0 
+                                        ? variationAttributes.map(attr => attr.charAt(0).toUpperCase() + attr.slice(1)).join(' / ')
+                                        : 'Attributes'}
+                                    </th>
+                                    <th style={{ padding: '0.75rem', textAlign: 'left', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', minWidth: '130px' }}>
+                                      <span style={{ color: '#ef4444' }}>*</span> Price
+                                    </th>
+                                    <th style={{ padding: '0.75rem', textAlign: 'left', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', minWidth: '130px' }}>
+                                      Special Price
+                                    </th>
+                                    <th style={{ padding: '0.75rem', textAlign: 'left', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', minWidth: '110px' }}>
+                                      Stock
+                                    </th>
+                                    <th style={{ padding: '0.75rem', textAlign: 'left', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', minWidth: '120px' }}>
+                                      Image
+                                    </th>
+                                    <th style={{ padding: '0.75rem', textAlign: 'left', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', minWidth: '80px' }}>
+                                      Delete
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {variations.map((variation, idx) => {
+                                    const variantImage = variationImages[variation.id]?.previews?.[0];
+                                    // Get all attribute values to display
+                                    const attributeValues = variationAttributes.length > 0 
+                                      ? variationAttributes.map(attr => variation.attributes[attr] || '').filter(Boolean).join(' / ') || 'Variant ' + (idx + 1)
+                                      : Object.values(variation.attributes).filter(Boolean).join(' / ') || 'Variant ' + (idx + 1);
+                                    return (
+                                      <tr key={variation.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                                        <td style={{ padding: '0.75rem' }}>
+                                          {/* Editable attributes (Storage, Color, etc.) */}
+                                          {variationAttributes.length > 0 ? (
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                                              {variationAttributes.map(attr => (
+                                                <div key={attr}>
+                                                  <label style={{ display: 'block', fontSize: '0.7rem', color: '#6b7280', marginBottom: '0.25rem', fontWeight: 500 }}>
+                                                    {attr.charAt(0).toUpperCase() + attr.slice(1)}
+                                                  </label>
+                                                  {attr.toLowerCase() === 'color' ? (
+                                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                                      <input
+                                                        type="text"
+                                                        value={variation.attributes[attr] || ''}
+                                                        onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
+                                                        placeholder="e.g., Blue"
+                                                        style={{
+                                                          flex: 1,
+                                                          padding: '0.5rem',
+                                                          border: '1px solid #d1d5db',
+                                                          borderRadius: '4px',
+                                                          fontSize: '0.875rem'
+                                                        }}
+                                                      />
+                                                      <input
+                                                        type="color"
+                                                        value={variation.attributes[attr] && variation.attributes[attr].startsWith('#') 
+                                                          ? variation.attributes[attr] 
+                                                          : '#000000'}
+                                                        onChange={(e) => {
+                                                          const hexValue = e.target.value;
+                                                          const hexToName = {
+                                                            '#ffffff': 'White', '#000000': 'Black', '#e53935': 'Red', '#1976d2': 'Blue',
+                                                            '#388e3c': 'Green', '#fbc02d': 'Yellow', '#9e9e9e': 'Gray', '#e91e63': 'Pink',
+                                                            '#9c27b0': 'Purple', '#ff9800': 'Orange', '#795548': 'Brown', '#ffd700': 'Gold',
+                                                            '#c0c0c0': 'Silver', '#001f3f': 'Midnight', '#191970': 'Midnight Blue', '#b76e79': 'Rose Gold'
+                                                          };
+                                                          const colorName = hexToName[hexValue.toLowerCase()];
+                                                          updateVariation(variation.id, `attr.${attr}`, colorName || hexValue);
+                                                        }}
+                                                        style={{
+                                                          width: '40px',
+                                                          height: '40px',
+                                                          border: '1px solid #d1d5db',
+                                                          borderRadius: '4px',
+                                                          cursor: 'pointer',
+                                                          padding: '2px',
+                                                          flexShrink: 0
+                                                        }}
+                                                        title="Pick color"
+                                                      />
+                                                    </div>
+                                                  ) : (
+                                                    <input
+                                                      type="text"
+                                                      value={variation.attributes[attr] || ''}
+                                                      onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
+                                                      placeholder={attr === 'storage' ? 'e.g., 128GB' : attr === 'ram' ? 'e.g., 8GB' : 'Value'}
+                                                      style={{
+                                                        width: '100%',
+                                                        padding: '0.5rem',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '4px',
+                                                        fontSize: '0.875rem'
+                                                      }}
+                                                    />
+                                                  )}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          ) : (
+                                            <div style={{ fontSize: '0.875rem', color: '#374151', fontWeight: 500 }}>{attributeValues}</div>
+                                          )}
+                                        </td>
+                                        <td style={{ padding: '0.75rem' }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                            <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Rs.</span>
+                                            <input
+                                              type="number"
+                                              value={variation.price || ''}
+                                              onChange={(e) => updateVariation(variation.id, 'price', e.target.value)}
+                                              placeholder="0"
+                                              step="0.01"
+                                              style={{ width: '100px', padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '0.875rem' }}
+                                            />
+                                          </div>
+                                        </td>
+                                        <td style={{ padding: '0.75rem' }}>
+                                          {variation.discountPrice ? (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                              <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Rs.</span>
+                                              <input
+                                                type="number"
+                                                value={variation.discountPrice}
+                                                onChange={(e) => updateVariation(variation.id, 'discountPrice', e.target.value)}
+                                                placeholder="0"
+                                                step="0.01"
+                                                style={{ width: '100px', padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '0.875rem' }}
+                                              />
+                                            </div>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              onClick={() => updateVariation(variation.id, 'discountPrice', '0')}
+                                              style={{
+                                                padding: '0.375rem 0.75rem',
+                                                background: 'transparent',
+                                                border: '1px solid #d1d5db',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.8125rem',
+                                                color: '#374151'
+                                              }}
+                                            >
+                                              Add
+                                            </button>
+                                          )}
+                                        </td>
+                                        <td style={{ padding: '0.75rem' }}>
+                                          <input
+                                            type="number"
+                                            value={variation.stock || ''}
+                                            onChange={(e) => updateVariation(variation.id, 'stock', e.target.value)}
+                                            placeholder="0"
+                                            min="0"
+                                            style={{ width: '100px', padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '0.875rem' }}
+                                          />
+                                        </td>
+                                        <td style={{ padding: '0.75rem' }}>
+                                          <div style={{ position: 'relative', width: '60px', height: '60px', border: '1px dashed #d1d5db', borderRadius: '4px', background: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                                            {variantImage ? (
+                                              <>
+                                                <img src={variantImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                                                <button
+                                                  type="button"
+                                                  onClick={() => removeVariationImage(variation.id, 0)}
+                                                  style={{
+                                                    position: 'absolute',
+                                                    top: '-8px',
+                                                    right: '-8px',
+                                                    background: '#ef4444',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '50%',
+                                                    width: '20px',
+                                                    height: '20px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.75rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                  }}
+                                                >
+                                                  ×
+                                                </button>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <span style={{ fontSize: '1.5rem', color: '#9ca3af' }}>+</span>
+                                                <input
+                                                  type="file"
+                                                  accept="image/*"
+                                                  onChange={(e) => handleVariationImageChange(variation.id, e)}
+                                                  style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
+                                                />
+                                              </>
+                                            )}
+                                          </div>
+                                        </td>
+                                        <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                                          <button
+                                            type="button"
+                                            onClick={() => removeVariation(variation.id)}
+                                            style={{
+                                              padding: '0.5rem',
+                                              background: '#ef4444',
+                                              color: 'white',
+                                              border: 'none',
+                                              borderRadius: '4px',
+                                              cursor: 'pointer',
+                                              fontSize: '0.875rem',
+                                              fontWeight: 500
+                                            }}
+                                            title="Delete variation"
+                                          >
+                                            Delete
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="step-navigation">
@@ -1030,17 +1578,19 @@ const AddProduct = () => {
                       <div className="review-item">
                         <span className="review-label">Stock:</span>
                         <span className="review-value">
-                          {hasVariations 
-                            ? `${variations.length} variation(s) - Total: ${variations.reduce((sum, v) => sum + (v.stock || 0), 0)} units`
+                          {hasVariations && variations.length > 0
+                            ? (() => {
+                                const validVariations = variations.filter(v => 
+                                  Object.values(v.attributes).some(val => val && val.trim() !== '')
+                                );
+                                const totalStock = validVariations.reduce((sum, v) => 
+                                  sum + (parseInt(v.stock) || 0), 0
+                                );
+                                return `${totalStock} units (from ${validVariations.length} variation${validVariations.length !== 1 ? 's' : ''})`;
+                              })()
                             : `${formData.stock || '0'} units`}
                         </span>
                       </div>
-                      {hasVariations && variations.length > 0 && (
-                        <div className="review-item">
-                          <span className="review-label">Variations:</span>
-                          <span className="review-value">{variations.length} combinations</span>
-                        </div>
-                      )}
                       <div className="review-item">
                         <span className="review-label">Images:</span>
                         <span className="review-value">{previewUrls.length} uploaded</span>
@@ -1054,16 +1604,10 @@ const AddProduct = () => {
                     const hasCategory = formData.category && formData.category.trim() !== '';
                     const hasPrice = formData.price && Number(formData.price) > 0;
                     
-                    // Stock validation depends on variations
-                    const hasStock = hasVariations 
-                      ? (variations.length > 0 && variations.every(v => v.stock !== undefined && v.stock !== null))
-                      : (formData.stock && Number(formData.stock) > 0);
+                    // Stock is optional - no need to check for stock
+                    // Return false if any required field is missing (stock is not required)
                     
-                    const hasValidVariations = hasVariations 
-                      ? (variationValidation.isValid && variations.length > 0)
-                      : true;
-                    
-                    return !hasName || !hasCategory || !hasPrice || !hasStock || !hasValidVariations;
+                    return !hasName || !hasCategory || !hasPrice;
                   })() ? (
                     <div className="warning-box">
                       <FontAwesomeIcon icon={faExclamationTriangle} /> Please complete all required fields before publishing
@@ -1086,17 +1630,6 @@ const AddProduct = () => {
                 onClick={(e) => handleSubmit(e, true)}
                 className="btn-secondary"
                 disabled={loading}
-                style={{
-                  background: 'white',
-                  color: '#475569',
-                  border: '1px solid #cbd5e1',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '4px',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1
-                }}
               >
                 {loading ? (
                   <>
@@ -1108,26 +1641,14 @@ const AddProduct = () => {
               <button
                 type="submit"
                 className="btn-primary"
-                disabled={loading || !formData.name || !formData.category || !formData.price || 
-                  (hasVariations ? (!variationValidation.isValid || variations.length === 0) : !formData.stock)}
-                style={{
-                  background: '#f97316',
-                  color: 'white',
-                  padding: '0.75rem 2rem',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1
-                }}
+                disabled={loading || !formData.name || !formData.category || !formData.price}
               >
                 {loading ? (
                   <>
                     <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
-                    Submitting...
+                    Publishing...
                   </>
-                ) : 'Submit'}
+                ) : 'Publish Product'}
               </button>
             </div>
           </form>

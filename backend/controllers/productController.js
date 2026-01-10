@@ -5,32 +5,118 @@ import cloudinary from '../config/cloudinary.js';
 import userModel from '../models/userModel.js'; // Ensure this matches your User model file name and export
 import mongoose from 'mongoose';
 
-
+// Helper function to convert MongoDB Map to plain object for JSON serialization
+const mapToObject = (map) => {
+  if (!map) return {};
+  
+  // If it's already a plain object, return as is
+  if (typeof map === 'object' && map.constructor === Object && !(map instanceof Map)) {
+    return map;
+  }
+  
+  // If it's a Map, convert it
+  if (map instanceof Map) {
+    const obj = {};
+    for (const [key, value] of map.entries()) {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  
+  // If it has Map-like methods but isn't a Map instance (Mongoose subdocument)
+  if (map && typeof map.get === 'function' && typeof map.set === 'function') {
+    const obj = {};
+    try {
+      // Try to iterate using forEach if available
+      if (typeof map.forEach === 'function') {
+        map.forEach((value, key) => {
+          obj[key] = value;
+        });
+      } else {
+        // Fallback: try to access keys directly if it's an object
+        Object.keys(map).forEach(key => {
+          obj[key] = map[key];
+        });
+      }
+    } catch (e) {
+      console.error('Error converting Map to object:', e);
+      return {};
+    }
+    return obj;
+  }
+  
+  // Last resort: try as plain object
+  return typeof map === 'object' ? map : {};
+};
 
 // Helper function to serialize product variations for JSON response
-const serializeVariations = (variations) => {
-  if (!variations || !Array.isArray(variations)) return [];
-  return variations.map(variation => ({
-    ...variation.toObject ? variation.toObject() : variation,
-    attributes: variation.attributes instanceof Map 
-      ? Object.fromEntries(variation.attributes.entries())
-      : variation.attributes
-  }));
-};
-
-// Helper function to serialize product for JSON response
 const serializeProduct = (product) => {
   if (!product) return product;
-  const productObj = product.toObject ? product.toObject() : product;
-  productObj.variations = serializeVariations(productObj.variations);
+  
+  // Use lean() alternative or toObject with proper options
+  const productObj = product.toObject ? product.toObject({ virtuals: true, flattenMaps: false }) : product;
+  
+  // Convert variations Map to plain objects
+  if (productObj.variations && Array.isArray(productObj.variations)) {
+    productObj.variations = productObj.variations.map(variation => {
+      // Handle attributes - could be Map, Object, or already converted
+      let attributesObj = {};
+      
+      if (variation.attributes) {
+        if (variation.attributes instanceof Map) {
+          // Convert Map to object
+          attributesObj = mapToObject(variation.attributes);
+        } else if (typeof variation.attributes === 'object' && variation.attributes.constructor === Object) {
+          // Already an object, use as is
+          attributesObj = variation.attributes;
+        } else if (variation.attributes.get && typeof variation.attributes.get === 'function') {
+          // It's a Map-like object, convert it
+          attributesObj = mapToObject(variation.attributes);
+        }
+      }
+      
+      return {
+        ...variation,
+        attributes: attributesObj
+      };
+    });
+  }
+  
   return productObj;
 };
+
 
 // Get all products (sorted by displayOrder, then by createdAt)
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ displayOrder: 1, createdAt: -1 });
-    const serializedProducts = products.map(product => serializeProduct(product));
+    // Use lean() to get plain JavaScript objects
+    const products = await Product.find({}).sort({ displayOrder: 1, createdAt: -1 }).lean();
+    
+    // Convert variations Map to plain objects for all products
+    const serializedProducts = products.map(product => {
+      if (product.variations && Array.isArray(product.variations)) {
+        product.variations = product.variations.map(variation => {
+          if (variation.attributes) {
+            let attributesObj = {};
+            if (variation.attributes instanceof Map) {
+              attributesObj = mapToObject(variation.attributes);
+            } else if (typeof variation.attributes === 'object') {
+              attributesObj = {};
+              Object.keys(variation.attributes).forEach(key => {
+                attributesObj[key] = variation.attributes[key];
+              });
+            }
+            return {
+              ...variation,
+              attributes: attributesObj
+            };
+          }
+          return variation;
+        });
+      }
+      return product;
+    });
+    
     res.status(200).json(serializedProducts);
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -46,11 +132,35 @@ export const getProduct = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const product = await Product.findById(req.params.id);
+    // Use lean() to get plain JavaScript object (avoids Map conversion issues)
+    const product = await Product.findById(req.params.id).lean();
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    res.status(200).json(serializeProduct(product));
+    
+    // Convert variations Map to plain objects manually
+    if (product.variations && Array.isArray(product.variations)) {
+      product.variations = product.variations.map(variation => {
+        if (variation.attributes) {
+          let attributesObj = {};
+          if (variation.attributes instanceof Map) {
+            attributesObj = mapToObject(variation.attributes);
+          } else if (typeof variation.attributes === 'object') {
+            attributesObj = {};
+            Object.keys(variation.attributes).forEach(key => {
+              attributesObj[key] = variation.attributes[key];
+            });
+          }
+          return {
+            ...variation,
+            attributes: attributesObj
+          };
+        }
+        return variation;
+      });
+    }
+    
+    res.status(200).json(product);
   } catch (error) {
     console.error('Error fetching product:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
@@ -60,186 +170,129 @@ export const getProduct = async (req, res) => {
 // Get single product by slug (SEO-friendly URL)
 export const getProductBySlug = async (req, res) => {
   try {
-    const product = await Product.findOne({ slug: req.params.slug });
+    // Use lean() to get plain JavaScript object (avoids Map conversion issues)
+    const product = await Product.findOne({ slug: req.params.slug }).lean();
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    res.status(200).json(serializeProduct(product));
+    
+    // Convert variations Map to plain objects manually
+    if (product.variations && Array.isArray(product.variations)) {
+      product.variations = product.variations.map(variation => {
+        if (variation.attributes) {
+          // When using lean(), Map types are already converted, but check to be sure
+          let attributesObj = {};
+          
+          if (variation.attributes instanceof Map) {
+            attributesObj = mapToObject(variation.attributes);
+          } else if (typeof variation.attributes === 'object') {
+            // Should already be an object with lean(), but ensure all keys are accessible
+            attributesObj = {};
+            Object.keys(variation.attributes).forEach(key => {
+              attributesObj[key] = variation.attributes[key];
+            });
+          }
+          
+          return {
+            ...variation,
+            attributes: attributesObj
+          };
+        }
+        return variation;
+      });
+    }
+    
+    res.status(200).json(product);
   } catch (error) {
     console.error('Error fetching product by slug:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
   }
 };
 
-// Helper function to process variations from request
-const processVariations = (hasVariations, variationAttributes, variations, variationImageFiles) => {
-  if (!hasVariations || hasVariations === 'false') {
-    return { hasVariations: false, variationAttributes: [], variations: [] };
-  }
-
-  let parsedAttributes = [];
-  if (variationAttributes) {
-    try {
-      parsedAttributes = typeof variationAttributes === 'string' 
-        ? JSON.parse(variationAttributes) 
-        : variationAttributes;
-    } catch (err) {
-      throw new Error('Invalid JSON format for variation attributes.');
-    }
-  }
-
-  let parsedVariations = [];
-  if (variations) {
-    try {
-      parsedVariations = typeof variations === 'string' 
-        ? JSON.parse(variations) 
-        : variations;
-    } catch (err) {
-      throw new Error('Invalid JSON format for variations.');
-    }
-  }
-
-  // Process variation images if provided
-  const variationImageMap = {};
-  if (variationImageFiles && Array.isArray(variationImageFiles)) {
-    variationImageFiles.forEach(file => {
-      // Expected format: variationImages[{variationId}][{index}]
-      const match = file.fieldname.match(/variationImages\[(.+?)\]\[(\d+)\]/);
-      if (match) {
-        const [, variationId, index] = match;
-        if (!variationImageMap[variationId]) {
-          variationImageMap[variationId] = [];
-        }
-        variationImageMap[variationId][parseInt(index)] = file.path;
-      }
-    });
-  }
-
-  // Format variations for MongoDB
-  const formattedVariations = parsedVariations.map(variant => {
-    const variationId = variant.variationId || `VAR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const attributesMap = new Map();
-    
-    // Convert attributes object to Map
-    if (variant.attributes && typeof variant.attributes === 'object') {
-      Object.entries(variant.attributes).forEach(([key, value]) => {
-        attributesMap.set(key, String(value));
-      });
-    }
-
-    // Add variation images if available
-    const variantImages = variationImageMap[variationId] 
-      ? variationImageMap[variationId].filter(img => img) 
-      : [];
-
-    return {
-      variationId,
-      attributes: attributesMap,
-      price: variant.price ? parseFloat(variant.price) : undefined,
-      discountPrice: variant.discountPrice ? parseFloat(variant.discountPrice) : undefined,
-      stock: parseInt(variant.stock) || 0,
-      sku: variant.sku || '',
-      images: variantImages,
-      isActive: variant.isActive !== false
-    };
-  });
-
-  return {
-    hasVariations: true,
-    variationAttributes: parsedAttributes,
-    variations: formattedVariations
-  };
-};
-
 // Create a new product
 export const createProduct = async (req, res) => {
   try {
-    const { 
-      name, 
-      category, 
-      price, 
-      description, 
-      longDescription, 
-      stock, 
-      details, 
-      warrantyPeriod, 
-      discountPrice, 
-      kokoPay,
-      hasVariations,
-      variationAttributes,
-      variations
-    } = req.body;
+    const { name, category, price, description, longDescription, stock, details, warrantyPeriod, discountPrice, kokoPay, variants, hasVariants, variations, hasVariations } = req.body;
 
-    // Filter main product images (fieldname === 'images')
-    const mainImageFiles = req.files ? req.files.filter(file => file.fieldname === 'images') : [];
-    // Filter variation images (fieldname starts with 'variationImages')
-    const variationImageFiles = req.files ? req.files.filter(file => file.fieldname.startsWith('variationImages')) : [];
-    
-    // Validate images based on variation status
-    const useVariations = hasVariations === 'true' || hasVariations === true;
-    
-    if (!useVariations && mainImageFiles.length === 0) {
-      return res.status(400).json({ message: 'Product must have at least one image.' });
-    }
+    let images = [];
+    let parsedVariants = [];
+    let parsedVariations = [];
 
-    if (mainImageFiles.length > 5) {
-      return res.status(400).json({ message: 'Product cannot have more than 5 main images.' });
-    }
-
-    // Extract image paths (Cloudinary URLs) from uploaded files
-    const images = mainImageFiles.map(file => file.path);
-    
-    // Process variations if enabled
-    let variationData = { hasVariations: false, variationAttributes: [], variations: [] };
-    if (useVariations) {
+    // Handle new flexible variations system
+    if (hasVariations === 'true' || hasVariations === true) {
       try {
-        variationData = processVariations(hasVariations, variationAttributes, variations, variationImageFiles);
+        parsedVariations = typeof variations === 'string' ? JSON.parse(variations) : variations;
         
-        // Validate variations
-        if (variationData.hasVariations) {
-          if (!variationData.variationAttributes || variationData.variationAttributes.length === 0) {
-            return res.status(400).json({ message: 'Variation attributes are required when variations are enabled.' });
+        if (!Array.isArray(parsedVariations) || parsedVariations.length === 0) {
+          return res.status(400).json({ message: 'Product with variations must have at least one variation.' });
+        }
+
+        // Validate each variation
+        for (const variation of parsedVariations) {
+          if (!variation.attributes || Object.keys(variation.attributes).length === 0) {
+            return res.status(400).json({ message: 'Each variation must have at least one attribute (e.g., storage, color).' });
           }
-          
-          if (!variationData.variations || variationData.variations.length === 0) {
-            return res.status(400).json({ message: 'At least one variation combination is required.' });
-          }
-          
-          // Validate each variation has required fields
-          for (const variant of variationData.variations) {
-            if (variant.stock === undefined || variant.stock === null) {
-              return res.status(400).json({ message: `Variation ${variant.variationId} must have stock quantity.` });
-            }
-            if (variant.attributes.size === 0) {
-              return res.status(400).json({ message: `Variation ${variant.variationId} must have at least one attribute.` });
-            }
+          if (variation.stock === undefined || variation.stock === null) {
+            return res.status(400).json({ message: 'Each variation must have a stock value.' });
           }
         }
-      } catch (error) {
-        return res.status(400).json({ message: error.message });
+        
+        // Extract main product images (fieldname === 'images')
+        const mainImageFiles = req.files ? req.files.filter(file => file.fieldname === 'images') : [];
+        if (mainImageFiles.length > 0) {
+          images = mainImageFiles.map(file => file.path);
+        } else if (req.body.images) {
+          images = typeof req.body.images === 'string' ? JSON.parse(req.body.images) : req.body.images;
+        } else if (parsedVariations[0]?.images && parsedVariations[0].images.length > 0) {
+          images = parsedVariations[0].images;
+        }
+      } catch (err) {
+        return res.status(400).json({ message: 'Invalid JSON format for variations: ' + err.message });
       }
+    } 
+    // Handle legacy color variants if present
+    else if (hasVariants === 'true' && variants) {
+      try {
+        parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+        
+        // Use images from the request body (already uploaded)
+        if (req.body.images) {
+          images = typeof req.body.images === 'string' ? JSON.parse(req.body.images) : req.body.images;
+        }
+      } catch (err) {
+        return res.status(400).json({ message: 'Invalid JSON format for variants.' });
+      }
+    } 
+      // Traditional product with no variants
+    else {
+      // Filter main product images (fieldname === 'images')
+      const mainImageFiles = req.files ? req.files.filter(file => file.fieldname === 'images') : [];
+      
+      if (mainImageFiles.length === 0) {
+        return res.status(400).json({ message: 'Product must have at least one image.' });
+      }
+
+      if (mainImageFiles.length > 5) {
+        return res.status(400).json({ message: 'Product cannot have more than 5 images.' });
+      }
+
+      // Extract image paths (Cloudinary URLs) from uploaded files
+      images = mainImageFiles.map(file => file.path);
     }
 
     // Validate essential fields
+    // For products with variations, stock is calculated from variations
     if (!name || !category || !price || !description) {
       return res.status(400).json({
         message: 'Missing required fields: name, category, price, and description are required.'
       });
     }
 
-    // Stock validation - only required if not using variations
-    if (!useVariations && (stock === undefined || stock === null)) {
+    // Stock validation: required only if no variations
+    if (!hasVariations && (stock === undefined || stock === null)) {
       return res.status(400).json({
         message: 'Stock is required for products without variations.'
       });
-    }
-    
-    // If using variations, calculate total stock from variations
-    let totalStock = 0;
-    if (useVariations && variationData.hasVariations) {
-      totalStock = variationData.variations.reduce((sum, variant) => sum + (parseInt(variant.stock) || 0), 0);
-    } else {
-      totalStock = parseInt(stock) || 0;
     }
 
     // Parse details if provided (handle stringified JSON or direct object)
@@ -279,6 +332,47 @@ export const createProduct = async (req, res) => {
       }
     }
 
+    // Calculate total stock from variations if product has variations
+    let totalStock = 0;
+    if (hasVariations && parsedVariations.length > 0) {
+      totalStock = parsedVariations.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
+    } else {
+      totalStock = parseInt(stock) || 0;
+    }
+
+    // Process variation images if provided
+    // Files come as variation-${variationId}-images in req.files array (when using upload.any())
+    const variationImageMap = {};
+    if (req.files && Array.isArray(req.files)) {
+      // Group files by variation ID
+      req.files.forEach(file => {
+        if (file.fieldname && file.fieldname.startsWith('variation-') && file.fieldname.endsWith('-images')) {
+          const variationId = file.fieldname.replace('variation-', '').replace('-images', '');
+          if (!variationImageMap[variationId]) {
+            variationImageMap[variationId] = [];
+          }
+          variationImageMap[variationId].push(file.path); // Cloudinary URL
+        }
+      });
+    }
+
+    // Convert variations attributes to Map format for MongoDB
+    const formattedVariations = parsedVariations.map(variation => {
+      // Get images for this variation if uploaded
+      const variationImages = variation._variationId && variationImageMap[variation._variationId]
+        ? variationImageMap[variation._variationId]
+        : (variation.images || []);
+      
+      return {
+        attributes: new Map(Object.entries(variation.attributes || {})),
+        stock: parseInt(variation.stock) || 0,
+        price: variation.price ? parseFloat(variation.price) : undefined,
+        discountPrice: variation.discountPrice ? parseFloat(variation.discountPrice) : undefined,
+        images: variationImages,
+        sku: variation.sku || undefined
+      };
+    });
+
     const newProduct = new Product({
       name,
       category,
@@ -287,13 +381,13 @@ export const createProduct = async (req, res) => {
       description,
       longDescription, // Optional
       images,
-      stock: totalStock, // Total stock (sum of variations if using variations, otherwise single stock)
+      stock: totalStock,
       warrantyPeriod: warrantyPeriod || 'No Warranty', // Optional
       details: parsedDetails, // Ensure this is an object
       kokoPay: kokoPay === 'true' || kokoPay === true, // Handle boolean from form-data
-      hasVariations: variationData.hasVariations,
-      variationAttributes: variationData.variationAttributes,
-      variations: variationData.variations
+      hasVariations: hasVariations === 'true' || hasVariations === true,
+      variations: formattedVariations.length > 0 ? formattedVariations : undefined,
+      variants: parsedVariants.length > 0 ? parsedVariants : undefined
     });
 
     const savedProduct = await newProduct.save();
@@ -327,21 +421,7 @@ export const createProduct = async (req, res) => {
 // Update an existing product
 export const updateProduct = async (req, res) => {
   try {
-    const { 
-      name, 
-      category, 
-      price, 
-      description, 
-      longDescription, 
-      stock, 
-      details, 
-      warrantyPeriod, 
-      discountPrice, 
-      kokoPay,
-      hasVariations,
-      variationAttributes,
-      variations
-    } = req.body;
+    const { name, category, price, description, longDescription, stock, details, warrantyPeriod, discountPrice, kokoPay, variations, hasVariations } = req.body;
 
     const productToUpdate = await Product.findById(req.params.id);
     if (!productToUpdate) {
@@ -357,54 +437,23 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // Filter main product images and variation images
-    const mainImageFiles = req.files ? req.files.filter(file => file.fieldname === 'images') : [];
-    const variationImageFiles = req.files ? req.files.filter(file => file.fieldname.startsWith('variationImages')) : [];
-    
-    // Handle existing images and new uploads for main product
+    // Handle existing images and new uploads
     let existingImages = [];
     if (req.body.existingImages) {
       try {
-        existingImages = JSON.parse(req.body.existingImages);
+        existingImages = JSON.parse(req.body.existingImages); // Assume it comes as a stringified array
       } catch (e) {
-        existingImages = Array.isArray(req.body.existingImages) ? req.body.existingImages : [req.body.existingImages];
+        existingImages = Array.isArray(req.body.existingImages) ? req.body.existingImages : [req.body.existingImages]; // Fallback for single image or malformed string
       }
-      existingImages = existingImages.filter(Boolean);
+      existingImages = existingImages.filter(Boolean); // Remove any null/undefined/empty strings
     }
 
-    let newImages = mainImageFiles.map(file => file.path);
-    const updatedImages = [...existingImages, ...newImages];
-    
-    // Process variations if enabled
-    const useVariations = hasVariations === 'true' || hasVariations === true;
-    let variationData = { hasVariations: false, variationAttributes: [], variations: [] };
-    
-    if (useVariations) {
-      try {
-        variationData = processVariations(hasVariations, variationAttributes, variations, variationImageFiles);
-        
-        if (variationData.hasVariations) {
-          if (!variationData.variationAttributes || variationData.variationAttributes.length === 0) {
-            return res.status(400).json({ message: 'Variation attributes are required when variations are enabled.' });
-          }
-          
-          if (!variationData.variations || variationData.variations.length === 0) {
-            return res.status(400).json({ message: 'At least one variation combination is required.' });
-          }
-          
-          for (const variant of variationData.variations) {
-            if (variant.stock === undefined || variant.stock === null) {
-              return res.status(400).json({ message: `Variation ${variant.variationId} must have stock quantity.` });
-            }
-            if (variant.attributes.size === 0) {
-              return res.status(400).json({ message: `Variation ${variant.variationId} must have at least one attribute.` });
-            }
-          }
-        }
-      } catch (error) {
-        return res.status(400).json({ message: error.message });
-      }
+    let newImages = [];
+    if (req.files && req.files.length > 0) {
+      newImages = req.files.map(file => file.path); // Cloudinary URLs from multer
     }
+
+    const updatedImages = [...existingImages, ...newImages];
     
     console.log('Update Product - Existing images from DB:', productToUpdate.images);
     console.log('Update Product - Existing images from request:', existingImages);
@@ -472,39 +521,63 @@ export const updateProduct = async (req, res) => {
       await Promise.all(deletePromises);
     }
 
-    // Calculate total stock based on variation status
-    let totalStock = 0;
-    if (useVariations && variationData.hasVariations) {
-      totalStock = variationData.variations.reduce((sum, variant) => sum + (parseInt(variant.stock) || 0), 0);
-    } else {
-      totalStock = parseInt(stock) || 0;
-    }
-    
-    // Handle variation image cleanup - delete removed variation images from Cloudinary
-    if (productToUpdate.variations && productToUpdate.variations.length > 0) {
-      const existingVariationImages = [];
-      productToUpdate.variations.forEach(variant => {
-        if (variant.images && Array.isArray(variant.images)) {
-          existingVariationImages.push(...variant.images);
+    // Handle variations if provided
+    let parsedVariations = [];
+    let totalStock = parseInt(stock) || 0;
+    let formattedVariations = undefined;
+
+    // Process variation images if provided
+    const variationImageMap = {};
+    if (req.files && Array.isArray(req.files)) {
+      // Group files by variation ID
+      req.files.forEach(file => {
+        if (file.fieldname && file.fieldname.startsWith('variation-') && file.fieldname.endsWith('-images')) {
+          const variationId = file.fieldname.replace('variation-', '').replace('-images', '');
+          if (!variationImageMap[variationId]) {
+            variationImageMap[variationId] = [];
+          }
+          variationImageMap[variationId].push(file.path); // Cloudinary URL
         }
       });
-      
-      // If variations are being removed, delete all variation images
-      if (!useVariations) {
-        const deleteVariationImagePromises = existingVariationImages
-          .filter(img => img && img.startsWith('http'))
-          .map(async (imageUrl) => {
-            try {
-              const urlParts = imageUrl.split('/');
-              const filenameWithExtension = urlParts[urlParts.length - 1];
-              const filename = filenameWithExtension.split('.')[0];
-              const publicId = `products/${filename}`;
-              await cloudinary.uploader.destroy(publicId);
-            } catch (cloudinaryError) {
-              console.error(`Cloudinary: Failed to delete variation image ${imageUrl}. Error: ${cloudinaryError.message}`);
+    }
+
+    if (hasVariations === 'true' || hasVariations === true) {
+      try {
+        parsedVariations = typeof variations === 'string' ? JSON.parse(variations) : variations;
+        
+        if (Array.isArray(parsedVariations) && parsedVariations.length > 0) {
+          // Validate each variation
+          for (const variation of parsedVariations) {
+            if (!variation.attributes || Object.keys(variation.attributes).length === 0) {
+              return res.status(400).json({ message: 'Each variation must have at least one attribute (e.g., storage, color).' });
             }
+            if (variation.stock === undefined || variation.stock === null) {
+              return res.status(400).json({ message: 'Each variation must have a stock value.' });
+            }
+          }
+
+          // Calculate total stock from variations
+          totalStock = parsedVariations.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
+
+          // Convert variations attributes to Map format for MongoDB
+          formattedVariations = parsedVariations.map(variation => {
+            // Get images for this variation if uploaded, otherwise use existing images
+            const variationImages = variation._variationId && variationImageMap[variation._variationId]
+              ? variationImageMap[variation._variationId]
+              : (variation.images || []);
+            
+            return {
+              attributes: new Map(Object.entries(variation.attributes || {})),
+              stock: parseInt(variation.stock) || 0,
+              price: variation.price ? parseFloat(variation.price) : undefined,
+              discountPrice: variation.discountPrice ? parseFloat(variation.discountPrice) : undefined,
+              images: variationImages,
+              sku: variation.sku || undefined
+            };
           });
-        await Promise.all(deleteVariationImagePromises);
+        }
+      } catch (err) {
+        return res.status(400).json({ message: 'Invalid JSON format for variations: ' + err.message });
       }
     }
 
@@ -515,20 +588,23 @@ export const updateProduct = async (req, res) => {
         discountPrice: discountPrice ? parseFloat(discountPrice) : undefined,
         description,
         longDescription,
-        images: updatedImages,
-        stock: totalStock,
+        images: updatedImages, // Set the final combined array of images
+      stock: totalStock,
         warrantyPeriod,
         details: parsedDetails,
-        kokoPay: kokoPay === 'true' || kokoPay === true,
-        hasVariations: variationData.hasVariations,
-        variationAttributes: variationData.variationAttributes,
-        variations: variationData.variations
+      kokoPay: kokoPay === 'true' || kokoPay === true,
+      hasVariations: hasVariations === 'true' || hasVariations === true
     };
+
+    // Only update variations if provided
+    if (formattedVariations !== undefined) {
+      updateData.variations = formattedVariations;
+    }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true } // Return the updated document and run schema validators
     );
 
     if (!updatedProduct) {
@@ -594,6 +670,7 @@ export const deleteProduct = async (req, res) => {
 export const getProductsByCategory = async (req, res) => {
   try {
     const products = await Product.find({ category: req.params.category });
+    // Serialize variations for JSON response
     const serializedProducts = products.map(product => serializeProduct(product));
     res.status(200).json(serializedProducts);
   } catch (error) {
@@ -719,8 +796,7 @@ export const getReviews = async (req, res) => {
 export const getLowStockProducts = async (req, res) => {
   try {
     const products = await Product.find({ stock: { $gt: 0, $lt: 5 } });
-    const serializedProducts = products.map(product => serializeProduct(product));
-    res.status(200).json(serializedProducts);
+    res.status(200).json(products);
   } catch (error) {
     console.error('Error fetching low stock products:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
@@ -731,8 +807,7 @@ export const getLowStockProducts = async (req, res) => {
 export const getOutOfStockProducts = async (req, res) => {
   try {
     const products = await Product.find({ stock: 0 });
-    const serializedProducts = products.map(product => serializeProduct(product));
-    res.status(200).json(serializedProducts);
+    res.status(200).json(products);
   } catch (error) {
     console.error('Error fetching out of stock products:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
@@ -750,8 +825,7 @@ export const searchProducts = async (req, res) => {
     const products = await Product.find({
       name: { $regex: query, $options: 'i' }
     });
-    const serializedProducts = products.map(product => serializeProduct(product));
-    res.status(200).json(serializedProducts);
+    res.status(200).json(products);
   } catch (error) {
     console.error('Search error:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
