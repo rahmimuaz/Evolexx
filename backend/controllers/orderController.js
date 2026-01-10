@@ -15,16 +15,29 @@ const serializeOrderItems = (items) => {
   return items.map(item => {
     const itemObj = item.toObject ? item.toObject() : item;
     // Serialize selectedVariation if present
-    if (itemObj.selectedVariation && itemObj.selectedVariation.attributes) {
-      const attrs = {};
-      if (itemObj.selectedVariation.attributes instanceof Map) {
-        for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
-          attrs[key] = value;
+    if (itemObj.selectedVariation) {
+      // Preserve all selectedVariation fields
+      const serializedVariation = {
+        stock: itemObj.selectedVariation.stock,
+        price: itemObj.selectedVariation.price,
+        discountPrice: itemObj.selectedVariation.discountPrice,
+        images: itemObj.selectedVariation.images || [] // Preserve images array
+      };
+      
+      // Serialize attributes Map to object
+      if (itemObj.selectedVariation.attributes) {
+        const attrs = {};
+        if (itemObj.selectedVariation.attributes instanceof Map) {
+          for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
+            attrs[key] = value;
+          }
+        } else {
+          Object.assign(attrs, itemObj.selectedVariation.attributes);
         }
-      } else {
-        Object.assign(attrs, itemObj.selectedVariation.attributes);
+        serializedVariation.attributes = attrs;
       }
-      itemObj.selectedVariation.attributes = attrs;
+      
+      itemObj.selectedVariation = serializedVariation;
     }
     return itemObj;
   });

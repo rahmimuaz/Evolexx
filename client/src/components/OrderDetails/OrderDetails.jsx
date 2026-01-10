@@ -148,8 +148,19 @@ const OrderDetails = () => {
             <h2 className="info-heading">Order Items</h2>
             <div className="order-items-list">
               {order.orderItems.map((item) => {
-                // Get image - prefer item.image (variation image), then product images
-                const imageUrl = item.image || (item.product?.images && item.product.images.length > 0 ? item.product.images[0] : null);
+                // Get variation image if available, otherwise use item.image, then product images
+                let imageUrl = null;
+                if (item.selectedVariation?.images && item.selectedVariation.images.length > 0) {
+                  // Use variation image first (from selectedVariation.images)
+                  imageUrl = item.selectedVariation.images[0];
+                } else if (item.image) {
+                  // Fallback to item.image (which should be the variation image if set correctly)
+                  imageUrl = item.image;
+                } else if (item.product?.images && item.product.images.length > 0) {
+                  // Last fallback to product main image
+                  imageUrl = item.product.images[0];
+                }
+                
                 const productName = item.name || item.product?.name || 'N/A';
                 
                 return (

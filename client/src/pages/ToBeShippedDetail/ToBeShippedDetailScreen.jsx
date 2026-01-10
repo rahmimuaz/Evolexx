@@ -192,14 +192,24 @@ const ToBeShippedDetailScreen = () => {
                     ? Object.fromEntries(variationAttrs.entries())
                     : variationAttrs;
                   
+                  // Get variation image if available, otherwise use item.image
+                  let imageUrl = null;
+                  if (item.selectedVariation?.images && item.selectedVariation.images.length > 0) {
+                    // Use variation image first (from selectedVariation.images)
+                    imageUrl = item.selectedVariation.images[0];
+                  } else if (item.image) {
+                    // Fallback to item.image (which should be the variation image if set correctly)
+                    imageUrl = item.image;
+                  }
+                  
                   return (
                     <div key={item._id || item.product} className="order-item">
                       <div className="order-item-details">
                         <div className="product-image-wrapper-sm">
-                          {item.image ? (
+                          {imageUrl ? (
                             <>
                               <img
-                                src={getImageUrl(item.image)}
+                                src={getImageUrl(imageUrl)}
                                 alt={item.name}
                                 className="product-image"
                                 onError={handleImageError}
