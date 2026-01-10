@@ -563,48 +563,14 @@ const EditProduct = () => {
     // Check if this is a color field (by name, not type)
     if (field.name.toLowerCase() === 'color') {
       return (
-        <div style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <input
-              type="text"
-              name={field.name}
-              value={fieldValue}
-              onChange={handleDetailChange}
-              className="modern-input"
-              placeholder={field.placeholder || "e.g., White, Black (preferred) or #ffffff"}
-              style={{ flex: 1 }}
-            />
-            <input
-              type="color"
-              value={fieldValue && fieldValue.startsWith('#') ? fieldValue : '#000000'}
-              onChange={(e) => {
-                const hexValue = e.target.value;
-                // Convert common hex codes to color names for better customer display
-                const hexToName = {
-                  '#ffffff': 'White', '#000000': 'Black', '#e53935': 'Red', '#1976d2': 'Blue',
-                  '#388e3c': 'Green', '#fbc02d': 'Yellow', '#9e9e9e': 'Gray', '#e91e63': 'Pink',
-                  '#9c27b0': 'Purple', '#ff9800': 'Orange', '#795548': 'Brown', '#ffd700': 'Gold',
-                  '#c0c0c0': 'Silver', '#001f3f': 'Navy', '#f5f5dc': 'Beige', '#fffdd0': 'Cream',
-                  '#191970': 'Midnight Blue', '#4a4a4a': 'Space Gray', '#b76e79': 'Rose Gold',
-                  '#ff0000': 'Red', '#00ff00': 'Green', '#0000ff': 'Blue', '#ffff00': 'Yellow',
-                  '#ff00ff': 'Magenta', '#00ffff': 'Cyan', '#808080': 'Gray', '#ffc0cb': 'Pink'
-                };
-                const colorName = hexToName[hexValue.toLowerCase()];
-                // Use color name if available, otherwise use hex code
-                handleDetailChange({ target: { name: field.name, value: colorName || hexValue } });
-              }}
-              style={{
-                width: '50px',
-                height: '40px',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                padding: '2px'
-              }}
-              title="Pick a color - will auto-convert to color name if possible"
-            />
-          </div>
-        </div>
+        <input
+          type="text"
+          name={field.name}
+          value={fieldValue}
+          onChange={handleDetailChange}
+          className="modern-input"
+          placeholder={field.placeholder || "e.g., White, Black, Blue"}
+        />
       );
     }
     
@@ -1313,54 +1279,19 @@ const EditProduct = () => {
                                     {attr.charAt(0).toUpperCase() + attr.slice(1)}
                                   </label>
                                   {attr.toLowerCase() === 'color' ? (
-                                    <div>
-                                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                        <input
-                                          type="text"
-                                          value={variation.attributes[attr] || ''}
-                                          onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
-                                          placeholder="e.g., White, Black (preferred) or #ffffff"
-                                          style={{
-                                            flex: 1,
-                                            padding: '0.5rem',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '4px',
-                                            fontSize: '0.875rem'
-                                          }}
-                                        />
-                                        <input
-                                          type="color"
-                                          value={variation.attributes[attr] && variation.attributes[attr].startsWith('#') 
-                                            ? variation.attributes[attr] 
-                                            : '#000000'}
-                                          onChange={(e) => {
-                                            const hexValue = e.target.value;
-                                            // Convert common hex codes to color names for better customer display
-                                            const hexToName = {
-                                              '#ffffff': 'White', '#000000': 'Black', '#e53935': 'Red', '#1976d2': 'Blue',
-                                              '#388e3c': 'Green', '#fbc02d': 'Yellow', '#9e9e9e': 'Gray', '#e91e63': 'Pink',
-                                              '#9c27b0': 'Purple', '#ff9800': 'Orange', '#795548': 'Brown', '#ffd700': 'Gold',
-                                              '#c0c0c0': 'Silver', '#001f3f': 'Navy', '#f5f5dc': 'Beige', '#fffdd0': 'Cream',
-                                              '#191970': 'Midnight Blue', '#4a4a4a': 'Space Gray', '#b76e79': 'Rose Gold',
-                                              '#ff0000': 'Red', '#00ff00': 'Green', '#0000ff': 'Blue', '#ffff00': 'Yellow',
-                                              '#ff00ff': 'Magenta', '#00ffff': 'Cyan', '#808080': 'Gray', '#ffc0cb': 'Pink'
-                                            };
-                                            const colorName = hexToName[hexValue.toLowerCase()];
-                                            // Use color name if available, otherwise use hex code
-                                            updateVariation(variation.id, `attr.${attr}`, colorName || hexValue);
-                                          }}
-                                          style={{
-                                            width: '50px',
-                                            height: '40px',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            padding: '2px'
-                                          }}
-                                          title="Pick a color - will auto-convert to color name if possible"
-                                        />
-                                      </div>
-                                    </div>
+                                    <input
+                                      type="text"
+                                      value={variation.attributes[attr] || ''}
+                                      onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
+                                      placeholder="e.g., Blue"
+                                      style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        border: '1px solid #d1d5db',
+                                        borderRadius: '4px',
+                                        fontSize: '0.875rem'
+                                      }}
+                                    />
                                   ) : (
                                     <input
                                       type="text"
