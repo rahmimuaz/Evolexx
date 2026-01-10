@@ -32,16 +32,6 @@ const userSchema = mongoose.Schema(
           type: Number,
           required: true,
           default: 1,
-        },
-        // Selected variation attributes (e.g., { storage: '128GB', color: 'Black' })
-        selectedVariation: {
-          attributes: {
-            type: Map,
-            of: String
-          },
-          stock: Number,
-          price: Number,
-          discountPrice: Number
         }
       },
     ],

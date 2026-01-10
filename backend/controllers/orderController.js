@@ -138,45 +138,14 @@ export const createOrder = asyncHandler(async (req, res) => {
     });
 
     finalOrderItems = userWithCart.cart.map(item => {
-      const orderItem = {
-      product: item.product._id,
-      quantity: item.quantity,
-      price: item.product.price,
-      name: item.product.name, // Copy product name from populated cart item
-      image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '', // Copy main image
-      selectedColor: item.selectedColor || '' // Copy selected color if present in cart item
+      return {
+        product: item.product._id,
+        quantity: item.quantity,
+        price: item.product.discountPrice || item.product.price,
+        name: item.product.name,
+        image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '',
+        selectedColor: item.selectedColor || ''
       };
-      
-      // Include selected variation if present
-      if (item.selectedVariation) {
-        // Convert Map to object if needed
-        let attrs = {};
-        if (item.selectedVariation.attributes) {
-          if (item.selectedVariation.attributes instanceof Map) {
-            for (const [key, value] of item.selectedVariation.attributes.entries()) {
-              attrs[key] = value;
-            }
-          } else {
-            attrs = item.selectedVariation.attributes;
-          }
-        }
-        
-        orderItem.selectedVariation = {
-          attributes: new Map(Object.entries(attrs)),
-          stock: item.selectedVariation.stock,
-          price: item.selectedVariation.price,
-          discountPrice: item.selectedVariation.discountPrice
-        };
-        
-        // Use variation price if available, otherwise use product price
-        if (item.selectedVariation.price) {
-          orderItem.price = item.selectedVariation.price;
-        } else if (item.selectedVariation.discountPrice) {
-          orderItem.price = item.selectedVariation.discountPrice;
-        }
-      }
-      
-      return orderItem;
     });
     finalTotalPrice = finalOrderItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
     console.log('Using cart items as fallback (with product details from populated cart)');
@@ -190,76 +159,20 @@ export const createOrder = asyncHandler(async (req, res) => {
       throw new Error(`Product not found: ${item.product}`);
     }
     
-    // Check stock for variations or regular product
-    if (item.selectedVariation && product.hasVariations && product.variations) {
-      // Find matching variation
-      const matchingVariation = product.variations.find(v => {
-        if (!v.attributes) return false;
-        const vAttrs = v.attributes instanceof Map 
-          ? Object.fromEntries(v.attributes.entries())
-          : v.attributes;
-        const itemAttrs = item.selectedVariation.attributes instanceof Map
-          ? Object.fromEntries(item.selectedVariation.attributes.entries())
-          : item.selectedVariation.attributes;
-        
-        return Object.keys(vAttrs).every(key => vAttrs[key] === itemAttrs[key]);
-      });
-      
-      if (!matchingVariation) {
-        res.status(400);
-        throw new Error(`Variation not found for product: ${product.name}`);
-      }
-      
-      if (matchingVariation.stock < item.quantity) {
-        res.status(400);
-        const attrsDesc = Object.entries(matchingVariation.attributes instanceof Map 
-          ? Object.fromEntries(matchingVariation.attributes.entries())
-          : matchingVariation.attributes).map(([k, v]) => `${k}: ${v}`).join(', ');
-        throw new Error(`Insufficient stock for ${product.name} (${attrsDesc}). Available: ${matchingVariation.stock}, Requested: ${item.quantity}`);
-      }
-    } else {
-      // Regular product stock check
+    // Check stock
     if (product.stock < item.quantity) {
       res.status(400);
       throw new Error(`Insufficient stock for product: ${product.name}`);
-      }
     }
   }
   
   // Deduct stock in parallel for better performance
   const stockUpdatePromises = finalOrderItems.map(async (item) => {
-    const product = await Product.findById(item.product);
-    if (!product) return null;
-    
-    if (item.selectedVariation && product.hasVariations && product.variations) {
-      // Update variation stock
-      const variationIndex = product.variations.findIndex(v => {
-        if (!v.attributes) return false;
-        const vAttrs = v.attributes instanceof Map 
-          ? Object.fromEntries(v.attributes.entries())
-          : v.attributes;
-        const itemAttrs = item.selectedVariation.attributes instanceof Map
-          ? Object.fromEntries(item.selectedVariation.attributes.entries())
-          : item.selectedVariation.attributes;
-        
-        return Object.keys(vAttrs).every(key => vAttrs[key] === itemAttrs[key]);
-      });
-      
-      if (variationIndex !== -1) {
-        product.variations[variationIndex].stock -= item.quantity;
-        // Recalculate total stock
-        product.stock = product.variations.reduce((sum, v) => sum + (v.stock || 0), 0);
-        await product.save();
-      }
-    } else {
-      // Regular product stock update
-      await Product.findByIdAndUpdate(
+    const product = await Product.findByIdAndUpdate(
       item.product,
       { $inc: { stock: -item.quantity } },
       { new: true }
     );
-    }
-    
     return product;
   });
   

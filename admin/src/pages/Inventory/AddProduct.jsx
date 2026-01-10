@@ -6,6 +6,7 @@ import 'easymde/dist/easymde.min.css';
 import './AddProduct.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClipboardList, faCog, faDollarSign, faImage, faCheck, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import VariationManager from '../../components/VariationManager/VariationManager';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -32,10 +33,12 @@ const AddProduct = () => {
   const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [discountError, setDiscountError] = useState('');
+  
+  // Variation state
   const [hasVariations, setHasVariations] = useState(false);
+  const [variationAttributes, setVariationAttributes] = useState([]);
   const [variations, setVariations] = useState([]);
-  const [variationAttributes, setVariationAttributes] = useState(['storage', 'color']); // Dynamic attributes based on category
-  const [variationImages, setVariationImages] = useState({}); // { variationId: { files: [], previews: [] } }
+  const [variationValidation, setVariationValidation] = useState({ isValid: true, errors: [], getImageFiles: () => [] });
 
   // Define the API base URL from environment variables
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -50,30 +53,11 @@ const AddProduct = () => {
 
   const categories = Object.keys(categoryHierarchy);
 
-  // Category-based suggested variation attributes
-  const categoryVariationAttributes = {
-    'Mobile Phone': ['storage', 'color', 'ram'],
-    'Laptops': ['storage', 'ram', 'color'],
-    'Tablets': ['storage', 'color', 'ram'],
-    'Smartwatches': ['size', 'color', 'bandMaterial'],
-    'Preowned Phones': ['storage', 'color', 'condition'],
-    'Preowned Laptops': ['storage', 'ram', 'condition'],
-    'Preowned Tablets': ['storage', 'color', 'condition'],
-    'Chargers': ['type', 'wattage', 'color'],
-    'Phone Covers': ['compatibility', 'color', 'material'],
-    'Screen Protectors': ['compatibility', 'type', 'material'],
-    'Cables': ['type', 'length', 'color'],
-    'Headphones': ['color', 'type', 'connectivity'],
-    'Earbuds': ['color', 'type', 'connectivity'],
-    'Other Accessories': ['color', 'type', 'compatibility']
-  };
 
   const categoryFields = {
     'Mobile Phone': [
       { name: 'model', label: 'Model', type: 'text' },
-      { name: 'storage', label: 'Storage', type: 'select', options: ['64GB', '128GB', '256GB', '512GB', '1TB'] },
       { name: 'ram', label: 'RAM', type: 'select', options: ['4GB', '6GB', '8GB', '12GB', '16GB'] },
-      { name: 'color', label: 'Color', type: 'text' },
       { name: 'screenSize', label: 'Screen Size', type: 'text', placeholder: 'e.g., 6.1 inches' },
       { name: 'batteryCapacity', label: 'Battery Capacity', type: 'text', placeholder: 'e.g., 4500mAh' },
       { name: 'processor', label: 'Processor', type: 'text' },
@@ -93,22 +77,18 @@ const AddProduct = () => {
       { name: 'type', label: 'Charger Type', type: 'select', options: ['Wall Charger', 'Car Charger', 'Wireless Charger', 'Power Bank'] },
       { name: 'wattage', label: 'Wattage', type: 'text', placeholder: 'e.g., 20W' },
       { name: 'compatibility', label: 'Compatibility', type: 'text', placeholder: 'e.g., iPhone, Android' },
-      { name: 'color', label: 'Color', type: 'text' },
       { name: 'cableLength', label: 'Cable Length', type: 'text', placeholder: 'e.g., 1 meter' },
       { name: 'material', label: 'Material', type: 'text' }
     ],
     'Phone Covers': [
       { name: 'type', label: 'Cover Type', type: 'select', options: ['Silicone Case', 'Hard Case', 'Leather Case', 'Flip Case'] },
       { name: 'compatibility', label: 'Compatibility', type: 'text', placeholder: 'e.g., iPhone 14 Pro' },
-      { name: 'color', label: 'Color', type: 'text' },
       { name: 'material', label: 'Material', type: 'text' }
     ],
     'Preowned Phones': [
       { name: 'model', label: 'Model', type: 'text' },
       { name: 'condition', label: 'Condition', type: 'select', options: ['Excellent', 'Good', 'Fair', 'Poor'] },
-      { name: 'storage', label: 'Storage', type: 'select', options: ['64GB', '128GB', '256GB', '512GB', '1TB'] },
       { name: 'ram', label: 'RAM', type: 'select', options: ['4GB', '6GB', '8GB', '12GB', '16GB'] },
-      { name: 'color', label: 'Color', type: 'text' },
       { name: 'batteryHealth', label: 'Battery Health', type: 'text', placeholder: 'e.g., 85%' },
       { name: 'warranty', label: 'Warranty', type: 'text' }
     ],
@@ -116,7 +96,6 @@ const AddProduct = () => {
       { name: 'model', label: 'Model', type: 'text' },
       { name: 'processor', label: 'Processor', type: 'text', placeholder: 'e.g., Intel i7 13th Gen' },
       { name: 'ram', label: 'RAM', type: 'select', options: ['8GB', '16GB', '32GB', '64GB'] },
-      { name: 'storage', label: 'Storage', type: 'text', placeholder: 'e.g., 512GB SSD' },
       { name: 'display', label: 'Display', type: 'text', placeholder: 'e.g., 15.6" FHD' },
       { name: 'graphics', label: 'Graphics', type: 'text', placeholder: 'e.g., NVIDIA RTX 3060' },
       { name: 'operatingSystem', label: 'Operating System', type: 'select', options: ['Windows 11', 'macOS', 'Linux', 'Chrome OS'] }
@@ -127,7 +106,6 @@ const AddProduct = () => {
       { name: 'connectivity', label: 'Connectivity', type: 'select', options: ['Wired', 'Wireless', 'Bluetooth', 'Hybrid'] },
       { name: 'noiseCancellation', label: 'Noise Cancellation', type: 'select', options: ['Active', 'Passive', 'None'] },
       { name: 'batteryLife', label: 'Battery Life', type: 'text', placeholder: 'e.g., 30 hours' },
-      { name: 'color', label: 'Color', type: 'text' },
       { name: 'driverSize', label: 'Driver Size', type: 'text', placeholder: 'e.g., 40mm' },
       { name: 'microphone', label: 'Microphone', type: 'toggle' }
     ],
@@ -137,7 +115,6 @@ const AddProduct = () => {
       { name: 'connectivity', label: 'Connectivity', type: 'select', options: ['Bluetooth', 'Wired', 'USB-C'] },
       { name: 'noiseCancellation', label: 'Noise Cancellation', type: 'select', options: ['Active', 'Passive', 'None'] },
       { name: 'batteryLife', label: 'Battery Life', type: 'text', placeholder: 'e.g., 6 hours (24 with case)' },
-      { name: 'color', label: 'Color', type: 'text' },
       { name: 'waterResistance', label: 'Water Resistance', type: 'text', placeholder: 'e.g., IPX4' },
       { name: 'microphone', label: 'Microphone', type: 'toggle' }
     ],
@@ -151,14 +128,12 @@ const AddProduct = () => {
       { name: 'type', label: 'Cable Type', type: 'select', options: ['Lightning', 'USB-C', 'Micro USB', 'USB-A to USB-C', 'USB-C to USB-C', 'Lightning to USB-C'] },
       { name: 'length', label: 'Cable Length', type: 'text', placeholder: 'e.g., 1 meter' },
       { name: 'compatibility', label: 'Compatibility', type: 'text', placeholder: 'e.g., iPhone, Android' },
-      { name: 'color', label: 'Color', type: 'text' },
       { name: 'material', label: 'Material', type: 'select', options: ['Braided Nylon', 'PVC', 'Silicone', 'TPE'] },
       { name: 'fastCharging', label: 'Fast Charging Support', type: 'toggle' }
     ],
     'Other Accessories': [
       { name: 'type', label: 'Accessory Type', type: 'text', placeholder: 'e.g., Phone Stand, Pop Socket' },
       { name: 'compatibility', label: 'Compatibility', type: 'text', placeholder: 'e.g., Universal, iPhone only' },
-      { name: 'color', label: 'Color', type: 'text' },
       { name: 'material', label: 'Material', type: 'text' }
     ]
   };
@@ -197,25 +172,6 @@ const AddProduct = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.category]);
 
-  // Update variation attributes based on category/subcategory
-  useEffect(() => {
-    if (hasVariations && formData.subcategory) {
-      const suggestedAttrs = categoryVariationAttributes[formData.subcategory] || ['color'];
-      // Only update if current attributes don't match suggested (to preserve custom attributes)
-      const currentAttrsSet = new Set(variationAttributes);
-      const isDifferent = suggestedAttrs.length !== variationAttributes.length || 
-                         !suggestedAttrs.every(attr => currentAttrsSet.has(attr));
-      
-      if (isDifferent && variations.length === 0) {
-        // Only auto-update if no variations exist yet
-        setVariationAttributes(suggestedAttrs);
-      }
-    } else if (hasVariations && !formData.subcategory && variationAttributes.length === 0) {
-      // Default attributes if no subcategory selected
-      setVariationAttributes(['color']);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.subcategory, hasVariations]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -265,181 +221,6 @@ const AddProduct = () => {
     ));
   };
 
-  // Variation attributes management functions
-  const addVariationAttribute = () => {
-    const newAttr = prompt('Enter attribute name (e.g., size, material, type):');
-    if (newAttr && newAttr.trim() && !variationAttributes.includes(newAttr.trim().toLowerCase())) {
-      const attrName = newAttr.trim().toLowerCase();
-      setVariationAttributes(prev => [...prev, attrName]);
-      // Update existing variations to include new attribute
-      setVariations(prev => prev.map(v => ({
-        ...v,
-        attributes: { ...v.attributes, [attrName]: '' }
-      })));
-    } else if (newAttr && variationAttributes.includes(newAttr.trim().toLowerCase())) {
-      alert('This attribute already exists.');
-    }
-  };
-
-  const removeVariationAttribute = (attrToRemove) => {
-    if (variationAttributes.length <= 1) {
-      alert('You must have at least one variation attribute.');
-      return;
-    }
-    if (window.confirm(`Remove "${attrToRemove}" attribute? This will remove this attribute from all variations.`)) {
-      setVariationAttributes(prev => prev.filter(attr => attr !== attrToRemove));
-      // Remove attribute from existing variations
-      setVariations(prev => prev.map(v => {
-        const newAttrs = { ...v.attributes };
-        delete newAttrs[attrToRemove];
-        return { ...v, attributes: newAttrs };
-      }));
-    }
-  };
-
-  // Variations management functions
-  const addVariation = () => {
-    const newVariation = {
-      id: Date.now(),
-      attributes: {},
-      stock: 0,
-      price: '',
-      discountPrice: '',
-      images: []
-    };
-    // Initialize attributes based on variationAttributes
-    variationAttributes.forEach(attr => {
-      newVariation.attributes[attr] = '';
-    });
-    setVariations(prev => [...prev, newVariation]);
-  };
-
-
-  const updateVariation = (id, field, value) => {
-    setVariations(prev => prev.map(v => {
-      if (v.id === id) {
-        if (field.startsWith('attr.')) {
-          const attrName = field.replace('attr.', '');
-          return {
-            ...v,
-            attributes: {
-              ...v.attributes,
-              [attrName]: value
-            }
-          };
-        }
-        return { ...v, [field]: value };
-      }
-      return v;
-    }));
-  };
-
-  // Handle variation image upload (single image only)
-  const handleVariationImageChange = (variationId, e) => {
-    const files = Array.from(e.target.files);
-    if (files.length > 1) {
-      alert('You can only upload 1 image per variation.');
-      return;
-    }
-
-    if (files.length === 0) return;
-
-    // Replace existing image with new one (single image only)
-    const file = files[0];
-    const preview = URL.createObjectURL(file);
-
-    // Clean up old preview URL if exists
-    const currentImages = variationImages[variationId];
-    if (currentImages && currentImages.previews.length > 0) {
-      URL.revokeObjectURL(currentImages.previews[0]);
-    }
-
-    setVariationImages(prev => ({
-      ...prev,
-      [variationId]: {
-        files: [file],
-        previews: [preview]
-      }
-    }));
-  };
-
-  // Remove variation image
-  const removeVariationImage = (variationId, index) => {
-    const currentImages = variationImages[variationId] || { files: [], previews: [] };
-    const newFiles = currentImages.files.filter((_, i) => i !== index);
-    const newPreviews = currentImages.previews.filter((_, i) => i !== index);
-
-    // Revoke object URL to free memory
-    URL.revokeObjectURL(currentImages.previews[index]);
-
-    setVariationImages(prev => ({
-      ...prev,
-      [variationId]: {
-        files: newFiles,
-        previews: newPreviews
-      }
-    }));
-  };
-
-  // Clean up variation images when variation is removed
-  const removeVariation = (id) => {
-    // Clean up image URLs
-    if (variationImages[id]) {
-      variationImages[id].previews.forEach(url => URL.revokeObjectURL(url));
-      setVariationImages(prev => {
-        const newImages = { ...prev };
-        delete newImages[id];
-        return newImages;
-      });
-    }
-    setVariations(prev => prev.filter(v => v.id !== id));
-  };
-
-  const generateVariationCombinations = () => {
-    // Get all unique values for each attribute from existing variations
-    const attributeValues = {};
-    variationAttributes.forEach(attr => {
-      attributeValues[attr] = [...new Set(variations.map(v => v.attributes[attr]).filter(Boolean))];
-    });
-
-    // Generate all combinations
-    const combinations = [];
-    const generate = (current, remainingAttrs) => {
-      if (remainingAttrs.length === 0) {
-        combinations.push(current);
-        return;
-      }
-      const [attr, ...rest] = remainingAttrs;
-      const values = attributeValues[attr] || [];
-      if (values.length === 0) {
-        generate({ ...current, [attr]: '' }, rest);
-      } else {
-        values.forEach(value => {
-          generate({ ...current, [attr]: value }, rest);
-        });
-      }
-    };
-
-    generate({}, variationAttributes);
-
-    // Create variations for each combination that doesn't already exist
-    combinations.forEach(combo => {
-      const exists = variations.some(v => 
-        variationAttributes.every(attr => v.attributes[attr] === combo[attr])
-      );
-      if (!exists) {
-        const newVariation = {
-          id: Date.now() + Math.random(),
-          attributes: combo,
-          stock: 0,
-          price: '',
-          discountPrice: '',
-          images: []
-        };
-        setVariations(prev => [...prev, newVariation]);
-      }
-    });
-  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -455,7 +236,13 @@ const AddProduct = () => {
   const handleSubmit = async (e, saveAsDraft = false) => {
     e.preventDefault();
 
-    if (!saveAsDraft && selectedFiles.length === 0) {
+    // Validation: Check if variations are enabled and valid
+    if (hasVariations && !variationValidation.isValid) {
+      alert('Please fix variation errors before submitting:\n' + variationValidation.errors.join('\n'));
+      return;
+    }
+
+    if (!saveAsDraft && selectedFiles.length === 0 && !hasVariations) {
       alert('Please upload at least one image.');
       return;
     }
@@ -464,10 +251,17 @@ const AddProduct = () => {
       return;
     }
 
-    // Validate stock for products without variations
-    if (!hasVariations) {
-      if (!formData.stock || Number(formData.stock) <= 0) {
-        alert('Please enter a valid stock quantity (must be greater than 0).');
+    // Validate stock - only required if not using variations
+    if (!hasVariations && (!formData.stock || Number(formData.stock) <= 0)) {
+      alert('Please enter a valid stock quantity (must be greater than 0).');
+      setLoading(false);
+      return;
+    }
+
+    // Validate variations if enabled
+    if (hasVariations) {
+      if (variationAttributes.length === 0 || variations.length === 0) {
+        alert('Please define at least one variation attribute and generate variations.');
         setLoading(false);
         return;
       }
@@ -511,69 +305,36 @@ const AddProduct = () => {
       formDataToSend.append('kokoPay', formData.kokoPay);
 
       // Handle variations
-      if (hasVariations && variations.length > 0) {
-        // Validate variations
-        const validVariations = variations.filter(v => {
-          // Check if at least one attribute has a value
-          return Object.values(v.attributes).some(val => val && val.trim() !== '');
-        });
+      formDataToSend.append('hasVariations', hasVariations ? 'true' : 'false');
+      
+      if (hasVariations && variationAttributes.length > 0 && variations.length > 0) {
+        // Format attributes for backend (remove internal IDs)
+        const formattedAttributes = variationAttributes.map(attr => ({
+          name: attr.name,
+          values: attr.values.filter(v => v.trim())
+        })).filter(attr => attr.name && attr.values.length > 0);
 
-        if (validVariations.length === 0) {
-          alert('Please add at least one valid variation with attributes.');
-          setLoading(false);
-          return;
-        }
-
-        // Validate that all variations have stock values
-        const variationsWithoutStock = validVariations.filter(v => !v.stock || parseInt(v.stock) <= 0);
-        if (variationsWithoutStock.length > 0) {
-          alert(`Please set stock quantity for all variations. ${variationsWithoutStock.length} variation(s) are missing stock.`);
-          setLoading(false);
-          return;
-        }
-
-        // Calculate total stock from variations
-        const totalStock = validVariations.reduce((sum, v) => {
-          return sum + (parseInt(v.stock) || 0);
-        }, 0);
-        
-        if (totalStock <= 0) {
-          alert('Total stock from all variations must be greater than 0.');
-          setLoading(false);
-          return;
-        }
-        
-        // Set stock to calculated total from variations
-        formDataToSend.append('stock', totalStock.toString());
-
-        // Upload variation images and get URLs
-        // For now, we'll upload variation images with a special naming convention
-        // The backend will need to handle these
-        validVariations.forEach((v, index) => {
-          const varImages = variationImages[v.id];
-          if (varImages && varImages.files.length > 0) {
-            varImages.files.forEach((file, fileIndex) => {
-              formDataToSend.append(`variation-${v.id}-images`, file);
-            });
-          }
-        });
-
-        // Include variation image file references in variation data
-        // The backend will process these files and return URLs
-        const variationsWithImageRefs = validVariations.map(v => ({
-          attributes: v.attributes,
-          stock: parseInt(v.stock) || 0,
-          price: v.price ? parseFloat(v.price) : undefined,
-          discountPrice: v.discountPrice ? parseFloat(v.discountPrice) : undefined,
-          images: [], // Will be populated by backend after upload
-          _hasImages: variationImages[v.id]?.files.length > 0,
-          _variationId: v.id // Temporary ID for backend to match files
+        // Format variations for backend (convert attributes to plain object)
+        const formattedVariations = variations.map(variant => ({
+          variationId: variant.variationId,
+          attributes: variant.attributes,
+          price: variant.price,
+          discountPrice: variant.discountPrice,
+          stock: variant.stock,
+          sku: variant.sku,
+          isActive: variant.isActive !== false
         }));
 
-        formDataToSend.append('hasVariations', 'true');
-        formDataToSend.append('variations', JSON.stringify(variationsWithImageRefs));
+        formDataToSend.append('variationAttributes', JSON.stringify(formattedAttributes));
+        formDataToSend.append('variations', JSON.stringify(formattedVariations));
+
+        // Add variation images
+        const variationImageFiles = variationValidation.getImageFiles ? variationValidation.getImageFiles() : [];
+        variationImageFiles.forEach(({ fieldname, file }) => {
+          formDataToSend.append(fieldname, file);
+        });
       } else {
-        // No variations - use the stock from formData
+        // Add stock only if not using variations
         formDataToSend.append('stock', formData.stock || '0');
       }
         
@@ -587,7 +348,9 @@ const AddProduct = () => {
         name: formData.name,
         category: categoryValue,
         price: formData.price,
-        stock: formData.stock,
+        stock: hasVariations ? 'Variations' : formData.stock,
+        hasVariations,
+        variationsCount: variations.length,
         brand: formData.brand,
         details: combinedDetails,
         imagesCount: selectedFiles.length
@@ -661,9 +424,6 @@ const AddProduct = () => {
               title="Pick a color - will auto-convert to color name if possible"
             />
           </div>
-          <small style={{ display: 'block', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.75rem' }}>
-            Tip: Enter color name (e.g., "White") for better customer display, or use color picker for hex codes
-          </small>
         </div>
       );
     }
@@ -1057,30 +817,86 @@ const AddProduct = () => {
                     </div>
                   </div>
 
-                  <div className="form-row-2col">
-                    <div className="form-field-group">
-                      <label className="modern-label">
-                        Stock Quantity {!hasVariations && <span className="required-star">*</span>}
-                      </label>
+                  {/* Variation Toggle */}
+                  <div className="form-field-group">
+                    <label className="modern-label checkbox-label">
                       <input
-                        type="number"
-                        name="stock"
-                        value={hasVariations ? '' : (formData.stock || '')}
-                        onChange={handleInputChange}
-                        required={!hasVariations}
-                        disabled={hasVariations}
-                        className="modern-input"
-                        placeholder={hasVariations ? "Calculated from variations" : "0"}
-                        min="0"
-                        style={hasVariations ? { background: '#f3f4f6', cursor: 'not-allowed' } : {}}
+                        type="checkbox"
+                        checked={hasVariations}
+                        onChange={(e) => {
+                          setHasVariations(e.target.checked);
+                          if (!e.target.checked) {
+                            setVariationAttributes([]);
+                            setVariations([]);
+                          }
+                        }}
+                        className="modern-checkbox"
                       />
-                      {hasVariations && (
-                        <small style={{ display: 'block', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.75rem' }}>
-                          Stock will be calculated automatically from your variations
-                        </small>
-                      )}
-                    </div>
+                      <span className="checkbox-text">
+                        Enable Product Variations (e.g., different colors, sizes, storage options)
+                      </span>
+                    </label>
+                    <small style={{ display: 'block', marginTop: '0.5rem', color: '#64748b', fontSize: '0.8125rem' }}>
+                      When enabled, you can define attributes like Color, Size, Storage, etc., and create multiple variations with different prices and stock levels.
+                    </small>
+                  </div>
 
+                  {/* Variation Manager Component */}
+                  <VariationManager
+                    hasVariations={hasVariations}
+                    onChange={(hasVars, attrs, vars, validation) => {
+                      setHasVariations(hasVars);
+                      setVariationAttributes(attrs);
+                      setVariations(vars);
+                      if (validation) {
+                        setVariationValidation(validation);
+                      }
+                    }}
+                    initialAttributes={variationAttributes}
+                    initialVariations={variations}
+                    basePrice={formData.price ? parseFloat(formData.price) : 0}
+                    baseDiscountPrice={formData.discountPrice ? parseFloat(formData.discountPrice) : null}
+                  />
+
+                  {/* Stock Quantity - only shown when variations are disabled */}
+                  {!hasVariations && (
+                    <div className="form-row-2col">
+                      <div className="form-field-group">
+                        <label className="modern-label">
+                          Stock Quantity <span className="required-star">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          name="stock"
+                          value={formData.stock || ''}
+                          onChange={handleInputChange}
+                          required={!hasVariations}
+                          className="modern-input"
+                          placeholder="0"
+                          min="0"
+                        />
+                      </div>
+
+                      <div className="form-field-group">
+                        <label className="modern-label">Warranty Period</label>
+                        <select
+                          name="warrantyPeriod"
+                          value={formData.warrantyPeriod}
+                          onChange={handleInputChange}
+                          className="modern-input"
+                        >
+                          <option value="No Warranty">No Warranty</option>
+                          <option value="6 months">6 months</option>
+                          <option value="1 year">1 year</option>
+                          <option value="2 years">2 years</option>
+                          <option value="3 years">3 years</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Warranty Period - shown separately when variations are enabled */}
+                  {hasVariations && (
                     <div className="form-field-group">
                       <label className="modern-label">Warranty Period</label>
                       <select
@@ -1096,7 +912,7 @@ const AddProduct = () => {
                         <option value="3 years">3 years</option>
                       </select>
                     </div>
-                  </div>
+                  )}
 
                   <div className="form-field-group">
                     <label className="modern-label checkbox-label">
@@ -1113,406 +929,6 @@ const AddProduct = () => {
                     </label>
                   </div>
 
-                  {/* Variations Section */}
-                  <div className="variations-section" style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '2px solid #e5e7eb' }}>
-                    <div className="form-field-group">
-                      <label className="modern-label checkbox-label">
-                        <input
-                          type="checkbox"
-                          checked={hasVariations}
-                          onChange={(e) => {
-                            setHasVariations(e.target.checked);
-                            if (!e.target.checked) {
-                              setVariations([]);
-                            } else if (variations.length === 0) {
-                              addVariation();
-                            }
-                          }}
-                          className="modern-checkbox"
-                        />
-                        <span className="checkbox-text" style={{ fontWeight: 600, fontSize: '1rem' }}>
-                          This product has variations (e.g., different storage sizes, colors)
-                        </span>
-                      </label>
-                      <small style={{ display: 'block', marginTop: '0.5rem', color: '#64748b' }}>
-                        Enable this if you want to manage different variants (like iPhone 13 128GB Black, iPhone 13 256GB Pink) under one product
-                      </small>
-                    </div>
-
-                    {hasVariations && (
-                      <div style={{ marginTop: '1.5rem' }}>
-                        {/* Variation Attributes Management */}
-                        <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                            <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
-                              Variation Attributes
-                            </label>
-                            <button
-                              type="button"
-                              onClick={addVariationAttribute}
-                              style={{
-                                padding: '0.375rem 0.75rem',
-                                background: '#10b981',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.8125rem',
-                                fontWeight: 500
-                              }}
-                            >
-                              + Add Attribute
-                            </button>
-                          </div>
-                          <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.75rem' }}>
-                            Define which attributes vary (e.g., storage, color, size). These will be used to create variations.
-                          </p>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            {variationAttributes.map(attr => (
-                              <div
-                                key={attr}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.5rem',
-                                  padding: '0.5rem 0.75rem',
-                                  background: 'white',
-                                  border: '1px solid #d1d5db',
-                                  borderRadius: '4px',
-                                  fontSize: '0.8125rem'
-                                }}
-                              >
-                                <span style={{ fontWeight: 500, color: '#374151' }}>
-                                  {attr.charAt(0).toUpperCase() + attr.slice(1)}
-                                </span>
-                                {variationAttributes.length > 1 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => removeVariationAttribute(attr)}
-                                    style={{
-                                      padding: '0.125rem 0.375rem',
-                                      background: '#ef4444',
-                                      color: 'white',
-                                      border: 'none',
-                                      borderRadius: '3px',
-                                      cursor: 'pointer',
-                                      fontSize: '0.75rem',
-                                      lineHeight: 1
-                                    }}
-                                    title="Remove attribute"
-                                  >
-                                    ×
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1f2937' }}>Product Variations</h3>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button
-                              type="button"
-                              onClick={addVariation}
-                              style={{
-                                padding: '0.5rem 1rem',
-                                background: '#3b82f6',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.875rem'
-                              }}
-                            >
-                              + Add Variation
-                            </button>
-                            {variations.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={generateVariationCombinations}
-                                style={{
-                                  padding: '0.5rem 1rem',
-                                  background: '#10b981',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  fontSize: '0.875rem'
-                                }}
-                              >
-                                Generate All Combinations
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {variations.length === 0 ? (
-                          <div style={{ padding: '2rem', textAlign: 'center', background: '#f9fafb', borderRadius: '8px', color: '#6b7280' }}>
-                            <p>No variations added yet. Click "Add Variation" to create your first variation.</p>
-                          </div>
-                        ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {variations.map((variation, idx) => (
-                              <div
-                                key={variation.id}
-                                style={{
-                                  padding: '1.5rem',
-                                  border: '1px solid #e5e7eb',
-                                  borderRadius: '8px',
-                                  background: '#fff'
-                                }}
-                              >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                  <h4 style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1f2937' }}>
-                                    Variation #{idx + 1}
-                                  </h4>
-                                  <button
-                                    type="button"
-                                    onClick={() => removeVariation(variation.id)}
-                                    style={{
-                                      padding: '0.25rem 0.75rem',
-                                      background: '#ef4444',
-                                      color: 'white',
-                                      border: 'none',
-                                      borderRadius: '4px',
-                                      cursor: 'pointer',
-                                      fontSize: '0.8125rem'
-                                    }}
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                                  {variationAttributes.map(attr => (
-                                    <div key={attr}>
-                                      <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, marginBottom: '0.25rem', color: '#374151' }}>
-                                        {attr.charAt(0).toUpperCase() + attr.slice(1)}
-                                      </label>
-                                      {attr.toLowerCase() === 'color' ? (
-                                        <div>
-                                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                            <input
-                                              type="text"
-                                              value={variation.attributes[attr] || ''}
-                                              onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
-                                              placeholder="e.g., White, Black (preferred) or #ffffff"
-                                              style={{
-                                                flex: 1,
-                                                padding: '0.5rem',
-                                                border: '1px solid #d1d5db',
-                                                borderRadius: '4px',
-                                                fontSize: '0.875rem'
-                                              }}
-                                            />
-                                            <input
-                                              type="color"
-                                              value={variation.attributes[attr] && variation.attributes[attr].startsWith('#') 
-                                                ? variation.attributes[attr] 
-                                                : '#000000'}
-                                              onChange={(e) => {
-                                                const hexValue = e.target.value;
-                                                // Convert common hex codes to color names for better customer display
-                                                const hexToName = {
-                                                  '#ffffff': 'White', '#000000': 'Black', '#e53935': 'Red', '#1976d2': 'Blue',
-                                                  '#388e3c': 'Green', '#fbc02d': 'Yellow', '#9e9e9e': 'Gray', '#e91e63': 'Pink',
-                                                  '#9c27b0': 'Purple', '#ff9800': 'Orange', '#795548': 'Brown', '#ffd700': 'Gold',
-                                                  '#c0c0c0': 'Silver', '#001f3f': 'Navy', '#f5f5dc': 'Beige', '#fffdd0': 'Cream',
-                                                  '#191970': 'Midnight Blue', '#4a4a4a': 'Space Gray', '#b76e79': 'Rose Gold',
-                                                  '#ff0000': 'Red', '#00ff00': 'Green', '#0000ff': 'Blue', '#ffff00': 'Yellow',
-                                                  '#ff00ff': 'Magenta', '#00ffff': 'Cyan', '#808080': 'Gray', '#ffc0cb': 'Pink'
-                                                };
-                                                const colorName = hexToName[hexValue.toLowerCase()];
-                                                // Use color name if available, otherwise use hex code
-                                                updateVariation(variation.id, `attr.${attr}`, colorName || hexValue);
-                                              }}
-                                              style={{
-                                                width: '50px',
-                                                height: '40px',
-                                                border: '1px solid #d1d5db',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                padding: '2px'
-                                              }}
-                                              title="Pick a color - will auto-convert to color name if possible"
-                                            />
-                                          </div>
-                                          <small style={{ display: 'block', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.75rem' }}>
-                                            Tip: Enter color name (e.g., "White") for better customer display, or use color picker for hex codes
-                                          </small>
-                                        </div>
-                                      ) : (
-                                        <input
-                                          type="text"
-                                          value={variation.attributes[attr] || ''}
-                                          onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
-                                          placeholder={`e.g., ${attr === 'storage' ? '128GB' : 'Value'}`}
-                                          style={{
-                                            width: '100%',
-                                            padding: '0.5rem',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '4px',
-                                            fontSize: '0.875rem'
-                                          }}
-                                        />
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                                  <div>
-                                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, marginBottom: '0.25rem', color: '#374151' }}>
-                                      Stock <span style={{ color: '#ef4444' }}>*</span>
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={variation.stock}
-                                      onChange={(e) => updateVariation(variation.id, 'stock', e.target.value)}
-                                      min="0"
-                                      required
-                                      style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '4px',
-                                        fontSize: '0.875rem'
-                                      }}
-                                    />
-                                  </div>
-                                  <div>
-                                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, marginBottom: '0.25rem', color: '#374151' }}>
-                                      Price (Optional)
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={variation.price}
-                                      onChange={(e) => updateVariation(variation.id, 'price', e.target.value)}
-                                      min="0"
-                                      step="0.01"
-                                      placeholder="Uses base price if empty"
-                                      style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '4px',
-                                        fontSize: '0.875rem'
-                                      }}
-                                    />
-                                  </div>
-                                  <div>
-                                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, marginBottom: '0.25rem', color: '#374151' }}>
-                                      Discount Price (Optional)
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={variation.discountPrice}
-                                      onChange={(e) => updateVariation(variation.id, 'discountPrice', e.target.value)}
-                                      min="0"
-                                      step="0.01"
-                                      placeholder="Optional"
-                                      style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '4px',
-                                        fontSize: '0.875rem'
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-
-                                {/* Variation Images Section */}
-                                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb' }}>
-                                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#1f2937' }}>
-                                    Variation Images (Optional)
-                                  </label>
-                                  <small style={{ display: 'block', marginBottom: '0.75rem', color: '#6b7280', fontSize: '0.75rem' }}>
-                                    Upload specific images for this variation. If not provided, main product images will be used.
-                                  </small>
-                                  
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => handleVariationImageChange(variation.id, e)}
-                                    style={{ display: 'none' }}
-                                    id={`variation-image-input-${variation.id}`}
-                                  />
-                                  <label
-                                    htmlFor={`variation-image-input-${variation.id}`}
-                                    style={{
-                                      display: 'inline-block',
-                                      padding: '0.5rem 1rem',
-                                      background: '#f3f4f6',
-                                      border: '1px dashed #d1d5db',
-                                      borderRadius: '4px',
-                                      cursor: 'pointer',
-                                      fontSize: '0.875rem',
-                                      color: '#374151',
-                                      marginBottom: '0.75rem'
-                                    }}
-                                  >
-                                    + Upload Image (1 image only)
-                                  </label>
-
-                                  {/* Image Preview (Single Image) */}
-                                  {variationImages[variation.id]?.previews && variationImages[variation.id].previews.length > 0 && (
-                                    <div style={{ marginTop: '0.75rem' }}>
-                                      <div
-                                        style={{
-                                          position: 'relative',
-                                          width: '150px',
-                                          height: '150px',
-                                          border: '1px solid #e5e7eb',
-                                          borderRadius: '4px',
-                                          overflow: 'hidden',
-                                          background: '#f9fafb'
-                                        }}
-                                      >
-                                        <img
-                                          src={variationImages[variation.id].previews[0]}
-                                          alt={`Variation ${idx + 1}`}
-                                          style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            objectFit: 'cover'
-                                          }}
-                                        />
-                                        <button
-                                          type="button"
-                                          onClick={() => removeVariationImage(variation.id, 0)}
-                                          style={{
-                                            position: 'absolute',
-                                            top: '0.25rem',
-                                            right: '0.25rem',
-                                            background: '#ef4444',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '50%',
-                                            width: '24px',
-                                            height: '24px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.75rem',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                          }}
-                                          title="Remove image"
-                                        >
-                                          ×
-                                        </button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
                 </div>
 
                 <div className="step-navigation">
@@ -1614,19 +1030,17 @@ const AddProduct = () => {
                       <div className="review-item">
                         <span className="review-label">Stock:</span>
                         <span className="review-value">
-                          {hasVariations && variations.length > 0
-                            ? (() => {
-                                const validVariations = variations.filter(v => 
-                                  Object.values(v.attributes).some(val => val && val.trim() !== '')
-                                );
-                                const totalStock = validVariations.reduce((sum, v) => 
-                                  sum + (parseInt(v.stock) || 0), 0
-                                );
-                                return `${totalStock} units (from ${validVariations.length} variation${validVariations.length !== 1 ? 's' : ''})`;
-                              })()
+                          {hasVariations 
+                            ? `${variations.length} variation(s) - Total: ${variations.reduce((sum, v) => sum + (v.stock || 0), 0)} units`
                             : `${formData.stock || '0'} units`}
                         </span>
                       </div>
+                      {hasVariations && variations.length > 0 && (
+                        <div className="review-item">
+                          <span className="review-label">Variations:</span>
+                          <span className="review-value">{variations.length} combinations</span>
+                        </div>
+                      )}
                       <div className="review-item">
                         <span className="review-label">Images:</span>
                         <span className="review-value">{previewUrls.length} uploaded</span>
@@ -1640,19 +1054,16 @@ const AddProduct = () => {
                     const hasCategory = formData.category && formData.category.trim() !== '';
                     const hasPrice = formData.price && Number(formData.price) > 0;
                     
-                    // For stock: if variations enabled, check variations have stock; otherwise check formData.stock
-                    let hasStock = false;
-                    if (hasVariations && variations.length > 0) {
-                      const validVariations = variations.filter(v => 
-                        Object.values(v.attributes).some(val => val && val.trim() !== '')
-                      );
-                      hasStock = validVariations.length > 0 && 
-                        validVariations.every(v => v.stock && parseInt(v.stock) > 0);
-                    } else {
-                      hasStock = formData.stock && Number(formData.stock) > 0;
-                    }
+                    // Stock validation depends on variations
+                    const hasStock = hasVariations 
+                      ? (variations.length > 0 && variations.every(v => v.stock !== undefined && v.stock !== null))
+                      : (formData.stock && Number(formData.stock) > 0);
                     
-                    return !hasName || !hasCategory || !hasPrice || !hasStock;
+                    const hasValidVariations = hasVariations 
+                      ? (variationValidation.isValid && variations.length > 0)
+                      : true;
+                    
+                    return !hasName || !hasCategory || !hasPrice || !hasStock || !hasValidVariations;
                   })() ? (
                     <div className="warning-box">
                       <FontAwesomeIcon icon={faExclamationTriangle} /> Please complete all required fields before publishing
@@ -1675,6 +1086,17 @@ const AddProduct = () => {
                 onClick={(e) => handleSubmit(e, true)}
                 className="btn-secondary"
                 disabled={loading}
+                style={{
+                  background: 'white',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '4px',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1
+                }}
               >
                 {loading ? (
                   <>
@@ -1686,14 +1108,26 @@ const AddProduct = () => {
               <button
                 type="submit"
                 className="btn-primary"
-                disabled={loading || !formData.name || !formData.category || !formData.price || !formData.stock}
+                disabled={loading || !formData.name || !formData.category || !formData.price || 
+                  (hasVariations ? (!variationValidation.isValid || variations.length === 0) : !formData.stock)}
+                style={{
+                  background: '#f97316',
+                  color: 'white',
+                  padding: '0.75rem 2rem',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1
+                }}
               >
                 {loading ? (
                   <>
                     <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginRight: '8px', display: 'inline-block' }}></div>
-                    Publishing...
+                    Submitting...
                   </>
-                ) : 'Publish Product'}
+                ) : 'Submit'}
               </button>
             </div>
           </form>

@@ -220,75 +220,6 @@
   margin-bottom: 24px;
 }
 
-/* Variations Section */
-.pd-variations-section {
-  margin-bottom: 12px;
-}
-
-.pd-variations-row {
-  display: flex;
-  gap: 0;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-.pd-variation-divider {
-  width: 1px;
-  height: 100%;
-  min-height: 60px;
-  border: none;
-  background-color: #e0e0e0;
-  margin: 0 2rem;
-  align-self: stretch;
-}
-
-/* Color Selection */
-.pd-option-section {
-  flex: 1;
-  min-width: 150px;
-  margin-bottom: 0;
-}
-
-.pd-option-label {
-  
-  font-size: 0.85rem;
-  color: #333;
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.pd-color-swatches {
-  display: flex;
-  gap: 10px;
-}
-
-.pd-color-swatch {
-  width: 26px;
-  height: 26px;
-  border-radius: 50px;
-  border: 1.5px solid #e0e0e0;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.pd-color-swatch:hover {
-  border-color: #999;
-}
-
-.pd-color-swatch.active {
-  border-color: #333;
-}
-
-.pd-swatch-check {
-  display: none;
-  color: #fff;
-  font-size: 0.7rem;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
-}
 
 /* Actions */
 /* Quantity Row */
@@ -1247,37 +1178,6 @@
     line-height: 1.5;
   }
 
-  /* Variations Section */
-  .pd-variations-row {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .pd-variation-divider {
-    width: 100%;
-    height: 1px;
-    min-height: 1px;
-    margin: 1rem 0;
-    align-self: stretch;
-  }
-
-  /* Color Selection */
-  .pd-option-section {
-    margin-bottom: 14px;
-    min-width: 100%;
-  }
-
-  .pd-option-label {
-    
-    font-size: 0.8rem;
-    margin-bottom: 8px;
-  }
-
-  .pd-color-swatch {
-    
-    width: 32px;
-    height: 32px;
-  }
 
   /* Quantity & Actions */
   .pd-quantity-row {

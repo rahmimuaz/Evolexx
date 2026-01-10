@@ -65,7 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/cart
 // @access  Private
 const addToCart = asyncHandler(async (req, res) => {
-  const { productId, quantity, selectedVariation } = req.body;
+  const { productId, quantity } = req.body;
 
   if (!productId || !quantity || quantity <= 0) {
     res.status(400);
@@ -78,56 +78,9 @@ const addToCart = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 
-  // Convert selectedVariation attributes to Map if provided
-  let variationMap = null;
-  if (selectedVariation && selectedVariation.attributes) {
-    variationMap = {
-      attributes: new Map(Object.entries(selectedVariation.attributes)),
-      stock: selectedVariation.stock,
-      price: selectedVariation.price,
-      discountPrice: selectedVariation.discountPrice
-    };
-  }
-
-  // Find existing cart item with same product and variation
+  // Find existing cart item with same product
   const existingCartItem = user.cart.find((item) => {
-    if (item.product.toString() !== productId) return false;
-    
-    // Compare variations
-    if (!variationMap && !item.selectedVariation) return true;
-    if (!variationMap || !item.selectedVariation) return false;
-    
-    // Compare attributes
-    const itemAttrs = item.selectedVariation.attributes;
-    const newAttrs = variationMap.attributes;
-    
-    if (!itemAttrs || !newAttrs) return false;
-    
-    // Check if all attributes match
-    const itemAttrObj = {};
-    if (itemAttrs instanceof Map) {
-      for (const [key, value] of itemAttrs.entries()) {
-        itemAttrObj[key] = value;
-      }
-    } else {
-      Object.assign(itemAttrObj, itemAttrs);
-    }
-    
-    const newAttrObj = {};
-    if (newAttrs instanceof Map) {
-      for (const [key, value] of newAttrs.entries()) {
-        newAttrObj[key] = value;
-      }
-    } else {
-      Object.assign(newAttrObj, newAttrs);
-    }
-    
-    const itemKeys = Object.keys(itemAttrObj).sort();
-    const newKeys = Object.keys(newAttrObj).sort();
-    
-    if (itemKeys.length !== newKeys.length) return false;
-    
-    return itemKeys.every(key => itemAttrObj[key] === newAttrObj[key]);
+    return item.product.toString() === productId;
   });
 
   if (existingCartItem) {
@@ -135,33 +88,14 @@ const addToCart = asyncHandler(async (req, res) => {
   } else {
     user.cart.push({ 
       product: productId, 
-      quantity,
-      selectedVariation: variationMap
+      quantity
     });
   }
 
   await user.save();
 
   const populatedUser = await User.findById(user._id).populate('cart.product');
-  
-  // Serialize cart items (convert Map to object for JSON)
-  const serializedCart = populatedUser.cart.map(item => {
-    const itemObj = item.toObject ? item.toObject() : item;
-    if (itemObj.selectedVariation && itemObj.selectedVariation.attributes) {
-      const attrs = {};
-      if (itemObj.selectedVariation.attributes instanceof Map) {
-        for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
-          attrs[key] = value;
-        }
-      } else {
-        Object.assign(attrs, itemObj.selectedVariation.attributes);
-      }
-      itemObj.selectedVariation.attributes = attrs;
-    }
-    return itemObj;
-  });
-  
-  res.status(200).json(serializedCart);
+  res.status(200).json(populatedUser.cart);
 });
 
 // @desc    Update product quantity in user cart

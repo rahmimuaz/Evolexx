@@ -27,16 +27,6 @@ const orderSchema = mongoose.Schema(
         price: {
           type: Number,
           required: true,
-        },
-        // Selected variation attributes (e.g., { storage: '128GB', color: 'Black' })
-        selectedVariation: {
-          attributes: {
-            type: Map,
-            of: String
-          },
-          stock: Number,
-          price: Number,
-          discountPrice: Number
         }
       },
     ],

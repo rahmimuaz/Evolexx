@@ -28,15 +28,12 @@ const ProductDetail = () => {
   const [reviewComment, setReviewComment] = useState('');
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState(null);
-  const [selectedColor, setSelectedColor] = useState('');
   const [activeTab, setActiveTab] = useState('DESCRIPTION');
   const [wishlist, setWishlist] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [openAccordion, setOpenAccordion] = useState(null); // Track which accordion is open
+  const [openAccordion, setOpenAccordion] = useState(null);
   const [hasPurchasedProduct, setHasPurchasedProduct] = useState(false);
   const [checkingPurchase, setCheckingPurchase] = useState(false);
-  const [selectedVariation, setSelectedVariation] = useState(null); // Selected variation object
-  const [selectedVariationAttributes, setSelectedVariationAttributes] = useState({}); // Selected attributes for variation
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
@@ -155,208 +152,21 @@ const ProductDetail = () => {
     checkUserPurchase();
   }, [user, productId, API_BASE_URL]);
 
-  useEffect(() => {
-    if (product && Array.isArray(product.details?.color) && product.details.color.length > 0) {
-      setSelectedColor(product.details.color[0]);
-    }
-    
-    // Initialize variation selection if product has variations
-    if (product?.hasVariations && product?.variations && product.variations.length > 0) {
-      // Try to find a variation that matches the primary product image
-      const primaryImage = product.images && product.images.length > 0 ? product.images[0] : null;
-      let matchingVariation = null;
-      
-      if (primaryImage) {
-        // Check if primary image belongs to any variation
-        matchingVariation = product.variations.find(v => 
-          v.images && v.images.length > 0 && v.images.includes(primaryImage)
-        );
-      }
-      
-      // If no match found, use first variation
-      const variationToSelect = matchingVariation || product.variations[0];
-      setSelectedVariation(variationToSelect);
-      
-      // Initialize selected attributes from selected variation
-      const attrs = {};
-      if (variationToSelect.attributes) {
-        Object.keys(variationToSelect.attributes).forEach(key => {
-          attrs[key] = variationToSelect.attributes[key];
-        });
-      }
-      setSelectedVariationAttributes(attrs);
-      
-      // Set main image based on selected variation
-      // If the selected variation has images, use the first one
-      // Otherwise, if primary image matches this variation, use primary image
-      // Otherwise, use primary product image
-      if (variationToSelect.images && variationToSelect.images.length > 0) {
-        setMainImage(variationToSelect.images[0]);
-      } else if (primaryImage && matchingVariation) {
-        // Primary image matches this variation, use it
-        setMainImage(primaryImage);
-      } else if (product.images && product.images.length > 0) {
-        // Fallback to primary product image
-        setMainImage(product.images[0]);
-      }
-    } else if (product) {
-      // Regular product without variations - initialize basic product details
-      // Always set primary product image first
-      if (product.images && product.images.length > 0) {
-        setMainImage(product.images[0]);
-      }
-      
-      const basicAttrs = {};
-      
-      // Extract basic product details that might be used as attributes
-      if (product.details) {
-        // Common attributes that might be in product details
-        const attributeFields = ['storage', 'color', 'ram', 'size', 'model'];
-        attributeFields.forEach(field => {
-          if (product.details[field]) {
-            // Handle both string and array values
-            if (Array.isArray(product.details[field])) {
-              basicAttrs[field] = product.details[field][0]; // Use first value if array
-            } else {
-              basicAttrs[field] = product.details[field];
-            }
-          }
-        });
-      }
-      
-      // Set basic attributes if any found
-      if (Object.keys(basicAttrs).length > 0) {
-        setSelectedVariationAttributes(basicAttrs);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product]);
-
-  // Get current images (show all images: product images + all variation images)
+  // Get current images
   const getCurrentImages = () => {
-    const allImages = [];
-    const imageSet = new Set(); // Use Set to avoid duplicates
-    
-    // Add product images first
     if (product?.images && product.images.length > 0) {
-      product.images.forEach(img => {
-        if (!imageSet.has(img)) {
-          allImages.push(img);
-          imageSet.add(img);
-        }
-      });
+      return product.images;
     }
-    
-    // Add all variation images (from all variations, not just selected)
-    if (product?.variations && product.variations.length > 0) {
-      product.variations.forEach(variation => {
-        if (variation.images && variation.images.length > 0) {
-          variation.images.forEach(img => {
-            if (!imageSet.has(img)) {
-              allImages.push(img);
-              imageSet.add(img);
-            }
-          });
-        }
-      });
-    }
-    
-    return allImages.length > 0 ? allImages : [];
+    return [];
   };
 
   const handleQuantityChange = (type) => {
     setQuantity((prev) => {
-      const maxStock = selectedVariation?.stock || product?.stock || 99;
+      const maxStock = product?.stock || 99;
       if (type === 'increment' && prev < maxStock) return prev + 1;
       if (type === 'decrement' && prev > 1) return prev - 1;
       return prev;
     });
-  };
-
-  // Handle variation attribute selection
-  const handleVariationAttributeChange = (attributeName, value) => {
-    const newAttributes = {
-      ...selectedVariationAttributes,
-      [attributeName]: value
-    };
-    setSelectedVariationAttributes(newAttributes);
-
-    // Find matching variation
-    const matchingVariation = product.variations.find(v => {
-      return Object.keys(newAttributes).every(key => 
-        v.attributes && v.attributes[key] === newAttributes[key]
-      );
-    });
-
-    if (matchingVariation) {
-      setSelectedVariation(matchingVariation);
-      // Update main image to first image of selected variation
-      if (matchingVariation.images && matchingVariation.images.length > 0) {
-        setMainImage(matchingVariation.images[0]);
-      } else if (product.images && product.images.length > 0) {
-        // Fallback to product images if variation doesn't have specific images
-        setMainImage(product.images[0]);
-      }
-    } else {
-      setSelectedVariation(null);
-      // Reset to product images if no matching variation
-      if (product.images && product.images.length > 0) {
-        setMainImage(product.images[0]);
-      }
-    }
-  };
-
-  // Get available values for an attribute
-  const getAvailableValues = (attributeName) => {
-    const values = new Set();
-    
-    // Add values from variations
-    if (product?.variations) {
-      product.variations.forEach(v => {
-        if (v.attributes && v.attributes[attributeName]) {
-          values.add(v.attributes[attributeName]);
-        }
-      });
-    }
-    
-    // For color attribute, also include basic product color if it exists
-    if (attributeName.toLowerCase() === 'color' && product?.details?.color) {
-      if (Array.isArray(product.details.color)) {
-        product.details.color.forEach(color => values.add(color));
-      } else if (typeof product.details.color === 'string') {
-        values.add(product.details.color);
-      }
-    }
-    
-    return Array.from(values);
-  };
-
-  // Get current stock (from selected variation or product)
-  const getCurrentStock = () => {
-    if (selectedVariation) {
-      return selectedVariation.stock || 0;
-    }
-    return product?.stock || 0;
-  };
-
-  // Check if all required attributes are selected
-  const areAllAttributesSelected = () => {
-    if (!product?.hasVariations || !product?.variations || product.variations.length === 0) {
-      return true; // No variations required
-    }
-    
-    // Get all attribute names that exist in variations
-    const requiredAttributes = new Set();
-    product.variations.forEach(v => {
-      if (v.attributes) {
-        Object.keys(v.attributes).forEach(key => requiredAttributes.add(key));
-      }
-    });
-    
-    // Check if all required attributes have been selected
-    return Array.from(requiredAttributes).every(attr => 
-      selectedVariationAttributes[attr] && selectedVariationAttributes[attr].trim() !== ''
-    );
   };
 
   const handleAddToCart = () => {
@@ -365,36 +175,7 @@ const ProductDetail = () => {
       return;
     }
     if (product) {
-      // Check if all required attributes are selected (for products with variations)
-      if (product.hasVariations && product.variations && product.variations.length > 0) {
-        if (!areAllAttributesSelected()) {
-          alert('Please select all required attributes (storage, color, etc.) before adding to cart.');
-          return;
-        }
-      }
-      
-      // Create variation object from selected attributes if no exact match found
-      let variationToAdd = selectedVariation;
-      if (product.hasVariations && !selectedVariation && Object.keys(selectedVariationAttributes).length > 0) {
-        // Create a virtual variation from selected attributes
-        variationToAdd = {
-          attributes: selectedVariationAttributes,
-          stock: product.stock || 0,
-          price: product.price,
-          discountPrice: product.discountPrice,
-          images: product.images || []
-        };
-      }
-      
-      const productToAdd = {
-        ...product,
-        selectedColor,
-        selectedVariation: variationToAdd ? {
-          ...variationToAdd,
-          selectedAttributes: selectedVariationAttributes
-        } : null
-      };
-      addToCart(productToAdd, quantity);
+      addToCart(product, quantity);
       navigate('/cart');
     }
   };
@@ -405,69 +186,13 @@ const ProductDetail = () => {
       return;
     }
     if (product) {
-      // Check if all required attributes are selected (for products with variations)
-      if (product.hasVariations && product.variations && product.variations.length > 0) {
-        if (!areAllAttributesSelected()) {
-          alert('Please select all required attributes (storage, color, etc.) before buying.');
-          return;
-        }
-      }
-      
-      // Create variation object from selected attributes if no exact match found
-      let variationToAdd = selectedVariation;
-      if (product.hasVariations && !selectedVariation && Object.keys(selectedVariationAttributes).length > 0) {
-        // Create a virtual variation from selected attributes
-        variationToAdd = {
-          attributes: selectedVariationAttributes,
-          stock: product.stock || 0,
-          price: product.price,
-          discountPrice: product.discountPrice,
-          images: product.images || []
-        };
-      }
-      
-      const productToAdd = {
-        ...product,
-        selectedColor,
-        selectedVariation: variationToAdd ? {
-          ...variationToAdd,
-          selectedAttributes: selectedVariationAttributes
-        } : null
-      };
-      addToCart(productToAdd, quantity);
+      addToCart(product, quantity);
       navigate('/checkout');
     }
   };
 
   const handleThumbnailClick = (imagePath) => {
     setMainImage(imagePath);
-    
-    // If product has variations, try to find which variation this image belongs to
-    if (product?.hasVariations && product?.variations) {
-      const matchingVariation = product.variations.find(v => {
-        return v.images && v.images.includes(imagePath);
-      });
-      
-      if (matchingVariation) {
-        // Auto-select this variation and update all details
-        setSelectedVariation(matchingVariation);
-        
-        // Update selected attributes
-        const attrs = {};
-        if (matchingVariation.attributes) {
-          Object.keys(matchingVariation.attributes).forEach(key => {
-            attrs[key] = matchingVariation.attributes[key];
-          });
-        }
-        setSelectedVariationAttributes(attrs);
-      } else {
-        // If image is from main product images, clear variation selection
-        if (product.images && product.images.includes(imagePath)) {
-          setSelectedVariation(null);
-          setSelectedVariationAttributes({});
-        }
-      }
-    }
   };
 
   const cleanImagePath = (imagePath) => {
@@ -683,35 +408,19 @@ const ProductDetail = () => {
           <h1 className="pd-title">{product.name}</h1>
           
           <div className="pd-price-row">
-            {(() => {
-              // Get price from selected variation if available, otherwise use product price
-              const currentPrice = selectedVariation?.price || selectedVariation?.discountPrice || product.price;
-              const currentDiscountPrice = selectedVariation?.discountPrice || product.discountPrice;
-              const basePrice = selectedVariation?.price || product.price;
-              
-              if (currentDiscountPrice && currentDiscountPrice < basePrice) {
-                return (
+            {product.discountPrice && product.discountPrice < product.price ? (
               <>
-                    <span className="pd-current-price">Rs. {currentDiscountPrice?.toLocaleString()}</span>
-                    <span className="pd-old-price">Rs. {basePrice?.toLocaleString()}</span>
-                    
+                <span className="pd-current-price">Rs. {product.discountPrice?.toLocaleString()}</span>
+                <span className="pd-old-price">Rs. {product.price?.toLocaleString()}</span>
               </>
-                );
-              } else {
-                return (
-                  <span className="pd-current-price">Rs. {currentPrice?.toLocaleString()}</span>
-                );
-              }
-            })()}
+            ) : (
+              <span className="pd-current-price">Rs. {product.price?.toLocaleString()}</span>
+            )}
           </div>
-             {/* Koko Payment Option */}
+          {/* Koko Payment Option */}
           <div className="pd-koko-payment">
             <span className="pd-koko-text">
-            3 x <strong>Rs. {Math.ceil(((() => {
-              const currentDiscountPrice = selectedVariation?.discountPrice || product.discountPrice;
-              const currentPrice = selectedVariation?.price || product.price;
-              return currentDiscountPrice || currentPrice;
-            })()) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
+              3 x <strong>Rs. {Math.ceil((product.discountPrice || product.price) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
             </span>
           </div>
           <div className="pd-rating-row">
@@ -723,97 +432,6 @@ const ProductDetail = () => {
             <span className="pd-rating-text">{reviews.length > 0 ? `${averageRating} (${reviews.length} reviews)` : 'No reviews yet'}</span>
             </div>
           <p className="pd-description">{product.description}</p>
-
-          {/* Variations Selection */}
-          {product.hasVariations && product.variations && product.variations.length > 0 ? (
-            <div className="pd-variations-section">
-              <div className="pd-variations-row">
-                {(() => {
-                  // Get all unique attribute names from variations
-                  const attributeNames = new Set();
-                  product.variations.forEach(v => {
-                    if (v.attributes) {
-                      Object.keys(v.attributes).forEach(key => attributeNames.add(key));
-                    }
-                  });
-                  return Array.from(attributeNames);
-                })().map((attrName, index, array) => {
-                  const availableValues = getAvailableValues(attrName);
-                  const isColor = attrName.toLowerCase() === 'color';
-                  
-                  return (
-                    <React.Fragment key={attrName}>
-                      <div className="pd-option-section">
-                        <p className="pd-option-label">
-                          Select {attrName.charAt(0).toUpperCase() + attrName.slice(1)}
-                          {!selectedVariation && <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>}
-                        </p>
-                        {isColor ? (
-                          <div className="pd-color-swatches">
-                            {availableValues.map((value, idx) => (
-                              <button
-                                key={idx}
-                                className={`pd-color-swatch ${selectedVariationAttributes[attrName] === value ? 'active' : ''}`}
-                                style={{ backgroundColor: getColorHex(value) }}
-                                onClick={() => handleVariationAttributeChange(attrName, value)}
-                                title={value}
-                              >
-                                {selectedVariationAttributes[attrName] === value && <FaCheck className="pd-swatch-check" />}
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="pd-variation-options" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            {availableValues.map((value, idx) => (
-                              <button
-                                key={idx}
-                                className={`pd-variation-option ${selectedVariationAttributes[attrName] === value ? 'active' : ''}`}
-                                onClick={() => handleVariationAttributeChange(attrName, value)}
-                                style={{
-                                  padding: '0.5rem 1rem',
-                                  border: `2px solid ${selectedVariationAttributes[attrName] === value ? '#333' : '#d1d5db'}`,
-                                  borderRadius: '4px',
-                                  background: selectedVariationAttributes[attrName] === value ? '#333' : '#fff',
-                                  color: selectedVariationAttributes[attrName] === value ? '#fff' : '#333',
-                                  cursor: 'pointer',
-                                  fontSize: '0.875rem',
-                                  fontWeight: selectedVariationAttributes[attrName] === value ? 600 : 400,
-                                  transition: 'all 0.2s'
-                                }}
-                              >
-                                {value}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      {index < array.length - 1 && <hr className="pd-variation-divider" />}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            /* Legacy Color Selection */
-            Array.isArray(product.details?.color) && product.details.color.length > 0 && (
-            <div className="pd-option-section">
-              <p className="pd-option-label">Select color</p>
-              <div className="pd-color-swatches">
-                {product.details.color.map((color, idx) => (
-                  <button
-                    key={idx}
-                    className={`pd-color-swatch ${selectedColor === color ? 'active' : ''}`}
-                    style={{ backgroundColor: getColorHex(color) }}
-                    onClick={() => setSelectedColor(color)}
-                    title={color}
-                          >
-                    {selectedColor === color && <FaCheck className="pd-swatch-check" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-            )
-          )}
 
           {/* Quantity & Wishlist */}
           <div className="pd-quantity-row">
@@ -832,14 +450,14 @@ const ProductDetail = () => {
             <button 
               className="pd-add-cart-btn" 
               onClick={handleAddToCart}
-              disabled={getCurrentStock() <= 0 || (product.hasVariations && product.variations && product.variations.length > 0 && !areAllAttributesSelected())}
+              disabled={!product.stock || product.stock <= 0}
             >
               ADD TO CART
             </button>
             <button 
               className="pd-buy-now-btn" 
               onClick={handleBuyNow} 
-              disabled={getCurrentStock() <= 0 || (product.hasVariations && product.variations && product.variations.length > 0 && !areAllAttributesSelected())}
+              disabled={!product.stock || product.stock <= 0}
             >
               BUY NOW
             </button>
@@ -847,15 +465,13 @@ const ProductDetail = () => {
 
           {/* Stock Status */}
           <div className="pd-stock-status">
-            {getCurrentStock() > 0 ? (
+            {product.stock > 0 ? (
               <span className="pd-in-stock">
-                <FaCheck /> In stock ({getCurrentStock()} available)
+                <FaCheck /> In stock ({product.stock} available)
               </span>
             ) : (
               <span className="pd-out-stock">
-                {product.hasVariations && !selectedVariation 
-                  ? 'Please select a variation to check availability' 
-                  : 'Out of stock'}
+                Out of stock
               </span>
             )}
           </div>
@@ -1031,7 +647,7 @@ const ProductDetail = () => {
               <table className="pd-specs-table">
                 <tbody>
                 {Object.entries(product.details).map(([key, value]) => {
-                  // Skip color field if it's a hex code (user-friendly display handled in variations)
+                  // Skip color field if it's a hex code
                   if (key.toLowerCase() === 'color' && isHexColorCode(value)) {
                     // Try to convert hex to color name
                     const colorName = hexToColorName(value);

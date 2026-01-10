@@ -50,36 +50,16 @@ export const CartProvider = ({ children }) => {
         },
       };
       
-      // Prepare request body with variation data if available
-      const requestBody = {
-        productId: product._id,
-        quantity
-      };
-      
-      if (product.selectedVariation) {
-        requestBody.selectedVariation = {
-          attributes: product.selectedVariation.selectedAttributes || product.selectedVariation.attributes,
-          stock: product.selectedVariation.stock,
-          price: product.selectedVariation.price,
-          discountPrice: product.selectedVariation.discountPrice
-        };
-      }
-      
       const { data } = await axios.post(
         `${API_BASE_URL}/api/users/cart`,
-        requestBody,
+        {
+          productId: product._id,
+          quantity
+        },
         config
       );
       setCartItems(data);
-      
-      // Build variation description for toast message
-      let variationDesc = '';
-      if (product.selectedVariation) {
-        const attrs = product.selectedVariation.selectedAttributes || product.selectedVariation.attributes || {};
-        variationDesc = ` (${Object.entries(attrs).map(([k, v]) => `${k}: ${v}`).join(', ')})`;
-      }
-      
-      toast.success(`${quantity} of ${product.name}${variationDesc} added to cart!`);
+      toast.success(`${quantity} of ${product.name} added to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error(error.response?.data?.message || 'Failed to add item to cart.');
