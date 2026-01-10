@@ -651,11 +651,19 @@ const ProductDetail = () => {
       // Use the exact matching variation
       let variationToAdd = selectedVariation;
       if (product.hasVariations && !variationToAdd && Object.keys(selectedVariationAttributes).length > 0) {
-        // Find the matching variation
+        // Filter selected attributes to only include non-excluded ones (for matching)
+        const validSelectedAttributes = {};
+        Object.keys(selectedVariationAttributes).forEach(key => {
+          if (selectedVariationAttributes[key] && selectedVariationAttributes[key].trim() !== '' && !isAttributeExcluded(key, product?.category)) {
+            validSelectedAttributes[key] = selectedVariationAttributes[key];
+          }
+        });
+        
+        // Find the matching variation (only check non-excluded attributes)
         const matchingVariation = product.variations.find(v => {
           if (!v.attributes) return false;
-          return Object.keys(selectedVariationAttributes).every(key => 
-            v.attributes[key] === selectedVariationAttributes[key]
+          return Object.keys(validSelectedAttributes).every(key => 
+            v.attributes[key] === validSelectedAttributes[key]
           );
         });
         variationToAdd = matchingVariation || null;
@@ -731,11 +739,19 @@ const ProductDetail = () => {
       // Use the exact matching variation
       let variationToAdd = selectedVariation;
       if (product.hasVariations && !variationToAdd && Object.keys(selectedVariationAttributes).length > 0) {
-        // Find the matching variation
+        // Filter selected attributes to only include non-excluded ones (for matching)
+        const validSelectedAttributes = {};
+        Object.keys(selectedVariationAttributes).forEach(key => {
+          if (selectedVariationAttributes[key] && selectedVariationAttributes[key].trim() !== '' && !isAttributeExcluded(key, product?.category)) {
+            validSelectedAttributes[key] = selectedVariationAttributes[key];
+          }
+        });
+        
+        // Find the matching variation (only check non-excluded attributes)
         const matchingVariation = product.variations.find(v => {
           if (!v.attributes) return false;
-          return Object.keys(selectedVariationAttributes).every(key => 
-            v.attributes[key] === selectedVariationAttributes[key]
+          return Object.keys(validSelectedAttributes).every(key => 
+            v.attributes[key] === validSelectedAttributes[key]
           );
         });
         variationToAdd = matchingVariation || null;
