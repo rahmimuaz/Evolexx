@@ -6,6 +6,27 @@ import ToBeShipped from '../models/ToBeShipped.js';
 
 const router = express.Router();
 
+// Helper function to serialize ToBeShipped order items (convert Map to object)
+const serializeToBeShippedItems = (items) => {
+  if (!items || !Array.isArray(items)) return [];
+  return items.map(item => {
+    const itemObj = item.toObject ? item.toObject() : item;
+    // Serialize selectedVariation if present
+    if (itemObj.selectedVariation && itemObj.selectedVariation.attributes) {
+      const attrs = {};
+      if (itemObj.selectedVariation.attributes instanceof Map) {
+        for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
+          attrs[key] = value;
+        }
+      } else {
+        Object.assign(attrs, itemObj.selectedVariation.attributes);
+      }
+      itemObj.selectedVariation.attributes = attrs;
+    }
+    return itemObj;
+  });
+};
+
 // @desc    Get all ToBeShipped orders (for admin)
 // @route   GET /api/tobeshipped/list
 // @access  Private/Admin
@@ -17,27 +38,16 @@ router.get('/list', protect, admin, async (req, res) => {
       // Populate orderId just for its _id. The other data (orderNumber, totalPrice, paymentMethod)
       // is now directly on the ToBeShipped document.
       .populate('orderId', '_id')
-      .populate('user', 'name email'); // Still populate user for basic user info
+      .populate('user', 'name email') // Still populate user for basic user info
+      .lean(); // Use lean() to get plain objects
 
-    // --- CRITICAL DEBUGGING LOGS ---
-    if (list.length > 0) {
-      console.log('--- Debugging ToBeShipped List (First Item) ---');
-      console.log('ToBeShipped _id:', list[0]._id);
-      console.log('Populated orderId (raw):', JSON.stringify(list[0].orderId, null, 2)); // Should now show only _id
-      console.log('Accessing orderNumber (direct):', list[0].orderNumber); // Access directly from ToBeShipped
-      console.log('Accessing totalPrice (direct):', list[0].totalPrice);     // Access directly from ToBeShipped
-      console.log('Accessing paymentMethod (direct):', list[0].paymentMethod); // Access directly from ToBeShipped
-      console.log('--- End Debugging ---');
+    // Serialize orders to convert Map objects to plain objects
+    const serializedList = list.map(order => ({
+      ...order,
+      orderItems: serializeToBeShippedItems(order.orderItems)
+    }));
 
-      if (!list[0].orderNumber) { // Check the directly stored field
-        console.warn('[toBeShippedRoutes] WARNING: orderNumber is null/undefined for the first item AFTER COPYING! This means the order was moved before the schema update.');
-      }
-    } else {
-      console.log('[toBeShippedRoutes] No ToBeShipped orders found in the database.');
-    }
-    // --- END CRITICAL DEBUGGING LOGS ---
-
-    res.status(200).json(list);
+    res.status(200).json(serializedList);
   } catch (error) {
     console.error('[toBeShippedRoutes] Error fetching to-be-shipped list:', error);
     res.status(500).json({ message: 'Error fetching to-be-shipped list: ' + error.message });
@@ -53,9 +63,16 @@ router.get('/myorders', protect, async (req, res) => {
       .sort({ createdAt: -1 })
       // Only populate _id from Order here too, as other data is direct
       .populate('orderId', '_id')
-      .populate('user', 'name email'); // Still populate user for basic user info
+      .populate('user', 'name email') // Still populate user for basic user info
+      .lean(); // Use lean() to get plain objects
 
-    res.status(200).json(userToBeShippedOrders);
+    // Serialize orders to convert Map objects to plain objects
+    const serializedOrders = userToBeShippedOrders.map(order => ({
+      ...order,
+      orderItems: serializeToBeShippedItems(order.orderItems)
+    }));
+
+    res.status(200).json(serializedOrders);
   } catch (error) {
     console.error('[toBeShippedRoutes] Error fetching user\'s to-be-shipped orders:', error);
     res.status(500).json({ message: 'Error fetching your orders.' });
@@ -69,7 +86,8 @@ router.get('/order/:id', protect, async (req, res) => {
   try {
     // Find the ToBeShipped document by its _id
     const toBeShippedOrder = await ToBeShipped.findById(req.params.id)
-      .populate('user', 'name email'); // Populate user for name/email if needed
+      .populate('user', 'name email') // Populate user for name/email if needed
+      .lean(); // Use lean() to get plain objects
 
     if (!toBeShippedOrder) {
       res.status(404);
@@ -82,7 +100,13 @@ router.get('/order/:id', protect, async (req, res) => {
     //   throw new Error('Not authorized to view this shipment.');
     // }
 
-    res.status(200).json(toBeShippedOrder);
+    // Serialize order to convert Map objects to plain objects
+    const serializedOrder = {
+      ...toBeShippedOrder,
+      orderItems: serializeToBeShippedItems(toBeShippedOrder.orderItems)
+    };
+
+    res.status(200).json(serializedOrder);
 
   } catch (error) {
     console.error(`[toBeShippedRoutes] Error fetching single to-be-shipped order with ID ${req.params.id}:`, error);

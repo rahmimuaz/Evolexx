@@ -27,10 +27,20 @@ const Cart = () => {
   // Helper to get item price (variation price or product price)
   const getItemPrice = (item) => {
     if (item.product?.hasVariations && item.selectedVariation) {
-      // Find matching variation in product
-      const matchingVariation = item.product.variations?.find(v => 
-        v.variationId === item.selectedVariation.variationId
-      );
+      // Use variation price directly from selectedVariation
+      if (item.selectedVariation.discountPrice) {
+        return item.selectedVariation.discountPrice;
+      }
+      if (item.selectedVariation.price) {
+        return item.selectedVariation.price;
+      }
+      // Fallback: try to find matching variation in product
+      const matchingVariation = item.product.variations?.find(v => {
+        if (!v.attributes || !item.selectedVariation.attributes) return false;
+        return Object.keys(item.selectedVariation.attributes).every(key => 
+          v.attributes[key] === item.selectedVariation.attributes[key]
+        );
+      });
       if (matchingVariation) {
         return matchingVariation.discountPrice || matchingVariation.price || item.product.price || 0;
       }
@@ -62,9 +72,17 @@ const Cart = () => {
 
   const anyOutOfStock = validCartItems.some(item => {
     if (item.product?.hasVariations && item.selectedVariation) {
-      const matchingVariation = item.product.variations?.find(v => 
-        v.variationId === item.selectedVariation.variationId
-      );
+      // Use variation stock directly from selectedVariation
+      if (item.selectedVariation.stock !== undefined) {
+        return item.selectedVariation.stock <= 0;
+      }
+      // Fallback: try to find matching variation in product
+      const matchingVariation = item.product.variations?.find(v => {
+        if (!v.attributes || !item.selectedVariation.attributes) return false;
+        return Object.keys(item.selectedVariation.attributes).every(key => 
+          v.attributes[key] === item.selectedVariation.attributes[key]
+        );
+      });
       return (matchingVariation?.stock || 0) <= 0;
     }
     return (item.product?.stock || 0) <= 0;
@@ -86,11 +104,20 @@ const Cart = () => {
                       // Get variation image if available, otherwise product image
                       let imageUrl = null;
                       if (item.product?.hasVariations && item.selectedVariation) {
-                        const matchingVariation = item.product.variations?.find(v => 
-                          v.variationId === item.selectedVariation.variationId
-                        );
-                        if (matchingVariation?.images && matchingVariation.images.length > 0) {
-                          imageUrl = matchingVariation.images[0];
+                        // Use variation images directly from selectedVariation
+                        if (item.selectedVariation.images && item.selectedVariation.images.length > 0) {
+                          imageUrl = item.selectedVariation.images[0];
+                        } else {
+                          // Fallback: try to find matching variation in product to get its image
+                          const matchingVariation = item.product.variations?.find(v => {
+                            if (!v.attributes || !item.selectedVariation.attributes) return false;
+                            return Object.keys(item.selectedVariation.attributes).every(key => 
+                              v.attributes[key] === item.selectedVariation.attributes[key]
+                            );
+                          });
+                          if (matchingVariation?.images && matchingVariation.images.length > 0) {
+                            imageUrl = matchingVariation.images[0];
+                          }
                         }
                       }
                       if (!imageUrl && item.product?.images?.length > 0) {
@@ -134,9 +161,24 @@ const Cart = () => {
                       </div>
                     )}
                     {(() => {
-                      const stock = item.product?.hasVariations && item.selectedVariation
-                        ? (item.product.variations?.find(v => v.variationId === item.selectedVariation.variationId)?.stock || 0)
-                        : (item.product?.stock || 0);
+                      let stock = 0;
+                      if (item.product?.hasVariations && item.selectedVariation) {
+                        // Use variation stock directly from selectedVariation
+                        if (item.selectedVariation.stock !== undefined) {
+                          stock = item.selectedVariation.stock;
+                        } else {
+                          // Fallback: try to find matching variation in product
+                          const matchingVariation = item.product.variations?.find(v => {
+                            if (!v.attributes || !item.selectedVariation.attributes) return false;
+                            return Object.keys(item.selectedVariation.attributes).every(key => 
+                              v.attributes[key] === item.selectedVariation.attributes[key]
+                            );
+                          });
+                          stock = matchingVariation?.stock || 0;
+                        }
+                      } else {
+                        stock = item.product?.stock || 0;
+                      }
                       
                       return stock <= 0 ? (
                         <p className="cart-out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>
@@ -182,13 +224,12 @@ const Cart = () => {
             <div className="summary-products">
               {validCartItems.map(item => {
                 const itemPrice = getItemPrice(item);
+                // Get variation image if available, otherwise product image
                 let imageUrl = null;
                 if (item.product?.hasVariations && item.selectedVariation) {
-                  const matchingVariation = item.product.variations?.find(v => 
-                    v.variationId === item.selectedVariation.variationId
-                  );
-                  if (matchingVariation?.images && matchingVariation.images.length > 0) {
-                    imageUrl = matchingVariation.images[0];
+                  // Use variation images directly from selectedVariation
+                  if (item.selectedVariation.images && item.selectedVariation.images.length > 0) {
+                    imageUrl = item.selectedVariation.images[0];
                   }
                 }
                 if (!imageUrl && item.product?.images?.length > 0) {

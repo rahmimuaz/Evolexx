@@ -167,12 +167,27 @@ const ToBeShippedList = () => {
       if (order.orderItems && Array.isArray(order.orderItems) && order.orderItems.length > 0) {
         order.orderItems.forEach(item => {
           const productName = item.name || 'N/A';
-          const colorInfo = item.selectedColor ? ` (${item.selectedColor})` : '';
+          // Get variation details
+          let variationInfo = '';
+          if (item.selectedVariation && item.selectedVariation.attributes) {
+            let attrs = {};
+            if (item.selectedVariation.attributes instanceof Map) {
+              for (const [key, value] of item.selectedVariation.attributes.entries()) {
+                attrs[key] = value;
+              }
+            } else {
+              attrs = item.selectedVariation.attributes;
+            }
+            const attrStrings = Object.entries(attrs).map(([key, value]) => `${key}: ${value}`);
+            variationInfo = attrStrings.length > 0 ? ` (${attrStrings.join(', ')})` : '';
+          } else if (item.selectedColor) {
+            variationInfo = ` (${item.selectedColor})`;
+          }
           const quantity = item.quantity ? item.quantity.toString() : '0';
           const price = item.price ? `LKR ${item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : 'LKR 0';
           
           tableRows.push([
-            productName + colorInfo,
+            productName + variationInfo,
             quantity,
             price
           ]);
@@ -395,34 +410,67 @@ const ToBeShippedList = () => {
                           Products in this Shipment:
                         </h4>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
-                          {order.orderItems.map((item, index) => (
-                            <div key={index} style={{
-                              display: 'flex',
-                              gap: '1rem',
-                              padding: '1rem',
-                              backgroundColor: 'white',
-                              borderRadius: 'var(--border-radius-sm)',
-                              border: '1px solid var(--border-color)'
-                            }}>
-                              <div style={{ flexShrink: 0 }}>
-                                {item.image ? (
-                                  <>
-                                    <img
-                                      src={getImageUrl(item.image)}
-                                      alt={item.name}
-                                      style={{
+                          {order.orderItems.map((item, index) => {
+                            // Get variation image if available, otherwise use item.image
+                            const variationImage = item.selectedVariation?.images && item.selectedVariation.images.length > 0
+                              ? item.selectedVariation.images[0]
+                              : null;
+                            const displayImage = variationImage || item.image;
+                            
+                            // Get variation attributes
+                            let variationAttrs = {};
+                            if (item.selectedVariation && item.selectedVariation.attributes) {
+                              if (item.selectedVariation.attributes instanceof Map) {
+                                for (const [key, value] of item.selectedVariation.attributes.entries()) {
+                                  variationAttrs[key] = value;
+                                }
+                              } else {
+                                variationAttrs = item.selectedVariation.attributes;
+                              }
+                            }
+                            
+                            return (
+                              <div key={index} style={{
+                                display: 'flex',
+                                gap: '1rem',
+                                padding: '1rem',
+                                backgroundColor: 'white',
+                                borderRadius: 'var(--border-radius-sm)',
+                                border: '1px solid var(--border-color)'
+                              }}>
+                                <div style={{ flexShrink: 0 }}>
+                                  {displayImage ? (
+                                    <>
+                                      <img
+                                        src={getImageUrl(displayImage)}
+                                        alt={item.name}
+                                        style={{
+                                          width: '60px',
+                                          height: '60px',
+                                          objectFit: 'cover',
+                                          borderRadius: 'var(--border-radius-sm)',
+                                          border: '1px solid var(--border-color)'
+                                        }}
+                                        onError={handleImageError}
+                                      />
+                                      <div style={{
+                                        display: 'none',
                                         width: '60px',
                                         height: '60px',
-                                        objectFit: 'cover',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: 'var(--gray-100)',
                                         borderRadius: 'var(--border-radius-sm)',
                                         border: '1px solid var(--border-color)'
-                                      }}
-                                      onError={handleImageError}
-                                    />
+                                      }}>
+                                        📷
+                                      </div>
+                                    </>
+                                  ) : (
                                     <div style={{
-                                      display: 'none',
                                       width: '60px',
                                       height: '60px',
+                                      display: 'flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
                                       backgroundColor: 'var(--gray-100)',
@@ -431,34 +479,34 @@ const ToBeShippedList = () => {
                                     }}>
                                       📷
                                     </div>
-                                  </>
-                                ) : (
-                                  <div style={{
-                                    width: '60px',
-                                    height: '60px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: 'var(--gray-100)',
-                                    borderRadius: 'var(--border-radius-sm)',
-                                    border: '1px solid var(--border-color)'
-                                  }}>
-                                    📷
+                                  )}
+                                </div>
+                                <div style={{ flex: 1, fontSize: '0.9rem' }}>
+                                  <div className="text-bold" style={{ marginBottom: '0.25rem' }}>{item.name}</div>
+                                  
+                                  {/* Show variation attributes if available */}
+                                  {Object.keys(variationAttrs).length > 0 ? (
+                                    <div className="text-secondary" style={{ marginBottom: '0.25rem', fontSize: '0.8125rem' }}>
+                                      {Object.entries(variationAttrs).map(([key, value], attrIdx) => (
+                                        <span key={attrIdx} style={{ marginRight: '0.75rem' }}>
+                                          <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  ) : item.selectedColor ? (
+                                    <div className="text-secondary" style={{ marginBottom: '0.25rem' }}>
+                                      Color: {item.selectedColor}
+                                    </div>
+                                  ) : null}
+                                  
+                                  <div className="text-secondary">Quantity: <strong>{item.quantity}</strong></div>
+                                  <div className="text-bold" style={{ marginTop: '0.25rem' }}>
+                                    Rs. {item.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })} × {item.quantity} = Rs. {(item.price * item.quantity)?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                                   </div>
-                                )}
-                              </div>
-                              <div style={{ flex: 1, fontSize: '0.9rem' }}>
-                                <div className="text-bold">{item.name}</div>
-                                {item.selectedColor && (
-                                  <div className="text-secondary">Color: {item.selectedColor}</div>
-                                )}
-                                <div className="text-secondary">Qty: {item.quantity}</div>
-                                <div className="text-bold" style={{ marginTop: '0.25rem' }}>
-                                  Rs. {item.price?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </td>
                     </tr>

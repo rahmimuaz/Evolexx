@@ -208,11 +208,14 @@ const Checkout = () => {
           price: getItemPrice(item)
         };
         
-        // Include variation data if available
+        // Include complete variation data if available (with images and all details)
         if (item.product?.hasVariations && item.selectedVariation) {
           orderItem.selectedVariation = {
-            variationId: item.selectedVariation.variationId,
-            attributes: item.selectedVariation.attributes
+            attributes: item.selectedVariation.attributes,
+            stock: item.selectedVariation.stock,
+            price: item.selectedVariation.price,
+            discountPrice: item.selectedVariation.discountPrice,
+            images: item.selectedVariation.images || [] // Include variation images
           };
         }
         
@@ -276,9 +279,20 @@ const Checkout = () => {
   // Helper to get item price (variation price or product price)
   const getItemPrice = (item) => {
     if (item.product?.hasVariations && item.selectedVariation) {
-      const matchingVariation = item.product.variations?.find(v => 
-        v.variationId === item.selectedVariation.variationId
-      );
+      // Use variation price directly from selectedVariation
+      if (item.selectedVariation.discountPrice) {
+        return item.selectedVariation.discountPrice;
+      }
+      if (item.selectedVariation.price) {
+        return item.selectedVariation.price;
+      }
+      // Fallback: try to find matching variation in product
+      const matchingVariation = item.product.variations?.find(v => {
+        if (!v.attributes || !item.selectedVariation.attributes) return false;
+        return Object.keys(item.selectedVariation.attributes).every(key => 
+          v.attributes[key] === item.selectedVariation.attributes[key]
+        );
+      });
       if (matchingVariation) {
         return matchingVariation.discountPrice || matchingVariation.price || item.product.price || 0;
       }
@@ -411,14 +425,12 @@ const Checkout = () => {
               <h2 className="section-heading">Order Summary</h2>
               <div className="summary-items-list">
                 {cartItems.map((item) => {
-                  // Get variation image if available
+                  // Get variation image if available (use directly from selectedVariation)
                   let imageUrl = null;
                   if (item.product?.hasVariations && item.selectedVariation) {
-                    const matchingVariation = item.product.variations?.find(v => 
-                      v.variationId === item.selectedVariation.variationId
-                    );
-                    if (matchingVariation?.images && matchingVariation.images.length > 0) {
-                      imageUrl = matchingVariation.images[0];
+                    // Use variation images directly from selectedVariation
+                    if (item.selectedVariation.images && item.selectedVariation.images.length > 0) {
+                      imageUrl = item.selectedVariation.images[0];
                     }
                   }
                   if (!imageUrl && item.product?.images?.length > 0) {
@@ -446,13 +458,15 @@ const Checkout = () => {
                         <div className="summary-item-details">
                           <p className="summary-item-name">{item.product.name}</p>
                           {item.selectedVariation && item.selectedVariation.attributes && (
-                            <p className="summary-item-variation">
-                              {Object.entries(item.selectedVariation.attributes).map(([key, value]) => (
-                                <span key={key}>{key}: {value} </span>
+                            <p className="summary-item-variation" style={{ fontSize: '0.8125rem', color: '#64748b', marginTop: '0.25rem' }}>
+                              {Object.entries(item.selectedVariation.attributes).map(([key, value], idx) => (
+                                <span key={key} style={{ marginRight: '0.75rem' }}>
+                                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                                </span>
                               ))}
                             </p>
                           )}
-                          <p className="summary-item-quantity">Quantity: {item.quantity}</p>
+                          <p className="summary-item-quantity" style={{ marginTop: '0.25rem' }}>Quantity: <strong>{item.quantity}</strong></p>
                         </div>
                       </div>
                       <p className="summary-item-price">

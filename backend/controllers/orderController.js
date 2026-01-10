@@ -9,32 +9,41 @@ import { sendEmail } from '../utils/sendEmail.js';
 // @desc    Get all orders (Admin)
 // @route   GET /api/orders
 // @access  Private/Admin
+// Helper function to serialize order items (convert Map to object)
+const serializeOrderItems = (items) => {
+  if (!items || !Array.isArray(items)) return [];
+  return items.map(item => {
+    const itemObj = item.toObject ? item.toObject() : item;
+    // Serialize selectedVariation if present
+    if (itemObj.selectedVariation && itemObj.selectedVariation.attributes) {
+      const attrs = {};
+      if (itemObj.selectedVariation.attributes instanceof Map) {
+        for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
+          attrs[key] = value;
+        }
+      } else {
+        Object.assign(attrs, itemObj.selectedVariation.attributes);
+      }
+      itemObj.selectedVariation.attributes = attrs;
+    }
+    return itemObj;
+  });
+};
+
 export const getOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find()
     .populate('user', 'name email')
     .populate('orderItems.product') // Ensure product details are populated
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean(); // Use lean() to get plain objects
 
-  // Debug: Log order details
-  console.log('=== ORDERS DEBUG ===');
-  orders.forEach((order, index) => {
-    console.log(`Order ${index + 1}:`, {
-      orderNumber: order.orderNumber,
-      paymentMethod: order.paymentMethod,
-      bankTransferProof: order.bankTransferProof,
-      hasProof: !!order.bankTransferProof,
-      createdAt: order.createdAt,
-      itemsCount: order.orderItems ? order.orderItems.length : 0 // Add item count
-    });
-    // Log details of the first item for debugging
-    if (order.orderItems && order.orderItems.length > 0) {
-      console.log(`  First Item Product Name: ${order.orderItems[0].product?.name}`);
-      console.log(`  First Item Product Image: ${order.orderItems[0].product?.images?.[0]}`);
-    }
-  });
-  console.log('=== END ORDERS DEBUG ===');
+  // Serialize orders to convert Map objects to plain objects
+  const serializedOrders = orders.map(order => ({
+    ...order,
+    orderItems: serializeOrderItems(order.orderItems)
+  }));
 
-  res.status(200).json(orders);
+  res.status(200).json(serializedOrders);
 });
 
 // @desc    Get single order by ID
@@ -43,14 +52,21 @@ export const getOrders = asyncHandler(async (req, res) => {
 export const getOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate('user', 'name email')
-    .populate('orderItems.product'); // Ensure product details are populated
+    .populate('orderItems.product') // Ensure product details are populated
+    .lean(); // Use lean() to get plain objects
 
   if (!order) {
     res.status(404);
     throw new Error('Order not found');
   }
 
-  res.status(200).json(order);
+  // Serialize order to convert Map objects to plain objects
+  const serializedOrder = {
+    ...order,
+    orderItems: serializeOrderItems(order.orderItems)
+  };
+
+  res.status(200).json(serializedOrder);
 });
 
 // @desc    Create a new order
@@ -111,14 +127,44 @@ export const createOrder = asyncHandler(async (req, res) => {
       const requestedPrice = item.price || product.price;
       const finalPrice = requestedPrice <= product.price ? requestedPrice : product.price;
       
-      return {
+      const orderItem = {
         product: item.product,
         quantity: item.quantity,
         price: finalPrice, // Use price from request (discountPrice if available), validated against product.price
         name: product.name, // Copy product name
-        image: product.images && product.images.length > 0 ? product.images[0] : '', // Copy main image
+        image: product.images && product.images.length > 0 ? product.images[0] : '', // Default to main image
         selectedColor: item.selectedColor || '' // Copy selected color if present
       };
+      
+      // If variation exists, use variation image instead of main image, and store variation details
+      if (item.selectedVariation) {
+        // Convert Map to object if needed
+        let attrs = {};
+        if (item.selectedVariation.attributes) {
+          if (item.selectedVariation.attributes instanceof Map) {
+            for (const [key, value] of item.selectedVariation.attributes.entries()) {
+              attrs[key] = value;
+            }
+          } else {
+            attrs = item.selectedVariation.attributes;
+          }
+        }
+        
+        orderItem.selectedVariation = {
+          attributes: new Map(Object.entries(attrs)),
+          stock: item.selectedVariation.stock,
+          price: item.selectedVariation.price,
+          discountPrice: item.selectedVariation.discountPrice,
+          images: item.selectedVariation.images || [] // Store variation images
+        };
+        
+        // Use variation image if available, otherwise fallback to main image
+        if (item.selectedVariation.images && item.selectedVariation.images.length > 0) {
+          orderItem.image = item.selectedVariation.images[0];
+        }
+      }
+      
+      return orderItem;
     });
     finalTotalPrice = finalOrderItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     console.log('Using orderItems from request body (with product details fetched)');
@@ -139,12 +185,12 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     finalOrderItems = userWithCart.cart.map(item => {
       const orderItem = {
-      product: item.product._id,
-      quantity: item.quantity,
-      price: item.product.price,
-      name: item.product.name, // Copy product name from populated cart item
-      image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '', // Copy main image
-      selectedColor: item.selectedColor || '' // Copy selected color if present in cart item
+        product: item.product._id,
+        quantity: item.quantity,
+        price: item.product.price,
+        name: item.product.name, // Copy product name from populated cart item
+        image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '', // Default to main image
+        selectedColor: item.selectedColor || '' // Copy selected color if present in cart item
       };
       
       // Include selected variation if present
@@ -165,7 +211,8 @@ export const createOrder = asyncHandler(async (req, res) => {
           attributes: new Map(Object.entries(attrs)),
           stock: item.selectedVariation.stock,
           price: item.selectedVariation.price,
-          discountPrice: item.selectedVariation.discountPrice
+          discountPrice: item.selectedVariation.discountPrice,
+          images: item.selectedVariation.images || [] // Store variation images
         };
         
         // Use variation price if available, otherwise use product price
@@ -173,6 +220,11 @@ export const createOrder = asyncHandler(async (req, res) => {
           orderItem.price = item.selectedVariation.price;
         } else if (item.selectedVariation.discountPrice) {
           orderItem.price = item.selectedVariation.discountPrice;
+        }
+        
+        // Use variation image if available, otherwise fallback to main image
+        if (item.selectedVariation.images && item.selectedVariation.images.length > 0) {
+          orderItem.image = item.selectedVariation.images[0];
         }
       }
       
@@ -356,14 +408,21 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     const populatedOrder = await Order.findById(order._id)
       .populate('user', 'name email')
-      .populate('orderItems.product');
+      .populate('orderItems.product')
+      .lean(); // Use lean() to get plain objects
 
     console.log('Created order with proof:', {
       orderId: populatedOrder._id,
       bankTransferProof: populatedOrder.bankTransferProof
     });
 
-    res.status(201).json(populatedOrder);
+    // Serialize order to convert Map objects to plain objects
+    const serializedOrder = {
+      ...populatedOrder,
+      orderItems: serializeOrderItems(populatedOrder.orderItems)
+    };
+
+    res.status(201).json(serializedOrder);
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(500);
@@ -411,15 +470,47 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     }
 
     try {
-      // Map order items to copy only necessary data to ToBeShipped
-      const copiedOrderItems = order.orderItems.map(item => ({
-        product: item.product._id, // Reference to the original Product ID
-        name: item.product.name,
-        quantity: item.quantity,
-        price: item.price, // Price from the order, not necessarily current product price
-        image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '',
-        selectedColor: item.selectedColor || '',
-      }));
+      // Map order items to copy only necessary data to ToBeShipped (including variation details)
+      const copiedOrderItems = order.orderItems.map(item => {
+        const orderItem = {
+          product: item.product._id, // Reference to the original Product ID
+          name: item.product ? item.product.name : item.name || 'Unknown Product',
+          quantity: item.quantity,
+          price: item.price, // Price from the order, not necessarily current product price
+          image: item.image || (item.product?.images && item.product.images.length > 0 ? item.product.images[0] : ''),
+          selectedColor: item.selectedColor || '',
+        };
+        
+        // Include variation details if present
+        if (item.selectedVariation) {
+          // Convert Map to object if needed
+          let attrs = {};
+          if (item.selectedVariation.attributes) {
+            if (item.selectedVariation.attributes instanceof Map) {
+              for (const [key, value] of item.selectedVariation.attributes.entries()) {
+                attrs[key] = value;
+              }
+            } else {
+              attrs = item.selectedVariation.attributes;
+            }
+          }
+          
+          orderItem.selectedVariation = {
+            attributes: new Map(Object.entries(attrs)), // Store as Map for schema consistency
+            stock: item.selectedVariation.stock,
+            price: item.selectedVariation.price,
+            discountPrice: item.selectedVariation.discountPrice,
+            images: item.selectedVariation.images || []
+          };
+          
+          // Use variation image if available, otherwise use item.image
+          if (item.selectedVariation.images && item.selectedVariation.images.length > 0) {
+            orderItem.image = item.selectedVariation.images[0];
+          }
+        }
+        
+        return orderItem;
+      });
 
       const toBeShippedEntry = await ToBeShipped.create({
         orderId: order._id,
@@ -534,9 +625,16 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
     const updatedOrder = await Order.findById(order._id)
       .populate('user', 'name email')
-      .populate('orderItems.product');
+      .populate('orderItems.product')
+      .lean(); // Use lean() to get plain objects
 
-    res.status(200).json(updatedOrder);
+    // Serialize order to convert Map objects to plain objects
+    const serializedOrder = {
+      ...updatedOrder,
+      orderItems: serializeOrderItems(updatedOrder.orderItems)
+    };
+
+    res.status(200).json(serializedOrder);
   }
 });
 
@@ -555,14 +653,22 @@ export const updatePaymentStatus = asyncHandler(async (req, res) => {
     req.params.id,
     { paymentStatus },
     { new: true }
-  ).populate('orderItems.product');
+  )
+    .populate('orderItems.product')
+    .lean(); // Use lean() to get plain objects
 
   if (!order) {
     res.status(404);
     throw new Error('Order not found');
   }
 
-  res.status(200).json(order);
+  // Serialize order to convert Map objects to plain objects
+  const serializedOrder = {
+    ...order,
+    orderItems: serializeOrderItems(order.orderItems)
+  };
+
+  res.status(200).json(serializedOrder);
 });
 
 // @desc    Delete an order
@@ -588,8 +694,17 @@ export const deleteOrder = asyncHandler(async (req, res) => {
 // @route   GET /api/orders/myorders
 // @access  Private
 export const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).populate('orderItems.product');
-  res.status(200).json(orders);
+  const orders = await Order.find({ user: req.user._id })
+    .populate('orderItems.product')
+    .lean(); // Use lean() to get plain objects
+
+  // Serialize orders to convert Map objects to plain objects
+  const serializedOrders = orders.map(order => ({
+    ...order,
+    orderItems: serializeOrderItems(order.orderItems)
+  }));
+
+  res.status(200).json(serializedOrders);
 });
 
 // @desc    Get orders from 'ToBeShipped' collection (Admin) - **This function is now redundant as logic is in toBeShippedRoutes.js**

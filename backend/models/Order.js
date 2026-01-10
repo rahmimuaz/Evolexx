@@ -36,7 +36,8 @@ const orderSchema = mongoose.Schema(
           },
           stock: Number,
           price: Number,
-          discountPrice: Number
+          discountPrice: Number,
+          images: [String] // Variation-specific images
         }
       },
     ],

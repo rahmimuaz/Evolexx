@@ -74,13 +74,14 @@ const toBeShippedSchema = mongoose.Schema(
           required: true,
         },
         selectedVariation: {
-          variationId: {
-            type: String
-          },
           attributes: {
             type: Map,
             of: String
-          }
+          },
+          stock: Number,
+          price: Number,
+          discountPrice: Number,
+          images: [String] // Variation-specific images
         },
         selectedColor: { type: String }, // Legacy support - if your products have colors
       },

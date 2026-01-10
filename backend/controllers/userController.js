@@ -85,7 +85,8 @@ const addToCart = asyncHandler(async (req, res) => {
       attributes: new Map(Object.entries(selectedVariation.attributes)),
       stock: selectedVariation.stock,
       price: selectedVariation.price,
-      discountPrice: selectedVariation.discountPrice
+      discountPrice: selectedVariation.discountPrice,
+      images: selectedVariation.images || [] // Store variation images
     };
   }
 

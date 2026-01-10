@@ -404,11 +404,22 @@ const OrderList = () => {
                         <>
                           {order.orderItems.slice(0, 1).map((item, idx) => (
                             <div key={idx}>
-                              {item.product ? item.product.name : 'Unknown'} (×{item.quantity})
+                              <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>
+                                {item.product ? item.product.name : item.name || 'Unknown'} (×{item.quantity})
+                              </div>
+                              {item.selectedVariation && item.selectedVariation.attributes && (
+                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.125rem' }}>
+                                  {Object.entries(item.selectedVariation.attributes).map(([key, value]) => (
+                                    <span key={key} style={{ marginRight: '0.5rem' }}>
+                                      {key.charAt(0).toUpperCase() + key.slice(1)}: <strong>{value}</strong>
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           ))}
                           {order.orderItems.length > 1 && (
-                            <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
+                            <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '0.25rem' }}>
                               +{order.orderItems.length - 1} more items
                             </div>
                           )}
@@ -521,13 +532,66 @@ const OrderList = () => {
                           </div>
                           <div>
                             <strong style={{ color: '#0f172a', fontSize: '0.875rem' }}>All Products:</strong>
-                            <div style={{ color: '#64748b', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                            <div style={{ color: '#64748b', fontSize: '0.875rem', marginTop: '0.5rem' }}>
                               {order.orderItems && order.orderItems.length > 0 ? (
-                                order.orderItems.map((item, idx) => (
-                                  <div key={idx} style={{ marginBottom: '0.25rem' }}>
-                                    {item.product ? item.product.name : 'Unknown'} (×{item.quantity}) - LKR {item.price?.toLocaleString()} each
-                                  </div>
-                                ))
+                                order.orderItems.map((item, idx) => {
+                                  // Get variation image if available, otherwise product image, otherwise item.image
+                                  const itemImage = item.selectedVariation?.images && item.selectedVariation.images.length > 0
+                                    ? item.selectedVariation.images[0]
+                                    : (item.image || (item.product?.images && item.product.images.length > 0 ? item.product.images[0] : null));
+                                  
+                                  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+                                  const imageUrl = itemImage 
+                                    ? (itemImage.startsWith('http') ? itemImage : `${API_BASE_URL}/${itemImage}`)
+                                    : null;
+                                  
+                                  return (
+                                    <div key={idx} style={{ 
+                                      marginBottom: '1rem', 
+                                      padding: '0.75rem', 
+                                      background: 'white', 
+                                      borderRadius: '4px',
+                                      border: '1px solid #e5e7eb',
+                                      display: 'flex',
+                                      gap: '0.75rem',
+                                      alignItems: 'flex-start'
+                                    }}>
+                                      {imageUrl && (
+                                        <img 
+                                          src={imageUrl} 
+                                          alt={item.product?.name || item.name || 'Product'}
+                                          style={{
+                                            width: '60px',
+                                            height: '60px',
+                                            objectFit: 'cover',
+                                            borderRadius: '4px',
+                                            border: '1px solid #e5e7eb'
+                                          }}
+                                          onError={(e) => {
+                                            e.target.style.display = 'none';
+                                          }}
+                                        />
+                                      )}
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: '#0f172a' }}>
+                                          {item.product ? item.product.name : item.name || 'Unknown'}
+                                        </div>
+                                        {item.selectedVariation && item.selectedVariation.attributes && (
+                                          <div style={{ fontSize: '0.8125rem', marginBottom: '0.25rem', color: '#64748b' }}>
+                                            {Object.entries(item.selectedVariation.attributes).map(([key, value], attrIdx) => (
+                                              <span key={attrIdx} style={{ marginRight: '0.75rem' }}>
+                                                <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        )}
+                                        <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
+                                          Quantity: <strong>{item.quantity}</strong> × LKR {item.price?.toLocaleString()} = LKR {(item.price * item.quantity)?.toLocaleString()}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })
                               ) : 'No items'}
                             </div>
                           </div>

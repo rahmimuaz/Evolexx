@@ -70,8 +70,16 @@ const MyOrders = () => {
   const getPrimaryImageForOrder = (order) => {
     try {
       const firstItem = order?.orderItems?.[0];
-      const raw = firstItem?.image || firstItem?.product?.images?.[0];
-      return getImageUrl(raw);
+      // Use variation image if available, otherwise use item.image, otherwise product image
+      let imageUrl = null;
+      if (firstItem?.selectedVariation?.images && firstItem.selectedVariation.images.length > 0) {
+        imageUrl = firstItem.selectedVariation.images[0];
+      } else if (firstItem?.image) {
+        imageUrl = firstItem.image;
+      } else if (firstItem?.product?.images && firstItem.product.images.length > 0) {
+        imageUrl = firstItem.product.images[0];
+      }
+      return imageUrl ? getImageUrl(imageUrl) : '/logo192.png';
     } catch (e) {
       return '/logo192.png';
     }

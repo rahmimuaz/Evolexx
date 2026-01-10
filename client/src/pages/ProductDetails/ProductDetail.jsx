@@ -10,7 +10,7 @@ import Modal from '../../components/Modal/Modal';
 import Login from '../../pages/Login/Login';
 import Register from '../../pages/Login/Register';
 import ReactMarkdown from 'react-markdown';
-import { FaShieldAlt, FaTruck, FaUndo, FaHeart, FaRegHeart, FaCheck, FaStar, FaRegStar, FaPlus, FaMinus } from 'react-icons/fa';
+import { FaShieldAlt, FaTruck, FaUndo, FaHeart, FaRegHeart, FaCheck, FaStar, FaRegStar, FaPlus, FaMinus, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const ProductDetail = () => {
   const { slug, id } = useParams();
@@ -37,6 +37,8 @@ const ProductDetail = () => {
   const [checkingPurchase, setCheckingPurchase] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState(null); // Selected variation object
   const [selectedVariationAttributes, setSelectedVariationAttributes] = useState({}); // Selected attributes for variation
+  const [thumbnailWarning, setThumbnailWarning] = useState(false); // Warning when clicking thumbnail without selecting variations
+  const [buttonWarning, setButtonWarning] = useState(''); // Warning message for button actions
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
@@ -312,10 +314,40 @@ const ProductDetail = () => {
       return; // Don't set invalid values
     }
 
+    // Clear warnings when variations are being selected
+    setThumbnailWarning(false);
+    setButtonWarning('');
+
+    // Create new attributes with the updated value
     const newAttributes = {
       ...selectedVariationAttributes,
       [attributeName]: value
     };
+    
+    // If another attribute is already selected, check if it's still valid with the new value
+    // If not, clear the conflicting attribute
+    if (product?.variations) {
+      const otherAttrKeys = Object.keys(selectedVariationAttributes).filter(key => 
+        key !== attributeName && selectedVariationAttributes[key] && selectedVariationAttributes[key].trim() !== ''
+      );
+      
+      // Check each other selected attribute to see if it's compatible with the new value
+      otherAttrKeys.forEach(otherAttr => {
+        const otherValue = selectedVariationAttributes[otherAttr];
+        // Check if this combination (new value + other selected value) exists
+        const combinationExists = product.variations.some(v => {
+          if (!v.attributes) return false;
+          return v.attributes[attributeName] === value && 
+                 v.attributes[otherAttr] === otherValue;
+        });
+        
+        // If combination doesn't exist, clear the incompatible attribute
+        if (!combinationExists) {
+          delete newAttributes[otherAttr];
+        }
+      });
+    }
+    
     setSelectedVariationAttributes(newAttributes);
 
     // Find matching variation
@@ -343,25 +375,51 @@ const ProductDetail = () => {
     }
   };
 
-  // Get available values for an attribute
+  // Get available values for an attribute (dynamically filtered based on other selected attributes)
   const getAvailableValues = (attributeName) => {
     const values = new Set();
+    const isColor = attributeName.toLowerCase() === 'color';
     
-    // Add values from variations (with validation)
+    // Get all other selected attributes (to filter available options dynamically)
+    // This works for ANY attribute combination, not just storage -> color
+    const otherSelectedAttrs = {};
+    Object.keys(selectedVariationAttributes).forEach(key => {
+      if (key !== attributeName && selectedVariationAttributes[key] && selectedVariationAttributes[key].trim() !== '') {
+        otherSelectedAttrs[key] = selectedVariationAttributes[key];
+      }
+    });
+    
+    // Add values from variations (with dynamic filtering based on other selected attributes)
     if (product?.variations) {
       product.variations.forEach(v => {
         if (v.attributes && v.attributes[attributeName]) {
-          const value = v.attributes[attributeName];
-          // Only add valid values
-          if (isValidAttributeValue(attributeName, value)) {
-            values.add(value);
+          let shouldInclude = true;
+          
+          // If other attributes are selected, filter to show only compatible values
+          // This works for any attribute combination dynamically
+          if (Object.keys(otherSelectedAttrs).length > 0) {
+            // Check if this variation matches all other selected attributes
+            const matchesOtherAttrs = Object.keys(otherSelectedAttrs).every(key => 
+              v.attributes[key] === otherSelectedAttrs[key]
+            );
+            shouldInclude = matchesOtherAttrs;
+          }
+          // If no other attributes selected, show all available values for this attribute
+          
+          if (shouldInclude) {
+            const value = v.attributes[attributeName];
+            // Only add valid values
+            if (isValidAttributeValue(attributeName, value)) {
+              values.add(value);
+            }
           }
         }
       });
     }
     
-    // For color attribute, also include basic product color if it exists
-    if (attributeName.toLowerCase() === 'color' && product?.details?.color) {
+    // For color attribute specifically, also include basic product color if it exists (only if no other attributes selected)
+    // This helps products without variations but with basic color selection
+    if (isColor && product?.details?.color && Object.keys(otherSelectedAttrs).length === 0) {
       if (Array.isArray(product.details.color)) {
         product.details.color.forEach(color => {
           if (isValidAttributeValue(attributeName, color)) {
@@ -410,6 +468,13 @@ const ProductDetail = () => {
 
   // Get current stock (from selected variation or product)
   const getCurrentStock = () => {
+    // If product has variations, check if the selected combination exists
+    if (product?.hasVariations && product?.variations && product.variations.length > 0) {
+      if (!doesVariationExist()) {
+        return 0; // Variation doesn't exist, no stock
+      }
+    }
+    
     if (selectedVariation) {
       return selectedVariation.stock || 0;
     }
@@ -436,40 +501,117 @@ const ProductDetail = () => {
     );
   };
 
+  // Check if the selected variation combination exists
+  const doesVariationExist = () => {
+    if (!product?.hasVariations || !product?.variations || product.variations.length === 0) {
+      return true; // No variations, so always valid
+    }
+    
+    if (!areAllAttributesSelected()) {
+      return true; // Not all attributes selected yet, don't show error
+    }
+    
+    // Check if there's a matching variation with the selected attributes
+    const matchingVariation = product.variations.find(v => {
+      if (!v.attributes) return false;
+      return Object.keys(selectedVariationAttributes).every(key => 
+        v.attributes[key] === selectedVariationAttributes[key]
+      );
+    });
+    
+    return !!matchingVariation;
+  };
+
+  // Get error message if variation doesn't exist
+  const getVariationErrorMessage = () => {
+    if (!product?.hasVariations || !product?.variations || product.variations.length === 0) {
+      return null;
+    }
+    
+    if (!areAllAttributesSelected()) {
+      return null; // Not all attributes selected yet
+    }
+    
+    if (doesVariationExist()) {
+      return null; // Variation exists, no error
+    }
+    
+    // Build error message with selected attributes
+    const selectedAttrs = Object.entries(selectedVariationAttributes)
+      .filter(([_, value]) => value && value.trim() !== '')
+      .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`)
+      .join(', ');
+    
+    return `This combination (${selectedAttrs}) is not available. Please select a different combination.`;
+  };
+
   const handleAddToCart = () => {
     if (!user) {
       setLoginModalOpen(true);
       return;
     }
     if (product) {
+      // Check stock first
+      if (getCurrentStock() <= 0) {
+        setButtonWarning('This product is currently out of stock.');
+        setTimeout(() => setButtonWarning(''), 5000);
+        return;
+      }
+      
       // Check if all required attributes are selected (for products with variations)
       if (product.hasVariations && product.variations && product.variations.length > 0) {
         if (!areAllAttributesSelected()) {
-          alert('Please select all required attributes (storage, color, etc.) before adding to cart.');
+          // Get attribute names dynamically for the warning message
+          const requiredAttrs = new Set();
+          product.variations.forEach(v => {
+            if (v.attributes) {
+              Object.keys(v.attributes).forEach(key => requiredAttrs.add(key));
+            }
+          });
+          const attrNames = Array.from(requiredAttrs).map(attr => attr.charAt(0).toUpperCase() + attr.slice(1)).join(', ');
+          setButtonWarning(`Please select all required attributes (${attrNames}) before adding to cart.`);
+          setTimeout(() => setButtonWarning(''), 5000);
+          return;
+        }
+        
+        // Check if the selected variation combination exists
+        if (!doesVariationExist()) {
+          setButtonWarning(getVariationErrorMessage() || 'This combination is not available. Please select a different combination.');
+          setTimeout(() => setButtonWarning(''), 5000);
           return;
         }
       }
       
-      // Create variation object from selected attributes if no exact match found
+      // Clear any warnings before proceeding
+      setButtonWarning('');
+      
+      // Use the exact matching variation
       let variationToAdd = selectedVariation;
-      if (product.hasVariations && !selectedVariation && Object.keys(selectedVariationAttributes).length > 0) {
-        // Create a virtual variation from selected attributes
-        variationToAdd = {
-          attributes: selectedVariationAttributes,
-          stock: product.stock || 0,
-          price: product.price,
-          discountPrice: product.discountPrice,
-          images: product.images || []
-        };
+      if (product.hasVariations && !variationToAdd && Object.keys(selectedVariationAttributes).length > 0) {
+        // Find the matching variation
+        const matchingVariation = product.variations.find(v => {
+          if (!v.attributes) return false;
+          return Object.keys(selectedVariationAttributes).every(key => 
+            v.attributes[key] === selectedVariationAttributes[key]
+          );
+        });
+        variationToAdd = matchingVariation || null;
       }
+      
+      // Prepare variation with images and all details for cart
+      const variationForCart = variationToAdd ? {
+        ...variationToAdd,
+        selectedAttributes: selectedVariationAttributes,
+        // Ensure images are included
+        images: variationToAdd.images && variationToAdd.images.length > 0 
+          ? variationToAdd.images 
+          : (product.images && product.images.length > 0 ? [product.images[0]] : [])
+      } : null;
       
       const productToAdd = {
         ...product,
         selectedColor,
-        selectedVariation: variationToAdd ? {
-          ...variationToAdd,
-          selectedAttributes: selectedVariationAttributes
-        } : null
+        selectedVariation: variationForCart
       };
       addToCart(productToAdd, quantity);
       navigate('/cart');
@@ -482,34 +624,67 @@ const ProductDetail = () => {
       return;
     }
     if (product) {
+      // Check stock first
+      if (getCurrentStock() <= 0) {
+        setButtonWarning('This product is currently out of stock.');
+        setTimeout(() => setButtonWarning(''), 5000);
+        return;
+      }
+      
       // Check if all required attributes are selected (for products with variations)
       if (product.hasVariations && product.variations && product.variations.length > 0) {
         if (!areAllAttributesSelected()) {
-          alert('Please select all required attributes (storage, color, etc.) before buying.');
+          // Get attribute names dynamically for the warning message
+          const requiredAttrs = new Set();
+          product.variations.forEach(v => {
+            if (v.attributes) {
+              Object.keys(v.attributes).forEach(key => requiredAttrs.add(key));
+            }
+          });
+          const attrNames = Array.from(requiredAttrs).map(attr => attr.charAt(0).toUpperCase() + attr.slice(1)).join(', ');
+          setButtonWarning(`Please select all required attributes (${attrNames}) before buying.`);
+          setTimeout(() => setButtonWarning(''), 5000);
+          return;
+        }
+        
+        // Check if the selected variation combination exists
+        if (!doesVariationExist()) {
+          setButtonWarning(getVariationErrorMessage() || 'This combination is not available. Please select a different combination.');
+          setTimeout(() => setButtonWarning(''), 5000);
           return;
         }
       }
       
-      // Create variation object from selected attributes if no exact match found
+      // Clear any warnings before proceeding
+      setButtonWarning('');
+      
+      // Use the exact matching variation
       let variationToAdd = selectedVariation;
-      if (product.hasVariations && !selectedVariation && Object.keys(selectedVariationAttributes).length > 0) {
-        // Create a virtual variation from selected attributes
-        variationToAdd = {
-          attributes: selectedVariationAttributes,
-          stock: product.stock || 0,
-          price: product.price,
-          discountPrice: product.discountPrice,
-          images: product.images || []
-        };
+      if (product.hasVariations && !variationToAdd && Object.keys(selectedVariationAttributes).length > 0) {
+        // Find the matching variation
+        const matchingVariation = product.variations.find(v => {
+          if (!v.attributes) return false;
+          return Object.keys(selectedVariationAttributes).every(key => 
+            v.attributes[key] === selectedVariationAttributes[key]
+          );
+        });
+        variationToAdd = matchingVariation || null;
       }
+      
+      // Prepare variation with images and all details for cart
+      const variationForCart = variationToAdd ? {
+        ...variationToAdd,
+        selectedAttributes: selectedVariationAttributes,
+        // Ensure images are included
+        images: variationToAdd.images && variationToAdd.images.length > 0 
+          ? variationToAdd.images 
+          : (product.images && product.images.length > 0 ? [product.images[0]] : [])
+      } : null;
       
       const productToAdd = {
         ...product,
         selectedColor,
-        selectedVariation: variationToAdd ? {
-          ...variationToAdd,
-          selectedAttributes: selectedVariationAttributes
-        } : null
+        selectedVariation: variationForCart
       };
       addToCart(productToAdd, quantity);
       navigate('/checkout');
@@ -517,6 +692,24 @@ const ProductDetail = () => {
   };
 
   const handleThumbnailClick = (imagePath) => {
+    // Check if variations need to be selected first - show warning but allow click
+    if (product?.hasVariations && product?.variations && product.variations.length > 0) {
+      // Check if all required attributes are selected
+      if (!areAllAttributesSelected()) {
+        // Show warning if variations not selected
+        setThumbnailWarning(true);
+        // Clear warning after 5 seconds
+        setTimeout(() => setThumbnailWarning(false), 5000);
+      } else {
+        // Clear warning if variations are selected
+        setThumbnailWarning(false);
+      }
+    } else {
+      // No variations required, clear any warning
+      setThumbnailWarning(false);
+    }
+    
+    // Always allow navigation - show warning but don't block
     setMainImage(imagePath);
     
     // If product has variations, try to find which variation this image belongs to
@@ -537,11 +730,85 @@ const ProductDetail = () => {
           });
         }
         setSelectedVariationAttributes(attrs);
+        
+        // Clear warnings if variation is auto-selected
+        setThumbnailWarning(false);
+        setButtonWarning('');
       } else {
-        // If image is from main product images, clear variation selection
+        // If image is from main product images, don't clear selection if variations were manually selected
         if (product.images && product.images.includes(imagePath)) {
-          setSelectedVariation(null);
-          setSelectedVariationAttributes({});
+          // Only clear if no variations were manually selected
+          if (!areAllAttributesSelected()) {
+            setSelectedVariation(null);
+            setSelectedVariationAttributes({});
+          }
+        }
+      }
+    }
+  };
+
+  // Handle image navigation (left/right arrows)
+  const navigateImage = (direction) => {
+    const allImages = getCurrentImages();
+    if (allImages.length === 0) return;
+    
+    // Check if variations need to be selected first - show warning but allow navigation
+    if (product?.hasVariations && product?.variations && product.variations.length > 0) {
+      if (!areAllAttributesSelected()) {
+        setThumbnailWarning(true);
+        setTimeout(() => setThumbnailWarning(false), 5000);
+      } else {
+        // Clear warning if all variations are selected
+        setThumbnailWarning(false);
+      }
+    } else {
+      // No variations required, clear any warning
+      setThumbnailWarning(false);
+    }
+    
+    // Always allow navigation - show warning but don't block
+    const currentIndex = allImages.findIndex(img => mainImage === img);
+    let newIndex;
+    
+    if (direction === 'prev') {
+      newIndex = currentIndex > 0 ? currentIndex - 1 : allImages.length - 1;
+    } else {
+      newIndex = currentIndex < allImages.length - 1 ? currentIndex + 1 : 0;
+    }
+    
+    const newImage = allImages[newIndex];
+    setMainImage(newImage);
+    
+    // If product has variations, try to find which variation this image belongs to
+    if (product?.hasVariations && product?.variations) {
+      const matchingVariation = product.variations.find(v => {
+        return v.images && v.images.includes(newImage);
+      });
+      
+      if (matchingVariation) {
+        // Auto-select this variation and update all details
+        setSelectedVariation(matchingVariation);
+        
+        // Update selected attributes
+        const attrs = {};
+        if (matchingVariation.attributes) {
+          Object.keys(matchingVariation.attributes).forEach(key => {
+            attrs[key] = matchingVariation.attributes[key];
+          });
+        }
+        setSelectedVariationAttributes(attrs);
+        
+        // Clear warnings if variation is auto-selected
+        setThumbnailWarning(false);
+        setButtonWarning('');
+      } else {
+        // If image is from main product images, don't clear selection if variations were manually selected
+        if (product.images && product.images.includes(newImage)) {
+          // Only clear if no variations were manually selected
+          if (!areAllAttributesSelected()) {
+            setSelectedVariation(null);
+            setSelectedVariationAttributes({});
+          }
         }
       }
     }
@@ -743,6 +1010,26 @@ const ProductDetail = () => {
 
         {/* Main Image */}
         <div className="pd-main-image">
+          {getCurrentImages().length > 1 && (
+            <>
+              <button 
+                className="pd-image-nav pd-image-nav-left" 
+                onClick={() => navigateImage('prev')}
+                aria-label="Previous image"
+                type="button"
+              >
+                <FaChevronLeft />
+              </button>
+              <button 
+                className="pd-image-nav pd-image-nav-right" 
+                onClick={() => navigateImage('next')}
+                aria-label="Next image"
+                type="button"
+              >
+                <FaChevronRight />
+              </button>
+            </>
+          )}
           {currentMainImageUrl ? (
             <img 
               src={currentMainImageUrl} 
@@ -804,36 +1091,87 @@ const ProductDetail = () => {
           {/* Variations Selection */}
           {product.hasVariations && product.variations && product.variations.length > 0 ? (
             <div className="pd-variations-section">
-              <div className="pd-variations-row">
-                {(() => {
-                  // Get all unique attribute names from variations
-                  const attributeNames = new Set();
-                  product.variations.forEach(v => {
-                    if (v.attributes) {
-                      Object.keys(v.attributes).forEach(key => attributeNames.add(key));
-                    }
-                  });
-                  return Array.from(attributeNames);
-                })().map((attrName, index, array) => {
-                  const availableValues = getAvailableValues(attrName);
-                  const isColor = attrName.toLowerCase() === 'color';
+              {(() => {
+                // Get all unique attribute names from variations
+                const attributeNames = new Set();
+                product.variations.forEach(v => {
+                  if (v.attributes) {
+                    Object.keys(v.attributes).forEach(key => attributeNames.add(key));
+                  }
+                });
+                
+                // Filter out inappropriate attributes based on category
+                // This prevents showing "storage" for mobile accessories, etc.
+                const validAttributes = Array.from(attributeNames).filter(attrName => {
+                  const attrLower = attrName.toLowerCase();
+                  const category = (product.category || '').toLowerCase();
                   
-                  return (
-                    <React.Fragment key={attrName}>
-                      <div className="pd-option-section">
-                        <p className="pd-option-label">
-                          {isColor ? (
-                            selectedVariationAttributes[attrName] 
-                              ? `${attrName.charAt(0).toUpperCase() + attrName.slice(1)} Family ${selectedVariationAttributes[attrName]}`
-                              : `Select ${attrName.charAt(0).toUpperCase() + attrName.slice(1)}`
-                          ) : (
-                            `Select ${attrName.charAt(0).toUpperCase() + attrName.slice(1)}`
-                          )}
-                          {!selectedVariation && <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>}
-                        </p>
+                  // Categories that should NOT have storage attribute
+                  const noStorageCategories = [
+                    'mobile accessories', 'chargers', 'phone covers', 'screen protectors',
+                    'cables', 'headphones', 'earbuds', 'other accessories',
+                    'smartwatches'
+                  ];
+                  
+                  // If attribute is "storage" or "memory", check if it's appropriate for this category
+                  if (attrLower === 'storage' || attrLower === 'memory') {
+                    // Check if category is in the list of categories that shouldn't have storage
+                    const shouldHideStorage = noStorageCategories.some(cat => 
+                      category.includes(cat) || cat.includes(category)
+                    );
+                    
+                    if (shouldHideStorage) {
+                      return false; // Don't show storage for mobile accessories, earbuds, etc.
+                    }
+                  }
+                  
+                  return true; // Keep all other attributes
+                });
+                
+                return validAttributes;
+              })().map((attrName, index, array) => {
+                // Get all available values for this attribute (unfiltered) - for storage and first attribute, show all
+                const isColor = attrName.toLowerCase() === 'color';
+                const isStorage = attrName.toLowerCase() === 'storage';
+                
+                // For storage: always show all options (no filtering)
+                // For color: filter based on selected storage
+                // For other attributes: show all options
+                const availableValues = getAvailableValues(attrName);
+                
+                // Get ALL values for this attribute (for display purposes - to show what's available in product)
+                const allValuesForAttribute = (() => {
+                  const values = new Set();
+                  if (product?.variations) {
+                    product.variations.forEach(v => {
+                      if (v.attributes && v.attributes[attrName]) {
+                        const value = v.attributes[attrName];
+                        if (isValidAttributeValue(attrName, value) && value && value.trim() !== '') {
+                          values.add(value);
+                        }
+                      }
+                    });
+                  }
+                  return Array.from(values).sort();
+                })();
+                
+                // For storage: always use all values (no filtering)
+                // For color: use filtered values when storage is selected
+                // For other attributes: use filtered values when other attributes are selected
+                const displayValues = isStorage ? allValuesForAttribute : availableValues;
+                
+                return (
+                  <div key={attrName} className="pd-option-section">
+                    <p className="pd-option-label">
+                      {selectedVariationAttributes[attrName] 
+                        ? `${attrName.charAt(0).toUpperCase() + attrName.slice(1)}: ${selectedVariationAttributes[attrName]}`
+                        : `Select ${attrName.charAt(0).toUpperCase() + attrName.slice(1)}`
+                      }
+                      {!selectedVariation && <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>}
+                    </p>
                         {isColor ? (
                           <div className="pd-variant-thumbnails">
-                            {availableValues.map((value, idx) => {
+                            {displayValues.map((value, idx) => {
                               const variantImage = getVariationImage(attrName, value);
                               const isSelected = selectedVariationAttributes[attrName] === value;
                               return (
@@ -927,9 +1265,17 @@ const ProductDetail = () => {
                           </div>
                         ) : (
                           <div className="pd-variation-options" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            {availableValues.map((value, idx) => {
-                              const variantImage = getVariationImage(attrName, value);
+                            {displayValues.map((value, idx) => {
                               const isSelected = selectedVariationAttributes[attrName] === value;
+                              // For storage: all options are always available and clickable (always show all variations)
+                              // For color: only show compatible colors (hide incompatible ones, don't just disable them)
+                              const isAvailable = isStorage ? true : availableValues.includes(value);
+                              
+                              // Hide unavailable colors (don't show grayed out buttons), but always show all storage options
+                              if (!isStorage && !isAvailable) {
+                                return null;
+                              }
+                              
                               return (
                                 <button
                                   key={idx}
@@ -946,6 +1292,7 @@ const ProductDetail = () => {
                                     fontWeight: isSelected ? 600 : 400,
                                     transition: 'all 0.2s'
                                   }}
+                                  title={value}
                                 >
                                   {value}
                                 </button>
@@ -953,12 +1300,9 @@ const ProductDetail = () => {
                             })}
                           </div>
                         )}
-                      </div>
-                      {index < array.length - 1 && <hr className="pd-variation-divider" />}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             /* Legacy Color Selection */
@@ -994,23 +1338,63 @@ const ProductDetail = () => {
             </button>
           </div>
 
+          {/* Variation Error/Warning Messages */}
+          {product.hasVariations && product.variations && product.variations.length > 0 && (
+            <>
+              {/* Variation combination error */}
+              {getVariationErrorMessage() && (
+                <div className="pd-variation-error">
+                  <span className="pd-error-icon">⚠</span>
+                  <span className="pd-error-text">{getVariationErrorMessage()}</span>
+                </div>
+              )}
+              {/* Thumbnail navigation warning */}
+              {thumbnailWarning && !getVariationErrorMessage() && (
+                <div className="pd-variation-error pd-variation-warning">
+                  <span className="pd-error-icon">⚠</span>
+                  <span className="pd-error-text">
+                    {(() => {
+                      // Get attribute names dynamically for the warning message
+                      const requiredAttrs = new Set();
+                      if (product?.variations) {
+                        product.variations.forEach(v => {
+                          if (v.attributes) {
+                            Object.keys(v.attributes).forEach(key => requiredAttrs.add(key));
+                          }
+                        });
+                      }
+                      const attrNames = Array.from(requiredAttrs).map(attr => attr.charAt(0).toUpperCase() + attr.slice(1)).join(', ');
+                      return `Please select variations (${attrNames}) before viewing other images.`;
+                    })()}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
+
           {/* Add to Cart & Buy Now */}
           <div className="pd-actions">
             <button 
               className="pd-add-cart-btn" 
               onClick={handleAddToCart}
-              disabled={getCurrentStock() <= 0 || (product.hasVariations && product.variations && product.variations.length > 0 && !areAllAttributesSelected())}
             >
               ADD TO CART
             </button>
             <button 
               className="pd-buy-now-btn" 
-              onClick={handleBuyNow} 
-              disabled={getCurrentStock() <= 0 || (product.hasVariations && product.variations && product.variations.length > 0 && !areAllAttributesSelected())}
+              onClick={handleBuyNow}
             >
               BUY NOW
             </button>
           </div>
+          
+          {/* Button Action Warning Message */}
+          {buttonWarning && (
+            <div className="pd-variation-error pd-button-warning">
+              <span className="pd-error-icon">⚠</span>
+              <span className="pd-error-text">{buttonWarning}</span>
+            </div>
+          )}
 
           {/* Stock Status */}
           <div className="pd-stock-status">

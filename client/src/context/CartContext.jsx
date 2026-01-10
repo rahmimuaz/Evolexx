@@ -61,7 +61,11 @@ export const CartProvider = ({ children }) => {
           attributes: product.selectedVariation.selectedAttributes || product.selectedVariation.attributes,
           stock: product.selectedVariation.stock,
           price: product.selectedVariation.price,
-          discountPrice: product.selectedVariation.discountPrice
+          discountPrice: product.selectedVariation.discountPrice,
+          // Include variation images - use first image if available
+          images: product.selectedVariation.images && product.selectedVariation.images.length > 0
+            ? product.selectedVariation.images
+            : []
         };
       }
       
