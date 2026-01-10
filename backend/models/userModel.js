@@ -32,6 +32,13 @@ const userSchema = mongoose.Schema(
           type: Number,
           required: true,
           default: 1,
+        },
+        selectedVariation: {
+          variationId: String,
+          attributes: {
+            type: Map,
+            of: String
+          }
         }
       },
     ],

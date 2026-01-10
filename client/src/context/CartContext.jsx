@@ -36,7 +36,7 @@ export const CartProvider = ({ children }) => {
     fetchCartItems();
   }, [user]);
 
-  const addToCart = async (product, quantity) => {
+  const addToCart = async (product, quantity, selectedVariation = null) => {
     if (!user) {
       toast.error('Please log in to add items to cart.');
       return;
@@ -50,16 +50,30 @@ export const CartProvider = ({ children }) => {
         },
       };
       
+      const payload = {
+        productId: product._id,
+        quantity
+      };
+
+      // Add variation data if product has variations
+      if (product.hasVariations && selectedVariation) {
+        payload.selectedVariation = {
+          variationId: selectedVariation.variationId,
+          attributes: selectedVariation.attributes || {}
+        };
+      }
+      
       const { data } = await axios.post(
         `${API_BASE_URL}/api/users/cart`,
-        {
-          productId: product._id,
-          quantity
-        },
+        payload,
         config
       );
       setCartItems(data);
-      toast.success(`${quantity} of ${product.name} added to cart!`);
+      
+      const variationText = selectedVariation 
+        ? ` (${Object.values(selectedVariation.attributes || {}).join(', ')})`
+        : '';
+      toast.success(`${quantity} of ${product.name}${variationText} added to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error(error.response?.data?.message || 'Failed to add item to cart.');

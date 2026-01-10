@@ -64,8 +64,19 @@ const registerUser = asyncHandler(async (req, res) => {
 // @desc    Add item to cart
 // @route   POST /api/users/cart
 // @access  Private
+// Helper function to serialize cart items (convert Map to object for JSON)
+const serializeCart = (cartItems) => {
+  return cartItems.map(item => {
+    const itemObj = item.toObject ? item.toObject() : item;
+    if (itemObj.selectedVariation && itemObj.selectedVariation.attributes instanceof Map) {
+      itemObj.selectedVariation.attributes = Object.fromEntries(itemObj.selectedVariation.attributes.entries());
+    }
+    return itemObj;
+  });
+};
+
 const addToCart = asyncHandler(async (req, res) => {
-  const { productId, quantity } = req.body;
+  const { productId, quantity, selectedVariation } = req.body;
 
   if (!productId || !quantity || quantity <= 0) {
     res.status(400);
@@ -78,24 +89,43 @@ const addToCart = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 
-  // Find existing cart item with same product
+  // Find existing cart item with same product and variation
   const existingCartItem = user.cart.find((item) => {
-    return item.product.toString() === productId;
+    if (item.product.toString() !== productId) return false;
+    
+    // If product has variations, match by variationId
+    if (selectedVariation && selectedVariation.variationId) {
+      return item.selectedVariation && 
+             item.selectedVariation.variationId === selectedVariation.variationId;
+    }
+    
+    // If no variation, match items without variation
+    return !item.selectedVariation || !item.selectedVariation.variationId;
   });
 
   if (existingCartItem) {
     existingCartItem.quantity += quantity;
   } else {
-    user.cart.push({ 
+    const cartItem = { 
       product: productId, 
       quantity
-    });
+    };
+    
+    // Add variation data if provided
+    if (selectedVariation && selectedVariation.variationId) {
+      cartItem.selectedVariation = {
+        variationId: selectedVariation.variationId,
+        attributes: selectedVariation.attributes ? new Map(Object.entries(selectedVariation.attributes)) : new Map()
+      };
+    }
+    
+    user.cart.push(cartItem);
   }
 
   await user.save();
 
   const populatedUser = await User.findById(user._id).populate('cart.product');
-  res.status(200).json(populatedUser.cart);
+  res.status(200).json(serializeCart(populatedUser.cart));
 });
 
 // @desc    Update product quantity in user cart
@@ -115,7 +145,7 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
       itemToUpdate.quantity = quantity;
       await user.save();
       const populatedUser = await User.findById(req.user._id).populate('cart.product');
-      res.status(200).json(populatedUser.cart);
+      res.status(200).json(serializeCart(populatedUser.cart));
     } else {
       res.status(404);
       throw new Error('Product not found in cart');
@@ -144,7 +174,7 @@ const removeFromUserCart = asyncHandler(async (req, res) => {
     } else {
       await user.save();
       const populatedUser = await User.findById(req.user._id).populate('cart.product');
-      res.status(200).json(populatedUser.cart);
+      res.status(200).json(serializeCart(populatedUser.cart));
     }
   } else {
     res.status(404);
@@ -159,7 +189,7 @@ const getUserCart = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate('cart.product');
 
   if (user) {
-    res.json(user.cart);
+    res.json(serializeCart(user.cart));
   } else {
     res.status(404);
     throw new Error('User not found');

@@ -23,6 +23,8 @@ const ProductDetail = () => {
   const [mainImage, setMainImage] = useState('');
   const { addToCart } = useCart();
   const { user } = useUser();
+  const [selectedVariation, setSelectedVariation] = useState(null);
+  const [selectedVariationAttributes, setSelectedVariationAttributes] = useState({});
   const [reviews, setReviews] = useState([]);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
@@ -97,6 +99,28 @@ const ProductDetail = () => {
     }
   }, [product, mainImage]);
 
+  // Initialize variation selection when product loads
+  useEffect(() => {
+    if (product?.hasVariations && product.variations && product.variations.length > 0) {
+      // Auto-select first active variation
+      const firstActiveVariation = product.variations.find(v => v.isActive !== false) || product.variations[0];
+      if (firstActiveVariation) {
+        setSelectedVariation(firstActiveVariation);
+        setSelectedVariationAttributes(firstActiveVariation.attributes || {});
+        
+        // Set images from variation if available
+        if (firstActiveVariation.images && firstActiveVariation.images.length > 0) {
+          setMainImage(firstActiveVariation.images[0]);
+        } else if (product.images && product.images.length > 0) {
+          setMainImage(product.images[0]);
+        }
+      }
+    } else {
+      setSelectedVariation(null);
+      setSelectedVariationAttributes({});
+    }
+  }, [product]);
+
   useEffect(() => {
     if (product && productId) {
       axios
@@ -152,17 +176,110 @@ const ProductDetail = () => {
     checkUserPurchase();
   }, [user, productId, API_BASE_URL]);
 
-  // Get current images
+  // Get current images (variation images if available, otherwise product images)
   const getCurrentImages = () => {
+    if (selectedVariation?.images && selectedVariation.images.length > 0) {
+      return selectedVariation.images;
+    }
     if (product?.images && product.images.length > 0) {
       return product.images;
     }
     return [];
   };
 
+  // Handle variation attribute selection
+  const handleVariationAttributeChange = (attributeName, value) => {
+    const newAttributes = {
+      ...selectedVariationAttributes,
+      [attributeName]: value
+    };
+    setSelectedVariationAttributes(newAttributes);
+
+    // Find matching variation - must match ALL selected attributes
+    const requiredAttributeNames = product.variationAttributes.map(attr => attr.name);
+    const allAttributesSelected = requiredAttributeNames.every(name => newAttributes[name]);
+    
+    if (allAttributesSelected) {
+      const matchingVariation = product.variations.find(variant => {
+        if (!variant.attributes || !variant.isActive) return false;
+        const variantAttrs = variant.attributes;
+        return requiredAttributeNames.every(key => variantAttrs[key] === newAttributes[key]);
+    });
+
+    if (matchingVariation) {
+      setSelectedVariation(matchingVariation);
+        // Update images if variation has specific images
+      if (matchingVariation.images && matchingVariation.images.length > 0) {
+        setMainImage(matchingVariation.images[0]);
+      } else if (product.images && product.images.length > 0) {
+        setMainImage(product.images[0]);
+      }
+        // Reset quantity if it exceeds new variation stock
+        if (quantity > (matchingVariation.stock || 0)) {
+          setQuantity(1);
+      }
+    } else {
+        // No matching variation found - clear selection
+      setSelectedVariation(null);
+      if (product.images && product.images.length > 0) {
+        setMainImage(product.images[0]);
+      }
+    }
+    } else {
+      // Not all attributes selected yet - clear variation but keep attributes
+      setSelectedVariation(null);
+      if (product.images && product.images.length > 0 && !selectedVariation) {
+        setMainImage(product.images[0]);
+      }
+    }
+  };
+
+  // Get current stock (variation stock if variations exist and selected, otherwise product stock)
+  const getCurrentStock = () => {
+    if (product?.hasVariations) {
+      if (selectedVariation) {
+        return selectedVariation.stock || 0;
+      }
+      // If variations exist but none selected, return 0 (user must select)
+      return 0;
+    }
+    return product?.stock || 0;
+  };
+
+  // Get current price (variation price if variations exist and selected, otherwise product price)
+  const getCurrentPrice = () => {
+    if (product?.hasVariations) {
+      if (selectedVariation) {
+        return selectedVariation.price !== undefined ? selectedVariation.price : product.price;
+      }
+      // If variations exist but none selected, show base price
+      return product?.price || 0;
+    }
+    return product?.price || 0;
+  };
+
+  // Get current discount price
+  const getCurrentDiscountPrice = () => {
+    if (product?.hasVariations) {
+    if (selectedVariation) {
+        return selectedVariation.discountPrice !== undefined ? selectedVariation.discountPrice : product.discountPrice;
+    }
+      // If variations exist but none selected, show base discount price
+      return product?.discountPrice;
+    }
+    return product?.discountPrice;
+  };
+
+  // Check if all required attributes are selected
+  const areAllAttributesSelected = () => {
+    if (!product?.hasVariations || !product.variationAttributes) return true;
+    const requiredAttributes = product.variationAttributes.map(attr => attr.name);
+    return requiredAttributes.every(attr => selectedVariationAttributes[attr]);
+  };
+
   const handleQuantityChange = (type) => {
     setQuantity((prev) => {
-      const maxStock = product?.stock || 99;
+      const maxStock = getCurrentStock();
       if (type === 'increment' && prev < maxStock) return prev + 1;
       if (type === 'decrement' && prev > 1) return prev - 1;
       return prev;
@@ -174,8 +291,15 @@ const ProductDetail = () => {
       setLoginModalOpen(true);
       return;
     }
+    
+    // Check if variations are required and selected
+    if (product?.hasVariations && !selectedVariation) {
+      alert('Please select all variation options before adding to cart.');
+          return;
+    }
+    
     if (product) {
-      addToCart(product, quantity);
+      addToCart(product, quantity, selectedVariation);
       navigate('/cart');
     }
   };
@@ -185,8 +309,15 @@ const ProductDetail = () => {
       setLoginModalOpen(true);
       return;
     }
+    
+    // Check if variations are required and selected
+    if (product?.hasVariations && !selectedVariation) {
+      alert('Please select all variation options before purchasing.');
+          return;
+    }
+    
     if (product) {
-      addToCart(product, quantity);
+      addToCart(product, quantity, selectedVariation);
       navigate('/checkout');
     }
   };
@@ -408,19 +539,23 @@ const ProductDetail = () => {
           <h1 className="pd-title">{product.name}</h1>
           
           <div className="pd-price-row">
-            {product.discountPrice && product.discountPrice < product.price ? (
-              <>
-                <span className="pd-current-price">Rs. {product.discountPrice?.toLocaleString()}</span>
-                <span className="pd-old-price">Rs. {product.price?.toLocaleString()}</span>
-              </>
-            ) : (
-              <span className="pd-current-price">Rs. {product.price?.toLocaleString()}</span>
-            )}
+            {(() => {
+              const currentPrice = getCurrentPrice();
+              const currentDiscountPrice = getCurrentDiscountPrice();
+              return currentDiscountPrice && currentDiscountPrice < currentPrice ? (
+                <>
+                  <span className="pd-current-price">Rs. {currentDiscountPrice?.toLocaleString()}</span>
+                  <span className="pd-old-price">Rs. {currentPrice?.toLocaleString()}</span>
+                </>
+              ) : (
+                  <span className="pd-current-price">Rs. {currentPrice?.toLocaleString()}</span>
+                );
+            })()}
           </div>
-          {/* Koko Payment Option */}
+             {/* Koko Payment Option */}
           <div className="pd-koko-payment">
             <span className="pd-koko-text">
-              3 x <strong>Rs. {Math.ceil((product.discountPrice || product.price) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
+              3 x <strong>Rs. {Math.ceil((getCurrentDiscountPrice() || getCurrentPrice()) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
             </span>
           </div>
           <div className="pd-rating-row">
@@ -432,6 +567,60 @@ const ProductDetail = () => {
             <span className="pd-rating-text">{reviews.length > 0 ? `${averageRating} (${reviews.length} reviews)` : 'No reviews yet'}</span>
             </div>
           <p className="pd-description">{product.description}</p>
+
+          {/* Variation Selection */}
+          {product?.hasVariations && product.variationAttributes && product.variationAttributes.length > 0 && (
+              <div className="pd-variations-section">
+              {product.variationAttributes.map((attribute) => (
+                <div key={attribute.name} className="pd-variation-attribute">
+                  <label className="pd-variation-label">
+                    {attribute.name}: <span className="pd-variation-selected">
+                      {selectedVariationAttributes[attribute.name] || 'Select ' + attribute.name}
+                    </span>
+                  </label>
+                  <div className="pd-variation-options">
+                    {attribute.values.map((value) => {
+                      const isSelected = selectedVariationAttributes[attribute.name] === value;
+                      const isColorAttribute = attribute.name.toLowerCase() === 'color';
+                      
+                      // Check if this value combination is available
+                      const isAvailable = product.variations.some(variant => {
+                        if (!variant.isActive) return false;
+                        const variantAttrs = variant.attributes || {};
+                        // Check if this value matches for this attribute and other selected attributes match
+                        if (variantAttrs[attribute.name] !== value) return false;
+                        return Object.keys(selectedVariationAttributes).every(key => {
+                          if (key === attribute.name) return true;
+                          return variantAttrs[key] === selectedVariationAttributes[key];
+                        });
+                      });
+                                    
+                                    return (
+                                      <button
+                          key={value}
+                                        type="button"
+                          className={`pd-variation-option ${isSelected ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}`}
+                          onClick={() => isAvailable && handleVariationAttributeChange(attribute.name, value)}
+                          disabled={!isAvailable}
+                          title={!isAvailable ? 'Not available' : `Select ${value}`}
+                          style={isColorAttribute ? {
+                            backgroundColor: getColorHex(value),
+                            border: isSelected ? '3px solid #000' : '1px solid #ddd'
+                          } : {}}
+                        >
+                          {!isColorAttribute && value}
+                          {isColorAttribute && <span className="pd-color-swatch-check">{isSelected && '✓'}</span>}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                                </div>
+              ))}
+              {!areAllAttributesSelected() && (
+                <p className="pd-variation-warning">Please select all options to continue</p>
+              )}
+                                </div>
+          )}
 
           {/* Quantity & Wishlist */}
           <div className="pd-quantity-row">
@@ -450,14 +639,14 @@ const ProductDetail = () => {
             <button 
               className="pd-add-cart-btn" 
               onClick={handleAddToCart}
-              disabled={!product.stock || product.stock <= 0}
+              disabled={getCurrentStock() <= 0 || (product?.hasVariations && !areAllAttributesSelected())}
             >
               ADD TO CART
             </button>
             <button 
               className="pd-buy-now-btn" 
               onClick={handleBuyNow} 
-              disabled={!product.stock || product.stock <= 0}
+              disabled={getCurrentStock() <= 0 || (product?.hasVariations && !areAllAttributesSelected())}
             >
               BUY NOW
             </button>
@@ -465,9 +654,9 @@ const ProductDetail = () => {
 
           {/* Stock Status */}
           <div className="pd-stock-status">
-            {product.stock > 0 ? (
+            {getCurrentStock() > 0 ? (
               <span className="pd-in-stock">
-                <FaCheck /> In stock ({product.stock} available)
+                <FaCheck /> In stock ({getCurrentStock()} available)
               </span>
             ) : (
               <span className="pd-out-stock">
