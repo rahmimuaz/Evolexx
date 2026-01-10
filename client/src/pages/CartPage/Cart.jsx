@@ -57,12 +57,15 @@ const Cart = () => {
     0
   );
 
-  const getImageUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return path.startsWith('/')
-      ? `${API_BASE_URL}${path}`
-      : `${API_BASE_URL}/${path}`;
+  const cleanImagePath = (imagePath) => {
+    if (!imagePath) return '';
+    // If it's already a full URL (http/https), return as is (handles Cloudinary URLs)
+    if (imagePath.startsWith('http')) return imagePath;
+    // Handle uploads/ paths (local storage)
+    if (imagePath.startsWith('uploads/')) return `${API_BASE_URL}/${imagePath}`;
+    if (imagePath.startsWith('/uploads/')) return `${API_BASE_URL}${imagePath}`;
+    // Default fallback
+    return `${API_BASE_URL}/uploads/${imagePath}`;
   };
 
   const onImageError = (e) => {
@@ -127,7 +130,7 @@ const Cart = () => {
                       return imageUrl ? (
                         <>
                           <img
-                            src={getImageUrl(imageUrl)}
+                            src={cleanImagePath(imageUrl)}
                             alt={item.product.name}
                             onError={onImageError}
                             className="product-image"
@@ -251,7 +254,7 @@ const Cart = () => {
                   <div key={item._id} className="summary-product-item">
                     {imageUrl && (
                       <img 
-                        src={getImageUrl(imageUrl)} 
+                        src={cleanImagePath(imageUrl)} 
                         alt={item.product.name}
                         className="summary-product-image"
                         onError={(e) => (e.target.src = '/logo192.png')}
