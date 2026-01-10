@@ -1559,15 +1559,16 @@ const ProductDetail = () => {
         {activeTab === 'DESCRIPTION' && (
           <div className="pd-description-content">
             {product.longDescription ? (() => {
-              // Process markdown to remove blank lines between list items
+              // Process markdown to remove excessive blank lines
               const processedMarkdown = product.longDescription
                 .split('\n')
                 .reduce((acc, line, index, array) => {
                   const prevLine = array[index - 1];
                   const nextLine = array[index + 1];
+                  
                   // Match list items: - * + or numbered lists
-                  const prevIsListItem = prevLine && (/^[\s]*[-*+]\s/.test(prevLine) || /^[\s]*\d+\.\s/.test(prevLine));
-                  const nextIsListItem = nextLine && (/^[\s]*[-*+]\s/.test(nextLine) || /^[\s]*\d+\.\s/.test(nextLine));
+                  const prevIsListItem = prevLine && (/^[\s]*[-*+]\s/.test(prevLine.trim()) || /^[\s]*\d+\.\s/.test(prevLine.trim()));
+                  const nextIsListItem = nextLine && (/^[\s]*[-*+]\s/.test(nextLine.trim()) || /^[\s]*\d+\.\s/.test(nextLine.trim()));
                   
                   // If current line is blank and it's between list items, skip it
                   if (line.trim() === '' && (prevIsListItem && nextIsListItem)) {
@@ -1576,6 +1577,11 @@ const ProductDetail = () => {
                   
                   // If current line is blank and previous is a list item, skip it
                   if (line.trim() === '' && prevIsListItem) {
+                    return acc;
+                  }
+                  
+                  // Remove multiple consecutive blank lines (keep only one)
+                  if (line.trim() === '' && acc[acc.length - 1] === '') {
                     return acc;
                   }
                   
@@ -1594,31 +1600,33 @@ const ProductDetail = () => {
                         // For paragraphs inside list items, render as span to avoid any block-level spacing
                         return <span style={{display: 'inline'}} {...props} />;
                       }
+                      // Reduce paragraph spacing significantly
                       return <p style={{
-                        marginBottom: '1em', 
-                        marginTop: '0'
+                        marginBottom: '0.75em', 
+                        marginTop: '0',
+                        lineHeight: '1.6'
                       }} {...props} />;
                     },
-                    h1: ({node, children, ...props}) => <h1 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props}>{children}</h1>,
-                    h2: ({node, children, ...props}) => <h2 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props}>{children}</h2>,
-                    h3: ({node, children, ...props}) => <h3 style={{marginTop: '1.5em', marginBottom: '0.5em'}} {...props}>{children}</h3>,
+                    h1: ({node, children, ...props}) => <h1 style={{marginTop: '1.2em', marginBottom: '0.4em'}} {...props}>{children}</h1>,
+                    h2: ({node, children, ...props}) => <h2 style={{marginTop: '1.2em', marginBottom: '0.4em'}} {...props}>{children}</h2>,
+                    h3: ({node, children, ...props}) => <h3 style={{marginTop: '1.2em', marginBottom: '0.4em'}} {...props}>{children}</h3>,
                     ul: ({node, ...props}) => {
-                      // Check if this list follows a heading
+                      // Check if this list follows a heading or paragraph
                       const prevSibling = node?.previousSibling;
-                      const isAfterHeading = prevSibling && (prevSibling.tagName === 'h1' || prevSibling.tagName === 'h2' || prevSibling.tagName === 'h3' || prevSibling.tagName === 'strong');
+                      const isAfterHeading = prevSibling && (prevSibling.tagName === 'h1' || prevSibling.tagName === 'h2' || prevSibling.tagName === 'h3' || prevSibling.tagName === 'p');
                       return <ul style={{
-                        marginTop: isAfterHeading ? '4px' : '0.5em', 
-                        marginBottom: '0.5em', 
+                        marginTop: isAfterHeading ? '4px' : '0.3em', 
+                        marginBottom: '0.3em', 
                         paddingLeft: '1.5em'
                       }} {...props} />;
                     },
                     ol: ({node, ...props}) => {
-                      // Check if this list follows a heading
+                      // Check if this list follows a heading or paragraph
                       const prevSibling = node?.previousSibling;
-                      const isAfterHeading = prevSibling && (prevSibling.tagName === 'h1' || prevSibling.tagName === 'h2' || prevSibling.tagName === 'h3' || prevSibling.tagName === 'strong');
+                      const isAfterHeading = prevSibling && (prevSibling.tagName === 'h1' || prevSibling.tagName === 'h2' || prevSibling.tagName === 'h3' || prevSibling.tagName === 'p');
                       return <ol style={{
-                        marginTop: isAfterHeading ? '4px' : '0.5em', 
-                        marginBottom: '0.5em', 
+                        marginTop: isAfterHeading ? '4px' : '0.3em', 
+                        marginBottom: '0.3em', 
                         paddingLeft: '1.5em'
                       }} {...props} />;
                     },
@@ -1627,9 +1635,9 @@ const ProductDetail = () => {
                       padding: '0',
                       marginTop: '0', 
                       marginBottom: '0',
-                      paddingTop: '0',
-                      paddingBottom: '0',
-                      lineHeight: '1.1'
+                      paddingTop: '2px',
+                      paddingBottom: '2px',
+                      lineHeight: '1.5'
                     }} {...props} />,
                     strong: ({node, ...props}) => <strong style={{fontWeight: '600'}} {...props} />,
                     em: ({node, ...props}) => <em style={{fontStyle: 'italic'}} {...props} />,

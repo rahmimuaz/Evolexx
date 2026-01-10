@@ -748,14 +748,14 @@
   white-space: pre-wrap; /* Preserve line breaks and whitespace */
   word-wrap: break-word; /* Break long words */
   max-width: 100%;
-  line-height: 1.8;
+  line-height: 1.6;
   color: #555;
 }
 
 /* Override line-height for lists specifically */
 .pd-description-content ul,
 .pd-description-content ol {
-  line-height: 1.1 !important;
+  line-height: 1.5 !important;
 }
 
 .pd-description-content h1,
@@ -786,13 +786,13 @@
 
 .pd-description-content ul {
   padding-left: 24px;
-  margin: 16px 0;
+  margin: 8px 0;
   list-style-type: disc;
 }
 
 .pd-description-content ol {
   padding-left: 24px;
-  margin: 16px 0;
+  margin: 8px 0;
   list-style-type: decimal;
 }
 
@@ -801,9 +801,9 @@
   padding: 0 !important;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  line-height: 1.1 !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  line-height: 1.5 !important;
   display: list-item;
   height: auto !important;
   min-height: 0 !important;
@@ -821,12 +821,12 @@
   font-size: inherit !important;
 }
 
-/* Remove any spacing between list items - use larger negative margin */
+/* Remove excessive spacing between list items */
 .pd-description-content li + li {
-  margin-top: -1.8em !important;
-  padding-top: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 2px !important;
   margin-bottom: 0 !important;
-  line-height: 1.1 !important;
+  line-height: 1.5 !important;
 }
 
 /* Target all direct children of list items */
@@ -839,7 +839,7 @@
   padding-bottom: 0 !important;
   display: inline !important;
   vertical-align: baseline !important;
-  line-height: 1.1 !important;
+  line-height: 1.5 !important;
   font-size: inherit !important;
 }
 
@@ -863,12 +863,12 @@
   margin-bottom: 0 !important;
 }
 
-/* Force tight spacing on the ul/ol itself */
+/* Force tighter spacing on the ul/ol itself */
 .pd-description-content ul,
 .pd-description-content ol {
-  margin-top: 0.5em !important;
-  margin-bottom: 0.5em !important;
-  line-height: 1.1 !important;
+  margin-top: 0.3em !important;
+  margin-bottom: 0.3em !important;
+  line-height: 1.5 !important;
 }
 
 .pd-description-content ul ul,
