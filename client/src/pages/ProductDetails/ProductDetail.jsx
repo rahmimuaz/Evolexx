@@ -184,6 +184,33 @@ const ProductDetail = () => {
     return true;
   };
 
+  // Helper function to check if an attribute should be excluded based on product category
+  const isAttributeExcluded = (attributeName, productCategory) => {
+    const attrLower = attributeName.toLowerCase();
+    const category = (productCategory || '').toLowerCase();
+    
+    // Categories that should NOT have storage attribute
+    const noStorageCategories = [
+      'mobile accessories', 'chargers', 'phone covers', 'screen protectors',
+      'cables', 'headphones', 'earbuds', 'other accessories',
+      'smartwatches'
+    ];
+    
+    // If attribute is "storage" or "memory", check if it's appropriate for this category
+    if (attrLower === 'storage' || attrLower === 'memory') {
+      // Check if category is in the list of categories that shouldn't have storage
+      const shouldHideStorage = noStorageCategories.some(cat => 
+        category.includes(cat) || cat.includes(category)
+      );
+      
+      if (shouldHideStorage) {
+        return true; // Hide storage for mobile accessories, earbuds, etc.
+      }
+    }
+    
+    return false; // Keep all other attributes
+  };
+
   useEffect(() => {
     if (product && Array.isArray(product.details?.color) && product.details.color.length > 0) {
       setSelectedColor(product.details.color[0]);
@@ -206,13 +233,13 @@ const ProductDetail = () => {
       const variationToSelect = matchingVariation || product.variations[0];
       setSelectedVariation(variationToSelect);
       
-      // Initialize selected attributes from selected variation (with validation)
+      // Initialize selected attributes from selected variation (with validation and filtering)
       const attrs = {};
       if (variationToSelect.attributes) {
         Object.keys(variationToSelect.attributes).forEach(key => {
           const value = variationToSelect.attributes[key];
-          // Only set valid attribute values
-          if (isValidAttributeValue(key, value)) {
+          // Only set valid attribute values that are not excluded for this category
+          if (isValidAttributeValue(key, value) && !isAttributeExcluded(key, product?.category)) {
             attrs[key] = value;
           }
         });
@@ -246,7 +273,7 @@ const ProductDetail = () => {
         // Common attributes that might be in product details
         const attributeFields = ['storage', 'color', 'ram', 'size', 'model'];
         attributeFields.forEach(field => {
-          if (product.details[field]) {
+          if (product.details[field] && !isAttributeExcluded(field, product?.category)) {
             // Handle both string and array values
             if (Array.isArray(product.details[field])) {
               basicAttrs[field] = product.details[field][0]; // Use first value if array
@@ -325,16 +352,21 @@ const ProductDetail = () => {
     };
     
     // If another attribute is already selected, check if it's still valid with the new value
-    // If not, clear the conflicting attribute
+    // If not, clear the conflicting attribute (only check non-excluded attributes)
     if (product?.variations) {
       const otherAttrKeys = Object.keys(selectedVariationAttributes).filter(key => 
-        key !== attributeName && selectedVariationAttributes[key] && selectedVariationAttributes[key].trim() !== ''
+        key !== attributeName && 
+        selectedVariationAttributes[key] && 
+        selectedVariationAttributes[key].trim() !== '' &&
+        !isAttributeExcluded(key, product?.category) // Only check non-excluded attributes
       );
       
       // Check each other selected attribute to see if it's compatible with the new value
+      // Only check combinations with non-excluded attributes
       otherAttrKeys.forEach(otherAttr => {
         const otherValue = selectedVariationAttributes[otherAttr];
         // Check if this combination (new value + other selected value) exists
+        // Note: otherAttrKeys is already filtered to exclude storage for mobile accessories
         const combinationExists = product.variations.some(v => {
           if (!v.attributes) return false;
           return v.attributes[attributeName] === value && 
@@ -350,10 +382,20 @@ const ProductDetail = () => {
     
     setSelectedVariationAttributes(newAttributes);
 
-    // Find matching variation
+    // Filter attributes to only include non-excluded ones for matching
+    const validAttributesForMatching = {};
+    Object.keys(newAttributes).forEach(key => {
+      if (newAttributes[key] && newAttributes[key].trim() !== '' && !isAttributeExcluded(key, product?.category)) {
+        validAttributesForMatching[key] = newAttributes[key];
+      }
+    });
+
+    // Find matching variation (only check non-excluded attributes)
     const matchingVariation = product.variations.find(v => {
-      return Object.keys(newAttributes).every(key => 
-        v.attributes && v.attributes[key] === newAttributes[key]
+      if (!v.attributes) return false;
+      // Only match on non-excluded attributes
+      return Object.keys(validAttributesForMatching).every(key => 
+        v.attributes[key] === validAttributesForMatching[key]
       );
     });
 
@@ -481,21 +523,26 @@ const ProductDetail = () => {
     return product?.stock || 0;
   };
 
-  // Check if all required attributes are selected
+  // Check if all required attributes are selected (only check attributes that should be displayed)
   const areAllAttributesSelected = () => {
     if (!product?.hasVariations || !product?.variations || product.variations.length === 0) {
       return true; // No variations required
     }
     
-    // Get all attribute names that exist in variations
+    // Get all attribute names that exist in variations, but filter out excluded ones
     const requiredAttributes = new Set();
     product.variations.forEach(v => {
       if (v.attributes) {
-        Object.keys(v.attributes).forEach(key => requiredAttributes.add(key));
+        Object.keys(v.attributes).forEach(key => {
+          // Only include attributes that should be displayed for this product category
+          if (!isAttributeExcluded(key, product?.category)) {
+            requiredAttributes.add(key);
+          }
+        });
       }
     });
     
-    // Check if all required attributes have been selected
+    // Check if all required (non-excluded) attributes have been selected
     return Array.from(requiredAttributes).every(attr => 
       selectedVariationAttributes[attr] && selectedVariationAttributes[attr].trim() !== ''
     );
@@ -511,11 +558,20 @@ const ProductDetail = () => {
       return true; // Not all attributes selected yet, don't show error
     }
     
-    // Check if there's a matching variation with the selected attributes
+    // Filter selected attributes to only include non-excluded ones (for matching)
+    const validSelectedAttributes = {};
+    Object.keys(selectedVariationAttributes).forEach(key => {
+      if (selectedVariationAttributes[key] && selectedVariationAttributes[key].trim() !== '' && !isAttributeExcluded(key, product?.category)) {
+        validSelectedAttributes[key] = selectedVariationAttributes[key];
+      }
+    });
+    
+    // Check if there's a matching variation with the selected (valid) attributes
     const matchingVariation = product.variations.find(v => {
       if (!v.attributes) return false;
-      return Object.keys(selectedVariationAttributes).every(key => 
-        v.attributes[key] === selectedVariationAttributes[key]
+      // Only check non-excluded attributes for matching
+      return Object.keys(validSelectedAttributes).every(key => 
+        v.attributes[key] === validSelectedAttributes[key]
       );
     });
     
@@ -561,17 +617,24 @@ const ProductDetail = () => {
       // Check if all required attributes are selected (for products with variations)
       if (product.hasVariations && product.variations && product.variations.length > 0) {
         if (!areAllAttributesSelected()) {
-          // Get attribute names dynamically for the warning message
+          // Get attribute names dynamically for the warning message (only non-excluded attributes)
           const requiredAttrs = new Set();
           product.variations.forEach(v => {
             if (v.attributes) {
-              Object.keys(v.attributes).forEach(key => requiredAttrs.add(key));
+              Object.keys(v.attributes).forEach(key => {
+                // Only include attributes that should be displayed for this product category
+                if (!isAttributeExcluded(key, product?.category)) {
+                  requiredAttrs.add(key);
+                }
+              });
             }
           });
           const attrNames = Array.from(requiredAttrs).map(attr => attr.charAt(0).toUpperCase() + attr.slice(1)).join(', ');
-          setButtonWarning(`Please select all required attributes (${attrNames}) before adding to cart.`);
-          setTimeout(() => setButtonWarning(''), 5000);
-          return;
+          if (attrNames) {
+            setButtonWarning(`Please select all required attributes (${attrNames}) before adding to cart.`);
+            setTimeout(() => setButtonWarning(''), 5000);
+            return;
+          }
         }
         
         // Check if the selected variation combination exists
@@ -634,17 +697,24 @@ const ProductDetail = () => {
       // Check if all required attributes are selected (for products with variations)
       if (product.hasVariations && product.variations && product.variations.length > 0) {
         if (!areAllAttributesSelected()) {
-          // Get attribute names dynamically for the warning message
+          // Get attribute names dynamically for the warning message (only non-excluded attributes)
           const requiredAttrs = new Set();
           product.variations.forEach(v => {
             if (v.attributes) {
-              Object.keys(v.attributes).forEach(key => requiredAttrs.add(key));
+              Object.keys(v.attributes).forEach(key => {
+                // Only include attributes that should be displayed for this product category
+                if (!isAttributeExcluded(key, product?.category)) {
+                  requiredAttrs.add(key);
+                }
+              });
             }
           });
           const attrNames = Array.from(requiredAttrs).map(attr => attr.charAt(0).toUpperCase() + attr.slice(1)).join(', ');
-          setButtonWarning(`Please select all required attributes (${attrNames}) before buying.`);
-          setTimeout(() => setButtonWarning(''), 5000);
-          return;
+          if (attrNames) {
+            setButtonWarning(`Please select all required attributes (${attrNames}) before buying.`);
+            setTimeout(() => setButtonWarning(''), 5000);
+            return;
+          }
         }
         
         // Check if the selected variation combination exists
@@ -1105,29 +1175,8 @@ const ProductDetail = () => {
                 // Filter out inappropriate attributes based on category
                 // This prevents showing "storage" for mobile accessories, etc.
                 const validAttributes = Array.from(attributeNames).filter(attrName => {
-                  const attrLower = attrName.toLowerCase();
-                  const category = (product.category || '').toLowerCase();
-                  
-                  // Categories that should NOT have storage attribute
-                  const noStorageCategories = [
-                    'mobile accessories', 'chargers', 'phone covers', 'screen protectors',
-                    'cables', 'headphones', 'earbuds', 'other accessories',
-                    'smartwatches'
-                  ];
-                  
-                  // If attribute is "storage" or "memory", check if it's appropriate for this category
-                  if (attrLower === 'storage' || attrLower === 'memory') {
-                    // Check if category is in the list of categories that shouldn't have storage
-                    const shouldHideStorage = noStorageCategories.some(cat => 
-                      category.includes(cat) || cat.includes(category)
-                    );
-                    
-                    if (shouldHideStorage) {
-                      return false; // Don't show storage for mobile accessories, earbuds, etc.
-                    }
-                  }
-                  
-                  return true; // Keep all other attributes
+                  // Use the same isAttributeExcluded function for consistency
+                  return !isAttributeExcluded(attrName, product?.category);
                 });
                 
                 return validAttributes;
