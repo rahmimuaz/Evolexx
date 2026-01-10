@@ -27,6 +27,24 @@ const orderSchema = mongoose.Schema(
         price: {
           type: Number,
           required: true,
+        },
+        name: {
+          type: String
+        },
+        image: {
+          type: String
+        },
+        selectedVariation: {
+          variationId: {
+            type: String
+          },
+          attributes: {
+            type: Map,
+            of: String
+          }
+        },
+        selectedColor: {
+          type: String
         }
       },
     ],

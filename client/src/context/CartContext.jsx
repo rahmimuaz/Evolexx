@@ -49,15 +49,15 @@ export const CartProvider = ({ children }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      
-      const payload = {
+
+      const cartPayload = {
         productId: product._id,
         quantity
       };
 
-      // Add variation data if product has variations
+      // Include variation data if product has variations
       if (product.hasVariations && selectedVariation) {
-        payload.selectedVariation = {
+        cartPayload.selectedVariation = {
           variationId: selectedVariation.variationId,
           attributes: selectedVariation.attributes || {}
         };
@@ -65,13 +65,13 @@ export const CartProvider = ({ children }) => {
       
       const { data } = await axios.post(
         `${API_BASE_URL}/api/users/cart`,
-        payload,
+        cartPayload,
         config
       );
       setCartItems(data);
       
       const variationText = selectedVariation 
-        ? ` (${Object.values(selectedVariation.attributes || {}).join(', ')})`
+        ? ` (${Object.values(selectedVariation.attributes || {}).join(', ')})` 
         : '';
       toast.success(`${quantity} of ${product.name}${variationText} added to cart!`);
     } catch (error) {
@@ -80,35 +80,9 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const removeFromCart = async (productId) => {
+  const removeFromCart = async (productId, selectedVariation = null) => {
     if (!user) {
       toast.error('Please log in to remove items from cart.');
-      return;
-    }
-
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-      const { data } = await axios.delete(`${API_BASE_URL}/api/users/cart/${productId}`, config);
-      setCartItems(data);
-      toast.success('Item removed from cart.');
-    } catch (error) {
-      console.error('Error removing from cart:', error);
-      toast.error(error.response?.data?.message || 'Failed to remove item from cart.');
-    }
-  };
-
-  const updateQuantity = async (productId, newQuantity) => {
-    if (!user) {
-      toast.error('Please log in to update cart.');
-      return;
-    }
-
-    if (newQuantity <= 0) {
-      removeFromCart(productId);
       return;
     }
 
@@ -119,9 +93,63 @@ export const CartProvider = ({ children }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
+
+      // For variation products, we need to send variation data in request body
+      if (selectedVariation) {
+        const { data } = await axios.delete(`${API_BASE_URL}/api/users/cart/${productId}`, {
+          ...config,
+          data: {
+            selectedVariation: {
+              variationId: selectedVariation.variationId,
+              attributes: selectedVariation.attributes || {}
+            }
+          }
+        });
+        setCartItems(data);
+      } else {
+        const { data } = await axios.delete(`${API_BASE_URL}/api/users/cart/${productId}`, config);
+        setCartItems(data);
+      }
+      
+      toast.success('Item removed from cart.');
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      toast.error(error.response?.data?.message || 'Failed to remove item from cart.');
+    }
+  };
+
+  const updateQuantity = async (productId, newQuantity, selectedVariation = null) => {
+    if (!user) {
+      toast.error('Please log in to update cart.');
+      return;
+    }
+
+    if (newQuantity <= 0) {
+      removeFromCart(productId, selectedVariation);
+      return;
+    }
+
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const updatePayload = { productId, quantity: newQuantity };
+      
+      // Include variation data if provided
+      if (selectedVariation) {
+        updatePayload.selectedVariation = {
+          variationId: selectedVariation.variationId,
+          attributes: selectedVariation.attributes || {}
+        };
+      }
+
       const { data } = await axios.put(
         `${API_BASE_URL}/api/users/cart`,
-        { productId, quantity: newQuantity },
+        updatePayload,
         config
       );
       setCartItems(data);

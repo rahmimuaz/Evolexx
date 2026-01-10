@@ -64,17 +64,6 @@ const registerUser = asyncHandler(async (req, res) => {
 // @desc    Add item to cart
 // @route   POST /api/users/cart
 // @access  Private
-// Helper function to serialize cart items (convert Map to object for JSON)
-const serializeCart = (cartItems) => {
-  return cartItems.map(item => {
-    const itemObj = item.toObject ? item.toObject() : item;
-    if (itemObj.selectedVariation && itemObj.selectedVariation.attributes instanceof Map) {
-      itemObj.selectedVariation.attributes = Object.fromEntries(itemObj.selectedVariation.attributes.entries());
-    }
-    return itemObj;
-  });
-};
-
 const addToCart = asyncHandler(async (req, res) => {
   const { productId, quantity, selectedVariation } = req.body;
 
@@ -89,63 +78,136 @@ const addToCart = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 
+  // Get product to check if it has variations
+  const product = await Product.findById(productId);
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  // Convert variation attributes Map if provided
+  let variationMap = null;
+  if (selectedVariation && selectedVariation.attributes) {
+    variationMap = new Map();
+    Object.entries(selectedVariation.attributes).forEach(([key, value]) => {
+      variationMap.set(key, String(value));
+    });
+  }
+
   // Find existing cart item with same product and variation
   const existingCartItem = user.cart.find((item) => {
-    if (item.product.toString() !== productId) return false;
+    const sameProduct = item.product.toString() === productId;
+    if (!sameProduct) return false;
     
-    // If product has variations, match by variationId
-    if (selectedVariation && selectedVariation.variationId) {
-      return item.selectedVariation && 
-             item.selectedVariation.variationId === selectedVariation.variationId;
+    // If product has variations, match by variation attributes
+    if (product.hasVariations && variationMap) {
+      const itemVariation = item.selectedVariation;
+      if (!itemVariation || !itemVariation.attributes) return false;
+      
+      const itemAttrs = itemVariation.attributes instanceof Map 
+        ? Object.fromEntries(itemVariation.attributes.entries())
+        : itemVariation.attributes;
+      
+      const newAttrs = Object.fromEntries(variationMap.entries());
+      
+      // Compare attributes
+      if (Object.keys(itemAttrs).length !== Object.keys(newAttrs).length) return false;
+      return Object.keys(itemAttrs).every(key => itemAttrs[key] === newAttrs[key]);
     }
     
-    // If no variation, match items without variation
-    return !item.selectedVariation || !item.selectedVariation.variationId;
+    // For non-variation products, just match product
+    return sameProduct && (!product.hasVariations || !item.selectedVariation);
   });
 
   if (existingCartItem) {
     existingCartItem.quantity += quantity;
   } else {
-    const cartItem = { 
+    const newCartItem = { 
       product: productId, 
       quantity
     };
     
-    // Add variation data if provided
-    if (selectedVariation && selectedVariation.variationId) {
-      cartItem.selectedVariation = {
+    // Add variation if provided
+    if (product.hasVariations && selectedVariation && variationMap) {
+      newCartItem.selectedVariation = {
         variationId: selectedVariation.variationId,
-        attributes: selectedVariation.attributes ? new Map(Object.entries(selectedVariation.attributes)) : new Map()
+        attributes: variationMap
       };
     }
     
-    user.cart.push(cartItem);
+    user.cart.push(newCartItem);
   }
 
   await user.save();
 
   const populatedUser = await User.findById(user._id).populate('cart.product');
-  res.status(200).json(serializeCart(populatedUser.cart));
+  
+  // Serialize cart items (convert Map to object for JSON)
+  const serializedCart = populatedUser.cart.map(item => {
+    const itemObj = item.toObject();
+    if (itemObj.selectedVariation && itemObj.selectedVariation.attributes instanceof Map) {
+      itemObj.selectedVariation.attributes = Object.fromEntries(itemObj.selectedVariation.attributes.entries());
+    }
+    return itemObj;
+  });
+  
+  res.status(200).json(serializedCart);
 });
 
 // @desc    Update product quantity in user cart
 // @route   PUT /api/users/cart
 // @access  Private
 const updateCartItemQuantity = asyncHandler(async (req, res) => {
-  const { productId, quantity } = req.body;
+  const { productId, quantity, selectedVariation } = req.body;
 
   const user = await User.findById(req.user._id);
 
   if (user) {
-    const itemToUpdate = user.cart.find(
-      (item) => item.product.toString() === productId
-    );
+    // Get product to check variations
+    const product = await Product.findById(productId);
+    
+    // Find matching cart item (considering variations)
+    let itemToUpdate;
+    if (product?.hasVariations && selectedVariation?.attributes) {
+      const variationMap = new Map();
+      Object.entries(selectedVariation.attributes).forEach(([key, value]) => {
+        variationMap.set(key, String(value));
+      });
+      
+      itemToUpdate = user.cart.find((item) => {
+        if (item.product.toString() !== productId) return false;
+        const itemVariation = item.selectedVariation;
+        if (!itemVariation || !itemVariation.attributes) return false;
+        
+        const itemAttrs = itemVariation.attributes instanceof Map 
+          ? Object.fromEntries(itemVariation.attributes.entries())
+          : itemVariation.attributes;
+        const newAttrs = Object.fromEntries(variationMap.entries());
+        
+        if (Object.keys(itemAttrs).length !== Object.keys(newAttrs).length) return false;
+        return Object.keys(itemAttrs).every(key => itemAttrs[key] === newAttrs[key]);
+      });
+    } else {
+      itemToUpdate = user.cart.find(
+        (item) => item.product.toString() === productId
+      );
+    }
 
     if (itemToUpdate) {
       itemToUpdate.quantity = quantity;
       await user.save();
       const populatedUser = await User.findById(req.user._id).populate('cart.product');
-      res.status(200).json(serializeCart(populatedUser.cart));
+      
+      // Serialize cart items
+      const serializedCart = populatedUser.cart.map(item => {
+        const itemObj = item.toObject();
+        if (itemObj.selectedVariation && itemObj.selectedVariation.attributes instanceof Map) {
+          itemObj.selectedVariation.attributes = Object.fromEntries(itemObj.selectedVariation.attributes.entries());
+        }
+        return itemObj;
+      });
+      
+      res.status(200).json(serializedCart);
     } else {
       res.status(404);
       throw new Error('Product not found in cart');
@@ -161,12 +223,40 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
 // @access  Private
 const removeFromUserCart = asyncHandler(async (req, res) => {
   const { productId } = req.params;
+  const { selectedVariation } = req.body;
 
   const user = await User.findById(req.user._id);
 
   if (user) {
     const initialCartLength = user.cart.length;
-    user.cart = user.cart.filter((item) => item.product.toString() !== productId);
+    
+    // Get product to check variations
+    const product = await Product.findById(productId);
+    
+    // Filter cart items based on variation matching
+    if (product?.hasVariations && selectedVariation?.attributes) {
+      const variationMap = new Map();
+      Object.entries(selectedVariation.attributes).forEach(([key, value]) => {
+        variationMap.set(key, String(value));
+      });
+      
+      user.cart = user.cart.filter((item) => {
+        if (item.product.toString() !== productId) return true;
+        
+        const itemVariation = item.selectedVariation;
+        if (!itemVariation || !itemVariation.attributes) return true;
+        
+        const itemAttrs = itemVariation.attributes instanceof Map 
+          ? Object.fromEntries(itemVariation.attributes.entries())
+          : itemVariation.attributes;
+        const newAttrs = Object.fromEntries(variationMap.entries());
+        
+        if (Object.keys(itemAttrs).length !== Object.keys(newAttrs).length) return true;
+        return !Object.keys(itemAttrs).every(key => itemAttrs[key] === newAttrs[key]);
+      });
+    } else {
+      user.cart = user.cart.filter((item) => item.product.toString() !== productId);
+    }
 
     if (user.cart.length === initialCartLength) {
       res.status(404);
@@ -174,7 +264,17 @@ const removeFromUserCart = asyncHandler(async (req, res) => {
     } else {
       await user.save();
       const populatedUser = await User.findById(req.user._id).populate('cart.product');
-      res.status(200).json(serializeCart(populatedUser.cart));
+      
+      // Serialize cart items
+      const serializedCart = populatedUser.cart.map(item => {
+        const itemObj = item.toObject();
+        if (itemObj.selectedVariation && itemObj.selectedVariation.attributes instanceof Map) {
+          itemObj.selectedVariation.attributes = Object.fromEntries(itemObj.selectedVariation.attributes.entries());
+        }
+        return itemObj;
+      });
+      
+      res.status(200).json(serializedCart);
     }
   } else {
     res.status(404);
@@ -189,7 +289,16 @@ const getUserCart = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate('cart.product');
 
   if (user) {
-    res.json(serializeCart(user.cart));
+    // Serialize cart items (convert Map to object for JSON)
+    const serializedCart = user.cart.map(item => {
+      const itemObj = item.toObject();
+      if (itemObj.selectedVariation && itemObj.selectedVariation.attributes instanceof Map) {
+        itemObj.selectedVariation.attributes = Object.fromEntries(itemObj.selectedVariation.attributes.entries());
+      }
+      return itemObj;
+    });
+    
+    res.json(serializedCart);
   } else {
     res.status(404);
     throw new Error('User not found');

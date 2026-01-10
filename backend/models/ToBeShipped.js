@@ -62,23 +62,29 @@ const toBeShippedSchema = mongoose.Schema(
       enum: ['accepted', 'shipped', 'delivered', 'cancelled'], // Added 'cancelled' for completeness
       default: 'accepted',
     },
-    // --- ADD THESE FIELDS ---
     orderItems: [
       {
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
-        image: { type: String }, // Assuming main product image URL
+        image: { type: String }, // Product or variation image URL
         price: { type: Number, required: true },
         product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Product',
           required: true,
         },
-        selectedColor: { type: String }, // If your products have colors
-        // Add other product-related fields you need to display
+        selectedVariation: {
+          variationId: {
+            type: String
+          },
+          attributes: {
+            type: Map,
+            of: String
+          }
+        },
+        selectedColor: { type: String }, // Legacy support - if your products have colors
       },
     ],
-    // --- END ADDITIONS ---
     shippedAt: {
       type: Date,
     },

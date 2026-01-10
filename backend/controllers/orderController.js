@@ -34,7 +34,21 @@ export const getOrders = asyncHandler(async (req, res) => {
   });
   console.log('=== END ORDERS DEBUG ===');
 
-  res.status(200).json(orders);
+  // Serialize orders (convert Map to object for JSON)
+  const serializedOrders = orders.map(order => {
+    const orderObj = order.toObject();
+    if (orderObj.orderItems) {
+      orderObj.orderItems = orderObj.orderItems.map(item => {
+        if (item.selectedVariation && item.selectedVariation.attributes instanceof Map) {
+          item.selectedVariation.attributes = Object.fromEntries(item.selectedVariation.attributes.entries());
+        }
+        return item;
+      });
+    }
+    return orderObj;
+  });
+
+  res.status(200).json(serializedOrders);
 });
 
 // @desc    Get single order by ID
@@ -107,18 +121,59 @@ export const createOrder = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error(`Product not found: ${item.product}`);
       }
-      // Use price from request (which includes discountPrice if available), but validate it's not higher than regular price
-      const requestedPrice = item.price || product.price;
-      const finalPrice = requestedPrice <= product.price ? requestedPrice : product.price;
       
-      return {
+      let finalPrice = item.price || product.price;
+      let image = product.images && product.images.length > 0 ? product.images[0] : '';
+      
+      // Handle variations if product has them
+      if (product.hasVariations && item.selectedVariation) {
+        const matchingVariation = product.variations?.find(v => 
+          v.variationId === item.selectedVariation.variationId
+        );
+        
+        if (matchingVariation) {
+          // Use variation price if available
+          if (matchingVariation.price !== undefined && matchingVariation.price !== null) {
+            finalPrice = matchingVariation.discountPrice || matchingVariation.price;
+          }
+          
+          // Use variation image if available
+          if (matchingVariation.images && matchingVariation.images.length > 0) {
+            image = matchingVariation.images[0];
+          }
+        }
+      }
+      
+      // Validate price is not higher than product base price
+      finalPrice = finalPrice <= product.price ? finalPrice : product.price;
+      
+      const orderItem = {
         product: item.product,
         quantity: item.quantity,
-        price: finalPrice, // Use price from request (discountPrice if available), validated against product.price
-        name: product.name, // Copy product name
-        image: product.images && product.images.length > 0 ? product.images[0] : '', // Copy main image
-        selectedColor: item.selectedColor || '' // Copy selected color if present
+        price: finalPrice,
+        name: product.name,
+        image: image,
       };
+      
+      // Include variation data if present
+      if (item.selectedVariation) {
+        // Convert attributes object to Map for MongoDB
+        const attrs = item.selectedVariation.attributes || {};
+        const attrsMap = new Map();
+        Object.entries(attrs).forEach(([key, value]) => {
+          attrsMap.set(key, String(value));
+        });
+        
+        orderItem.selectedVariation = {
+          variationId: item.selectedVariation.variationId,
+          attributes: attrsMap
+        };
+      } else if (item.selectedColor) {
+        // Legacy support for selectedColor
+        orderItem.selectedColor = item.selectedColor;
+      }
+      
+      return orderItem;
     });
     finalTotalPrice = finalOrderItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     console.log('Using orderItems from request body (with product details fetched)');
@@ -138,14 +193,57 @@ export const createOrder = asyncHandler(async (req, res) => {
     });
 
     finalOrderItems = userWithCart.cart.map(item => {
-      return {
+      let price = item.product.discountPrice || item.product.price;
+      let image = item.product.images && item.product.images.length > 0 ? item.product.images[0] : '';
+      
+      // Handle variations if product has them
+      if (item.product.hasVariations && item.selectedVariation) {
+        const matchingVariation = item.product.variations?.find(v => 
+          v.variationId === item.selectedVariation.variationId
+        );
+        
+        if (matchingVariation) {
+          if (matchingVariation.price !== undefined && matchingVariation.price !== null) {
+            price = matchingVariation.discountPrice || matchingVariation.price;
+          }
+          if (matchingVariation.images && matchingVariation.images.length > 0) {
+            image = matchingVariation.images[0];
+          }
+        }
+      }
+      
+      const orderItem = {
         product: item.product._id,
         quantity: item.quantity,
-        price: item.product.discountPrice || item.product.price,
+        price: price,
         name: item.product.name,
-        image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '',
-        selectedColor: item.selectedColor || ''
+        image: image,
       };
+      
+      // Include variation data if present
+      if (item.selectedVariation) {
+        // Convert Map to object if needed
+        const attrs = item.selectedVariation.attributes || {};
+        const attrsObj = attrs instanceof Map 
+          ? Object.fromEntries(attrs.entries())
+          : attrs;
+        
+        // Convert attributes object to Map for MongoDB
+        const attrsMap = new Map();
+        Object.entries(attrsObj).forEach(([key, value]) => {
+          attrsMap.set(key, String(value));
+        });
+        
+        orderItem.selectedVariation = {
+          variationId: item.selectedVariation.variationId,
+          attributes: attrsMap
+        };
+      } else if (item.selectedColor) {
+        // Legacy support
+        orderItem.selectedColor = item.selectedColor;
+      }
+      
+      return orderItem;
     });
     finalTotalPrice = finalOrderItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
     console.log('Using cart items as fallback (with product details from populated cart)');
@@ -159,20 +257,64 @@ export const createOrder = asyncHandler(async (req, res) => {
       throw new Error(`Product not found: ${item.product}`);
     }
     
-    // Check stock
-    if (product.stock < item.quantity) {
-      res.status(400);
-      throw new Error(`Insufficient stock for product: ${product.name}`);
+    // Check stock - handle variations
+    if (product.hasVariations && item.selectedVariation) {
+      const matchingVariation = product.variations?.find(v => 
+        v.variationId === item.selectedVariation.variationId
+      );
+      
+      if (!matchingVariation) {
+        res.status(400);
+        throw new Error(`Variation not found for product: ${product.name}`);
+      }
+      
+      if (matchingVariation.stock < item.quantity) {
+        res.status(400);
+        throw new Error(`Insufficient stock for ${product.name} variation`);
+      }
+    } else {
+      // Regular product stock check
+      if (product.stock < item.quantity) {
+        res.status(400);
+        throw new Error(`Insufficient stock for product: ${product.name}`);
+      }
     }
   }
   
-  // Deduct stock in parallel for better performance
+  // Deduct stock in parallel - handle variations
   const stockUpdatePromises = finalOrderItems.map(async (item) => {
-    const product = await Product.findByIdAndUpdate(
-      item.product,
-      { $inc: { stock: -item.quantity } },
-      { new: true }
-    );
+    const product = await Product.findById(item.product);
+    if (!product) {
+      throw new Error(`Product not found: ${item.product}`);
+    }
+    
+    if (product.hasVariations && item.selectedVariation) {
+      // Find and update variation stock
+      const variationIndex = product.variations.findIndex(v => 
+        v.variationId === item.selectedVariation.variationId
+      );
+      
+      if (variationIndex === -1) {
+        throw new Error(`Variation not found: ${item.selectedVariation.variationId}`);
+      }
+      
+      // Update variation stock
+      product.variations[variationIndex].stock -= item.quantity;
+      if (product.variations[variationIndex].stock < 0) {
+        product.variations[variationIndex].stock = 0;
+      }
+      
+      // Recalculate total stock from variations
+      product.stock = product.variations.reduce((sum, v) => sum + (v.stock || 0), 0);
+      
+      await product.save();
+    } else {
+      // Regular product stock update
+      product.stock -= item.quantity;
+      if (product.stock < 0) product.stock = 0;
+      await product.save();
+    }
+    
     return product;
   });
   
@@ -271,12 +413,23 @@ export const createOrder = asyncHandler(async (req, res) => {
       .populate('user', 'name email')
       .populate('orderItems.product');
 
+    // Serialize order items (convert Map to object for JSON)
+    const serializedOrder = populatedOrder.toObject();
+    if (serializedOrder.orderItems) {
+      serializedOrder.orderItems = serializedOrder.orderItems.map(item => {
+        if (item.selectedVariation && item.selectedVariation.attributes instanceof Map) {
+          item.selectedVariation.attributes = Object.fromEntries(item.selectedVariation.attributes.entries());
+        }
+        return item;
+      });
+    }
+
     console.log('Created order with proof:', {
-      orderId: populatedOrder._id,
-      bankTransferProof: populatedOrder.bankTransferProof
+      orderId: serializedOrder._id,
+      bankTransferProof: serializedOrder.bankTransferProof
     });
 
-    res.status(201).json(populatedOrder);
+    res.status(201).json(serializedOrder);
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(500);
@@ -325,14 +478,39 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
     try {
       // Map order items to copy only necessary data to ToBeShipped
-      const copiedOrderItems = order.orderItems.map(item => ({
-        product: item.product._id, // Reference to the original Product ID
-        name: item.product.name,
-        quantity: item.quantity,
-        price: item.price, // Price from the order, not necessarily current product price
-        image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '',
-        selectedColor: item.selectedColor || '',
-      }));
+      const copiedOrderItems = order.orderItems.map(item => {
+        const orderItem = {
+          product: item.product._id, // Reference to the original Product ID
+          name: item.name || item.product.name,
+          quantity: item.quantity,
+          price: item.price, // Price from the order, not necessarily current product price
+          image: item.image || (item.product.images && item.product.images.length > 0 ? item.product.images[0] : ''),
+        };
+        
+        // Include variation data if present
+        if (item.selectedVariation) {
+          const attrs = item.selectedVariation.attributes || {};
+          const attrsObj = attrs instanceof Map 
+            ? Object.fromEntries(attrs.entries())
+            : attrs;
+          
+          // Convert attributes object to Map for MongoDB
+          const attrsMap = new Map();
+          Object.entries(attrsObj).forEach(([key, value]) => {
+            attrsMap.set(key, String(value));
+          });
+          
+          orderItem.selectedVariation = {
+            variationId: item.selectedVariation.variationId,
+            attributes: attrsMap
+          };
+        } else if (item.selectedColor) {
+          // Legacy support
+          orderItem.selectedColor = item.selectedColor;
+        }
+        
+        return orderItem;
+      });
 
       const toBeShippedEntry = await ToBeShipped.create({
         orderId: order._id,
@@ -449,7 +627,18 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       .populate('user', 'name email')
       .populate('orderItems.product');
 
-    res.status(200).json(updatedOrder);
+    // Serialize order (convert Map to object for JSON)
+    const serializedOrder = updatedOrder.toObject();
+    if (serializedOrder.orderItems) {
+      serializedOrder.orderItems = serializedOrder.orderItems.map(item => {
+        if (item.selectedVariation && item.selectedVariation.attributes instanceof Map) {
+          item.selectedVariation.attributes = Object.fromEntries(item.selectedVariation.attributes.entries());
+        }
+        return item;
+      });
+    }
+
+    res.status(200).json(serializedOrder);
   }
 });
 
@@ -475,7 +664,18 @@ export const updatePaymentStatus = asyncHandler(async (req, res) => {
     throw new Error('Order not found');
   }
 
-  res.status(200).json(order);
+  // Serialize order (convert Map to object for JSON)
+  const serializedOrder = order.toObject();
+  if (serializedOrder.orderItems) {
+    serializedOrder.orderItems = serializedOrder.orderItems.map(item => {
+      if (item.selectedVariation && item.selectedVariation.attributes instanceof Map) {
+        item.selectedVariation.attributes = Object.fromEntries(item.selectedVariation.attributes.entries());
+      }
+      return item;
+    });
+  }
+
+  res.status(200).json(serializedOrder);
 });
 
 // @desc    Delete an order
@@ -502,7 +702,22 @@ export const deleteOrder = asyncHandler(async (req, res) => {
 // @access  Private
 export const getMyOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({ user: req.user._id }).populate('orderItems.product');
-  res.status(200).json(orders);
+  
+  // Serialize orders (convert Map to object for JSON)
+  const serializedOrders = orders.map(order => {
+    const orderObj = order.toObject();
+    if (orderObj.orderItems) {
+      orderObj.orderItems = orderObj.orderItems.map(item => {
+        if (item.selectedVariation && item.selectedVariation.attributes instanceof Map) {
+          item.selectedVariation.attributes = Object.fromEntries(item.selectedVariation.attributes.entries());
+        }
+        return item;
+      });
+    }
+    return orderObj;
+  });
+  
+  res.status(200).json(serializedOrders);
 });
 
 // @desc    Get orders from 'ToBeShipped' collection (Admin) - **This function is now redundant as logic is in toBeShippedRoutes.js**

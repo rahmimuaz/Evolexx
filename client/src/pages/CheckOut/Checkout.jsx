@@ -188,18 +188,41 @@ const Checkout = () => {
         phone: formData.phone
       };
 
-      const orderItems = cartItems.map(item => ({
-        product: item.product._id,
-        quantity: item.quantity,
-        // Use discountPrice if available, otherwise use regular price
-        price: item.product.discountPrice || item.product.price
-      }));
+      // Helper to get item price (variation price or product price)
+      const getItemPrice = (item) => {
+        if (item.product?.hasVariations && item.selectedVariation) {
+          const matchingVariation = item.product.variations?.find(v => 
+            v.variationId === item.selectedVariation.variationId
+          );
+          if (matchingVariation) {
+            return matchingVariation.discountPrice || matchingVariation.price || item.product.price || 0;
+          }
+        }
+        return item.product?.discountPrice || item.product?.price || 0;
+      };
+
+      const orderItems = cartItems.map(item => {
+        const orderItem = {
+          product: item.product._id,
+          quantity: item.quantity,
+          price: getItemPrice(item)
+        };
+        
+        // Include variation data if available
+        if (item.product?.hasVariations && item.selectedVariation) {
+          orderItem.selectedVariation = {
+            variationId: item.selectedVariation.variationId,
+            attributes: item.selectedVariation.attributes
+          };
+        }
+        
+        return orderItem;
+      });
 
       const total = cartItems.reduce(
         (acc, item) => {
           if (!item.product) return acc;
-          const itemPrice = item.product.discountPrice || item.product.price || 0;
-          return acc + itemPrice * item.quantity;
+          return acc + getItemPrice(item) * item.quantity;
         },
         0
       );
@@ -250,12 +273,24 @@ const Checkout = () => {
     e.target.nextSibling.style.display = 'flex';
   };
 
-  // Calculate totals - use discountPrice if available
+  // Helper to get item price (variation price or product price)
+  const getItemPrice = (item) => {
+    if (item.product?.hasVariations && item.selectedVariation) {
+      const matchingVariation = item.product.variations?.find(v => 
+        v.variationId === item.selectedVariation.variationId
+      );
+      if (matchingVariation) {
+        return matchingVariation.discountPrice || matchingVariation.price || item.product.price || 0;
+      }
+    }
+    return item.product?.discountPrice || item.product?.price || 0;
+  };
+
+  // Calculate totals - use variation price if available
   const subtotal = cartItems.reduce(
     (acc, item) => {
       if (!item.product) return acc;
-      const itemPrice = item.product.discountPrice || item.product.price || 0;
-      return acc + itemPrice * item.quantity;
+      return acc + getItemPrice(item) * item.quantity;
     },
     0
   );
@@ -375,41 +410,57 @@ const Checkout = () => {
             <div className="checkout-card">
               <h2 className="section-heading">Order Summary</h2>
               <div className="summary-items-list">
-                {cartItems.map((item) => (
-                  <div key={item._id} className="summary-item">
-                    <div className="summary-item-content">
-                      <div className="summary-item-image-container">
-                        {item.product.images?.length > 0 ? (
-                          <>
-                            <img
-                              src={getImageUrl(item.product.images[0])}
-                              alt={item.product.name}
-                              className="summary-item-image"
-                              onError={handleImageError}
-                            />
-                            <div className="summary-item-image-placeholder" style={{ display: 'none' }} />
-                          </>
-                        ) : (
-                          <div className="summary-item-image-placeholder" />
-                        )}
+                {cartItems.map((item) => {
+                  // Get variation image if available
+                  let imageUrl = null;
+                  if (item.product?.hasVariations && item.selectedVariation) {
+                    const matchingVariation = item.product.variations?.find(v => 
+                      v.variationId === item.selectedVariation.variationId
+                    );
+                    if (matchingVariation?.images && matchingVariation.images.length > 0) {
+                      imageUrl = matchingVariation.images[0];
+                    }
+                  }
+                  if (!imageUrl && item.product?.images?.length > 0) {
+                    imageUrl = item.product.images[0];
+                  }
+                  
+                  return (
+                    <div key={item._id} className="summary-item">
+                      <div className="summary-item-content">
+                        <div className="summary-item-image-container">
+                          {imageUrl ? (
+                            <>
+                              <img
+                                src={getImageUrl(imageUrl)}
+                                alt={item.product.name}
+                                className="summary-item-image"
+                                onError={handleImageError}
+                              />
+                              <div className="summary-item-image-placeholder" style={{ display: 'none' }} />
+                            </>
+                          ) : (
+                            <div className="summary-item-image-placeholder" />
+                          )}
+                        </div>
+                        <div className="summary-item-details">
+                          <p className="summary-item-name">{item.product.name}</p>
+                          {item.selectedVariation && item.selectedVariation.attributes && (
+                            <p className="summary-item-variation">
+                              {Object.entries(item.selectedVariation.attributes).map(([key, value]) => (
+                                <span key={key}>{key}: {value} </span>
+                              ))}
+                            </p>
+                          )}
+                          <p className="summary-item-quantity">Quantity: {item.quantity}</p>
+                        </div>
                       </div>
-                      <div className="summary-item-details">
-                        <p className="summary-item-name">{item.product.name}</p>
-                        <p className="summary-item-quantity">Quantity: {item.quantity}</p>
-                      </div>
+                      <p className="summary-item-price">
+                        <span>Rs. {(getItemPrice(item) * item.quantity).toLocaleString()}</span>
+                      </p>
                     </div>
-                    <p className="summary-item-price">
-                      {item.product.discountPrice ? (
-                        <>
-                          
-                          <span>Rs. {(item.product.discountPrice * item.quantity).toLocaleString()}</span>
-                        </>
-                      ) : (
-                        <span>Rs. {(item.product.price * item.quantity).toLocaleString()}</span>
-                      )}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="summary-totals">

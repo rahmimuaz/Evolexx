@@ -15,19 +15,33 @@ const Cart = () => {
     if (!item) return;
 
     if (type === 'increment') {
-      updateQuantity(item.product._id, item.quantity + 1);
+      updateQuantity(item.product._id, item.quantity + 1, item.selectedVariation);
     } else if (type === 'decrement' && item.quantity > 1) {
-      updateQuantity(item.product._id, item.quantity - 1);
+      updateQuantity(item.product._id, item.quantity - 1, item.selectedVariation);
     }
   };
 
   // Filter out invalid cart items (where product is null)
   const validCartItems = cartItems.filter(item => item.product);
   
-  // Calculate subtotal using discountPrice if available, otherwise use regular price
+  // Helper to get item price (variation price or product price)
+  const getItemPrice = (item) => {
+    if (item.product?.hasVariations && item.selectedVariation) {
+      // Find matching variation in product
+      const matchingVariation = item.product.variations?.find(v => 
+        v.variationId === item.selectedVariation.variationId
+      );
+      if (matchingVariation) {
+        return matchingVariation.discountPrice || matchingVariation.price || item.product.price || 0;
+      }
+    }
+    return item.product?.discountPrice || item.product?.price || 0;
+  };
+
+  // Calculate subtotal using variation price or product price
   const subtotal = validCartItems.reduce(
     (acc, item) => {
-      const itemPrice = item.product?.discountPrice || item.product?.price || 0;
+      const itemPrice = getItemPrice(item);
       return acc + itemPrice * item.quantity;
     },
     0
@@ -46,7 +60,15 @@ const Cart = () => {
     e.target.nextSibling.style.display = 'flex';
   };
 
-  const anyOutOfStock = validCartItems.some(item => item.product?.stock <= 0);
+  const anyOutOfStock = validCartItems.some(item => {
+    if (item.product?.hasVariations && item.selectedVariation) {
+      const matchingVariation = item.product.variations?.find(v => 
+        v.variationId === item.selectedVariation.variationId
+      );
+      return (matchingVariation?.stock || 0) <= 0;
+    }
+    return (item.product?.stock || 0) <= 0;
+  });
 
   return (
     <div className="cart">
@@ -60,40 +82,68 @@ const Cart = () => {
               validCartItems.map(item => (
                 <article className="cart-item" key={item._id}>
                   <div className="image-wrapper">
-                    {item.product?.images?.length ? (
-                      <>
-                        <img
-                          src={getImageUrl(item.product.images[0])}
-                          alt={item.product.name}
-                          onError={onImageError}
-                          className="product-image"
-                        />
+                    {(() => {
+                      // Get variation image if available, otherwise product image
+                      let imageUrl = null;
+                      if (item.product?.hasVariations && item.selectedVariation) {
+                        const matchingVariation = item.product.variations?.find(v => 
+                          v.variationId === item.selectedVariation.variationId
+                        );
+                        if (matchingVariation?.images && matchingVariation.images.length > 0) {
+                          imageUrl = matchingVariation.images[0];
+                        }
+                      }
+                      if (!imageUrl && item.product?.images?.length > 0) {
+                        imageUrl = item.product.images[0];
+                      }
+                      
+                      return imageUrl ? (
+                        <>
+                          <img
+                            src={getImageUrl(imageUrl)}
+                            alt={item.product.name}
+                            onError={onImageError}
+                            className="product-image"
+                          />
                         <div className="image-placeholder" style={{ display: 'none' }}>
                           <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" className="placeholder-icon">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </div>
-                      </>
-                    ) : (
-                      <div className="image-placeholder">
-                        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" className="placeholder-icon">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
+                        </>
+                      ) : (
+                        <div className="image-placeholder">
+                          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" className="placeholder-icon">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <div className="details">
                     <h2 className="product-name">{item.product?.name || 'N/A'}</h2>
                     <p className="product-desc">{item.product?.description || 'N/A'}</p>
-                    {item.selectedColor && (
-                      <p className="product-color">Color: {item.selectedColor}</p>
+                    {item.selectedVariation && item.selectedVariation.attributes && (
+                      <div className="product-variation">
+                        {Object.entries(item.selectedVariation.attributes).map(([key, value]) => (
+                          <span key={key} className="variation-attr">
+                            {key}: <strong>{value}</strong>
+                          </span>
+                        ))}
+                      </div>
                     )}
-                    {item.product?.stock <= 0 && (
-                      <p className="cart-out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>
-                        Out of Stock
-                      </p>
-                    )}
+                    {(() => {
+                      const stock = item.product?.hasVariations && item.selectedVariation
+                        ? (item.product.variations?.find(v => v.variationId === item.selectedVariation.variationId)?.stock || 0)
+                        : (item.product?.stock || 0);
+                      
+                      return stock <= 0 ? (
+                        <p className="cart-out-of-stock" style={{ color: 'red', fontWeight: 'bold' }}>
+                          Out of Stock
+                        </p>
+                      ) : null;
+                    })()}
 
                     <div className="quantity-controls">
                       <button
@@ -108,20 +158,14 @@ const Cart = () => {
                         aria-label="Increase quantity"
                       >+</button>
                       <button
-                        onClick={() => removeFromCart(item.product._id)}
+                        onClick={() => removeFromCart(item.product._id, item.selectedVariation)}
                         className="remove-btn"
                       >Remove</button>
                     </div>
                   </div>
 
                   <div className="item-price">
-                    {item.product?.discountPrice ? (
-                      <>
-                        <span>Rs. {(item.product.discountPrice * item.quantity).toLocaleString()}</span>
-                      </>
-                    ) : (
-                      <span>Rs. {((item.product?.price || 0) * item.quantity).toLocaleString() || 'N/A'}</span>
-                    )}
+                    <span>Rs. {(getItemPrice(item) * item.quantity).toLocaleString()}</span>
                   </div>
                 </article>
               ))
@@ -137,12 +181,25 @@ const Cart = () => {
           {validCartItems.length > 0 && (
             <div className="summary-products">
               {validCartItems.map(item => {
-                const itemPrice = item.product?.discountPrice || item.product?.price || 0;
+                const itemPrice = getItemPrice(item);
+                let imageUrl = null;
+                if (item.product?.hasVariations && item.selectedVariation) {
+                  const matchingVariation = item.product.variations?.find(v => 
+                    v.variationId === item.selectedVariation.variationId
+                  );
+                  if (matchingVariation?.images && matchingVariation.images.length > 0) {
+                    imageUrl = matchingVariation.images[0];
+                  }
+                }
+                if (!imageUrl && item.product?.images?.length > 0) {
+                  imageUrl = item.product.images[0];
+                }
+                
                 return (
                   <div key={item._id} className="summary-product-item">
-                    {item.product?.images?.[0] && (
+                    {imageUrl && (
                       <img 
-                        src={getImageUrl(item.product.images[0])} 
+                        src={getImageUrl(imageUrl)} 
                         alt={item.product.name}
                         className="summary-product-image"
                         onError={(e) => (e.target.src = '/logo192.png')}
@@ -150,6 +207,13 @@ const Cart = () => {
                     )}
                     <div className="summary-product-info">
                       <p className="summary-product-name">{item.product?.name}</p>
+                      {item.selectedVariation && item.selectedVariation.attributes && (
+                        <p className="summary-product-variation">
+                          {Object.entries(item.selectedVariation.attributes).map(([key, value]) => (
+                            <span key={key}>{key}: {value} </span>
+                          ))}
+                        </p>
+                      )}
                       <p className="summary-product-qty">Qty: {item.quantity}</p>
                     </div>
                     <p className="summary-product-price">

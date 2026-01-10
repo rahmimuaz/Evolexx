@@ -147,43 +147,58 @@ const OrderDetails = () => {
           <div className="order-items-section">
             <h2 className="info-heading">Order Items</h2>
             <div className="order-items-list">
-              {order.orderItems.map((item) => (
-                <div key={item._id} className="order-item">
-                  <div className="order-item-details">
-                    {item.product.images && item.product.images.length > 0 ? (
-                      <>
-                        <img
-                          src={getImageUrl(item.product.images[0])}
-                          alt={item.product.name}
-                          className="product-image"
-                          onError={handleImageError}
-                        />
-                        <div className="product-image-placeholder" style={{ display: 'none' }}>
+              {order.orderItems.map((item) => {
+                // Get image - prefer item.image (variation image), then product images
+                const imageUrl = item.image || (item.product?.images && item.product.images.length > 0 ? item.product.images[0] : null);
+                const productName = item.name || item.product?.name || 'N/A';
+                
+                return (
+                  <div key={item._id} className="order-item">
+                    <div className="order-item-details">
+                      {imageUrl ? (
+                        <>
+                          <img
+                            src={getImageUrl(imageUrl)}
+                            alt={productName}
+                            className="product-image"
+                            onError={handleImageError}
+                          />
+                          <div className="product-image-placeholder" style={{ display: 'none' }}>
+                            <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="product-image-placeholder">
                           <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </div>
-                      </>
-                    ) : (
-                      <div className="product-image-placeholder">
-                        <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
-                    <div className="product-info">
-                      <h3 className="product-name">{item.product.name}</h3>
-                      {item.selectedColor && (
-                        <p className="product-color">Color: {item.selectedColor}</p>
                       )}
-                      <p className="product-quantity">Quantity: {item.quantity}</p>
+                      <div className="product-info">
+                        <h3 className="product-name">{productName}</h3>
+                        {item.selectedVariation && item.selectedVariation.attributes && (
+                          <div className="product-variation">
+                            {Object.entries(item.selectedVariation.attributes).map(([key, value]) => (
+                              <span key={key} className="variation-attr">
+                                {key}: <strong>{value}</strong>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {item.selectedColor && !item.selectedVariation && (
+                          <p className="product-color">Color: {item.selectedColor}</p>
+                        )}
+                        <p className="product-quantity">Quantity: {item.quantity}</p>
+                      </div>
                     </div>
+                    <p className="item-total-price">
+                      Rs. {(item.price * item.quantity).toLocaleString()}
+                    </p>
                   </div>
-                  <p className="item-total-price">
-                    Rs. {(item.price * item.quantity).toLocaleString()}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

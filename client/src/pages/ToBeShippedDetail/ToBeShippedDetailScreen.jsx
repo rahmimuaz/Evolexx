@@ -185,45 +185,62 @@ const ToBeShippedDetailScreen = () => {
             <div className="order-items-section">
               <h2 className="info-heading">Order Items</h2>
               <div className="order-items-list">
-                {order.orderItems.map((item) => (
-                  <div key={item._id || item.product} className="order-item"> {/* Use item._id or item.product for key */}
-                    <div className="order-item-details">
-                      <div className="product-image-wrapper-sm">
-                        {item.image ? (
-                          <>
-                            <img
-                              src={getImageUrl(item.image)}
-                              alt={item.name}
-                              className="product-image"
-                              onError={handleImageError}
-                            />
-                            <div className="product-image-placeholder-small" style={{ display: 'none' }}>
-                                <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                {order.orderItems.map((item) => {
+                  // Handle variation attributes - convert Map to object if needed
+                  const variationAttrs = item.selectedVariation?.attributes || {};
+                  const attrsObj = variationAttrs instanceof Map 
+                    ? Object.fromEntries(variationAttrs.entries())
+                    : variationAttrs;
+                  
+                  return (
+                    <div key={item._id || item.product} className="order-item">
+                      <div className="order-item-details">
+                        <div className="product-image-wrapper-sm">
+                          {item.image ? (
+                            <>
+                              <img
+                                src={getImageUrl(item.image)}
+                                alt={item.name}
+                                className="product-image"
+                                onError={handleImageError}
+                              />
+                              <div className="product-image-placeholder-small" style={{ display: 'none' }}>
+                                  <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="product-image-placeholder-small">
+                              <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
                             </div>
-                          </>
-                        ) : (
-                          <div className="product-image-placeholder-small">
-                            <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                        )}
+                          )}
+                        </div>
+                        <div className="product-info">
+                          <h3 className="product-name">{item.name}</h3>
+                          {item.selectedVariation && Object.keys(attrsObj).length > 0 && (
+                            <div className="product-variation">
+                              {Object.entries(attrsObj).map(([key, value]) => (
+                                <span key={key} className="variation-attr">
+                                  {key}: <strong>{value}</strong>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {item.selectedColor && !item.selectedVariation && (
+                            <p className="product-color">Color: {item.selectedColor}</p>
+                          )}
+                          <p className="product-quantity">Quantity: {item.quantity}</p>
+                        </div>
                       </div>
-                      <div className="product-info">
-                        <h3 className="product-name">{item.name}</h3> {/* Use item.name directly from copied data */}
-                        {item.selectedColor && (
-                          <p className="product-color">Color: {item.selectedColor}</p>
-                        )}
-                        <p className="product-quantity">Quantity: {item.quantity}</p>
-                      </div>
+                      <p className="item-total-price">
+                        Rs. {(item.price * item.quantity).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                      </p>
                     </div>
-                    <p className="item-total-price">
-                      Rs. {(item.price * item.quantity).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (
