@@ -106,12 +106,20 @@
   margin-bottom: 10px;
 }
 
-.product-variation {
+.variation-quantity-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
   margin-top: 8px;
   margin-bottom: 10px;
+}
+
+.product-variation {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
 }
 
 .variation-attr {
@@ -434,6 +442,12 @@
 
   .product-name {
     font-size: 0.95rem;
+  }
+
+  .variation-quantity-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 
   .cart-summary {

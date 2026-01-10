@@ -39,7 +39,7 @@ const Cart = () => {
         if (!v.attributes || !item.selectedVariation.attributes) return false;
         return Object.keys(item.selectedVariation.attributes).every(key => 
           v.attributes[key] === item.selectedVariation.attributes[key]
-        );
+      );
       });
       if (matchingVariation) {
         return matchingVariation.discountPrice || matchingVariation.price || item.product.price || 0;
@@ -84,7 +84,7 @@ const Cart = () => {
         if (!v.attributes || !item.selectedVariation.attributes) return false;
         return Object.keys(item.selectedVariation.attributes).every(key => 
           v.attributes[key] === item.selectedVariation.attributes[key]
-        );
+      );
       });
       return (matchingVariation?.stock || 0) <= 0;
     }
@@ -116,10 +116,10 @@ const Cart = () => {
                             if (!v.attributes || !item.selectedVariation.attributes) return false;
                             return Object.keys(item.selectedVariation.attributes).every(key => 
                               v.attributes[key] === item.selectedVariation.attributes[key]
-                            );
+                        );
                           });
-                          if (matchingVariation?.images && matchingVariation.images.length > 0) {
-                            imageUrl = matchingVariation.images[0];
+                        if (matchingVariation?.images && matchingVariation.images.length > 0) {
+                          imageUrl = matchingVariation.images[0];
                           }
                         }
                       }
@@ -154,15 +154,34 @@ const Cart = () => {
                   <div className="details">
                     <h2 className="product-name">{item.product?.name || 'N/A'}</h2>
                     <p className="product-desc">{item.product?.description || 'N/A'}</p>
-                    {item.selectedVariation && item.selectedVariation.attributes && (
-                      <div className="product-variation">
-                        {Object.entries(item.selectedVariation.attributes).map(([key, value]) => (
-                          <span key={key} className="variation-attr">
-                            {key}: <strong>{value}</strong>
-                          </span>
-                        ))}
+                    <div className="variation-quantity-row">
+                      {item.selectedVariation && item.selectedVariation.attributes && (
+                        <div className="product-variation">
+                          {Object.entries(item.selectedVariation.attributes).map(([key, value]) => (
+                            <span key={key} className="variation-attr">
+                              {key}: <strong>{value}</strong>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="quantity-controls">
+                        <button
+                          onClick={() => handleQuantityChange(item._id, 'decrement')}
+                          className="qty-btn"
+                          aria-label="Decrease quantity"
+                        >-</button>
+                        <span className="qty-display">{String(item.quantity).padStart(2, '0')}</span>
+                        <button
+                          onClick={() => handleQuantityChange(item._id, 'increment')}
+                          className="qty-btn"
+                          aria-label="Increase quantity"
+                        >+</button>
+                        <button
+                          onClick={() => removeFromCart(item.product._id, item.selectedVariation)}
+                          className="remove-btn"
+                        >Remove</button>
                       </div>
-                    )}
+                    </div>
                     {(() => {
                       let stock = 0;
                       if (item.product?.hasVariations && item.selectedVariation) {
@@ -189,24 +208,6 @@ const Cart = () => {
                         </p>
                       ) : null;
                     })()}
-
-                    <div className="quantity-controls">
-                      <button
-                        onClick={() => handleQuantityChange(item._id, 'decrement')}
-                        className="qty-btn"
-                        aria-label="Decrease quantity"
-                      >-</button>
-                      <span className="qty-display">{String(item.quantity).padStart(2, '0')}</span>
-                      <button
-                        onClick={() => handleQuantityChange(item._id, 'increment')}
-                        className="qty-btn"
-                        aria-label="Increase quantity"
-                      >+</button>
-                      <button
-                        onClick={() => removeFromCart(item.product._id, item.selectedVariation)}
-                        className="remove-btn"
-                      >Remove</button>
-                    </div>
                   </div>
 
                   <div className="item-price">
@@ -239,10 +240,10 @@ const Cart = () => {
                       if (!v.attributes || !item.selectedVariation.attributes) return false;
                       return Object.keys(item.selectedVariation.attributes).every(key => 
                         v.attributes[key] === item.selectedVariation.attributes[key]
-                      );
+                  );
                     });
-                    if (matchingVariation?.images && matchingVariation.images.length > 0) {
-                      imageUrl = matchingVariation.images[0];
+                  if (matchingVariation?.images && matchingVariation.images.length > 0) {
+                    imageUrl = matchingVariation.images[0];
                     }
                   }
                 }
