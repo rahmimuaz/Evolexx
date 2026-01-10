@@ -230,6 +230,17 @@ const Cart = () => {
                   // Use variation images directly from selectedVariation
                   if (item.selectedVariation.images && item.selectedVariation.images.length > 0) {
                     imageUrl = item.selectedVariation.images[0];
+                  } else {
+                    // Fallback: try to find matching variation in product to get its image
+                    const matchingVariation = item.product.variations?.find(v => {
+                      if (!v.attributes || !item.selectedVariation.attributes) return false;
+                      return Object.keys(item.selectedVariation.attributes).every(key => 
+                        v.attributes[key] === item.selectedVariation.attributes[key]
+                      );
+                    });
+                    if (matchingVariation?.images && matchingVariation.images.length > 0) {
+                      imageUrl = matchingVariation.images[0];
+                    }
                   }
                 }
                 if (!imageUrl && item.product?.images?.length > 0) {

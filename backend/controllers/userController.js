@@ -145,19 +145,26 @@ const addToCart = asyncHandler(async (req, res) => {
 
   const populatedUser = await User.findById(user._id).populate('cart.product');
   
-  // Serialize cart items (convert Map to object for JSON)
+  // Serialize cart items (convert Map to object for JSON and preserve images)
   const serializedCart = populatedUser.cart.map(item => {
     const itemObj = item.toObject ? item.toObject() : item;
-    if (itemObj.selectedVariation && itemObj.selectedVariation.attributes) {
-      const attrs = {};
-      if (itemObj.selectedVariation.attributes instanceof Map) {
-        for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
-          attrs[key] = value;
+    if (itemObj.selectedVariation) {
+      // Convert Map attributes to plain object
+      if (itemObj.selectedVariation.attributes) {
+        const attrs = {};
+        if (itemObj.selectedVariation.attributes instanceof Map) {
+          for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
+            attrs[key] = value;
+          }
+        } else {
+          Object.assign(attrs, itemObj.selectedVariation.attributes);
         }
-      } else {
-        Object.assign(attrs, itemObj.selectedVariation.attributes);
+        itemObj.selectedVariation.attributes = attrs;
       }
-      itemObj.selectedVariation.attributes = attrs;
+      // Ensure images array is preserved (should already be an array, but make sure)
+      if (!itemObj.selectedVariation.images || !Array.isArray(itemObj.selectedVariation.images)) {
+        itemObj.selectedVariation.images = itemObj.selectedVariation.images || [];
+      }
     }
     return itemObj;
   });
@@ -182,7 +189,32 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
       itemToUpdate.quantity = quantity;
       await user.save();
       const populatedUser = await User.findById(req.user._id).populate('cart.product');
-      res.status(200).json(populatedUser.cart);
+      
+      // Serialize cart items (convert Map to object for JSON and preserve images)
+      const serializedCart = populatedUser.cart.map(item => {
+        const itemObj = item.toObject ? item.toObject() : item;
+        if (itemObj.selectedVariation) {
+          // Convert Map attributes to plain object
+          if (itemObj.selectedVariation.attributes) {
+            const attrs = {};
+            if (itemObj.selectedVariation.attributes instanceof Map) {
+              for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
+                attrs[key] = value;
+              }
+            } else {
+              Object.assign(attrs, itemObj.selectedVariation.attributes);
+            }
+            itemObj.selectedVariation.attributes = attrs;
+          }
+          // Ensure images array is preserved
+          if (!itemObj.selectedVariation.images || !Array.isArray(itemObj.selectedVariation.images)) {
+            itemObj.selectedVariation.images = itemObj.selectedVariation.images || [];
+          }
+        }
+        return itemObj;
+      });
+      
+      res.status(200).json(serializedCart);
     } else {
       res.status(404);
       throw new Error('Product not found in cart');
@@ -211,7 +243,32 @@ const removeFromUserCart = asyncHandler(async (req, res) => {
     } else {
       await user.save();
       const populatedUser = await User.findById(req.user._id).populate('cart.product');
-      res.status(200).json(populatedUser.cart);
+      
+      // Serialize cart items (convert Map to object for JSON and preserve images)
+      const serializedCart = populatedUser.cart.map(item => {
+        const itemObj = item.toObject ? item.toObject() : item;
+        if (itemObj.selectedVariation) {
+          // Convert Map attributes to plain object
+          if (itemObj.selectedVariation.attributes) {
+            const attrs = {};
+            if (itemObj.selectedVariation.attributes instanceof Map) {
+              for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
+                attrs[key] = value;
+              }
+            } else {
+              Object.assign(attrs, itemObj.selectedVariation.attributes);
+            }
+            itemObj.selectedVariation.attributes = attrs;
+          }
+          // Ensure images array is preserved
+          if (!itemObj.selectedVariation.images || !Array.isArray(itemObj.selectedVariation.images)) {
+            itemObj.selectedVariation.images = itemObj.selectedVariation.images || [];
+          }
+        }
+        return itemObj;
+      });
+      
+      res.status(200).json(serializedCart);
     }
   } else {
     res.status(404);
@@ -226,7 +283,31 @@ const getUserCart = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate('cart.product');
 
   if (user) {
-    res.json(user.cart);
+    // Serialize cart items (convert Map to object for JSON and preserve images)
+    const serializedCart = user.cart.map(item => {
+      const itemObj = item.toObject ? item.toObject() : item;
+      if (itemObj.selectedVariation) {
+        // Convert Map attributes to plain object
+        if (itemObj.selectedVariation.attributes) {
+          const attrs = {};
+          if (itemObj.selectedVariation.attributes instanceof Map) {
+            for (const [key, value] of itemObj.selectedVariation.attributes.entries()) {
+              attrs[key] = value;
+            }
+          } else {
+            Object.assign(attrs, itemObj.selectedVariation.attributes);
+          }
+          itemObj.selectedVariation.attributes = attrs;
+        }
+        // Ensure images array is preserved (should already be an array, but make sure)
+        if (!itemObj.selectedVariation.images || !Array.isArray(itemObj.selectedVariation.images)) {
+          itemObj.selectedVariation.images = itemObj.selectedVariation.images || [];
+        }
+      }
+      return itemObj;
+    });
+    
+    res.json(serializedCart);
   } else {
     res.status(404);
     throw new Error('User not found');
