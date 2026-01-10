@@ -1834,8 +1834,9 @@ const ProductDetail = () => {
                   <div className="pd-related-price">
                     {rp.discountPrice ? (
                       <>
-                        <span className="pd-related-old">Rs. {rp.price?.toLocaleString()}</span>
                         <span className="pd-related-current">Rs. {rp.discountPrice?.toLocaleString()}</span>
+                        <span className="pd-related-old">Rs. {rp.price?.toLocaleString()}</span>
+                        
                       </>
                     ) : (
                       <span className="pd-related-current">Rs. {rp.price?.toLocaleString()}</span>
