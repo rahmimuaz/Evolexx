@@ -5,8 +5,9 @@
 /* Layout Container */
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: #f8fafc;
+  overflow: hidden;
 }
 
 /* ========================================
@@ -195,6 +196,8 @@
   display: flex;
   flex-direction: column;
   transition: margin-left 0.3s ease;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .admin-main.sidebar-open {
@@ -421,9 +424,9 @@
   padding: 2rem 3rem;
   flex: 1;
   overflow-x: hidden;
-  max-width: 1600px;
-  height: calc(100vh - 70px);
   overflow-y: auto;
+  max-width: 1600px;
+  min-height: 0;
 }
 
 /* ========================================
