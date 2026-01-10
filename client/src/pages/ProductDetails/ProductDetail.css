@@ -120,7 +120,7 @@
 .pd-main-image img {
   max-width: 100%;
   max-height: 540px;
-  object-fit: cover;
+  object-fit: contain;
   width: 100%;
   height: auto;
 }
@@ -148,8 +148,8 @@
 
 .pd-image-nav:hover {
   background: rgba(255, 255, 255, 1);
-  border-color: #f97316;
-  color: #f97316;
+  border-color: #000000;
+  color: #000000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transform: translateY(-50%) scale(1.05);
 }
@@ -183,10 +183,10 @@
   margin-bottom: 8px;
 }
 .pd-title {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 500;
   color: #222;
-  margin: 0 0 16px;
+  margin: 0 0 8px;
   line-height: 1.3;
 }
 
@@ -204,7 +204,7 @@
 }
 
 .pd-current-price {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: #222;
 }
@@ -213,7 +213,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .pd-stars {
@@ -234,7 +234,7 @@
   align-items: center;
   gap: 10px;
   padding: 5px 0;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .pd-koko-logo {
@@ -261,12 +261,12 @@
   font-size: 0.95rem;
   color: #555;
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 /* Variations Section */
 .pd-variations-section {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -285,7 +285,7 @@
 /* Color Selection - Daraz Style */
 .pd-option-section {
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 .pd-option-section:last-child {
@@ -295,7 +295,7 @@
 .pd-option-label {
   font-size: 0.875rem;
   color: #374151;
-  margin-bottom: 12px;
+  margin-bottom:5px;
   font-weight: 500;
 }
 
@@ -332,8 +332,8 @@
 }
 
 .pd-variant-thumbnail.active {
-  border-color: #f97316;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+  border-color: #282828;
+  box-shadow: 0 2px 8px rgba(58, 58, 58, 0.3);
 }
 
 .pd-variant-thumbnail img {
@@ -436,7 +436,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .pd-actions .pd-add-cart-btn,

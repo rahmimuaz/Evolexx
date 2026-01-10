@@ -1068,16 +1068,18 @@ const ProductDetail = () => {
               }
             })()}
           </div>
-             {/* Koko Payment Option */}
-          <div className="pd-koko-payment">
-            <span className="pd-koko-text">
-            3 x <strong>Rs. {Math.ceil(((() => {
-              const currentDiscountPrice = selectedVariation?.discountPrice || product.discountPrice;
-              const currentPrice = selectedVariation?.price || product.price;
-              return currentDiscountPrice || currentPrice;
-            })()) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
-            </span>
-          </div>
+             {/* Koko Payment Option - Only show if enabled */}
+          {product.kokoPay && (
+            <div className="pd-koko-payment">
+              <span className="pd-koko-text">
+              3 x <strong>Rs. {Math.ceil(((() => {
+                const currentDiscountPrice = selectedVariation?.discountPrice || product.discountPrice;
+                const currentPrice = selectedVariation?.price || product.price;
+                return currentDiscountPrice || currentPrice;
+              })()) / 3).toLocaleString()}</strong> with <img src="/koko.webp" alt="Koko" className="pd-koko-logo" />
+              </span>
+            </div>
+          )}
           <div className="pd-rating-row">
             <div className="pd-stars">
               {[...Array(5)].map((_, i) => (
@@ -1182,10 +1184,10 @@ const ProductDetail = () => {
                                   title={value}
                                   style={{
                                     position: 'relative',
-                                    width: '80px',
-                                    height: '80px',
+                                    width: '60px',
+                                    height: '60px',
                                     padding: '2px',
-                                    border: `2px solid ${isSelected ? '#f97316' : '#e5e7eb'}`,
+                                    border: `1px solid ${isSelected ? '#000000' : '#e5e7eb'}`,
                                     borderRadius: '4px',
                                     background: 'white',
                                     cursor: 'pointer',
@@ -1248,7 +1250,7 @@ const ProductDetail = () => {
                                         width: '20px',
                                         height: '20px',
                                         borderRadius: '50%',
-                                        background: '#f97316',
+                                        background: '#000000',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -1256,7 +1258,7 @@ const ProductDetail = () => {
                                         boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
                                       }}
                                     >
-                                      <FaCheck style={{ color: 'white', fontSize: '0.75rem' }} />
+                                      <FaCheck style={{ color: 'white', fontSize: '0.65rem' }} />
                                     </div>
                                   )}
                                 </button>
@@ -1283,9 +1285,9 @@ const ProductDetail = () => {
                                   onClick={() => handleVariationAttributeChange(attrName, value)}
                                   style={{
                                     padding: '0.5rem 1rem',
-                                    border: `2px solid ${isSelected ? '#f97316' : '#d1d5db'}`,
+                                    border: `2px solid ${isSelected ? '#000000' : '#d1d5db'}`,
                                     borderRadius: '4px',
-                                    background: isSelected ? '#f97316' : '#fff',
+                                    background: isSelected ? '#000000' : '#fff',
                                     color: isSelected ? '#fff' : '#333',
                                     cursor: 'pointer',
                                     fontSize: '0.875rem',
@@ -1336,6 +1338,20 @@ const ProductDetail = () => {
             <button className="pd-wishlist-btn" onClick={() => setWishlist(!wishlist)}>
               {wishlist ? <FaHeart /> : <FaRegHeart />}
             </button>
+            {/* Stock Status */}
+          <div className="pd-stock-status">
+            {getCurrentStock() > 0 ? (
+              <span className="pd-in-stock">
+                <FaCheck /> In stock ({getCurrentStock()} available)
+              </span>
+            ) : (
+              <span className="pd-out-stock">
+                {product.hasVariations && !selectedVariation 
+                  ? 'Please select a variation to check availability' 
+                  : 'Out of stock'}
+              </span>
+            )}
+          </div>
           </div>
 
           {/* Variation Error/Warning Messages */}
@@ -1396,20 +1412,7 @@ const ProductDetail = () => {
             </div>
           )}
 
-          {/* Stock Status */}
-          <div className="pd-stock-status">
-            {getCurrentStock() > 0 ? (
-              <span className="pd-in-stock">
-                <FaCheck /> In stock ({getCurrentStock()} available)
-              </span>
-            ) : (
-              <span className="pd-out-stock">
-                {product.hasVariations && !selectedVariation 
-                  ? 'Please select a variation to check availability' 
-                  : 'Out of stock'}
-              </span>
-            )}
-          </div>
+          
 
           {/* Policy Accordion */}
           <div className="pd-policy-accordion">
