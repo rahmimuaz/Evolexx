@@ -132,7 +132,7 @@ export const createProduct = async (req, res) => {
         return res.status(400).json({ message: 'Invalid JSON format for variants.' });
       }
     } 
-    // Traditional product with no variants
+      // Traditional product with no variants
     else {
       // Filter main product images (fieldname === 'images')
       const mainImageFiles = req.files ? req.files.filter(file => file.fieldname === 'images') : [];
@@ -451,16 +451,16 @@ export const updateProduct = async (req, res) => {
     }
 
     const updateData = {
-      name,
-      category,
-      price: parseFloat(price),
-      discountPrice: discountPrice ? parseFloat(discountPrice) : undefined,
-      description,
-      longDescription,
-      images: updatedImages, // Set the final combined array of images
+        name,
+        category,
+        price: parseFloat(price),
+        discountPrice: discountPrice ? parseFloat(discountPrice) : undefined,
+        description,
+        longDescription,
+        images: updatedImages, // Set the final combined array of images
       stock: totalStock,
-      warrantyPeriod,
-      details: parsedDetails,
+        warrantyPeriod,
+        details: parsedDetails,
       kokoPay: kokoPay === 'true' || kokoPay === true,
       hasVariations: hasVariations === 'true' || hasVariations === true
     };

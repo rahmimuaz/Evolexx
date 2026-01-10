@@ -3,7 +3,7 @@
 .pd-page {
   min-height: 100vh;
   background: #ffffff;
-  padding-top: 90px;
+  padding-top: 40px;
   margin-left: 0;
 }
 
@@ -38,7 +38,8 @@
 /* Breadcrumb */
 .pd-breadcrumb {
   width: 100%;
-  padding: 20px 30px;
+  margin-top: 30px;
+  padding: 5px 20px;
   font-size: 0.85rem;
   color: #999;
 }
@@ -68,9 +69,9 @@
   grid-template-columns: 100px 1fr 450px;
   gap: 40px;
   width: 98%;
-  padding: 0px 60px 10px;
+  padding: 0px 20px 10px;
   border: 1px solid #f0f0f0;
-  margin-left: 20px;
+  margin-left: 15px;
 }
 
 /* Thumbnails - Vertical */
@@ -80,6 +81,7 @@
   flex-direction: column;
   gap: 12px;
 }
+
 
 .pd-thumb {
   width: 80px;
@@ -107,60 +109,23 @@
 
 /* Main Image */
 .pd-main-image {
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 540px;
   overflow: hidden;
-  position: relative;
-  cursor: zoom-in;
-  user-select: none;
 }
 
 .pd-main-image img {
   max-width: 100%;
   max-height: 540px;
   object-fit: cover;
-  transition: transform 0.3s ease-out;
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Image zoom when clicked - scales the image based on cursor position */
-.pd-main-image.zoom-active {
-  cursor: zoom-out;
-}
-
-.pd-main-image.zoom-active img {
-  transform: scale(2.5);
-}
-
-/* Zoom overlay that shows magnified view */
-.pd-zoom-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  background-repeat: no-repeat;
-  border-radius: 8px;
-  z-index: 10;
-}
-
-.pd-main-image.zoom-active .pd-zoom-overlay {
-  opacity: 1;
 }
 
 .pd-no-image {
   color: #999;
   font-size: 1rem;
 }
-
 /* Product Info */
 .pd-info {
   padding: 10px 0;
@@ -173,7 +138,6 @@
   letter-spacing: 1.5px;
   margin-bottom: 8px;
 }
-
 .pd-title {
   font-size: 1.6rem;
   font-weight: 500;
@@ -256,12 +220,37 @@
   margin-bottom: 24px;
 }
 
+/* Variations Section */
+.pd-variations-section {
+  margin-bottom: 12px;
+}
+
+.pd-variations-row {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.pd-variation-divider {
+  width: 1px;
+  height: 100%;
+  min-height: 60px;
+  border: none;
+  background-color: #e0e0e0;
+  margin: 0 2rem;
+  align-self: stretch;
+}
+
 /* Color Selection */
 .pd-option-section {
-  margin-bottom: 20px;
+  flex: 1;
+  min-width: 150px;
+  margin-bottom: 0;
 }
 
 .pd-option-label {
+  
   font-size: 0.85rem;
   color: #333;
   margin-bottom: 10px;
@@ -274,10 +263,10 @@
 }
 
 .pd-color-swatch {
-  width: 36px;
-  height: 36px;
-  border-radius: 4px;
-  border: 2px solid #e0e0e0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50px;
+  border: 1.5px solid #e0e0e0;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -295,6 +284,7 @@
 }
 
 .pd-swatch-check {
+  display: none;
   color: #fff;
   font-size: 0.7rem;
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
@@ -305,8 +295,8 @@
 .pd-quantity-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 18px;
+  margin-bottom: 10px;
 }
 
 /* Action Buttons Row */
@@ -436,7 +426,7 @@
 /* Trust Badges */
 /* Policy Accordion */
 .pd-policy-accordion {
-  margin-top: 30px;
+  margin-top: 10px;
   padding-top: 10px;
   display: flex;
   
@@ -576,7 +566,7 @@
 .pd-description-content {
   white-space: pre-wrap; /* Preserve line breaks and whitespace */
   word-wrap: break-word; /* Break long words */
-  max-width: 800px;
+  max-width: 100%;
   line-height: 1.8;
   color: #555;
 }
@@ -720,7 +710,7 @@
 /* Specs Table */
 .pd-specs-table {
   width: 100%;
-  max-width: 600px;
+  max-width: 50%;
   border-collapse: collapse;
 }
 
@@ -1257,17 +1247,34 @@
     line-height: 1.5;
   }
 
+  /* Variations Section */
+  .pd-variations-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .pd-variation-divider {
+    width: 100%;
+    height: 1px;
+    min-height: 1px;
+    margin: 1rem 0;
+    align-self: stretch;
+  }
+
   /* Color Selection */
   .pd-option-section {
     margin-bottom: 14px;
+    min-width: 100%;
   }
 
   .pd-option-label {
+    
     font-size: 0.8rem;
     margin-bottom: 8px;
   }
 
   .pd-color-swatch {
+    
     width: 32px;
     height: 32px;
   }

@@ -33,7 +33,6 @@ const ProductDetail = () => {
   const [wishlist, setWishlist] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [openAccordion, setOpenAccordion] = useState(null); // Track which accordion is open
-  const [imageZoom, setImageZoom] = useState({ x: 0, y: 0, show: false, active: false });
   const [hasPurchasedProduct, setHasPurchasedProduct] = useState(false);
   const [checkingPurchase, setCheckingPurchase] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState(null); // Selected variation object
@@ -537,6 +536,34 @@ const ProductDetail = () => {
     return colors[colorValue?.toLowerCase()] || '#cccccc';
   };
 
+  // Convert hex color code to color name (for display in details)
+  const hexToColorName = (hexCode) => {
+    if (!hexCode || !hexCode.startsWith('#')) return null;
+    
+    // Normalize hex code (convert to lowercase, remove spaces)
+    const normalizedHex = hexCode.toLowerCase().trim();
+    
+    // Common hex to color name mapping
+    const hexToName = {
+      '#ffffff': 'White', '#000000': 'Black', '#e53935': 'Red', '#1976d2': 'Blue',
+      '#388e3c': 'Green', '#fbc02d': 'Yellow', '#9e9e9e': 'Gray', '#e91e63': 'Pink',
+      '#9c27b0': 'Purple', '#ff9800': 'Orange', '#795548': 'Brown', '#ffd700': 'Gold',
+      '#c0c0c0': 'Silver', '#001f3f': 'Navy', '#f5f5dc': 'Beige', '#fffdd0': 'Cream',
+      '#191970': 'Midnight Blue', '#4a4a4a': 'Space Gray', '#b76e79': 'Rose Gold',
+      '#ff0000': 'Red', '#00ff00': 'Green', '#0000ff': 'Blue', '#ffff00': 'Yellow',
+      '#ff00ff': 'Magenta', '#00ffff': 'Cyan', '#808080': 'Gray', '#800000': 'Maroon',
+      '#008000': 'Green', '#000080': 'Navy', '#800080': 'Purple', '#ffc0cb': 'Pink'
+    };
+    
+    return hexToName[normalizedHex] || null;
+  };
+
+  // Check if a value is a hex color code
+  const isHexColorCode = (value) => {
+    if (!value || typeof value !== 'string') return false;
+    return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value.trim());
+  };
+
   // Add structured data (JSON-LD) for SEO
   useEffect(() => {
     if (!product) return;
@@ -634,54 +661,17 @@ const ProductDetail = () => {
             >
               <img src={cleanImagePath(img)} alt={`${product.name} ${i + 1}`} onError={(e) => (e.target.src = '/logo192.png')} />
             </div>
-          ))}
-        </div>
+              ))}
+            </div>
 
         {/* Main Image */}
-        <div 
-          className={`pd-main-image ${imageZoom.active ? 'zoom-active' : ''}`}
-          onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            setImageZoom({ x, y, show: true, active: !imageZoom.active });
-          }}
-          onMouseMove={(e) => {
-            if (imageZoom.active) {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = ((e.clientX - rect.left) / rect.width) * 100;
-              const y = ((e.clientY - rect.top) / rect.height) * 100;
-              setImageZoom(prev => ({ ...prev, x, y, show: true }));
-            }
-          }}
-          onMouseLeave={() => {
-            if (!imageZoom.active) {
-              setImageZoom({ x: 0, y: 0, show: false, active: false });
-            }
-          }}
-        >
+        <div className="pd-main-image">
           {currentMainImageUrl ? (
-            <>
-              <img 
-                src={currentMainImageUrl} 
-                alt={product.name} 
-                onError={(e) => (e.target.src = '/logo192.png')}
-                style={{
-                  transform: imageZoom.active ? `scale(2.5)` : 'scale(1)',
-                  transformOrigin: `${imageZoom.x}% ${imageZoom.y}%`,
-                }}
-              />
-              {imageZoom.active && imageZoom.show && (
-                <div 
-                  className="pd-zoom-overlay"
-                  style={{
-                    backgroundImage: `url(${currentMainImageUrl})`,
-                    backgroundPosition: `${imageZoom.x}% ${imageZoom.y}%`,
-                    backgroundSize: '250%',
-                  }}
-                />
-              )}
-            </>
+            <img 
+              src={currentMainImageUrl} 
+              alt={product.name} 
+              onError={(e) => (e.target.src = '/logo192.png')}
+            />
           ) : (
             <div className="pd-no-image">No Image Available</div>
           )}
@@ -701,10 +691,11 @@ const ProductDetail = () => {
               
               if (currentDiscountPrice && currentDiscountPrice < basePrice) {
                 return (
-                  <>
-                    <span className="pd-old-price">Rs. {basePrice?.toLocaleString()}</span>
+              <>
                     <span className="pd-current-price">Rs. {currentDiscountPrice?.toLocaleString()}</span>
-                  </>
+                    <span className="pd-old-price">Rs. {basePrice?.toLocaleString()}</span>
+                    
+              </>
                 );
               } else {
                 return (
@@ -736,71 +727,71 @@ const ProductDetail = () => {
           {/* Variations Selection */}
           {product.hasVariations && product.variations && product.variations.length > 0 ? (
             <div className="pd-variations-section">
-              {(() => {
-                // Get all unique attribute names from variations
-                const attributeNames = new Set();
-                product.variations.forEach(v => {
-                  if (v.attributes) {
-                    Object.keys(v.attributes).forEach(key => attributeNames.add(key));
-                  }
-                });
-                return Array.from(attributeNames);
-              })().map(attrName => {
-                const availableValues = getAvailableValues(attrName);
-                const isColor = attrName.toLowerCase() === 'color';
-                
-                return (
-                  <div key={attrName} className="pd-option-section">
-                    <p className="pd-option-label">
-                      Select {attrName.charAt(0).toUpperCase() + attrName.slice(1)}
-                      {!selectedVariation && <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>}
-                    </p>
-                    {isColor ? (
-                      <div className="pd-color-swatches">
-                        {availableValues.map((value, idx) => (
-                          <button
-                            key={idx}
-                            className={`pd-color-swatch ${selectedVariationAttributes[attrName] === value ? 'active' : ''}`}
-                            style={{ backgroundColor: getColorHex(value) }}
-                            onClick={() => handleVariationAttributeChange(attrName, value)}
-                            title={value}
-                          >
-                            {selectedVariationAttributes[attrName] === value && <FaCheck className="pd-swatch-check" />}
-                          </button>
-                        ))}
+              <div className="pd-variations-row">
+                {(() => {
+                  // Get all unique attribute names from variations
+                  const attributeNames = new Set();
+                  product.variations.forEach(v => {
+                    if (v.attributes) {
+                      Object.keys(v.attributes).forEach(key => attributeNames.add(key));
+                    }
+                  });
+                  return Array.from(attributeNames);
+                })().map((attrName, index, array) => {
+                  const availableValues = getAvailableValues(attrName);
+                  const isColor = attrName.toLowerCase() === 'color';
+                  
+                  return (
+                    <React.Fragment key={attrName}>
+                      <div className="pd-option-section">
+                        <p className="pd-option-label">
+                          Select {attrName.charAt(0).toUpperCase() + attrName.slice(1)}
+                          {!selectedVariation && <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>}
+                        </p>
+                        {isColor ? (
+                          <div className="pd-color-swatches">
+                            {availableValues.map((value, idx) => (
+                              <button
+                                key={idx}
+                                className={`pd-color-swatch ${selectedVariationAttributes[attrName] === value ? 'active' : ''}`}
+                                style={{ backgroundColor: getColorHex(value) }}
+                                onClick={() => handleVariationAttributeChange(attrName, value)}
+                                title={value}
+                              >
+                                {selectedVariationAttributes[attrName] === value && <FaCheck className="pd-swatch-check" />}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="pd-variation-options" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            {availableValues.map((value, idx) => (
+                              <button
+                                key={idx}
+                                className={`pd-variation-option ${selectedVariationAttributes[attrName] === value ? 'active' : ''}`}
+                                onClick={() => handleVariationAttributeChange(attrName, value)}
+                                style={{
+                                  padding: '0.5rem 1rem',
+                                  border: `2px solid ${selectedVariationAttributes[attrName] === value ? '#333' : '#d1d5db'}`,
+                                  borderRadius: '4px',
+                                  background: selectedVariationAttributes[attrName] === value ? '#333' : '#fff',
+                                  color: selectedVariationAttributes[attrName] === value ? '#fff' : '#333',
+                                  cursor: 'pointer',
+                                  fontSize: '0.875rem',
+                                  fontWeight: selectedVariationAttributes[attrName] === value ? 600 : 400,
+                                  transition: 'all 0.2s'
+                                }}
+                              >
+                                {value}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="pd-variation-options" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                        {availableValues.map((value, idx) => (
-                          <button
-                            key={idx}
-                            className={`pd-variation-option ${selectedVariationAttributes[attrName] === value ? 'active' : ''}`}
-                            onClick={() => handleVariationAttributeChange(attrName, value)}
-                            style={{
-                              padding: '0.5rem 1rem',
-                              border: `2px solid ${selectedVariationAttributes[attrName] === value ? '#333' : '#d1d5db'}`,
-                              borderRadius: '4px',
-                              background: selectedVariationAttributes[attrName] === value ? '#333' : '#fff',
-                              color: selectedVariationAttributes[attrName] === value ? '#fff' : '#333',
-                              cursor: 'pointer',
-                              fontSize: '0.875rem',
-                              fontWeight: selectedVariationAttributes[attrName] === value ? 600 : 400,
-                              transition: 'all 0.2s'
-                            }}
-                          >
-                            {value}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              {selectedVariation && (
-                <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#f0f9ff', borderRadius: '4px', fontSize: '0.8125rem', color: '#0369a1' }}>
-                  Selected: {Object.entries(selectedVariationAttributes).map(([key, value]) => `${key}: ${value}`).join(', ')}
-                </div>
-              )}
+                      {index < array.length - 1 && <hr className="pd-variation-divider" />}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
             </div>
           ) : (
             /* Legacy Color Selection */
@@ -859,7 +850,6 @@ const ProductDetail = () => {
             {getCurrentStock() > 0 ? (
               <span className="pd-in-stock">
                 <FaCheck /> In stock ({getCurrentStock()} available)
-                {selectedVariation && ` - ${Object.entries(selectedVariationAttributes).map(([k, v]) => `${k}: ${v}`).join(', ')}`}
               </span>
             ) : (
               <span className="pd-out-stock">
@@ -1041,6 +1031,18 @@ const ProductDetail = () => {
               <table className="pd-specs-table">
                 <tbody>
                 {Object.entries(product.details).map(([key, value]) => {
+                  // Skip color field if it's a hex code (user-friendly display handled in variations)
+                  if (key.toLowerCase() === 'color' && isHexColorCode(value)) {
+                    // Try to convert hex to color name
+                    const colorName = hexToColorName(value);
+                    // If we can't convert it, hide this field from details table
+                    if (!colorName) {
+                      return null;
+                    }
+                    // If we can convert it, use the color name instead
+                    value = colorName;
+                  }
+                  
                   // Format the value for display
                   let displayValue = value;
                   
@@ -1050,9 +1052,24 @@ const ProductDetail = () => {
                   }
                   // Handle arrays
                   else if (Array.isArray(value)) {
-                    displayValue = value.join(', ');
+                    // Check if array contains hex codes for color field
+                    if (key.toLowerCase() === 'color') {
+                      displayValue = value.map(v => {
+                        if (isHexColorCode(v)) {
+                          const colorName = hexToColorName(v);
+                          return colorName || v; // Use color name if available, otherwise keep original
+                        }
+                        return v;
+                      }).join(', ');
+                    } else {
+                      displayValue = value.join(', ');
+                    }
                   }
-                  // Handle string values
+                  // Handle string values - check if it's a hex code
+                  else if (typeof value === 'string' && key.toLowerCase() === 'color' && isHexColorCode(value)) {
+                    const colorName = hexToColorName(value);
+                    displayValue = colorName || value;
+                  }
                   else {
                     displayValue = value;
                   }
@@ -1063,7 +1080,7 @@ const ProductDetail = () => {
                       <td className="pd-spec-value">{displayValue}</td>
                     </tr>
                   );
-                })}
+                }).filter(Boolean)}
                   <tr>
                     <td className="pd-spec-key">Warranty</td>
                     <td className="pd-spec-value">{product.warrantyPeriod || 'No Warranty'}</td>

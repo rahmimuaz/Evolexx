@@ -139,12 +139,12 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     finalOrderItems = userWithCart.cart.map(item => {
       const orderItem = {
-        product: item.product._id,
-        quantity: item.quantity,
-        price: item.product.price,
-        name: item.product.name, // Copy product name from populated cart item
-        image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '', // Copy main image
-        selectedColor: item.selectedColor || '' // Copy selected color if present in cart item
+      product: item.product._id,
+      quantity: item.quantity,
+      price: item.product.price,
+      name: item.product.name, // Copy product name from populated cart item
+      image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '', // Copy main image
+      selectedColor: item.selectedColor || '' // Copy selected color if present in cart item
       };
       
       // Include selected variation if present
@@ -219,9 +219,9 @@ export const createOrder = asyncHandler(async (req, res) => {
       }
     } else {
       // Regular product stock check
-      if (product.stock < item.quantity) {
-        res.status(400);
-        throw new Error(`Insufficient stock for product: ${product.name}`);
+    if (product.stock < item.quantity) {
+      res.status(400);
+      throw new Error(`Insufficient stock for product: ${product.name}`);
       }
     }
   }
@@ -254,10 +254,10 @@ export const createOrder = asyncHandler(async (req, res) => {
     } else {
       // Regular product stock update
       await Product.findByIdAndUpdate(
-        item.product,
-        { $inc: { stock: -item.quantity } },
-        { new: true }
-      );
+      item.product,
+      { $inc: { stock: -item.quantity } },
+      { new: true }
+    );
     }
     
     return product;

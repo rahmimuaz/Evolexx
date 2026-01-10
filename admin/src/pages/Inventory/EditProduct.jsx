@@ -15,6 +15,24 @@ const categoryHierarchy = {
 
 const categories = Object.keys(categoryHierarchy);
 
+// Category-based suggested variation attributes
+const categoryVariationAttributes = {
+  'Mobile Phone': ['storage', 'color', 'ram'],
+  'Laptops': ['storage', 'ram', 'color'],
+  'Tablets': ['storage', 'color', 'ram'],
+  'Smartwatches': ['size', 'color', 'bandMaterial'],
+  'Preowned Phones': ['storage', 'color', 'condition'],
+  'Preowned Laptops': ['storage', 'ram', 'condition'],
+  'Preowned Tablets': ['storage', 'color', 'condition'],
+  'Chargers': ['type', 'wattage', 'color'],
+  'Phone Covers': ['compatibility', 'color', 'material'],
+  'Screen Protectors': ['compatibility', 'type', 'material'],
+  'Cables': ['type', 'length', 'color'],
+  'Headphones': ['color', 'type', 'connectivity'],
+  'Earbuds': ['color', 'type', 'connectivity'],
+  'Other Accessories': ['color', 'type', 'compatibility']
+};
+
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -261,6 +279,26 @@ const EditProduct = () => {
     fetchProduct();
   }, [fetchProduct]);
 
+  // Update variation attributes based on category/subcategory (only if no existing variations)
+  useEffect(() => {
+    if (hasVariations && formData.subcategory && variations.length === 0) {
+      const suggestedAttrs = categoryVariationAttributes[formData.subcategory] || ['color'];
+      // Only update if current attributes don't match suggested
+      const currentAttrsSet = new Set(variationAttributes);
+      const suggestedAttrsSet = new Set(suggestedAttrs);
+      const isDifferent = suggestedAttrs.length !== variationAttributes.length || 
+                         !suggestedAttrs.every(attr => currentAttrsSet.has(attr));
+      
+      if (isDifferent) {
+        setVariationAttributes(suggestedAttrs);
+      }
+    } else if (hasVariations && !formData.subcategory && variationAttributes.length === 0 && variations.length === 0) {
+      // Default attributes if no subcategory selected
+      setVariationAttributes(['color']);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.subcategory, hasVariations]);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
@@ -322,6 +360,38 @@ const EditProduct = () => {
     setCustomSpecs(prev => prev.map(spec => 
       spec.id === id ? { ...spec, [field]: value } : spec
     ));
+  };
+
+  // Variation attributes management functions
+  const addVariationAttribute = () => {
+    const newAttr = prompt('Enter attribute name (e.g., size, material, type):');
+    if (newAttr && newAttr.trim() && !variationAttributes.includes(newAttr.trim().toLowerCase())) {
+      const attrName = newAttr.trim().toLowerCase();
+      setVariationAttributes(prev => [...prev, attrName]);
+      // Update existing variations to include new attribute
+      setVariations(prev => prev.map(v => ({
+        ...v,
+        attributes: { ...v.attributes, [attrName]: '' }
+      })));
+    } else if (newAttr && variationAttributes.includes(newAttr.trim().toLowerCase())) {
+      alert('This attribute already exists.');
+    }
+  };
+
+  const removeVariationAttribute = (attrToRemove) => {
+    if (variationAttributes.length <= 1) {
+      alert('You must have at least one variation attribute.');
+      return;
+    }
+    if (window.confirm(`Remove "${attrToRemove}" attribute? This will remove this attribute from all variations.`)) {
+      setVariationAttributes(prev => prev.filter(attr => attr !== attrToRemove));
+      // Remove attribute from existing variations
+      setVariations(prev => prev.map(v => {
+        const newAttrs = { ...v.attributes };
+        delete newAttrs[attrToRemove];
+        return { ...v, attributes: newAttrs };
+      }));
+    }
   };
 
   // Variations management functions
@@ -508,15 +578,27 @@ const EditProduct = () => {
               value={fieldValue}
               onChange={handleDetailChange}
               className="modern-input"
-              placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+              placeholder={field.placeholder || "e.g., White, Black (preferred) or #ffffff"}
               style={{ flex: 1 }}
             />
             <input
               type="color"
               value={fieldValue && fieldValue.startsWith('#') ? fieldValue : '#000000'}
               onChange={(e) => {
-                const colorValue = e.target.value;
-                handleDetailChange({ target: { name: field.name, value: colorValue } });
+                const hexValue = e.target.value;
+                // Convert common hex codes to color names for better customer display
+                const hexToName = {
+                  '#ffffff': 'White', '#000000': 'Black', '#e53935': 'Red', '#1976d2': 'Blue',
+                  '#388e3c': 'Green', '#fbc02d': 'Yellow', '#9e9e9e': 'Gray', '#e91e63': 'Pink',
+                  '#9c27b0': 'Purple', '#ff9800': 'Orange', '#795548': 'Brown', '#ffd700': 'Gold',
+                  '#c0c0c0': 'Silver', '#001f3f': 'Navy', '#f5f5dc': 'Beige', '#fffdd0': 'Cream',
+                  '#191970': 'Midnight Blue', '#4a4a4a': 'Space Gray', '#b76e79': 'Rose Gold',
+                  '#ff0000': 'Red', '#00ff00': 'Green', '#0000ff': 'Blue', '#ffff00': 'Yellow',
+                  '#ff00ff': 'Magenta', '#00ffff': 'Cyan', '#808080': 'Gray', '#ffc0cb': 'Pink'
+                };
+                const colorName = hexToName[hexValue.toLowerCase()];
+                // Use color name if available, otherwise use hex code
+                handleDetailChange({ target: { name: field.name, value: colorName || hexValue } });
               }}
               style={{
                 width: '50px',
@@ -526,9 +608,12 @@ const EditProduct = () => {
                 cursor: 'pointer',
                 padding: '2px'
               }}
-              title="Pick a color"
+              title="Pick a color - will auto-convert to color name if possible"
             />
           </div>
+          <small style={{ display: 'block', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.75rem' }}>
+            Tip: Enter color name (e.g., "White") for better customer display, or use color picker for hex codes
+          </small>
         </div>
       );
     }
@@ -1105,23 +1190,93 @@ const EditProduct = () => {
 
                 {hasVariations && (
                   <div style={{ marginTop: '1.5rem' }}>
+                    {/* Variation Attributes Management */}
+                    <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                          Variation Attributes
+                        </label>
+                        <button
+                          type="button"
+                          onClick={addVariationAttribute}
+                          style={{
+                            padding: '0.375rem 0.75rem',
+                            background: '#10b981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.8125rem',
+                            fontWeight: 500
+                          }}
+                        >
+                          + Add Attribute
+                        </button>
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.75rem' }}>
+                        Define which attributes vary (e.g., storage, color, size). These will be used to create variations.
+                      </p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        {variationAttributes.map(attr => (
+                          <div
+                            key={attr}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              padding: '0.5rem 0.75rem',
+                              background: 'white',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '4px',
+                              fontSize: '0.8125rem'
+                            }}
+                          >
+                            <span style={{ fontWeight: 500, color: '#374151' }}>
+                              {attr.charAt(0).toUpperCase() + attr.slice(1)}
+                            </span>
+                            {variationAttributes.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeVariationAttribute(attr)}
+                                style={{
+                                  padding: '0.125rem 0.375rem',
+                                  background: '#ef4444',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '3px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.75rem',
+                                  lineHeight: 1
+                                }}
+                                title="Remove attribute"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                       <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1f2937' }}>Product Variations</h3>
-                      <button
-                        type="button"
-                        onClick={addVariation}
-                        style={{
-                          padding: '0.5rem 1rem',
-                          background: '#3b82f6',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem'
-                        }}
-                      >
-                        + Add Variation
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          type="button"
+                          onClick={addVariation}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#3b82f6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          + Add Variation
+                        </button>
+                      </div>
                     </div>
 
                     {variations.length === 0 ? (
@@ -1168,36 +1323,56 @@ const EditProduct = () => {
                                     {attr.charAt(0).toUpperCase() + attr.slice(1)}
                                   </label>
                                   {attr.toLowerCase() === 'color' ? (
-                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                      <input
-                                        type="text"
-                                        value={variation.attributes[attr] || ''}
-                                        onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
-                                        placeholder="e.g., Black or #000000"
-                                        style={{
-                                          flex: 1,
-                                          padding: '0.5rem',
-                                          border: '1px solid #d1d5db',
-                                          borderRadius: '4px',
-                                          fontSize: '0.875rem'
-                                        }}
-                                      />
-                                      <input
-                                        type="color"
-                                        value={variation.attributes[attr] && variation.attributes[attr].startsWith('#') 
-                                          ? variation.attributes[attr] 
-                                          : '#000000'}
-                                        onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
-                                        style={{
-                                          width: '50px',
-                                          height: '40px',
-                                          border: '1px solid #d1d5db',
-                                          borderRadius: '4px',
-                                          cursor: 'pointer',
-                                          padding: '2px'
-                                        }}
-                                        title="Pick a color"
-                                      />
+                                    <div>
+                                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        <input
+                                          type="text"
+                                          value={variation.attributes[attr] || ''}
+                                          onChange={(e) => updateVariation(variation.id, `attr.${attr}`, e.target.value)}
+                                          placeholder="e.g., White, Black (preferred) or #ffffff"
+                                          style={{
+                                            flex: 1,
+                                            padding: '0.5rem',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '4px',
+                                            fontSize: '0.875rem'
+                                          }}
+                                        />
+                                        <input
+                                          type="color"
+                                          value={variation.attributes[attr] && variation.attributes[attr].startsWith('#') 
+                                            ? variation.attributes[attr] 
+                                            : '#000000'}
+                                          onChange={(e) => {
+                                            const hexValue = e.target.value;
+                                            // Convert common hex codes to color names for better customer display
+                                            const hexToName = {
+                                              '#ffffff': 'White', '#000000': 'Black', '#e53935': 'Red', '#1976d2': 'Blue',
+                                              '#388e3c': 'Green', '#fbc02d': 'Yellow', '#9e9e9e': 'Gray', '#e91e63': 'Pink',
+                                              '#9c27b0': 'Purple', '#ff9800': 'Orange', '#795548': 'Brown', '#ffd700': 'Gold',
+                                              '#c0c0c0': 'Silver', '#001f3f': 'Navy', '#f5f5dc': 'Beige', '#fffdd0': 'Cream',
+                                              '#191970': 'Midnight Blue', '#4a4a4a': 'Space Gray', '#b76e79': 'Rose Gold',
+                                              '#ff0000': 'Red', '#00ff00': 'Green', '#0000ff': 'Blue', '#ffff00': 'Yellow',
+                                              '#ff00ff': 'Magenta', '#00ffff': 'Cyan', '#808080': 'Gray', '#ffc0cb': 'Pink'
+                                            };
+                                            const colorName = hexToName[hexValue.toLowerCase()];
+                                            // Use color name if available, otherwise use hex code
+                                            updateVariation(variation.id, `attr.${attr}`, colorName || hexValue);
+                                          }}
+                                          style={{
+                                            width: '50px',
+                                            height: '40px',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            padding: '2px'
+                                          }}
+                                          title="Pick a color - will auto-convert to color name if possible"
+                                        />
+                                      </div>
+                                      <small style={{ display: 'block', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.75rem' }}>
+                                        Tip: Enter color name (e.g., "White") for better customer display, or use color picker for hex codes
+                                      </small>
                                     </div>
                                   ) : (
                                     <input
