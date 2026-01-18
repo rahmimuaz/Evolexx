@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faVideo, faSave, faSpinner } from '@fortawesome/free-solid-svg-icons';
@@ -8,17 +8,28 @@ const HeroVideoManager = () => {
   const [settings, setSettings] = useState({
     videoUrl: '',
     webmUrl: '',
+    mobileVideoUrl: '',
+    mobileWebmUrl: '',
     enabled: true
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [previewError, setPreviewError] = useState(false);
+  const videoRef = useRef(null);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     fetchHeroVideoSettings();
   }, []);
+
+  // Reload video when URLs change
+  useEffect(() => {
+    if (videoRef.current && settings.videoUrl) {
+      videoRef.current.load();
+    }
+  }, [settings.videoUrl, settings.webmUrl]);
 
   const fetchHeroVideoSettings = async () => {
     try {
@@ -29,6 +40,8 @@ const HeroVideoManager = () => {
         setSettings({
           videoUrl: response.data.value.videoUrl || '/hero-video.mp4',
           webmUrl: response.data.value.webmUrl || '/hero-video.webm',
+          mobileVideoUrl: response.data.value.mobileVideoUrl || '',
+          mobileWebmUrl: response.data.value.mobileWebmUrl || '',
           enabled: response.data.value.enabled !== false
         });
       }
@@ -47,13 +60,14 @@ const HeroVideoManager = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
     setMessage({ type: '', text: '' }); // Clear message on change
+    setPreviewError(false); // Clear preview error when URL changes
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!settings.videoUrl && !settings.webmUrl) {
-      setMessage({ type: 'error', text: 'Please provide at least one video URL (MP4 or WebM).' });
+    if (!settings.videoUrl && !settings.mobileVideoUrl) {
+      setMessage({ type: 'error', text: 'Please provide at least one desktop or mobile video URL.' });
       return;
     }
 
@@ -67,6 +81,8 @@ const HeroVideoManager = () => {
         {
           videoUrl: settings.videoUrl || undefined,
           webmUrl: settings.webmUrl || undefined,
+          mobileVideoUrl: settings.mobileVideoUrl || undefined,
+          mobileWebmUrl: settings.mobileWebmUrl || undefined,
           enabled: settings.enabled
         },
         {
@@ -175,16 +191,90 @@ const HeroVideoManager = () => {
             </small>
           </div>
 
+          <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '2px solid #e5e7eb' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937', marginBottom: '1rem' }}>
+              Mobile Video (Optional)
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+              Set a separate video for mobile devices. If not set, desktop video will be used on mobile.
+            </p>
+
+            {/* Mobile MP4 Video URL */}
+            <div className="form-field-group">
+              <label className="modern-label">
+                Mobile MP4 Video URL
+              </label>
+              <input
+                type="text"
+                name="mobileVideoUrl"
+                value={settings.mobileVideoUrl}
+                onChange={handleInputChange}
+                className="modern-input"
+                placeholder="/hero-video-mobile.mp4 or https://example.com/video-mobile.mp4"
+              />
+              <small className="field-hint">
+                Optional: Separate MP4 video for mobile devices (screens smaller than 768px)
+              </small>
+            </div>
+
+            {/* Mobile WebM Video URL */}
+            <div className="form-field-group">
+              <label className="modern-label">
+                Mobile WebM Video URL (Optional)
+              </label>
+              <input
+                type="text"
+                name="mobileWebmUrl"
+                value={settings.mobileWebmUrl}
+                onChange={handleInputChange}
+                className="modern-input"
+                placeholder="/hero-video-mobile.webm or https://example.com/video-mobile.webm"
+              />
+              <small className="field-hint">
+                Optional: WebM format for mobile video (better compression)
+              </small>
+            </div>
+          </div>
+
           {/* Video Preview */}
           {settings.videoUrl && (
             <div className="form-field-group">
               <label className="modern-label">Preview</label>
               <div className="video-preview-container">
+                {previewError && settings.videoUrl.startsWith('http') && (
+                  <div style={{ 
+                    padding: '2rem', 
+                    textAlign: 'center', 
+                    color: '#ef4444',
+                    background: '#fee2e2',
+                    borderRadius: '8px',
+                    border: '1px solid #f87171'
+                  }}>
+                    <p style={{ margin: 0, fontWeight: 500 }}>Could not load video preview.</p>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Please check if the URL is correct and accessible.</p>
+                  </div>
+                )}
                 <video
+                  key={`${settings.videoUrl}-${settings.webmUrl || ''}`}
+                  ref={videoRef}
                   className="video-preview"
                   controls
                   muted
-                  preload="metadata"
+                  preload="auto"
+                  style={{ display: previewError && settings.videoUrl.startsWith('http') ? 'none' : 'block' }}
+                  onError={(e) => {
+                    // Only show error for full URLs (http/https) as relative paths are expected to fail in admin preview
+                    if (settings.videoUrl.startsWith('http')) {
+                      console.error('Video preview error for URL:', settings.videoUrl);
+                      setPreviewError(true);
+                    } else {
+                      // For relative paths, this is expected - they work on client but not in admin preview
+                      console.log('Relative path video preview unavailable (this is expected)');
+                    }
+                  }}
+                  onLoadedData={() => {
+                    setPreviewError(false);
+                  }}
                 >
                   {settings.videoUrl && (
                     <source src={settings.videoUrl} type="video/mp4" />
@@ -198,6 +288,11 @@ const HeroVideoManager = () => {
               <small className="field-hint">
                 This is a preview of how the video will appear (controls are for preview only)
               </small>
+              {!settings.videoUrl.startsWith('http') && (
+                <small className="field-hint" style={{ display: 'block', marginTop: '0.5rem', color: '#6b7280', fontStyle: 'italic' }}>
+                  Note: Relative paths (like <code>/hero-video.mp4</code>) work on your homepage but may not preview here. Use a full URL (http://...) for preview.
+                </small>
+              )}
             </div>
           )}
 
@@ -218,7 +313,7 @@ const HeroVideoManager = () => {
             <button
               type="submit"
               className="btn-primary"
-              disabled={saving || !settings.videoUrl}
+              disabled={saving || (!settings.videoUrl && !settings.mobileVideoUrl)}
             >
               {saving ? (
                 <>

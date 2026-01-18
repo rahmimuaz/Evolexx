@@ -191,16 +191,30 @@
 
 /* Video Element */
 .hero-video {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
   min-height: 100%;
-  object-fit: cover;
-  object-position: center;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%) translateZ(0);
   z-index: 1;
   /* Optimize video rendering */
   will-change: contents;
-  transform: translateZ(0);
   backface-visibility: hidden;
+  object-fit: cover;
+  object-position: center center;
+}
+
+/* Desktop video - show on larger screens, hide on mobile */
+.hero-video-desktop {
+  display: block;
+}
+
+/* Mobile video - hide on desktop, show on mobile */
+.hero-video-mobile {
+  display: none;
 }
 
 /* Video Overlay for better text readability */
@@ -1236,7 +1250,7 @@
 
 .product-card img {
   width: 100%;
-  height: 280px;
+  height: 300px;
   object-fit: fill;
   background-color:none;
   border-radius: 8px;
@@ -1590,9 +1604,36 @@
     
   }
 
-  /* Optimize video for mobile */
+  /* Hide desktop video on mobile */
+  .hero-video-desktop {
+    display: none;
+  }
+  
+  /* Show mobile video on mobile */
+  .hero-video-mobile {
+    display: block;
+  }
+
+  /* Optimize video for mobile - ensure full coverage */
   .hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%) translateZ(0);
+    object-fit: cover;
     object-position: center center;
+  }
+  
+  /* Ensure video container is properly sized */
+  .hero-video-container {
+    min-width: 100%;
+    min-height: 100%;
+    width: 100%;
+    height: 100%;
   }
 
   /* Adjust overlay for mobile */
@@ -1644,11 +1685,17 @@
   }
   
   .hero-video-container,
-  .hero-video,
   .hero-video-overlay {
     min-height: 100vh;
     height: 100vh;
     height: -webkit-fill-available; /* For iOS Safari */
+    width: 100%;
+  }
+  
+  /* Don't override video element height - let it scale naturally */
+  .hero-video {
+    min-height: 100%;
+    height: auto;
   }
   
   .hero-content {
@@ -1672,12 +1719,28 @@
   }
   
   .hero-video-container,
-  .hero-video,
   .hero-video-overlay {
     min-height: 115vh;
     height: 115vh;
     height: -webkit-fill-available;
     height: 100dvh; /* Dynamic viewport height for mobile */
+    width: 100%;
+  }
+  
+  /* Better video sizing for small mobile screens - ensure full coverage */
+  .hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%) translateZ(0);
+    object-fit: cover;
+    object-position: center center;
+    /* Override any height restrictions */
+    max-height: none;
   }
   
   .hero-content {

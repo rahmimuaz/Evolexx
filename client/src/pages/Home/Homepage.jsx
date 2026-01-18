@@ -20,6 +20,8 @@ const Homepage = () => {
   const [heroVideo, setHeroVideo] = useState({
     videoUrl: '/hero-video.mp4',
     webmUrl: '/hero-video.webm',
+    mobileVideoUrl: '',
+    mobileWebmUrl: '',
     enabled: true
   });
 
@@ -99,6 +101,8 @@ const Homepage = () => {
         setHeroVideo({
           videoUrl: response.data.value.videoUrl || '/hero-video.mp4',
           webmUrl: response.data.value.webmUrl || '/hero-video.webm',
+          mobileVideoUrl: response.data.value.mobileVideoUrl || '',
+          mobileWebmUrl: response.data.value.mobileWebmUrl || '',
           enabled: response.data.value.enabled !== false
         });
       }
@@ -371,23 +375,64 @@ const Homepage = () => {
         {/* Video Background */}
         {heroVideo.enabled && (
           <div className="hero-video-container">
-            <video 
-              className="hero-video" 
-              autoPlay 
-              muted 
-              loop 
-              playsInline
-              preload="auto"
-            >
-              {heroVideo.videoUrl && (
-                <source src={heroVideo.videoUrl} type="video/mp4" />
-              )}
-              {heroVideo.webmUrl && (
-                <source src={heroVideo.webmUrl} type="video/webm" />
-              )}
-              {/* Fallback for browsers that don't support video */}
-              Your browser does not support the video tag.
-            </video>
+            {/* Desktop Video - Hidden on mobile */}
+            {(heroVideo.videoUrl || heroVideo.webmUrl) && (
+              <video 
+                className="hero-video hero-video-desktop" 
+                autoPlay 
+                muted 
+                loop 
+                playsInline
+                preload="auto"
+              >
+                {heroVideo.videoUrl && (
+                  <source src={heroVideo.videoUrl} type="video/mp4" />
+                )}
+                {heroVideo.webmUrl && (
+                  <source src={heroVideo.webmUrl} type="video/webm" />
+                )}
+                Your browser does not support the video tag.
+              </video>
+            )}
+            
+            {/* Mobile Video - Hidden on desktop */}
+            {(heroVideo.mobileVideoUrl || heroVideo.mobileWebmUrl) ? (
+              <video 
+                className="hero-video hero-video-mobile" 
+                autoPlay 
+                muted 
+                loop 
+                playsInline
+                preload="auto"
+              >
+                {heroVideo.mobileVideoUrl && (
+                  <source src={heroVideo.mobileVideoUrl} type="video/mp4" />
+                )}
+                {heroVideo.mobileWebmUrl && (
+                  <source src={heroVideo.mobileWebmUrl} type="video/webm" />
+                )}
+                Your browser does not support the video tag.
+              </video>
+            ) : (heroVideo.videoUrl || heroVideo.webmUrl) ? (
+              // Fallback: Use desktop video on mobile if no mobile video is set
+              <video 
+                className="hero-video hero-video-mobile" 
+                autoPlay 
+                muted 
+                loop 
+                playsInline
+                preload="auto"
+              >
+                {heroVideo.videoUrl && (
+                  <source src={heroVideo.videoUrl} type="video/mp4" />
+                )}
+                {heroVideo.webmUrl && (
+                  <source src={heroVideo.webmUrl} type="video/webm" />
+                )}
+                Your browser does not support the video tag.
+              </video>
+            ) : null}
+            
             <div className="hero-video-overlay"></div>
           </div>
         )}

@@ -18,6 +18,8 @@ export const getHeroVideo = async (req, res) => {
         value: {
           videoUrl: '/hero-video.mp4',
           webmUrl: '/hero-video.webm',
+          mobileVideoUrl: '',
+          mobileWebmUrl: '',
           enabled: true
         }
       });
@@ -39,11 +41,11 @@ export const getHeroVideo = async (req, res) => {
  */
 export const updateHeroVideo = async (req, res) => {
   try {
-    const { videoUrl, webmUrl, enabled } = req.body;
+    const { videoUrl, webmUrl, mobileVideoUrl, mobileWebmUrl, enabled } = req.body;
     
     // Validate input
-    if (videoUrl === undefined && webmUrl === undefined && enabled === undefined) {
-      return res.status(400).json({ message: 'At least one field (videoUrl, webmUrl, or enabled) must be provided.' });
+    if (videoUrl === undefined && webmUrl === undefined && mobileVideoUrl === undefined && mobileWebmUrl === undefined && enabled === undefined) {
+      return res.status(400).json({ message: 'At least one field must be provided.' });
     }
     
     // Get existing settings or create new object
@@ -59,6 +61,8 @@ export const updateHeroVideo = async (req, res) => {
     // Update only provided fields
     if (videoUrl !== undefined) settingsValue.videoUrl = videoUrl;
     if (webmUrl !== undefined) settingsValue.webmUrl = webmUrl;
+    if (mobileVideoUrl !== undefined) settingsValue.mobileVideoUrl = mobileVideoUrl;
+    if (mobileWebmUrl !== undefined) settingsValue.mobileWebmUrl = mobileWebmUrl;
     if (enabled !== undefined) settingsValue.enabled = enabled;
     
     // Save or update settings
