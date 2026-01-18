@@ -23,7 +23,7 @@ const getApiBaseUrl = () => {
   // For example: https://your-backend.railway.app or https://your-backend.herokuapp.com
   
   // Fallback: return empty string (will not fetch video settings, video will be hidden)
-  console.warn('REACT_APP_API_BASE_URL is not set. Video settings will not be loaded.');
+      // REACT_APP_API_BASE_URL is not set - video settings will not be loaded
   return '';
 };
 
@@ -117,35 +117,25 @@ const Homepage = () => {
   const fetchHeroVideoSettings = async () => {
     // Check if API_BASE_URL is defined
     if (!API_BASE_URL) {
-      console.warn('REACT_APP_API_BASE_URL is not defined. Using default video settings.');
       return; // Keep default values
     }
 
     try {
-      console.log('Fetching hero video settings from:', `${API_BASE_URL}/api/settings/hero-video`);
       const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`, {
-        timeout: 5000, // 5 second timeout
+        timeout: 5000,
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      
-      console.log('Hero video settings API response:', response.data);
       
       if (response.data) {
         // Handle both response formats: { value: {...} } or direct settings object
         let settings = null;
         if (response.data.value) {
           settings = response.data.value;
-          console.log('Settings from response.data.value:', settings);
         } else if (response.data.videoUrl || response.data.mobileVideoUrl) {
           settings = response.data;
-          console.log('Settings from response.data:', settings);
         }
-        
-        console.log('Parsed settings object:', settings);
-        console.log('videoUrl:', settings?.videoUrl);
-        console.log('mobileVideoUrl:', settings?.mobileVideoUrl);
         
         // Always update if we have settings, even if URLs are empty (enabled might have changed)
         if (settings) {
@@ -154,25 +144,11 @@ const Homepage = () => {
             mobileVideoUrl: settings.mobileVideoUrl || '',
             enabled: settings.enabled !== false
           };
-          
-          console.log('Updating hero video settings:', newVideoSettings);
           setHeroVideo(newVideoSettings);
-        } else {
-          console.log('No video settings found in response, using defaults');
-          console.log('Response data:', response.data);
         }
-      } else {
-        console.log('No data in response');
       }
     } catch (error) {
-      console.error('Error fetching hero video settings:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        url: `${API_BASE_URL}/api/settings/hero-video`
-      });
-      // Use default values if API fails - this is expected on first load
-      console.log('Using default hero video settings');
+      // Use default values if API fails - silent fail
     }
   };
 
@@ -289,7 +265,6 @@ const Homepage = () => {
       
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching products:', error);
       setError('Error fetching products. Please try again later.');
       setLoading(false);
     }
@@ -419,17 +394,7 @@ const Homepage = () => {
 };
 
 
-  if (loading) return (
-    <div className="loader">
-      <div className="loader-container">
-        <div className="loader-logo">EVOLEXX</div>
-        <div className="spinner-container">
-          <div className="spinner-circle"></div>
-        </div>
-        <p className="loading-text">Loading products...</p>
-      </div>
-    </div>
-  );
+  // Don't block page rendering - show content immediately with loading states inline
   if (error) return <div className="error">{error}</div>;
 
   return (
@@ -447,7 +412,7 @@ const Homepage = () => {
                 muted 
                 loop 
                 playsInline
-                preload="auto"
+                preload="metadata"
               >
                 <source src={heroVideo.videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -462,7 +427,7 @@ const Homepage = () => {
                 muted 
                 loop 
                 playsInline
-                preload="auto"
+                preload="metadata"
               >
                 <source src={heroVideo.mobileVideoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -475,7 +440,7 @@ const Homepage = () => {
                 muted 
                 loop 
                 playsInline
-                preload="auto"
+                preload="metadata"
               >
                 <source src={heroVideo.videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -676,6 +641,11 @@ const Homepage = () => {
         )}
 
         <div className={`product-grid-container ${animationDirection}`}>
+          {loading && products.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+              Loading products...
+            </div>
+          ) : (
           <div className="product-grid">
             {currentProducts.map((product) => {
               const imageUrl = generateImageUrl(product);
@@ -726,6 +696,7 @@ const Homepage = () => {
               );
             })}
           </div>
+          )}
         </div>
 
         <div className="pagination-dots">

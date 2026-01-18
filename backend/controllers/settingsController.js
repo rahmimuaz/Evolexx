@@ -29,9 +29,6 @@ export const getHeroVideo = async (req, res) => {
     const settingsObj = settings.toObject ? settings.toObject() : settings;
     const serializedSettings = JSON.parse(JSON.stringify(settingsObj));
     
-    console.log('Raw settings.value type:', typeof settingsObj.value);
-    console.log('Raw settings.value:', settingsObj.value);
-    
     // Ensure value is always an object
     let valueObj = serializedSettings.value || {};
     
@@ -41,7 +38,6 @@ export const getHeroVideo = async (req, res) => {
         try {
           valueObj = JSON.parse(valueObj);
         } catch (e) {
-          console.warn('Failed to parse value as JSON:', e);
           valueObj = {};
         }
       } else {
@@ -55,8 +51,6 @@ export const getHeroVideo = async (req, res) => {
       mobileVideoUrl: (valueObj.mobileVideoUrl && typeof valueObj.mobileVideoUrl === 'string') ? valueObj.mobileVideoUrl : '',
       enabled: valueObj.enabled !== false && valueObj.enabled !== 'false'
     };
-    
-    console.log('Final value to return:', finalValue);
     
     const response = {
       _id: serializedSettings._id,
@@ -92,11 +86,9 @@ export const updateHeroVideo = async (req, res) => {
       // req.files is an object when using .fields()
       if (req.files.desktopVideo && req.files.desktopVideo.length > 0) {
         desktopVideoUrl = req.files.desktopVideo[0].path; // Cloudinary URL from multer
-        console.log('Desktop video uploaded:', desktopVideoUrl);
       }
       if (req.files.mobileVideo && req.files.mobileVideo.length > 0) {
         mobileVidUrl = req.files.mobileVideo[0].path; // Cloudinary URL from multer
-        console.log('Mobile video uploaded:', mobileVidUrl);
       }
     }
     

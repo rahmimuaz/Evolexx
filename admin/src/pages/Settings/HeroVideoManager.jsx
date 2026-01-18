@@ -31,9 +31,6 @@ const HeroVideoManager = () => {
       setLoading(true);
       const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`);
       
-      console.log('Hero video settings response:', response.data);
-      console.log('Full response.data JSON:', JSON.stringify(response.data, null, 2));
-      
       // Handle different response formats
       let videoData = null;
       
@@ -42,26 +39,19 @@ const HeroVideoManager = () => {
         // Handle Mongoose Mixed type - could be object or already parsed
         if (typeof response.data.value === 'object' && response.data.value !== null) {
           videoData = response.data.value;
-          console.log('Found videoData in response.data.value:', videoData);
-          console.log('Type of value:', typeof response.data.value);
-          console.log('videoData keys:', Object.keys(videoData || {}));
         } else {
           // Try to parse if it's a string
           try {
             videoData = typeof response.data.value === 'string' 
               ? JSON.parse(response.data.value) 
               : response.data.value;
-            console.log('Parsed videoData from string:', videoData);
           } catch (e) {
-            console.error('Failed to parse value:', e);
+            // Failed to parse - use empty data
           }
         }
-        console.log('videoData.videoUrl:', videoData?.videoUrl);
-        console.log('videoData.mobileVideoUrl:', videoData?.mobileVideoUrl);
       } else if (response.data && (response.data.videoUrl || response.data.mobileVideoUrl)) {
         // If response.data is the settings object directly
         videoData = response.data;
-        console.log('Found videoData in response.data:', videoData);
       }
       
       // Always update settings, even if URLs are empty (to show enabled state)
@@ -71,13 +61,8 @@ const HeroVideoManager = () => {
         enabled: videoData ? (videoData.enabled !== false) : true
       };
       
-      console.log('Setting video settings:', newSettings);
-      console.log('Will show delete button for desktop:', !!newSettings.videoUrl && newSettings.videoUrl.length > 0);
-      console.log('Will show delete button for mobile:', !!newSettings.mobileVideoUrl && newSettings.mobileVideoUrl.length > 0);
-      
       setSettings(newSettings);
     } catch (error) {
-      console.error('Error fetching hero video settings:', error);
       setMessage({ type: 'error', text: 'Failed to load hero video settings.' });
     } finally {
       setLoading(false);
@@ -162,7 +147,6 @@ const HeroVideoManager = () => {
         setMessage({ type: '', text: '' });
       }, 3000);
     } catch (error) {
-      console.error('Error updating hero video settings:', error);
       const errorMessage = error.response?.data?.message || 'Failed to update hero video settings.';
       setMessage({ type: 'error', text: errorMessage });
     } finally {
@@ -200,7 +184,6 @@ const HeroVideoManager = () => {
         setMessage({ type: '', text: '' });
       }, 3000);
     } catch (error) {
-      console.error(`Error deleting ${type} video:`, error);
       const errorMessage = error.response?.data?.message || `Failed to delete ${type} video.`;
       setMessage({ type: 'error', text: errorMessage });
     } finally {
