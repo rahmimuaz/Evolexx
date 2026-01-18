@@ -7,7 +7,23 @@ import Footer from '../../components/Footer/Footer';
 import WhatsAppButton from '../../components/WhatsAppButton/WhatsAppButton';
 
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+// Get API base URL - check environment variable first, then try to infer from current location
+const getApiBaseUrl = () => {
+  // First, try environment variable
+  if (process.env.REACT_APP_API_BASE_URL) {
+    return process.env.REACT_APP_API_BASE_URL;
+  }
+  
+  // If on Vercel or production, try to use the backend URL
+  // You should set REACT_APP_API_BASE_URL in Vercel environment variables
+  // For example: https://your-backend.railway.app or https://your-backend.herokuapp.com
+  
+  // Fallback: return empty string (will use default video settings)
+  console.warn('REACT_APP_API_BASE_URL is not set. Please configure it in Vercel environment variables.');
+  return '';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const Homepage = () => {
   const [products, setProducts] = useState([]);
@@ -95,8 +111,20 @@ const Homepage = () => {
   }, []);
 
   const fetchHeroVideoSettings = async () => {
+    // Check if API_BASE_URL is defined
+    if (!API_BASE_URL) {
+      console.warn('REACT_APP_API_BASE_URL is not defined. Using default video settings.');
+      return; // Keep default values
+    }
+
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`);
+      const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`, {
+        timeout: 5000, // 5 second timeout
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
       if (response.data && response.data.value) {
         setHeroVideo({
           videoUrl: response.data.value.videoUrl || '/hero-video.mp4',
@@ -105,10 +133,20 @@ const Homepage = () => {
           mobileWebmUrl: response.data.value.mobileWebmUrl || '',
           enabled: response.data.value.enabled !== false
         });
+        console.log('Hero video settings loaded successfully:', response.data.value);
+      } else if (response.data) {
+        // Handle case where settings exist but no value
+        console.log('Hero video settings response:', response.data);
       }
     } catch (error) {
-      console.error('Error fetching hero video settings:', error);
-      // Use default values if API fails
+      console.error('Error fetching hero video settings:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        url: `${API_BASE_URL}/api/settings/hero-video`
+      });
+      // Use default values if API fails - this is expected on first load
+      console.log('Using default hero video settings');
     }
   };
 
