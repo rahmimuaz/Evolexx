@@ -137,11 +137,18 @@ const Homepage = () => {
         let settings = null;
         if (response.data.value) {
           settings = response.data.value;
+          console.log('Settings from response.data.value:', settings);
         } else if (response.data.videoUrl || response.data.mobileVideoUrl) {
           settings = response.data;
+          console.log('Settings from response.data:', settings);
         }
         
-        if (settings && (settings.videoUrl || settings.mobileVideoUrl)) {
+        console.log('Parsed settings object:', settings);
+        console.log('videoUrl:', settings?.videoUrl);
+        console.log('mobileVideoUrl:', settings?.mobileVideoUrl);
+        
+        // Always update if we have settings, even if URLs are empty (enabled might have changed)
+        if (settings) {
           const newVideoSettings = {
             videoUrl: settings.videoUrl || '',
             mobileVideoUrl: settings.mobileVideoUrl || '',
