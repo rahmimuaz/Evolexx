@@ -37,7 +37,9 @@ const AddProduct = () => {
   const [variationAttributes, setVariationAttributes] = useState(['storage', 'color']); // Dynamic attributes based on category
   const [variationImages, setVariationImages] = useState({}); // { variationId: { files: [], previews: [] } }
   const [variantName, setVariantName] = useState(''); // Variant attribute name (e.g., "Color Family") - deprecated, kept for compatibility
+  // eslint-disable-next-line no-unused-vars
   const [variantAttributeValues, setVariantAttributeValues] = useState([]); // Array of variant values (e.g., ["Black", "Blue"]) - deprecated
+  // eslint-disable-next-line no-unused-vars
   const [newVariantValue, setNewVariantValue] = useState(''); // Input for adding new variant values - deprecated
 
   // Define the API base URL from environment variables
@@ -258,6 +260,7 @@ const AddProduct = () => {
   };
 
   // Variation attributes management functions
+  // eslint-disable-next-line no-unused-vars
   const addVariationAttribute = () => {
     const newAttr = prompt('Enter attribute name (e.g., size, material, type):');
     if (newAttr && newAttr.trim() && !variationAttributes.includes(newAttr.trim().toLowerCase())) {
@@ -273,6 +276,7 @@ const AddProduct = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const removeVariationAttribute = (attrToRemove) => {
     if (variationAttributes.length <= 1) {
       alert('You must have at least one variation attribute.');
@@ -446,6 +450,7 @@ const AddProduct = () => {
     setVariations(prev => prev.filter(v => v.id !== id));
   };
 
+  // eslint-disable-next-line no-unused-vars
   const generateVariationCombinations = () => {
     // Get all unique values for each attribute from existing variations
     const attributeValues = {};

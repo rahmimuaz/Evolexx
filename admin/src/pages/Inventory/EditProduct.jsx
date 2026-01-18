@@ -278,7 +278,6 @@ const EditProduct = () => {
       const suggestedAttrs = categoryVariationAttributes[formData.subcategory] || ['color'];
       // Only update if current attributes don't match suggested
       const currentAttrsSet = new Set(variationAttributes);
-      const suggestedAttrsSet = new Set(suggestedAttrs);
       const isDifferent = suggestedAttrs.length !== variationAttributes.length || 
                          !suggestedAttrs.every(attr => currentAttrsSet.has(attr));
       

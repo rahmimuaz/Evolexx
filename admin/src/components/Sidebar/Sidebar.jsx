@@ -20,8 +20,7 @@ import {
   faChevronLeft,
   faChevronRight,
   faTimes,
-  faVideo,
-  faCog
+  faVideo
 } from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
 

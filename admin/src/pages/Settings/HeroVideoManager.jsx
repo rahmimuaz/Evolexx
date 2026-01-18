@@ -22,6 +22,7 @@ const HeroVideoManager = () => {
 
   useEffect(() => {
     fetchHeroVideoSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reload video when URLs change
@@ -76,7 +77,7 @@ const HeroVideoManager = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await axios.put(
+      await axios.put(
         `${API_BASE_URL}/api/settings/hero-video`,
         {
           videoUrl: settings.videoUrl || undefined,
