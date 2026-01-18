@@ -1,28 +1,35 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css';
-import ProductDetail from './pages/ProductDetails/ProductDetail';
-import Cart from './pages/CartPage/Cart';
-import Checkout from './pages/CheckOut/Checkout';
-import OrderDetails from './components/OrderDetails/OrderDetails'; // Corrected component path based on your previous examples
-import Login from './pages/Login/Login';
-import Register from './pages/Login/Register';
 import ResponsiveNavbar from './components/Navbar/ResponsiveNavbar';
-import CardPaymentPage from './pages/Payment/CardPaymentPage';
 import { UserProvider } from './context/UserContext';
 import { CartProvider } from './context/CartContext';
-import Homepage from './pages/Home/Homepage';
-import Footer from './components/Footer/Footer';
-import CategoryPage from './pages/Category/CategoryPage';
-import MyOrders from './pages/MyOrders/MyOrders'; // Import MyOrders
-import ToBeShippedDetailScreen from './pages/ToBeShippedDetail/ToBeShippedDetailScreen';
-// Legal/Policy pages
-import Contact from './pages/Legal/Contact';
-import RefundPolicy from './pages/Legal/RefundPolicy';
-import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
-import TermsConditions from './pages/Legal/TermsConditions';
+import Homepage from './pages/Home/Homepage'; // Keep Homepage eager loaded (main entry)
 import WhatsAppButton from './components/WhatsAppButton/WhatsAppButton';
+
+// Lazy load heavy components for better performance
+const ProductDetail = lazy(() => import('./pages/ProductDetails/ProductDetail'));
+const Cart = lazy(() => import('./pages/CartPage/Cart'));
+const Checkout = lazy(() => import('./pages/CheckOut/Checkout'));
+const OrderDetails = lazy(() => import('./components/OrderDetails/OrderDetails'));
+const Login = lazy(() => import('./pages/Login/Login'));
+const Register = lazy(() => import('./pages/Login/Register'));
+const CardPaymentPage = lazy(() => import('./pages/Payment/CardPaymentPage'));
+const CategoryPage = lazy(() => import('./pages/Category/CategoryPage'));
+const MyOrders = lazy(() => import('./pages/MyOrders/MyOrders'));
+const ToBeShippedDetailScreen = lazy(() => import('./pages/ToBeShippedDetail/ToBeShippedDetailScreen'));
+const Contact = lazy(() => import('./pages/Legal/Contact'));
+const RefundPolicy = lazy(() => import('./pages/Legal/RefundPolicy'));
+const PrivacyPolicy = lazy(() => import('./pages/Legal/PrivacyPolicy'));
+const TermsConditions = lazy(() => import('./pages/Legal/TermsConditions'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+    <div>Loading...</div>
+  </div>
+);
 
 function App() {
   return (
@@ -31,6 +38,7 @@ function App() {
         <CartProvider>
           <div className="app">
             <ResponsiveNavbar />
+            <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<Homepage />} />
                 <Route path="/product/:slug" element={<ProductDetail />} />
@@ -43,9 +51,8 @@ function App() {
                 <Route path="/order/:id" element={<OrderDetails />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/homepage" element={<Homepage />} /> {/* Duplicate route, consider removing */}
-                <Route path="/footer" element={<Footer/>} /> {/* This usually isn't a separate route */}
-                <Route path="/my-orders" element={<MyOrders />} /> {/* This is the correct addition! */}
+                <Route path="/homepage" element={<Homepage />} />
+                <Route path="/my-orders" element={<MyOrders />} />
                 <Route path="/tobeshipped/order/:id" element={<ToBeShippedDetailScreen />} />
                 {/* Legal/Policy Pages */}
                 <Route path="/contact" element={<Contact />} />
@@ -53,6 +60,7 @@ function App() {
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsConditions />} />
               </Routes>
+            </Suspense>
             <WhatsAppButton />
           </div>
         </CartProvider>
