@@ -118,6 +118,7 @@ const Homepage = () => {
     }
 
     try {
+      console.log('Fetching hero video settings from:', `${API_BASE_URL}/api/settings/hero-video`);
       const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`, {
         timeout: 5000, // 5 second timeout
         headers: {
@@ -125,18 +126,26 @@ const Homepage = () => {
         }
       });
       
-      if (response.data && response.data.value) {
-        setHeroVideo({
-          videoUrl: response.data.value.videoUrl || '/hero-video.mp4',
-          webmUrl: response.data.value.webmUrl || '/hero-video.webm',
-          mobileVideoUrl: response.data.value.mobileVideoUrl || '',
-          mobileWebmUrl: response.data.value.mobileWebmUrl || '',
-          enabled: response.data.value.enabled !== false
-        });
-        console.log('Hero video settings loaded successfully:', response.data.value);
-      } else if (response.data) {
-        // Handle case where settings exist but no value
-        console.log('Hero video settings response:', response.data);
+      console.log('Hero video settings API response:', response.data);
+      
+      if (response.data) {
+        // Handle both response formats: { value: {...} } or direct settings object
+        const settings = response.data.value || response.data;
+        
+        if (settings && (settings.videoUrl || settings.mobileVideoUrl)) {
+          const newVideoSettings = {
+            videoUrl: settings.videoUrl || '/hero-video.mp4',
+            webmUrl: settings.webmUrl || '/hero-video.webm',
+            mobileVideoUrl: settings.mobileVideoUrl || '',
+            mobileWebmUrl: settings.mobileWebmUrl || '',
+            enabled: settings.enabled !== false
+          };
+          
+          console.log('Updating hero video settings:', newVideoSettings);
+          setHeroVideo(newVideoSettings);
+        } else {
+          console.log('No video settings found in response, using defaults');
+        }
       }
     } catch (error) {
       console.error('Error fetching hero video settings:', {
