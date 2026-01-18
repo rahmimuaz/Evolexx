@@ -35,12 +35,6 @@ const NewArrivals = () => {
       if (allResult.status === 'fulfilled') {
         setAllProducts(allResult.value.data);
       } else {
-        console.error('Error fetching all products:', {
-          message: allResult.reason?.message,
-          status: allResult.reason?.response?.status,
-          data: allResult.reason?.response?.data,
-          requestUrl: productsUrl
-        });
         setError('Error fetching products');
         setLoading(false);
         return;
@@ -50,13 +44,6 @@ const NewArrivals = () => {
       if (newArrivalsResult.status === 'fulfilled') {
         setNewArrivals(newArrivalsResult.value.data);
       } else {
-        console.error('Error fetching new arrivals:', {
-          message: newArrivalsResult.reason?.message,
-          status: newArrivalsResult.reason?.response?.status,
-          data: newArrivalsResult.reason?.response?.data,
-          requestUrl: newArrivalsUrl
-        });
-
         if (newArrivalsResult.reason?.response?.status === 404) {
           // Fall back to deriving new arrivals from all products
           const fallback = Array.isArray(allResult.value?.data)
@@ -69,7 +56,6 @@ const NewArrivals = () => {
       }
 
     } catch (err) {
-      console.error('Unexpected error fetching products:', err);
       setError('Error fetching products');
     } finally {
       setLoading(false);
@@ -82,13 +68,6 @@ const NewArrivals = () => {
       await axios.patch(patchUrl);
       fetchProducts(); // Refresh data
     } catch (err) {
-      console.error('Error toggling new arrival:', {
-        message: err?.message,
-        status: err?.response?.status,
-        data: err?.response?.data,
-        requestUrl: `${API_BASE_URL}/api/products/${productId}/toggle-new-arrival`
-      });
-
       // If the endpoint does not exist on the server, surface a clear UI message and disable future toggles
       if (err?.response?.status === 404 && err?.response?.data?.message === 'Route not found') {
         setToggleAvailable(false);
@@ -132,7 +111,6 @@ const NewArrivals = () => {
       await axios.put(`${API_BASE_URL}/api/products/new-arrivals/order`, { orderedProducts });
       alert('Order saved successfully!');
     } catch (err) {
-      console.error('Error saving order:', err);
       alert('Error saving order');
     } finally {
       setSaving(false);

@@ -627,17 +627,6 @@ const AddProduct = () => {
         formDataToSend.append('images', file);
       });
 
-      // Log the data being sent for debugging
-      console.log('Sending product data:', {
-        name: formData.name,
-        category: categoryValue,
-        price: formData.price,
-        stock: formData.stock,
-        brand: formData.brand,
-        details: combinedDetails,
-        imagesCount: selectedFiles.length
-      });
-
       // Use the API_BASE_URL here
       const response = await axios.post(`${API_BASE_URL}/api/products`, formDataToSend, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -648,10 +637,6 @@ const AddProduct = () => {
         navigate('/Products');
       }
     } catch (error) {
-      console.error('Error adding product:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      
       const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Error adding product. Please try again.';
       alert(errorMessage);
     } finally {

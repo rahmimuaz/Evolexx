@@ -79,7 +79,7 @@ const AdminDashboard = () => {
       setOrderStats({ labels, data });
 
     } catch (err) {
-      console.error("Failed to fetch dashboard data:", err);
+      // Failed to fetch dashboard data
     } finally {
       setLoading(false);
     }

@@ -75,7 +75,6 @@ const Sidebar = ({ children }) => {
       } catch (err) {
         setAlerts([]);
         setUnreadCount(0);
-        console.error("Error fetching alerts:", err);
       }
     };
     fetchAlerts();

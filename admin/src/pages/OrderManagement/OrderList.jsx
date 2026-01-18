@@ -63,7 +63,6 @@ const OrderList = () => {
       const sortedOrders = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setOrders(sortedOrders);
     } catch (err) {
-      console.error('Error fetching orders:', err);
       setError(err.message || 'Error fetching orders. Please try again.');
     } finally {
       setLoading(false);
@@ -115,7 +114,6 @@ const OrderList = () => {
         toast.success('Order status updated successfully!');
       }
     } catch (err) {
-      console.error('Error updating order status:', err);
       setError(err.message || 'Error updating order status. Please try again.');
     }
   };
@@ -148,7 +146,6 @@ const OrderList = () => {
       setOrderToDelete(null);
       setShowDeleteModal(false);
     } catch (err) {
-      console.error('Error deleting order:', err);
       setError(err.message || 'Error deleting order. Please try again.');
       setOrderToDelete(null);
       setShowDeleteModal(false);

@@ -24,7 +24,6 @@ const Products = () => {
       const response = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(response.data);
     } catch (err) {
-      console.error("Error fetching products:", err);
       setError('Error fetching products');
     } finally {
       setLoading(false);
@@ -41,7 +40,6 @@ const Products = () => {
       await axios.delete(`${API_BASE_URL}/api/products/${productId}`);
       setProducts(prev => prev.filter(p => p._id !== productId));
     } catch (err) {
-      console.error("Error deleting product:", err);
       alert('Error deleting product. Please try again.');
     }
   };

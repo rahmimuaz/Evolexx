@@ -47,7 +47,6 @@ const RegisterForm = () => {
         setError(data.message || 'Registration failed. Please try again.');
       }
     } catch (err) {
-      console.error('Registration API call error:', err);
       setError('Network error or server is unreachable. Please try again later.');
     } finally {
       setLoading(false);

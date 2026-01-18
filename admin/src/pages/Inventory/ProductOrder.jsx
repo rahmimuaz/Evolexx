@@ -30,7 +30,6 @@ const ProductOrder = () => {
       }
       setProducts(response.data);
     } catch (err) {
-      console.error('Error fetching products:', err);
       setError('Error fetching products');
     } finally {
       setLoading(false);
@@ -70,7 +69,6 @@ const ProductOrder = () => {
       await axios.put(`${API_BASE_URL}/api/products/order`, { orderedProducts });
       alert('Product order saved successfully!');
     } catch (err) {
-      console.error('Error saving order:', err);
       alert('Error saving order');
     } finally {
       setSaving(false);

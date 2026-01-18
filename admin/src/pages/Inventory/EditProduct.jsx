@@ -264,7 +264,6 @@ const EditProduct = () => {
     } catch (err) {
       setError('Failed to load product');
       setLoading(false);
-      console.error("Error fetching product:", err);
     }
   }, [id, API_BASE_URL]);
 
@@ -720,9 +719,6 @@ const EditProduct = () => {
       // Send existing images exactly as they are stored in formData.images
       // These are the original URLs from the database
       formDataToSend.append('existingImages', JSON.stringify(formData.images));
-      
-      console.log('Frontend - Sending existing images:', formData.images);
-      console.log('Frontend - Sending new images count:', newImages.length);
 
       newImages.forEach(file => {
         formDataToSend.append('images', file);
@@ -741,7 +737,6 @@ const EditProduct = () => {
         throw new Error('No response data received');
       }
     } catch (err) {
-      console.error('Update failed:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Error updating product. Please try again.';
       alert(errorMessage);
     } finally {

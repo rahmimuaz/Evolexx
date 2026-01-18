@@ -47,10 +47,8 @@ const ToBeShippedList = () => {
         }
 
         const data = await response.json();
-        console.log('ToBeShipped data received:', data);
         setOrders(data);
       } catch (err) {
-        console.error('Error fetching to-be-shipped orders:', err);
         setError(err.message || 'Error fetching to-be-shipped orders. Please try again.');
       } finally {
         setLoading(false);
@@ -62,7 +60,6 @@ const ToBeShippedList = () => {
 
   const downloadPdf = (order) => {
     try {
-      console.log('Starting PDF generation for order:', order);
       
       // Create new PDF instance
       const doc = new jsPDF();
@@ -249,11 +246,8 @@ const ToBeShippedList = () => {
       // Save the PDF
       const filename = `Shipping_Label_${order.orderNumber || 'Unknown'}.pdf`;
       doc.save(filename);
-      console.log('PDF downloaded successfully:', filename);
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      console.error('Error details:', error.message, error.stack);
-      alert(`Failed to generate PDF: ${error.message || 'Unknown error'}. Please check the console for details.`);
+      alert(`Failed to generate PDF: ${error.message || 'Unknown error'}.`);
     }
   };
 

@@ -13,8 +13,7 @@ const OutOfStockProducts = () => {
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/products/admin/out-of-stock`)
       .then(res => setProducts(res.data))
-      .catch((error) => {
-        console.error("Error fetching out of stock products:", error);
+      .catch(() => {
         setProducts([]);
       })
       .finally(() => setLoading(false));

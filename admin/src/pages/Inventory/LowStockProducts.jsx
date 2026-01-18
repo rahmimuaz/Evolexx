@@ -13,8 +13,7 @@ const LowStockProducts = () => {
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/products/admin/low-stock`)
       .then(res => setProducts(res.data))
-      .catch((error) => {
-        console.error("Error fetching low stock products:", error);
+      .catch(() => {
         setProducts([]);
       })
       .finally(() => setLoading(false));

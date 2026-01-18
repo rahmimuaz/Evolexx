@@ -20,10 +20,7 @@ const LoginForm = () => {
     setError('');
     setLoading(true);
 
-    console.log('Attempting login with:', { email, password });
-
     try {
-      // Use the API_BASE_URL here
       const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
         method: 'POST',
         headers: {
@@ -32,22 +29,15 @@ const LoginForm = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-
       const data = await response.json();
-      console.log('Response data:', data);
 
       if (response.ok) {
-        console.log('Login successful, token received:', data.token);
         login(data.token);
         navigate('/');
       } else {
-        console.log('Login failed:', data.message);
         setError(data.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
-      console.error('Login API call error:', err);
       setError('Network error or server is unreachable. Please try again later.');
     } finally {
       setLoading(false);
