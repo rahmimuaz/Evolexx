@@ -1,6 +1,6 @@
 // routes/settingsRoutes.js
 import express from 'express';
-import { getHeroVideo, updateHeroVideo } from '../controllers/settingsController.js';
+import { getHeroVideo, updateHeroVideo, deleteHeroVideo } from '../controllers/settingsController.js';
 import { adminProtect } from '../middleware/authMiddleware.js';
 import uploadVideo from '../middleware/uploadVideo.js';
 
@@ -20,9 +20,14 @@ router.get('/hero-video', getHeroVideo);
  */
 router.put('/hero-video', adminProtect, uploadVideo.fields([
   { name: 'desktopVideo', maxCount: 1 },
-  { name: 'desktopWebm', maxCount: 1 },
-  { name: 'mobileVideo', maxCount: 1 },
-  { name: 'mobileWebm', maxCount: 1 }
+  { name: 'mobileVideo', maxCount: 1 }
 ]), updateHeroVideo);
+
+/**
+ * @route DELETE /api/settings/hero-video/:type
+ * @desc Delete hero video (desktop or mobile) from Cloudinary
+ * @access Private (admin only)
+ */
+router.delete('/hero-video/:type', adminProtect, deleteHeroVideo);
 
 export default router;
