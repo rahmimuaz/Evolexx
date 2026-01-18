@@ -134,7 +134,12 @@ const Homepage = () => {
       
       if (response.data) {
         // Handle both response formats: { value: {...} } or direct settings object
-        const settings = response.data.value || response.data;
+        let settings = null;
+        if (response.data.value) {
+          settings = response.data.value;
+        } else if (response.data.videoUrl || response.data.mobileVideoUrl) {
+          settings = response.data;
+        }
         
         if (settings && (settings.videoUrl || settings.mobileVideoUrl)) {
           const newVideoSettings = {
@@ -147,7 +152,10 @@ const Homepage = () => {
           setHeroVideo(newVideoSettings);
         } else {
           console.log('No video settings found in response, using defaults');
+          console.log('Response data:', response.data);
         }
+      } else {
+        console.log('No data in response');
       }
     } catch (error) {
       console.error('Error fetching hero video settings:', {

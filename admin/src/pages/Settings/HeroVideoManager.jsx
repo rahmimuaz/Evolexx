@@ -31,12 +31,27 @@ const HeroVideoManager = () => {
       setLoading(true);
       const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`);
       
+      console.log('Hero video settings response:', response.data);
+      
+      // Handle different response formats
+      let videoData = null;
       if (response.data && response.data.value) {
-        setSettings({
-          videoUrl: response.data.value.videoUrl || '',
-          mobileVideoUrl: response.data.value.mobileVideoUrl || '',
-          enabled: response.data.value.enabled !== false
-        });
+        videoData = response.data.value;
+      } else if (response.data && (response.data.videoUrl || response.data.mobileVideoUrl)) {
+        // If response.data is the settings object directly
+        videoData = response.data;
+      }
+      
+      if (videoData) {
+        const newSettings = {
+          videoUrl: videoData.videoUrl || '',
+          mobileVideoUrl: videoData.mobileVideoUrl || '',
+          enabled: videoData.enabled !== false
+        };
+        console.log('Setting video settings:', newSettings);
+        setSettings(newSettings);
+      } else {
+        console.log('No video data found in response');
       }
     } catch (error) {
       console.error('Error fetching hero video settings:', error);
