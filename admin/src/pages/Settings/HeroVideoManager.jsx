@@ -37,9 +37,13 @@ const HeroVideoManager = () => {
       let videoData = null;
       if (response.data && response.data.value) {
         videoData = response.data.value;
+        console.log('Found videoData in response.data.value:', videoData);
+        console.log('videoData.videoUrl:', videoData.videoUrl);
+        console.log('videoData.mobileVideoUrl:', videoData.mobileVideoUrl);
       } else if (response.data && (response.data.videoUrl || response.data.mobileVideoUrl)) {
         // If response.data is the settings object directly
         videoData = response.data;
+        console.log('Found videoData in response.data:', videoData);
       }
       
       if (videoData) {
@@ -49,9 +53,12 @@ const HeroVideoManager = () => {
           enabled: videoData.enabled !== false
         };
         console.log('Setting video settings:', newSettings);
+        console.log('Will show delete button for desktop:', !!newSettings.videoUrl);
+        console.log('Will show delete button for mobile:', !!newSettings.mobileVideoUrl);
         setSettings(newSettings);
       } else {
         console.log('No video data found in response');
+        console.log('response.data:', JSON.stringify(response.data, null, 2));
       }
     } catch (error) {
       console.error('Error fetching hero video settings:', error);
