@@ -269,8 +269,24 @@ const HeroVideoManager = () => {
             </div>
 
             {settings.videoUrl && (
-              <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#e0f2fe', borderRadius: '6px', fontSize: '0.875rem' }}>
-                <strong>Current Video:</strong> <a href={settings.videoUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#0369a1' }}>View on Cloudinary</a>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ padding: '0.75rem', background: '#e0f2fe', borderRadius: '6px', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                  <strong>Current Desktop Video:</strong>
+                  <br />
+                  <a href={settings.videoUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#0369a1', wordBreak: 'break-all' }}>
+                    {settings.videoUrl}
+                  </a>
+                </div>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <video 
+                    src={settings.videoUrl} 
+                    controls 
+                    style={{ width: '100%', maxWidth: '500px', borderRadius: '6px', background: '#000' }}
+                    preload="metadata"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
               </div>
             )}
 
@@ -322,8 +338,24 @@ const HeroVideoManager = () => {
             </div>
 
             {settings.mobileVideoUrl && (
-              <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#e0f2fe', borderRadius: '6px', fontSize: '0.875rem' }}>
-                <strong>Current Video:</strong> <a href={settings.mobileVideoUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#0369a1' }}>View on Cloudinary</a>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ padding: '0.75rem', background: '#e0f2fe', borderRadius: '6px', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                  <strong>Current Mobile Video:</strong>
+                  <br />
+                  <a href={settings.mobileVideoUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#0369a1', wordBreak: 'break-all' }}>
+                    {settings.mobileVideoUrl}
+                  </a>
+                </div>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <video 
+                    src={settings.mobileVideoUrl} 
+                    controls 
+                    style={{ width: '100%', maxWidth: '500px', borderRadius: '6px', background: '#000' }}
+                    preload="metadata"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
               </div>
             )}
 

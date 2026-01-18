@@ -17,10 +17,8 @@ export const getHeroVideo = async (req, res) => {
       return res.status(200).json({
         key: 'heroVideo',
         value: {
-          videoUrl: '/hero-video.mp4',
-          webmUrl: '/hero-video.webm',
+          videoUrl: '',
           mobileVideoUrl: '',
-          mobileWebmUrl: '',
           enabled: true
         }
       });
@@ -28,6 +26,25 @@ export const getHeroVideo = async (req, res) => {
     
     // Convert Mongoose document to plain object for JSON response
     const settingsObj = settings.toObject ? settings.toObject() : settings;
+    
+    // Ensure value is always an object
+    if (!settingsObj.value) {
+      settingsObj.value = {
+        videoUrl: '',
+        mobileVideoUrl: '',
+        enabled: true
+      };
+    }
+    
+    // Ensure value has all expected fields
+    if (typeof settingsObj.value === 'object') {
+      settingsObj.value = {
+        videoUrl: settingsObj.value.videoUrl || '',
+        mobileVideoUrl: settingsObj.value.mobileVideoUrl || '',
+        enabled: settingsObj.value.enabled !== false
+      };
+    }
+    
     res.status(200).json(settingsObj);
   } catch (error) {
     console.error('Error fetching hero video settings:', error);
@@ -45,22 +62,21 @@ export const updateHeroVideo = async (req, res) => {
     const { enabled } = req.body;
     
     // Handle uploaded video files from Cloudinary
+    // When using uploadVideo.fields(), req.files is an object: { desktopVideo: [file], mobileVideo: [file] }
     let desktopVideoUrl = null;
     let mobileVidUrl = null;
     
-    // Check for uploaded video files (from multer)
-    if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        const fieldname = file.fieldname || '';
-        const cloudinaryUrl = file.path; // Cloudinary URL from multer
-        
-        // Map file fields to settings
-        if (fieldname === 'desktopVideo') {
-          desktopVideoUrl = cloudinaryUrl;
-        } else if (fieldname === 'mobileVideo') {
-          mobileVidUrl = cloudinaryUrl;
-        }
-      });
+    // Check for uploaded video files (from multer with fields())
+    if (req.files) {
+      // req.files is an object when using .fields()
+      if (req.files.desktopVideo && req.files.desktopVideo.length > 0) {
+        desktopVideoUrl = req.files.desktopVideo[0].path; // Cloudinary URL from multer
+        console.log('Desktop video uploaded:', desktopVideoUrl);
+      }
+      if (req.files.mobileVideo && req.files.mobileVideo.length > 0) {
+        mobileVidUrl = req.files.mobileVideo[0].path; // Cloudinary URL from multer
+        console.log('Mobile video uploaded:', mobileVidUrl);
+      }
     }
     
     // Parse enabled from FormData (might be string 'true'/'false') or JSON
@@ -70,8 +86,7 @@ export const updateHeroVideo = async (req, res) => {
     }
     
     // Validate input - check if we have at least one video file or enabled setting
-    const hasAnyInput = desktopVideoUrl || mobileVidUrl || enabledValue !== undefined || 
-                       (req.files && req.files.length > 0);
+    const hasAnyInput = desktopVideoUrl || mobileVidUrl || enabledValue !== undefined;
     
     if (!hasAnyInput) {
       return res.status(400).json({ message: 'At least one video file must be uploaded or enabled setting provided.' });
