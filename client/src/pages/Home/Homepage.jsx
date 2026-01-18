@@ -139,9 +139,7 @@ const Homepage = () => {
         if (settings && (settings.videoUrl || settings.mobileVideoUrl)) {
           const newVideoSettings = {
             videoUrl: settings.videoUrl || '',
-            webmUrl: settings.webmUrl || '',
             mobileVideoUrl: settings.mobileVideoUrl || '',
-            mobileWebmUrl: settings.mobileWebmUrl || '',
             enabled: settings.enabled !== false
           };
           
@@ -424,10 +422,10 @@ const Homepage = () => {
       {/* Hero Section with Video Background */}
       <section className="banner">
         {/* Video Background - Only show if enabled and at least one video URL exists */}
-        {heroVideo.enabled && (heroVideo.videoUrl || heroVideo.webmUrl || heroVideo.mobileVideoUrl || heroVideo.mobileWebmUrl) && (
+        {heroVideo.enabled && (heroVideo.videoUrl || heroVideo.mobileVideoUrl) && (
           <div className="hero-video-container">
             {/* Desktop Video - Hidden on mobile */}
-            {(heroVideo.videoUrl || heroVideo.webmUrl) && (
+            {heroVideo.videoUrl && (
               <video 
                 className="hero-video hero-video-desktop" 
                 autoPlay 
@@ -436,18 +434,13 @@ const Homepage = () => {
                 playsInline
                 preload="auto"
               >
-                {heroVideo.videoUrl && (
-                  <source src={heroVideo.videoUrl} type="video/mp4" />
-                )}
-                {heroVideo.webmUrl && (
-                  <source src={heroVideo.webmUrl} type="video/webm" />
-                )}
+                <source src={heroVideo.videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             )}
             
             {/* Mobile Video - Hidden on desktop */}
-            {(heroVideo.mobileVideoUrl || heroVideo.mobileWebmUrl) ? (
+            {heroVideo.mobileVideoUrl ? (
               <video 
                 className="hero-video hero-video-mobile" 
                 autoPlay 
@@ -456,15 +449,10 @@ const Homepage = () => {
                 playsInline
                 preload="auto"
               >
-                {heroVideo.mobileVideoUrl && (
-                  <source src={heroVideo.mobileVideoUrl} type="video/mp4" />
-                )}
-                {heroVideo.mobileWebmUrl && (
-                  <source src={heroVideo.mobileWebmUrl} type="video/webm" />
-                )}
+                <source src={heroVideo.mobileVideoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
-            ) : (heroVideo.videoUrl || heroVideo.webmUrl) ? (
+            ) : heroVideo.videoUrl ? (
               // Fallback: Use desktop video on mobile if no mobile video is set
               <video 
                 className="hero-video hero-video-mobile" 
@@ -474,12 +462,7 @@ const Homepage = () => {
                 playsInline
                 preload="auto"
               >
-                {heroVideo.videoUrl && (
-                  <source src={heroVideo.videoUrl} type="video/mp4" />
-                )}
-                {heroVideo.webmUrl && (
-                  <source src={heroVideo.webmUrl} type="video/webm" />
-                )}
+                <source src={heroVideo.videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             ) : null}

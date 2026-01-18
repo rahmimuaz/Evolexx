@@ -154,13 +154,29 @@ export const deleteHeroVideo = async (req, res) => {
     // Delete video from Cloudinary if it's a Cloudinary URL
     if (videoUrlToDelete && videoUrlToDelete.includes('cloudinary.com')) {
       try {
+        // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/video/upload/v{version}/{folder}/{filename}.mp4
+        // Public ID format: {folder}/{filename} (without version and extension)
         const urlParts = videoUrlToDelete.split('/');
-        const folderIndex = urlParts.findIndex(part => part === 'hero-videos');
-        if (folderIndex !== -1 && folderIndex < urlParts.length - 1) {
-          const filename = urlParts[urlParts.length - 1].split('.')[0];
-          const publicId = `hero-videos/${filename}`;
+        const uploadIndex = urlParts.findIndex(part => part === 'upload');
+        
+        if (uploadIndex !== -1 && uploadIndex < urlParts.length - 1) {
+          // Get parts after 'upload' - skip version (v123456) and get folder + filename
+          const partsAfterUpload = urlParts.slice(uploadIndex + 1);
+          // Skip version number (starts with 'v') and join the rest
+          const folderAndFile = partsAfterUpload.filter(part => !part.startsWith('v'));
+          const filenameWithExt = folderAndFile[folderAndFile.length - 1];
+          const filename = filenameWithExt.split('.')[0];
+          
+          // Construct public_id
+          const publicId = folderAndFile.length > 1 
+            ? `${folderAndFile.slice(0, -1).join('/')}/${filename}`
+            : filename;
+          
+          console.log(`Attempting to delete Cloudinary video with public_id: ${publicId}`);
           await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
           console.log(`Cloudinary: Successfully deleted video ${publicId}`);
+        } else {
+          console.warn('Could not parse Cloudinary URL for deletion:', videoUrlToDelete);
         }
       } catch (cloudinaryError) {
         console.error(`Cloudinary: Failed to delete video. Error: ${cloudinaryError.message}`);
