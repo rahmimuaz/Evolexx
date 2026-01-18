@@ -32,34 +32,50 @@ const HeroVideoManager = () => {
       const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`);
       
       console.log('Hero video settings response:', response.data);
+      console.log('Full response.data JSON:', JSON.stringify(response.data, null, 2));
       
       // Handle different response formats
       let videoData = null;
+      
+      // Check if value exists and is an object
       if (response.data && response.data.value) {
-        videoData = response.data.value;
-        console.log('Found videoData in response.data.value:', videoData);
-        console.log('videoData.videoUrl:', videoData.videoUrl);
-        console.log('videoData.mobileVideoUrl:', videoData.mobileVideoUrl);
+        // Handle Mongoose Mixed type - could be object or already parsed
+        if (typeof response.data.value === 'object' && response.data.value !== null) {
+          videoData = response.data.value;
+          console.log('Found videoData in response.data.value:', videoData);
+          console.log('Type of value:', typeof response.data.value);
+          console.log('videoData keys:', Object.keys(videoData || {}));
+        } else {
+          // Try to parse if it's a string
+          try {
+            videoData = typeof response.data.value === 'string' 
+              ? JSON.parse(response.data.value) 
+              : response.data.value;
+            console.log('Parsed videoData from string:', videoData);
+          } catch (e) {
+            console.error('Failed to parse value:', e);
+          }
+        }
+        console.log('videoData.videoUrl:', videoData?.videoUrl);
+        console.log('videoData.mobileVideoUrl:', videoData?.mobileVideoUrl);
       } else if (response.data && (response.data.videoUrl || response.data.mobileVideoUrl)) {
         // If response.data is the settings object directly
         videoData = response.data;
         console.log('Found videoData in response.data:', videoData);
       }
       
-      if (videoData) {
-        const newSettings = {
-          videoUrl: videoData.videoUrl || '',
-          mobileVideoUrl: videoData.mobileVideoUrl || '',
-          enabled: videoData.enabled !== false
-        };
-        console.log('Setting video settings:', newSettings);
-        console.log('Will show delete button for desktop:', !!newSettings.videoUrl);
-        console.log('Will show delete button for mobile:', !!newSettings.mobileVideoUrl);
-        setSettings(newSettings);
-      } else {
-        console.log('No video data found in response');
-        console.log('response.data:', JSON.stringify(response.data, null, 2));
-      }
+      // Always update settings, even if URLs are empty (to show enabled state)
+      const newSettings = {
+        videoUrl: (videoData && videoData.videoUrl) ? String(videoData.videoUrl).trim() : '',
+        mobileVideoUrl: (videoData && videoData.mobileVideoUrl) ? String(videoData.mobileVideoUrl).trim() : '',
+        enabled: videoData ? (videoData.enabled !== false) : true
+      };
+      
+      console.log('Setting video settings:', newSettings);
+      console.log('Will show delete button for desktop:', !!newSettings.videoUrl && newSettings.videoUrl.length > 0);
+      console.log('Will show delete button for mobile:', !!newSettings.mobileVideoUrl && newSettings.mobileVideoUrl.length > 0);
+      
+      setSettings(newSettings);
     } catch (error) {
       console.error('Error fetching hero video settings:', error);
       setMessage({ type: 'error', text: 'Failed to load hero video settings.' });
@@ -244,7 +260,7 @@ const HeroVideoManager = () => {
               <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937', margin: 0 }}>
                 Desktop Video (Larger Screens)
               </h3>
-              {settings.videoUrl && (
+              {settings.videoUrl && settings.videoUrl.trim().length > 0 && (
                 <button
                   type="button"
                   onClick={() => handleDelete('desktop')}
@@ -313,7 +329,7 @@ const HeroVideoManager = () => {
               <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937', margin: 0 }}>
                 Mobile Video (Smaller Screens - Optional)
               </h3>
-              {settings.mobileVideoUrl && (
+              {settings.mobileVideoUrl && settings.mobileVideoUrl.trim().length > 0 && (
                 <button
                   type="button"
                   onClick={() => handleDelete('mobile')}

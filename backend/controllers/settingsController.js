@@ -25,27 +25,48 @@ export const getHeroVideo = async (req, res) => {
     }
     
     // Convert Mongoose document to plain object for JSON response
+    // Use JSON.parse(JSON.stringify()) to ensure Mixed types are properly serialized
     const settingsObj = settings.toObject ? settings.toObject() : settings;
+    const serializedSettings = JSON.parse(JSON.stringify(settingsObj));
+    
+    console.log('Raw settings.value type:', typeof settingsObj.value);
+    console.log('Raw settings.value:', settingsObj.value);
     
     // Ensure value is always an object
-    if (!settingsObj.value) {
-      settingsObj.value = {
-        videoUrl: '',
-        mobileVideoUrl: '',
-        enabled: true
-      };
+    let valueObj = serializedSettings.value || {};
+    
+    // If value is not an object, try to parse it
+    if (typeof valueObj !== 'object' || valueObj === null || Array.isArray(valueObj)) {
+      if (typeof valueObj === 'string') {
+        try {
+          valueObj = JSON.parse(valueObj);
+        } catch (e) {
+          console.warn('Failed to parse value as JSON:', e);
+          valueObj = {};
+        }
+      } else {
+        valueObj = {};
+      }
     }
     
-    // Ensure value has all expected fields
-    if (typeof settingsObj.value === 'object') {
-      settingsObj.value = {
-        videoUrl: settingsObj.value.videoUrl || '',
-        mobileVideoUrl: settingsObj.value.mobileVideoUrl || '',
-        enabled: settingsObj.value.enabled !== false
-      };
-    }
+    // Ensure value has all expected fields with proper defaults
+    const finalValue = {
+      videoUrl: (valueObj.videoUrl && typeof valueObj.videoUrl === 'string') ? valueObj.videoUrl : '',
+      mobileVideoUrl: (valueObj.mobileVideoUrl && typeof valueObj.mobileVideoUrl === 'string') ? valueObj.mobileVideoUrl : '',
+      enabled: valueObj.enabled !== false && valueObj.enabled !== 'false'
+    };
     
-    res.status(200).json(settingsObj);
+    console.log('Final value to return:', finalValue);
+    
+    const response = {
+      _id: serializedSettings._id,
+      key: serializedSettings.key || 'heroVideo',
+      value: finalValue,
+      updatedAt: serializedSettings.updatedAt,
+      createdAt: serializedSettings.createdAt
+    };
+    
+    res.status(200).json(response);
   } catch (error) {
     console.error('Error fetching hero video settings:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
