@@ -154,32 +154,43 @@ export const deleteHeroVideo = async (req, res) => {
     // Delete video from Cloudinary if it's a Cloudinary URL
     if (videoUrlToDelete && videoUrlToDelete.includes('cloudinary.com')) {
       try {
-        // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/video/upload/v{version}/{folder}/{filename}.mp4
-        // Public ID format: {folder}/{filename} (without version and extension)
+        // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/video/upload/v{version}/hero-videos/{filename}.mp4
+        // Public ID format: hero-videos/{filename} (without version and extension)
         const urlParts = videoUrlToDelete.split('/');
         const uploadIndex = urlParts.findIndex(part => part === 'upload');
         
         if (uploadIndex !== -1 && uploadIndex < urlParts.length - 1) {
-          // Get parts after 'upload' - skip version (v123456) and get folder + filename
+          // Get parts after 'upload'
           const partsAfterUpload = urlParts.slice(uploadIndex + 1);
-          // Skip version number (starts with 'v') and join the rest
-          const folderAndFile = partsAfterUpload.filter(part => !part.startsWith('v'));
-          const filenameWithExt = folderAndFile[folderAndFile.length - 1];
-          const filename = filenameWithExt.split('.')[0];
           
-          // Construct public_id
-          const publicId = folderAndFile.length > 1 
-            ? `${folderAndFile.slice(0, -1).join('/')}/${filename}`
-            : filename;
+          // Find the folder index (should be 'hero-videos')
+          const folderIndex = partsAfterUpload.findIndex(part => part === 'hero-videos');
           
-          console.log(`Attempting to delete Cloudinary video with public_id: ${publicId}`);
-          await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
-          console.log(`Cloudinary: Successfully deleted video ${publicId}`);
+          if (folderIndex !== -1 && folderIndex < partsAfterUpload.length - 1) {
+            // Get filename (last part, without extension)
+            const filenameWithExt = partsAfterUpload[partsAfterUpload.length - 1];
+            const filename = filenameWithExt.split('.')[0];
+            
+            // Construct public_id: hero-videos/filename
+            const publicId = `hero-videos/${filename}`;
+            
+            console.log(`Attempting to delete Cloudinary video with public_id: ${publicId} from URL: ${videoUrlToDelete}`);
+            const result = await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+            console.log(`Cloudinary deletion result:`, result);
+            
+            if (result.result === 'ok') {
+              console.log(`Cloudinary: Successfully deleted video ${publicId}`);
+            } else {
+              console.warn(`Cloudinary: Deletion returned result: ${result.result}`);
+            }
+          } else {
+            console.warn('Could not find "hero-videos" folder in URL:', videoUrlToDelete);
+          }
         } else {
-          console.warn('Could not parse Cloudinary URL for deletion:', videoUrlToDelete);
+          console.warn('Could not find "upload" in Cloudinary URL:', videoUrlToDelete);
         }
       } catch (cloudinaryError) {
-        console.error(`Cloudinary: Failed to delete video. Error: ${cloudinaryError.message}`);
+        console.error(`Cloudinary: Failed to delete video. Error:`, cloudinaryError);
         // Continue even if Cloudinary deletion fails - still clear the URL from database
       }
     }
