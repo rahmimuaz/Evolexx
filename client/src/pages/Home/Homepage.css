@@ -1677,8 +1677,8 @@
   
   .hero-video-container,
   .hero-video-overlay {
-    min-height: 100vh;
-    height: 100vh;
+    min-height: 115vh;
+    height: 115vh;
     height: -webkit-fill-available; /* For iOS Safari */
     width: 100%;
   }
@@ -1691,7 +1691,7 @@
   
   .hero-content {
     margin-top: 0;
-    min-height: 100vh;
+    min-height: 115vh;
     padding-top: 80px; /* Account for navbar */
   }
 }
@@ -1712,8 +1712,8 @@
   .hero-video-container,
   .hero-video-overlay {
  
-    min-height: 100vh;
-    height: 100vh;
+    min-height: 115vh;
+    height: 115vh;
     height: -webkit-fill-available;
     height: 100dvh; /* Dynamic viewport height for mobile */
     width: 100%;
