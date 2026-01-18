@@ -43,8 +43,57 @@ export const updateHeroVideo = async (req, res) => {
   try {
     const { videoUrl, webmUrl, mobileVideoUrl, mobileWebmUrl, enabled } = req.body;
     
-    // Validate input
-    if (videoUrl === undefined && webmUrl === undefined && mobileVideoUrl === undefined && mobileWebmUrl === undefined && enabled === undefined) {
+    // Handle uploaded video files from Cloudinary (files take priority over URLs)
+    let desktopVideoUrl = null;
+    let desktopWebmUrl = null;
+    let mobileVidUrl = null;
+    let mobileWebm = null;
+    
+    // Check for uploaded video files (from multer) - these take priority
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        const fieldname = file.fieldname || '';
+        const cloudinaryUrl = file.path; // Cloudinary URL from multer
+        
+        // Map file fields to settings
+        if (fieldname === 'desktopVideo') {
+          desktopVideoUrl = cloudinaryUrl;
+        } else if (fieldname === 'desktopWebm') {
+          desktopWebmUrl = cloudinaryUrl;
+        } else if (fieldname === 'mobileVideo') {
+          mobileVidUrl = cloudinaryUrl;
+        } else if (fieldname === 'mobileWebm') {
+          mobileWebm = cloudinaryUrl;
+        }
+      });
+    }
+    
+    // If no file was uploaded for a field, use the URL from body (if provided)
+    if (!desktopVideoUrl && videoUrl) {
+      desktopVideoUrl = videoUrl;
+    }
+    if (!desktopWebmUrl && webmUrl) {
+      desktopWebmUrl = webmUrl;
+    }
+    if (!mobileVidUrl && mobileVideoUrl) {
+      mobileVidUrl = mobileVideoUrl;
+    }
+    if (!mobileWebm && mobileWebmUrl) {
+      mobileWebm = mobileWebmUrl;
+    }
+    
+    // Parse enabled from FormData (might be string 'true'/'false') or JSON
+    let enabledValue = enabled;
+    if (enabled !== undefined && typeof enabled === 'string') {
+      enabledValue = enabled === 'true' || enabled === '1';
+    }
+    
+    // Validate input - check if we have at least one video URL or file
+    const hasAnyInput = desktopVideoUrl || desktopWebmUrl || mobileVidUrl || 
+                       mobileWebm || enabledValue !== undefined || 
+                       (req.files && req.files.length > 0);
+    
+    if (!hasAnyInput) {
       return res.status(400).json({ message: 'At least one field must be provided.' });
     }
     
@@ -59,11 +108,11 @@ export const updateHeroVideo = async (req, res) => {
       : {};
     
     // Update only provided fields
-    if (videoUrl !== undefined) settingsValue.videoUrl = videoUrl;
-    if (webmUrl !== undefined) settingsValue.webmUrl = webmUrl;
-    if (mobileVideoUrl !== undefined) settingsValue.mobileVideoUrl = mobileVideoUrl;
-    if (mobileWebmUrl !== undefined) settingsValue.mobileWebmUrl = mobileWebmUrl;
-    if (enabled !== undefined) settingsValue.enabled = enabled;
+    if (desktopVideoUrl !== null) settingsValue.videoUrl = desktopVideoUrl;
+    if (desktopWebmUrl !== null) settingsValue.webmUrl = desktopWebmUrl;
+    if (mobileVidUrl !== null) settingsValue.mobileVideoUrl = mobileVidUrl;
+    if (mobileWebm !== null) settingsValue.mobileWebmUrl = mobileWebm;
+    if (enabledValue !== undefined) settingsValue.enabled = enabledValue;
     
     // Save or update settings
     if (settings) {

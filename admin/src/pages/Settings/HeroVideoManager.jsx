@@ -16,6 +16,12 @@ const HeroVideoManager = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [previewError, setPreviewError] = useState(false);
+  const [videoFiles, setVideoFiles] = useState({
+    desktopVideo: null,
+    desktopWebm: null,
+    mobileVideo: null,
+    mobileWebm: null
+  });
   const videoRef = useRef(null);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -39,8 +45,8 @@ const HeroVideoManager = () => {
       
       if (response.data && response.data.value) {
         setSettings({
-          videoUrl: response.data.value.videoUrl || '/hero-video.mp4',
-          webmUrl: response.data.value.webmUrl || '/hero-video.webm',
+          videoUrl: response.data.value.videoUrl || '',
+          webmUrl: response.data.value.webmUrl || '',
           mobileVideoUrl: response.data.value.mobileVideoUrl || '',
           mobileWebmUrl: response.data.value.mobileWebmUrl || '',
           enabled: response.data.value.enabled !== false
@@ -64,11 +70,27 @@ const HeroVideoManager = () => {
     setPreviewError(false); // Clear preview error when URL changes
   };
 
+  const handleFileChange = (e) => {
+    const { name } = e.target;
+    const file = e.target.files[0];
+    if (file) {
+      setVideoFiles(prev => ({
+        ...prev,
+        [name]: file
+      }));
+      setMessage({ type: '', text: '' });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!settings.videoUrl && !settings.mobileVideoUrl) {
-      setMessage({ type: 'error', text: 'Please provide at least one desktop or mobile video URL.' });
+    // Check if we have at least one video (URL or file)
+    const hasDesktopVideo = settings.videoUrl || videoFiles.desktopVideo;
+    const hasMobileVideo = settings.mobileVideoUrl || videoFiles.mobileVideo;
+    
+    if (!hasDesktopVideo && !hasMobileVideo) {
+      setMessage({ type: 'error', text: 'Please provide at least one desktop or mobile video (upload file or enter URL).' });
       return;
     }
 
@@ -77,24 +99,76 @@ const HeroVideoManager = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      await axios.put(
-        `${API_BASE_URL}/api/settings/hero-video`,
-        {
-          videoUrl: settings.videoUrl || undefined,
-          webmUrl: settings.webmUrl || undefined,
-          mobileVideoUrl: settings.mobileVideoUrl || undefined,
-          mobileWebmUrl: settings.mobileWebmUrl || undefined,
-          enabled: settings.enabled
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
+      
+      // Use FormData if files are being uploaded, otherwise use JSON
+      const hasFiles = videoFiles.desktopVideo || videoFiles.desktopWebm || 
+                       videoFiles.mobileVideo || videoFiles.mobileWebm;
+      
+      if (hasFiles) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        
+        // Append video files
+        if (videoFiles.desktopVideo) formData.append('desktopVideo', videoFiles.desktopVideo);
+        if (videoFiles.desktopWebm) formData.append('desktopWebm', videoFiles.desktopWebm);
+        if (videoFiles.mobileVideo) formData.append('mobileVideo', videoFiles.mobileVideo);
+        if (videoFiles.mobileWebm) formData.append('mobileWebm', videoFiles.mobileWebm);
+        
+        // Append URL fields (if no file is uploaded for that field, use URL)
+        if (!videoFiles.desktopVideo && settings.videoUrl) formData.append('videoUrl', settings.videoUrl);
+        if (!videoFiles.desktopWebm && settings.webmUrl) formData.append('webmUrl', settings.webmUrl);
+        if (!videoFiles.mobileVideo && settings.mobileVideoUrl) formData.append('mobileVideoUrl', settings.mobileVideoUrl);
+        if (!videoFiles.mobileWebm && settings.mobileWebmUrl) formData.append('mobileWebmUrl', settings.mobileWebmUrl);
+        
+        formData.append('enabled', settings.enabled);
+        
+        await axios.put(
+          `${API_BASE_URL}/api/settings/hero-video`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            }
           }
-        }
-      );
+        );
+      } else {
+        // Use JSON if no files (URLs only)
+        await axios.put(
+          `${API_BASE_URL}/api/settings/hero-video`,
+          {
+            videoUrl: settings.videoUrl || undefined,
+            webmUrl: settings.webmUrl || undefined,
+            mobileVideoUrl: settings.mobileVideoUrl || undefined,
+            mobileWebmUrl: settings.mobileWebmUrl || undefined,
+            enabled: settings.enabled
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
 
       setMessage({ type: 'success', text: 'Hero video settings updated successfully!' });
+      
+      // Clear file inputs after successful upload
+      setVideoFiles({
+        desktopVideo: null,
+        desktopWebm: null,
+        mobileVideo: null,
+        mobileWebm: null
+      });
+      
+      // Reset file input elements
+      document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.value = '';
+      });
+      
+      // Refresh settings to show uploaded Cloudinary URLs
+      fetchHeroVideoSettings();
       
       // Clear message after 3 seconds
       setTimeout(() => {
@@ -155,41 +229,83 @@ const HeroVideoManager = () => {
             </small>
           </div>
 
-          {/* MP4 Video URL */}
-          <div className="form-field-group">
-            <label className="modern-label">
-              MP4 Video URL <span className="required-star">*</span>
-            </label>
-            <input
-              type="text"
-              name="videoUrl"
-              value={settings.videoUrl}
-              onChange={handleInputChange}
-              className="modern-input"
-              placeholder="/hero-video.mp4 or https://example.com/video.mp4"
-              required
-            />
-            <small className="field-hint">
-              Enter the path or URL to your MP4 video file (required for most browsers)
-            </small>
-          </div>
+          {/* Desktop Video Section */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937', marginBottom: '1rem' }}>
+              Desktop Video (Larger Screens)
+            </h3>
 
-          {/* WebM Video URL */}
-          <div className="form-field-group">
-            <label className="modern-label">
-              WebM Video URL (Optional)
-            </label>
-            <input
-              type="text"
-              name="webmUrl"
-              value={settings.webmUrl}
-              onChange={handleInputChange}
-              className="modern-input"
-              placeholder="/hero-video.webm or https://example.com/video.webm"
-            />
-            <small className="field-hint">
-              Optional: WebM format for better compression (browsers will use this if available)
-            </small>
+            {/* Desktop MP4 Video - File Upload */}
+            <div className="form-field-group">
+              <label className="modern-label">
+                Desktop MP4 Video (Upload to Cloudinary) <span className="required-star">*</span>
+              </label>
+              <input
+                type="file"
+                name="desktopVideo"
+                accept="video/mp4,video/quicktime"
+                onChange={handleFileChange}
+                className="modern-input"
+              />
+              <small className="field-hint">
+                Upload MP4 video file (max 100MB). Videos are stored on Cloudinary.
+              </small>
+            </div>
+
+            {/* Desktop MP4 Video - URL (Alternative) */}
+            <div className="form-field-group">
+              <label className="modern-label">
+                Desktop MP4 Video URL (Alternative - if not uploading file)
+              </label>
+              <input
+                type="text"
+                name="videoUrl"
+                value={settings.videoUrl}
+                onChange={handleInputChange}
+                className="modern-input"
+                placeholder="https://res.cloudinary.com/.../video/upload/... or https://example.com/video.mp4"
+                disabled={!!videoFiles.desktopVideo}
+              />
+              <small className="field-hint">
+                Or enter Cloudinary URL or external video URL (disabled when file is selected)
+              </small>
+            </div>
+
+            {/* Desktop WebM Video - File Upload */}
+            <div className="form-field-group">
+              <label className="modern-label">
+                Desktop WebM Video (Upload to Cloudinary - Optional)
+              </label>
+              <input
+                type="file"
+                name="desktopWebm"
+                accept="video/webm"
+                onChange={handleFileChange}
+                className="modern-input"
+              />
+              <small className="field-hint">
+                Optional: Upload WebM video file for better compression
+              </small>
+            </div>
+
+            {/* Desktop WebM Video - URL (Alternative) */}
+            <div className="form-field-group">
+              <label className="modern-label">
+                Desktop WebM Video URL (Alternative - if not uploading file)
+              </label>
+              <input
+                type="text"
+                name="webmUrl"
+                value={settings.webmUrl}
+                onChange={handleInputChange}
+                className="modern-input"
+                placeholder="https://res.cloudinary.com/.../video/upload/... or https://example.com/video.webm"
+                disabled={!!videoFiles.desktopWebm}
+              />
+              <small className="field-hint">
+                Or enter Cloudinary URL or external video URL (disabled when file is selected)
+              </small>
+            </div>
           </div>
 
           <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '2px solid #e5e7eb' }}>
@@ -200,10 +316,27 @@ const HeroVideoManager = () => {
               Set a separate video for mobile devices. If not set, desktop video will be used on mobile.
             </p>
 
-            {/* Mobile MP4 Video URL */}
+            {/* Mobile MP4 Video - File Upload */}
             <div className="form-field-group">
               <label className="modern-label">
-                Mobile MP4 Video URL
+                Mobile MP4 Video (Upload to Cloudinary - Optional)
+              </label>
+              <input
+                type="file"
+                name="mobileVideo"
+                accept="video/mp4,video/quicktime"
+                onChange={handleFileChange}
+                className="modern-input"
+              />
+              <small className="field-hint">
+                Optional: Upload separate MP4 video for mobile devices (max 100MB)
+              </small>
+            </div>
+
+            {/* Mobile MP4 Video - URL (Alternative) */}
+            <div className="form-field-group">
+              <label className="modern-label">
+                Mobile MP4 Video URL (Alternative - if not uploading file)
               </label>
               <input
                 type="text"
@@ -211,17 +344,35 @@ const HeroVideoManager = () => {
                 value={settings.mobileVideoUrl}
                 onChange={handleInputChange}
                 className="modern-input"
-                placeholder="/hero-video-mobile.mp4 or https://example.com/video-mobile.mp4"
+                placeholder="https://res.cloudinary.com/.../video/upload/... or https://example.com/video-mobile.mp4"
+                disabled={!!videoFiles.mobileVideo}
               />
               <small className="field-hint">
-                Optional: Separate MP4 video for mobile devices (screens smaller than 768px)
+                Or enter Cloudinary URL or external video URL (disabled when file is selected)
               </small>
             </div>
 
-            {/* Mobile WebM Video URL */}
+            {/* Mobile WebM Video - File Upload */}
             <div className="form-field-group">
               <label className="modern-label">
-                Mobile WebM Video URL (Optional)
+                Mobile WebM Video (Upload to Cloudinary - Optional)
+              </label>
+              <input
+                type="file"
+                name="mobileWebm"
+                accept="video/webm"
+                onChange={handleFileChange}
+                className="modern-input"
+              />
+              <small className="field-hint">
+                Optional: Upload WebM format for mobile video (better compression)
+              </small>
+            </div>
+
+            {/* Mobile WebM Video - URL (Alternative) */}
+            <div className="form-field-group">
+              <label className="modern-label">
+                Mobile WebM Video URL (Alternative - if not uploading file)
               </label>
               <input
                 type="text"
@@ -229,10 +380,11 @@ const HeroVideoManager = () => {
                 value={settings.mobileWebmUrl}
                 onChange={handleInputChange}
                 className="modern-input"
-                placeholder="/hero-video-mobile.webm or https://example.com/video-mobile.webm"
+                placeholder="https://res.cloudinary.com/.../video/upload/... or https://example.com/video-mobile.webm"
+                disabled={!!videoFiles.mobileWebm}
               />
               <small className="field-hint">
-                Optional: WebM format for mobile video (better compression)
+                Or enter Cloudinary URL or external video URL (disabled when file is selected)
               </small>
             </div>
           </div>
@@ -301,11 +453,12 @@ const HeroVideoManager = () => {
           <div className="info-box">
             <h3>Instructions:</h3>
             <ul>
-              <li>You can use relative paths (e.g., <code>/hero-video.mp4</code>) for videos in your public folder</li>
-              <li>Or use full URLs (e.g., <code>https://example.com/video.mp4</code>) for external videos</li>
-              <li>MP4 format is required and works in all modern browsers</li>
-              <li>WebM format is optional but provides better compression</li>
-              <li>Make sure your video files are optimized for web (compressed, reasonable file size)</li>
+              <li><strong>Upload Video Files:</strong> Use the file upload inputs to upload videos directly to Cloudinary (recommended). Maximum file size: 100MB per video.</li>
+              <li><strong>Use Cloudinary URLs:</strong> If you already have videos on Cloudinary, paste the Cloudinary URL in the URL fields.</li>
+              <li><strong>External URLs:</strong> You can also use external video URLs (e.g., <code>https://example.com/video.mp4</code>).</li>
+              <li><strong>Format:</strong> MP4 is required for desktop. WebM is optional but provides better compression.</li>
+              <li><strong>Mobile Videos:</strong> Optionally set separate videos for mobile devices (screens smaller than 768px).</li>
+              <li><strong>Note:</strong> When you upload a file, it replaces any existing URL for that field. The file is uploaded to Cloudinary and the URL is automatically saved.</li>
             </ul>
           </div>
 
@@ -314,7 +467,7 @@ const HeroVideoManager = () => {
             <button
               type="submit"
               className="btn-primary"
-              disabled={saving || (!settings.videoUrl && !settings.mobileVideoUrl)}
+              disabled={saving || (!settings.videoUrl && !settings.mobileVideoUrl && !videoFiles.desktopVideo && !videoFiles.mobileVideo)}
             >
               {saving ? (
                 <>
