@@ -14,12 +14,16 @@ const getApiBaseUrl = () => {
     return process.env.REACT_APP_API_BASE_URL;
   }
   
-  // If on Vercel or production, try to use the backend URL
-  // You should set REACT_APP_API_BASE_URL in Vercel environment variables
+  // For localhost development, use default backend URL if not set
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5001';
+  }
+  
+  // If on Vercel or production, you should set REACT_APP_API_BASE_URL in environment variables
   // For example: https://your-backend.railway.app or https://your-backend.herokuapp.com
   
-  // Fallback: return empty string (will use default video settings)
-  console.warn('REACT_APP_API_BASE_URL is not set. Please configure it in Vercel environment variables.');
+  // Fallback: return empty string (will not fetch video settings, video will be hidden)
+  console.warn('REACT_APP_API_BASE_URL is not set. Video settings will not be loaded.');
   return '';
 };
 
@@ -34,8 +38,8 @@ const Homepage = () => {
   const [animationDirection, setAnimationDirection] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [heroVideo, setHeroVideo] = useState({
-    videoUrl: '/hero-video.mp4',
-    webmUrl: '/hero-video.webm',
+    videoUrl: '',
+    webmUrl: '',
     mobileVideoUrl: '',
     mobileWebmUrl: '',
     enabled: true
@@ -134,8 +138,8 @@ const Homepage = () => {
         
         if (settings && (settings.videoUrl || settings.mobileVideoUrl)) {
           const newVideoSettings = {
-            videoUrl: settings.videoUrl || '/hero-video.mp4',
-            webmUrl: settings.webmUrl || '/hero-video.webm',
+            videoUrl: settings.videoUrl || '',
+            webmUrl: settings.webmUrl || '',
             mobileVideoUrl: settings.mobileVideoUrl || '',
             mobileWebmUrl: settings.mobileWebmUrl || '',
             enabled: settings.enabled !== false
@@ -419,8 +423,8 @@ const Homepage = () => {
     <div className="home">
       {/* Hero Section with Video Background */}
       <section className="banner">
-        {/* Video Background */}
-        {heroVideo.enabled && (
+        {/* Video Background - Only show if enabled and at least one video URL exists */}
+        {heroVideo.enabled && (heroVideo.videoUrl || heroVideo.webmUrl || heroVideo.mobileVideoUrl || heroVideo.mobileWebmUrl) && (
           <div className="hero-video-container">
             {/* Desktop Video - Hidden on mobile */}
             {(heroVideo.videoUrl || heroVideo.webmUrl) && (
