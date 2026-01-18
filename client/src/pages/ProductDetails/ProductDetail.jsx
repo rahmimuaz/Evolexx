@@ -147,7 +147,6 @@ const ProductDetail = () => {
 
         setHasPurchasedProduct(hasPurchased);
       } catch (error) {
-        console.error('Error checking purchase status:', error);
         setHasPurchasedProduct(false);
       } finally {
         setCheckingPurchase(false);
@@ -337,7 +336,6 @@ const ProductDetail = () => {
   const handleVariationAttributeChange = (attributeName, value) => {
     // Validate the value is appropriate for this attribute before setting
     if (!isValidAttributeValue(attributeName, value)) {
-      console.warn(`Invalid value "${value}" for attribute "${attributeName}"`);
       return; // Don't set invalid values
     }
 

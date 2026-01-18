@@ -43,11 +43,9 @@ const MyOrders = () => {
         // Sort orders by creation date (most recent first)
         combinedOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        console.log('Combined orders for MyOrders:', combinedOrders); // Debugging
         setOrders(combinedOrders);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching orders:', err.message || err);
         setError('Failed to fetch orders. Please try again.');
         setLoading(false);
       }

@@ -60,12 +60,6 @@ const BankTransferModal = ({ onClose, onSubmit }) => {
       const formData = new FormData();
       formData.append('proof', selectedFile);
 
-      console.log('Uploading file:', {
-        fileName: selectedFile.name,
-        fileSize: selectedFile.size,
-        fileType: selectedFile.type
-      });
-
       const response = await fetch(`${API_BASE_URL}/api/upload/bank-transfer-proof`, {
         method: 'POST',
         headers: {
@@ -74,22 +68,17 @@ const BankTransferModal = ({ onClose, onSubmit }) => {
         body: formData,
       });
 
-      console.log('Upload response status:', response.status);
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Upload error response:', errorData);
         throw new Error(errorData.message || 'Upload failed');
       }
 
       const data = await response.json();
-      console.log('Upload success response:', data);
       
       toast.success('File uploaded successfully! Proceeding with order placement.');
       onSubmit(data.fileUrl);
       onClose();
     } catch (uploadError) {
-      console.error('File upload failed:', uploadError);
       setError(uploadError.message || 'Failed to upload file. Please try again.');
       toast.error(uploadError.message || 'Failed to upload file. Please try again.');
     } finally {

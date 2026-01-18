@@ -52,7 +52,6 @@ const ToBeShippedDetailScreen = () => {
         setOrder(data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching ToBeShipped order details:', err);
         const errorMessage = err.response?.data?.message || 'Failed to load shipment details.';
         toast.error(errorMessage);
         setError(errorMessage);

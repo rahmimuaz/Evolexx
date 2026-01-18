@@ -28,7 +28,6 @@ export const CartProvider = ({ children }) => {
         const { data } = await axios.get(`${API_BASE_URL}/api/users/cart`, config);
         setCartItems(data);
       } catch (error) {
-        console.error('Error fetching cart items:', error);
         toast.error(error.response?.data?.message || 'Failed to load cart.');
       }
     };
@@ -85,7 +84,6 @@ export const CartProvider = ({ children }) => {
       
       toast.success(`${quantity} of ${product.name}${variationDesc} added to cart!`);
     } catch (error) {
-      console.error('Error adding to cart:', error);
       toast.error(error.response?.data?.message || 'Failed to add item to cart.');
     }
   };
@@ -106,7 +104,6 @@ export const CartProvider = ({ children }) => {
       setCartItems(data);
       toast.success('Item removed from cart.');
     } catch (error) {
-      console.error('Error removing from cart:', error);
       toast.error(error.response?.data?.message || 'Failed to remove item from cart.');
     }
   };
@@ -137,7 +134,6 @@ export const CartProvider = ({ children }) => {
       setCartItems(data);
       toast.success('Cart quantity updated.');
     } catch (error) {
-      console.error('Error updating quantity:', error);
       toast.error(error.response?.data?.message || 'Failed to update quantity.');
     }
   };
@@ -158,7 +154,6 @@ export const CartProvider = ({ children }) => {
       setCartItems([]);
       toast.success('Cart cleared successfully.');
     } catch (error) {
-      console.error('Error clearing cart:', error);
       toast.error(error.response?.data?.message || 'Failed to clear cart.');
     }
   };
