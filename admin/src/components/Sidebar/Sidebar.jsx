@@ -19,7 +19,9 @@ import {
   faBell,
   faChevronLeft,
   faChevronRight,
-  faTimes
+  faTimes,
+  faVideo,
+  faCog
 } from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
 
@@ -229,6 +231,20 @@ const Sidebar = ({ children }) => {
           >
             <span className="sidebar-icon"><FontAwesomeIcon icon={faUser} /></span>
             {isSidebarOpen && <span className="sidebar-text">Register Admin</span>}
+          </NavLink>
+
+          {/* Settings Section */}
+          <div className="sidebar-section-title">
+            {isSidebarOpen && <span>SETTINGS</span>}
+          </div>
+
+          <NavLink
+            to="/admin/hero-video"
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            title="Hero Video"
+          >
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faVideo} /></span>
+            {isSidebarOpen && <span className="sidebar-text">Hero Video</span>}
           </NavLink>
         </nav>
 

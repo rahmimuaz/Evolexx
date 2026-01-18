@@ -17,6 +17,7 @@ import OutOfStockProducts from './pages/Inventory/OutOfStockProducts';
 import UserList from './pages/AdminDashboard/UserList';
 import NewArrivals from './pages/Inventory/NewArrivals';
 import ProductOrder from './pages/Inventory/ProductOrder';
+import HeroVideoManager from './pages/Settings/HeroVideoManager';
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -47,6 +48,7 @@ function AppContent() {
             <Route path="/admin/users" element={<UserList />} />
             <Route path="/admin/new-arrivals" element={<NewArrivals />} />
             <Route path="/admin/product-order" element={<ProductOrder />} />
+            <Route path="/admin/hero-video" element={<HeroVideoManager />} />
             <Route path="*" element={<AdminDashboard />} />
           </Routes>
         </Sidebar>

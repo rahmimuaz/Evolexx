@@ -21,6 +21,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import toBeShippedRoutes from './routes/toBeShippedRoutes.js'; // <--- NEW: Import the ToBeShipped routes
+import settingsRoutes from './routes/settingsRoutes.js'; // Import settings routes
 import { generateSitemap } from './controllers/sitemapController.js';
 
 
@@ -63,6 +64,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/tobeshipped', toBeShippedRoutes); // <--- NEW: Use the ToBeShipped routes under '/api/tobeshipped'
+app.use('/api/settings', settingsRoutes); // Settings routes for hero video and other settings
 
 
 

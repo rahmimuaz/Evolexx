@@ -17,6 +17,11 @@ const Homepage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [animationDirection, setAnimationDirection] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [heroVideo, setHeroVideo] = useState({
+    videoUrl: '/hero-video.mp4',
+    webmUrl: '/hero-video.webm',
+    enabled: true
+  });
 
   const productsPerPage = 12;
   const productSectionRef = useRef(null);
@@ -84,7 +89,24 @@ const Homepage = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchHeroVideoSettings();
   }, []);
+
+  const fetchHeroVideoSettings = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`);
+      if (response.data && response.data.value) {
+        setHeroVideo({
+          videoUrl: response.data.value.videoUrl || '/hero-video.mp4',
+          webmUrl: response.data.value.webmUrl || '/hero-video.webm',
+          enabled: response.data.value.enabled !== false
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching hero video settings:', error);
+      // Use default values if API fails
+    }
+  };
 
   // Add structured data for homepage (Organization schema)
   useEffect(() => {
@@ -347,23 +369,28 @@ const Homepage = () => {
       {/* Hero Section with Video Background */}
       <section className="banner">
         {/* Video Background */}
-        <div className="hero-video-container">
-          <video 
-            className="hero-video" 
-            autoPlay 
-            muted 
-            loop 
-            playsInline
-            preload="auto"
-  
-          >
-            <source src="/hero-video.mp4" type="video/mp4" />
-            <source src="/hero-video.webm" type="video/webm" />
-            {/* Fallback for browsers that don't support video */}
-            Your browser does not support the video tag.
-          </video>
-          <div className="hero-video-overlay"></div>
-        </div>
+        {heroVideo.enabled && (
+          <div className="hero-video-container">
+            <video 
+              className="hero-video" 
+              autoPlay 
+              muted 
+              loop 
+              playsInline
+              preload="auto"
+            >
+              {heroVideo.videoUrl && (
+                <source src={heroVideo.videoUrl} type="video/mp4" />
+              )}
+              {heroVideo.webmUrl && (
+                <source src={heroVideo.webmUrl} type="video/webm" />
+              )}
+              {/* Fallback for browsers that don't support video */}
+              Your browser does not support the video tag.
+            </video>
+            <div className="hero-video-overlay"></div>
+          </div>
+        )}
         
         <div className="hero-content">
           <div className="hero-text">
