@@ -501,6 +501,7 @@ const ProductDetail = () => {
   };
 
   // Get variation object for a specific attribute value
+  // eslint-disable-next-line no-unused-vars
   const getVariationForValue = (attributeName, attributeValue) => {
     if (!product?.variations) return null;
     return product.variations.find(v => {
