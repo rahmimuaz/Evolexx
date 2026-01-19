@@ -543,11 +543,11 @@ const Homepage = () => {
                     <Link to={`/product/${product.slug || product._id}`} className="carousel-card-inner">
                       <div className="carousel-card-image">
                         <img src={imageUrl} alt={product.name} onError={(e) => (e.target.src = '/logo192.png')} />
+                        <span className="new-arrival-badge">New Arrival</span>
                       </div>
-                      <div className="carousel-card-label">{product.name}</div>
                       {isCenter && (
                         <div className="carousel-card-details">
-                          <h3>{product.name}</h3>
+                        
                           <div className="carousel-price-row">
                             <span className="carousel-price">Rs. {fullPrice.toLocaleString()}</span>
                             {product.discountPrice && (
