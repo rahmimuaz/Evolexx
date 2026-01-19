@@ -14,6 +14,7 @@ const InvoiceView = () => {
 
   useEffect(() => {
     fetchInvoice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchInvoice = async () => {
