@@ -432,9 +432,20 @@ const LocalSales = () => {
                       <div className="form-group">
                         <label>Variation</label>
                         <select
+                          value={currentItem.selectedVariation ? 'selected' : ''}
                           onChange={(e) => {
-                            const variation = product.variations[parseInt(e.target.value)];
-                            handleVariationSelect(variation);
+                            if (e.target.value) {
+                              const variation = product.variations[parseInt(e.target.value)];
+                              if (variation) {
+                                handleVariationSelect(variation);
+                              }
+                            } else {
+                              setCurrentItem({
+                                ...currentItem,
+                                selectedVariation: null,
+                                unitPrice: product.discountPrice || product.price || 0
+                              });
+                            }
                           }}
                         >
                           <option value="">Select Variation</option>
