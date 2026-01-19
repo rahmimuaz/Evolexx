@@ -81,17 +81,17 @@ const LocalSales = () => {
   };
 
   const handleVariationSelect = (variation) => {
+    // Convert variation attributes to plain object
+    const attributes = variation.attributes instanceof Map
+      ? Object.fromEntries(variation.attributes.entries())
+      : (variation.attributes || {});
+    
     setCurrentItem({
       ...currentItem,
       selectedVariation: {
-        attributes: variation.attributes instanceof Map
-          ? Object.fromEntries(variation.attributes.entries())
-          : variation.attributes,
-        stock: variation.stock,
-        price: variation.price,
-        discountPrice: variation.discountPrice
+        attributes: attributes
       },
-      unitPrice: variation.discountPrice || variation.price || currentItem.unitPrice
+      unitPrice: parseFloat(variation.discountPrice || variation.price || currentItem.unitPrice || 0)
     });
   };
 
@@ -107,10 +107,12 @@ const LocalSales = () => {
     const newItem = {
       product: currentItem.product,
       productName: product.name,
-      quantity: currentItem.quantity,
-      unitPrice: currentItem.unitPrice,
+      quantity: parseInt(currentItem.quantity),
+      unitPrice: parseFloat(currentItem.unitPrice),
       totalPrice: itemTotal,
-      selectedVariation: currentItem.selectedVariation
+      selectedVariation: currentItem.selectedVariation && currentItem.selectedVariation.attributes 
+        ? { attributes: currentItem.selectedVariation.attributes }
+        : null
     };
 
     setFormData({
@@ -154,9 +156,34 @@ const LocalSales = () => {
       return;
     }
 
+    // Prepare data for API - ensure items have correct structure
+    const saleData = {
+      customerName: formData.customerName,
+      customerPhone: formData.customerPhone,
+      customerEmail: formData.customerEmail || undefined,
+      customerAddress: formData.customerAddress || undefined,
+      paymentMethod: formData.paymentMethod,
+      notes: formData.notes || undefined,
+      items: formData.items.map(item => ({
+        product: item.product,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        selectedVariation: item.selectedVariation && Object.keys(item.selectedVariation).length > 0 
+          ? { attributes: item.selectedVariation.attributes } 
+          : null
+      })),
+      subtotal: formData.subtotal,
+      tax: formData.tax || 0,
+      discount: formData.discount || 0,
+      totalAmount: formData.totalAmount
+    };
+
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/local-sales`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.post(`${API_BASE_URL}/api/local-sales`, saleData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       alert('Local sale created successfully!');
@@ -178,7 +205,9 @@ const LocalSales = () => {
       setSelectedSale(response.data);
       setShowQRModal(true);
     } catch (error) {
-      alert(error.response?.data?.message || 'Error creating local sale');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Error creating local sale';
+      alert(`Error: ${errorMessage}`);
+      console.error('Local sale error:', error.response?.data || error);
     }
   };
 
