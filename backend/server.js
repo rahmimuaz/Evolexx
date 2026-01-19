@@ -2,19 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import upload from './middleware/upload.js'; // Cloudinary-based multer
-
-// Import product controller functions (no routes imported here) - This block can likely be removed if you're using productRoutes
-// import {
-//   getProducts,
-//   getProduct,
-//   createProduct,
-//   updateProduct,
-//   deleteProduct,
-//   getProductsByCategory,
-// } from './controllers/productController.js';
-
-// Import your route files
+import upload from './middleware/upload.js';
 import orderRoutes from './routes/orderRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
@@ -28,7 +16,6 @@ import { generateSitemap } from './controllers/sitemapController.js';
 
 dotenv.config();
 
-// Check for required environment variables
 const requiredEnvVars = ['MONGODB_URI', 'PORT', 'JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
@@ -39,15 +26,11 @@ if (missingEnvVars.length > 0) {
 
 const app = express();
 
-// Middleware
 app.use(cors());
-app.use(express.json()); // To parse JSON request bodies
-app.use(express.urlencoded({ extended: true })); // To parse URL-encoded request bodies
-
-// Serve static files from uploads directory (if you store uploads locally)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
-// MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => {
@@ -55,26 +38,23 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1);
   });
 
-// Sitemap route (before other routes for better SEO)
 app.get('/sitemap.xml', generateSitemap);
 
-// Use routers for modular routes
 app.use('/api/products', productRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api/tobeshipped', toBeShippedRoutes); // <--- NEW: Use the ToBeShipped routes under '/api/tobeshipped'
-app.use('/api/settings', settingsRoutes); // Settings routes for hero video and other settings
-app.use('/api/local-sales', localSaleRoutes); // Local sales routes for offline/WhatsApp sales
+app.use('/api/tobeshipped', toBeShippedRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/local-sales', localSaleRoutes);
 
 
 
 
-// Test Cloudinary endpoint (keep this if you use Cloudinary)
 app.get('/api/test-cloudinary', async (req, res) => {
   try {
-    const cloudinary = (await import('./config/cloudinary.js')).default; // Adjust path as needed
+    const cloudinary = (await import('./config/cloudinary.js')).default;
     const result = await cloudinary.api.ping();
     res.json({
       message: 'Cloudinary connection successful',
@@ -88,7 +68,6 @@ app.get('/api/test-cloudinary', async (req, res) => {
   }
 });
 
-// Error handling middleware (should be last before 404 handler)
 app.use((err, req, res, next) => {
   console.error('Error details:', {
     name: err.name,
@@ -97,7 +76,6 @@ app.use((err, req, res, next) => {
     stack: err.stack
   });
 
-  // Handle specific errors for better client feedback
   if (err.name === 'MulterError') {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
@@ -111,23 +89,20 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ message: 'File upload error: ' + err.message });
   }
 
-  if (err.name === 'ValidationError') { // Mongoose validation errors
+  if (err.name === 'ValidationError') {
     return res.status(400).json({ message: 'Validation error: ' + err.message });
   }
 
-  // Custom file validation errors
   if (err.message && err.message.includes('Only image and PDF files are allowed')) {
     return res.status(400).json({ message: err.message });
   }
 
-  // Generic internal server error
   res.status(500).json({
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined // Only show full error in development
   });
 });
 
-// 404 handler (if no route matched - should be after all other routes and middleware)
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
