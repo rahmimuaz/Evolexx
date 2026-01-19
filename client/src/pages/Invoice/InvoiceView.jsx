@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { FaDownload, FaSpinner } from 'react-icons/fa';
 import './InvoiceView.css';
 
 const InvoiceView = () => {
@@ -30,115 +27,126 @@ const InvoiceView = () => {
     }
   };
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     if (!invoice) return;
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.width;
-    const margin = 15;
+    // Dynamically import jsPDF and autoTable to avoid bundle size issues
+    try {
+      const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable')
+      ]);
 
-    // Header
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, pageWidth, 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text('INVOICE', pageWidth / 2, 20, { align: 'center' });
-    doc.setFontSize(12);
-    doc.text(`Invoice #: ${invoice.invoiceNumber}`, pageWidth / 2, 30, { align: 'center' });
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const margin = 15;
 
-    let yPos = 50;
+      // Header
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('INVOICE', pageWidth / 2, 20, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text(`Invoice #: ${invoice.invoiceNumber}`, pageWidth / 2, 30, { align: 'center' });
 
-    // Customer Details
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('CUSTOMER DETAILS', margin, yPos);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    yPos += 8;
-    doc.text(`Name: ${invoice.customerName}`, margin, yPos);
-    yPos += 6;
-    doc.text(`Phone: ${invoice.customerPhone}`, margin, yPos);
-    if (invoice.customerEmail) {
+      let yPos = 50;
+
+      // Customer Details
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CUSTOMER DETAILS', margin, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      yPos += 8;
+      doc.text(`Name: ${invoice.customerName}`, margin, yPos);
       yPos += 6;
-      doc.text(`Email: ${invoice.customerEmail}`, margin, yPos);
-    }
-    if (invoice.customerAddress) {
-      yPos += 6;
-      doc.text(`Address: ${invoice.customerAddress}`, margin, yPos);
-    }
-    yPos += 10;
-
-    // Items Table
-    const tableColumns = ['Product', 'Qty', 'Unit Price', 'Total'];
-    const tableRows = invoice.items.map(item => {
-      let productName = item.productName;
-      if (item.selectedVariation && item.selectedVariation.attributes) {
-        const attrs = item.selectedVariation.attributes instanceof Map
-          ? Object.fromEntries(item.selectedVariation.attributes.entries())
-          : item.selectedVariation.attributes;
-        const attrStrings = Object.entries(attrs).map(([k, v]) => `${k}: ${v}`);
-        productName += ` (${attrStrings.join(', ')})`;
+      doc.text(`Phone: ${invoice.customerPhone}`, margin, yPos);
+      if (invoice.customerEmail) {
+        yPos += 6;
+        doc.text(`Email: ${invoice.customerEmail}`, margin, yPos);
       }
-      return [
-        productName,
-        item.quantity.toString(),
-        `Rs. ${item.unitPrice.toLocaleString()}`,
-        `Rs. ${item.totalPrice.toLocaleString()}`
-      ];
-    });
+      if (invoice.customerAddress) {
+        yPos += 6;
+        doc.text(`Address: ${invoice.customerAddress}`, margin, yPos);
+      }
+      yPos += 10;
 
-    autoTable(doc, {
-      head: [tableColumns],
-      body: tableRows,
-      startY: yPos,
-      theme: 'striped',
-      styles: { fontSize: 10, cellPadding: 5 },
-      headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
-      columnStyles: {
-        0: { cellWidth: 'auto' },
-        1: { cellWidth: 30, halign: 'center' },
-        2: { cellWidth: 45, halign: 'right' },
-        3: { cellWidth: 45, halign: 'right', fontStyle: 'bold' }
-      },
-      margin: { left: margin, right: margin }
-    });
+      // Items Table
+      const tableColumns = ['Product', 'Qty', 'Unit Price', 'Total'];
+      const tableRows = invoice.items.map(item => {
+        let productName = item.productName;
+        if (item.selectedVariation && item.selectedVariation.attributes) {
+          const attrs = item.selectedVariation.attributes instanceof Map
+            ? Object.fromEntries(item.selectedVariation.attributes.entries())
+            : item.selectedVariation.attributes;
+          const attrStrings = Object.entries(attrs).map(([k, v]) => `${k}: ${v}`);
+          productName += ` (${attrStrings.join(', ')})`;
+        }
+        return [
+          productName,
+          item.quantity.toString(),
+          `Rs. ${item.unitPrice.toLocaleString()}`,
+          `Rs. ${item.totalPrice.toLocaleString()}`
+        ];
+      });
 
-    yPos = doc.lastAutoTable.finalY + 10;
+      autoTable(doc, {
+        head: [tableColumns],
+        body: tableRows,
+        startY: yPos,
+        theme: 'striped',
+        styles: { fontSize: 10, cellPadding: 5 },
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
+        columnStyles: {
+          0: { cellWidth: 'auto' },
+          1: { cellWidth: 30, halign: 'center' },
+          2: { cellWidth: 45, halign: 'right' },
+          3: { cellWidth: 45, halign: 'right', fontStyle: 'bold' }
+        },
+        margin: { left: margin, right: margin }
+      });
 
-    // Totals
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Subtotal: Rs. ${invoice.subtotal.toLocaleString()}`, pageWidth - margin, yPos, { align: 'right' });
-    if (invoice.tax > 0) {
-      yPos += 6;
-      doc.text(`Tax: Rs. ${invoice.tax.toLocaleString()}`, pageWidth - margin, yPos, { align: 'right' });
+      yPos = doc.lastAutoTable.finalY + 10;
+
+      // Totals
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Subtotal: Rs. ${invoice.subtotal.toLocaleString()}`, pageWidth - margin, yPos, { align: 'right' });
+      if (invoice.tax > 0) {
+        yPos += 6;
+        doc.text(`Tax: Rs. ${invoice.tax.toLocaleString()}`, pageWidth - margin, yPos, { align: 'right' });
+      }
+      if (invoice.discount > 0) {
+        yPos += 6;
+        doc.text(`Discount: Rs. ${invoice.discount.toLocaleString()}`, pageWidth - margin, yPos, { align: 'right' });
+      }
+      yPos += 8;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text(`Total: Rs. ${invoice.totalAmount.toLocaleString()}`, pageWidth - margin, yPos, { align: 'right' });
+
+      // Footer
+      yPos += 15;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Payment Method: ${invoice.paymentMethod.toUpperCase()}`, margin, yPos);
+      doc.text(`Date: ${new Date(invoice.saleDate).toLocaleDateString()}`, pageWidth - margin, yPos, { align: 'right' });
+
+      doc.save(`Invoice_${invoice.invoiceNumber}.pdf`);
+    } catch (error) {
+      alert('Error generating PDF. Please try again or contact support.');
+      console.error('PDF generation error:', error);
     }
-    if (invoice.discount > 0) {
-      yPos += 6;
-      doc.text(`Discount: Rs. ${invoice.discount.toLocaleString()}`, pageWidth - margin, yPos, { align: 'right' });
-    }
-    yPos += 8;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text(`Total: Rs. ${invoice.totalAmount.toLocaleString()}`, pageWidth - margin, yPos, { align: 'right' });
-
-    // Footer
-    yPos += 15;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(148, 163, 184);
-    doc.text(`Payment Method: ${invoice.paymentMethod.toUpperCase()}`, margin, yPos);
-    doc.text(`Date: ${new Date(invoice.saleDate).toLocaleDateString()}`, pageWidth - margin, yPos, { align: 'right' });
-
-    doc.save(`Invoice_${invoice.invoiceNumber}.pdf`);
   };
 
   if (loading) {
     return (
       <div className="invoice-loading">
-        <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+        <FaSpinner className="spinning" style={{ fontSize: '2rem' }} />
         <p>Loading invoice...</p>
       </div>
     );
@@ -165,7 +173,7 @@ const InvoiceView = () => {
           <p className="invoice-number">Invoice #: {invoice.invoiceNumber}</p>
         </div>
         <button className="btn-download" onClick={downloadPDF}>
-          <FontAwesomeIcon icon={faDownload} /> Download PDF
+          <FaDownload /> Download PDF
         </button>
       </div>
 
