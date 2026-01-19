@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faReceipt, faPlus, faTrash, faDownload, faQrcode, faEye } from '@fortawesome/free-solid-svg-icons';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import './LocalSales.css';
 
 const LocalSales = () => {
@@ -43,6 +43,7 @@ const LocalSales = () => {
   useEffect(() => {
     fetchSales();
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchSales = async () => {
@@ -142,6 +143,7 @@ const LocalSales = () => {
 
   useEffect(() => {
     calculateTotal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.subtotal, formData.tax, formData.discount]);
 
   const handleSubmit = async (e) => {
@@ -616,7 +618,7 @@ const LocalSales = () => {
             <div className="modal-body">
               <p>Scan this QR code to view the invoice:</p>
               <div className="qr-code-container">
-                <QRCode value={getInvoiceUrl(selectedSale._id)} size={256} />
+                <QRCodeSVG value={getInvoiceUrl(selectedSale._id)} size={256} />
               </div>
               <p className="invoice-number">Invoice #: {selectedSale.invoiceNumber}</p>
               <div className="modal-actions">
