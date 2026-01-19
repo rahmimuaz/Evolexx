@@ -10,7 +10,8 @@ import {
   FaSignInAlt,
   FaUserPlus,
   FaSignOutAlt,
-  FaCog
+  FaCog,
+  FaTimes
 } from 'react-icons/fa';
 import Modal from '../Modal/Modal';
 import Login from '../../pages/Login/Login';
@@ -164,7 +165,7 @@ const Navbar = () => {
                     aria-label="Close search"
                     type="button"
                   >
-                    &times;
+                    <FaTimes />
                   </button>
                 </div>
                 {(searchLoading || searchResults.length > 0 || searchError) && searchQuery && (
