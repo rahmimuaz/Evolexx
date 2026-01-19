@@ -22,9 +22,9 @@ const WhatsAppButton = () => {
         </div>
         <div className="whatsapp-chat-bubble">
           <p className="whatsapp-bubble-text">
-            Place order? <strong>Chat</strong>
+            Place order <strong>Via</strong>
           </p>
-          <p className="whatsapp-bubble-text">with us</p>
+          <p className="whatsapp-bubble-text">WhatsApp</p>
         </div>
       </a>
     </div>

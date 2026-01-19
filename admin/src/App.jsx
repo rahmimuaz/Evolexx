@@ -20,6 +20,7 @@ const UserList = lazy(() => import('./pages/AdminDashboard/UserList'));
 const NewArrivals = lazy(() => import('./pages/Inventory/NewArrivals'));
 const ProductOrder = lazy(() => import('./pages/Inventory/ProductOrder'));
 const HeroVideoManager = lazy(() => import('./pages/Settings/HeroVideoManager'));
+const LocalSales = lazy(() => import('./pages/LocalSales/LocalSales'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -60,6 +61,7 @@ function AppContent() {
               <Route path="/admin/new-arrivals" element={<NewArrivals />} />
               <Route path="/admin/product-order" element={<ProductOrder />} />
               <Route path="/admin/hero-video" element={<HeroVideoManager />} />
+              <Route path="/admin/local-sales" element={<LocalSales />} />
               <Route path="*" element={<AdminDashboard />} />
             </Routes>
           </Suspense>

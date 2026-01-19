@@ -20,7 +20,8 @@ import {
   faChevronLeft,
   faChevronRight,
   faTimes,
-  faVideo
+  faVideo,
+  faReceipt
 } from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
 
@@ -206,6 +207,15 @@ const Sidebar = ({ children }) => {
           >
             <span className="sidebar-icon"><FontAwesomeIcon icon={faTruck} /></span>
             {isSidebarOpen && <span className="sidebar-text">Shipments</span>}
+          </NavLink>
+
+          <NavLink
+            to="/admin/local-sales"
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            title="Local Sales"
+          >
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faReceipt} /></span>
+            {isSidebarOpen && <span className="sidebar-text">Local Sales</span>}
           </NavLink>
 
           {/* Users Section */}

@@ -543,7 +543,6 @@ const Homepage = () => {
                     <Link to={`/product/${product.slug || product._id}`} className="carousel-card-inner">
                       <div className="carousel-card-image">
                         <img src={imageUrl} alt={product.name} onError={(e) => (e.target.src = '/logo192.png')} />
-                        <span className="new-arrival-badge">New Arrival</span>
                       </div>
                       {isCenter && (
                         <div className="carousel-card-details">

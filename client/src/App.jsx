@@ -23,6 +23,7 @@ const Contact = lazy(() => import('./pages/Legal/Contact'));
 const RefundPolicy = lazy(() => import('./pages/Legal/RefundPolicy'));
 const PrivacyPolicy = lazy(() => import('./pages/Legal/PrivacyPolicy'));
 const TermsConditions = lazy(() => import('./pages/Legal/TermsConditions'));
+const InvoiceView = lazy(() => import('./pages/Invoice/InvoiceView'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -59,6 +60,7 @@ function App() {
                 <Route path="/refund-policy" element={<RefundPolicy />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsConditions />} />
+                <Route path="/invoice/:id" element={<InvoiceView />} />
               </Routes>
             </Suspense>
             <WhatsAppButton />
