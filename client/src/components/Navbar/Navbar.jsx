@@ -39,6 +39,7 @@ const Navbar = () => {
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const dropdownRef = useRef(null);
+  const searchBarRef = useRef(null);
 
   // 🔁 Close profile dropdown when clicking outside
   useEffect(() => {
@@ -46,10 +47,32 @@ const Navbar = () => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
+      // Close search bar and suggestions when clicking outside
+      if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
+        setSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // 🔁 Close all open elements smoothly on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (dropdownOpen) {
+        setDropdownOpen(false);
+      }
+      if (searchOpen) {
+        setSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [dropdownOpen, searchOpen]);
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
@@ -148,7 +171,7 @@ const Navbar = () => {
                     <FaSearch size={18} />
                   </button>
                 ) : (
-              <div className={`search-bar-integrated ${searchOpen ? 'visible' : ''}`}>
+              <div className={`search-bar-integrated ${searchOpen ? 'visible' : ''}`} ref={searchBarRef}>
                 <div className="search-input-wrapper-inner">
                   <span className="search-input-icon"><FaSearch size={18} /></span>
                   <input

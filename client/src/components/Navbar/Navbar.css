@@ -18,18 +18,7 @@
 
 .navbar.hidden { transform: translateY(-110%); }
 /* Theme variables */
-.navbar.light {
-  --nav-fg: #111111;
-  --nav-fg-hover: #555555;
-  --nav-divider: rgba(0, 0, 0, 0.12);
-  --nav-input-fg: #222222;
-  --nav-muted: #6b7280; /* slate-500 */
-  /* Add subtle background for visibility on white pages */
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
+
 .navbar.dark {
   --nav-fg: #ffffff;
   --nav-fg-hover: #e5e5e5;
@@ -49,9 +38,7 @@
 
 /* Light theme scrolled - stronger background for white pages */
 .navbar.light.scrolled {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  background: rgba(255, 255, 255);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
@@ -186,7 +173,6 @@
 
 /* SEARCH ICON BUTTON */
 .search-icon-button {
-
   background: none;
   border: none;
   cursor: pointer;
@@ -195,6 +181,7 @@
   align-items: center;
   padding: 0.25rem;
   flex-shrink: 0; /* Essential to prevent shrinking when other items appear */
+  
 }
 
 .theme-toggle-button {
@@ -236,13 +223,14 @@
 
 .search-input-icon {
   position: absolute;
-  left: 12px;
-  color: rgb(44, 43, 43);
+  left: 10px;
+  color: rgb(224, 224, 224);
   pointer-events: none;
   display: flex;
   align-items: center;
   height: 100%;
   z-index: 2;
+  color: var(--nav-fg);
 }
 
 .search-input-navbar,
@@ -270,7 +258,8 @@
 }
 
 .search-input-navbar::placeholder {
-  color: rgb(44, 43, 43);
+  color: var(--nav-input-fg);
+
 }
 
 /* Emphasize glass when focused anywhere inside the wrapper */
@@ -286,13 +275,13 @@
   right: 0.3rem;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.765);
   border: none;
   border-radius:10px;
   width: 1.2rem;
   height: 1.2rem;
-  font-size: 1.5rem;
-  color: #696969;
+  font-size: 1rem;
+  color: #000000;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -309,21 +298,21 @@
 /* Suggestions Dropdown */
 .search-suggestions-dropdown {
   position: absolute;
-  top: calc(100% + 1px); /* below input */
+  top: calc(96% + 1px); /* below input */
   left: 0;
-  width: 100%;
-  background-color: rgba(133, 130, 130, 0.712); /* Semi-transparent color */
+  width: 99%;
+  background-color: rgba(35, 35, 35, 0.712); /* Semi-transparent color */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px); /* For Safari support */
   border-radius: 0.5rem ;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  
+  color: #ffffff;
   z-index: 3100;
   padding: 0.5rem 0;
   max-height: 320px;
   overflow-y: auto;
-  color: var(--nav-fg); /* ensure text is readable */
+
 }
 
 
@@ -338,14 +327,14 @@
 }
 
 .search-suggestion-item:hover {
-  background: rgba(255, 255, 255, 0.427);
+  background: rgba(94, 93, 93, 0.427);
 }
 
 .search-suggestion-img {
   width: 48px;
   height: 48px;
   object-fit: cover;
-  border-radius: 0rem;
+  border-radius: 0.3rem;
   background: #ffffff;
 }
 
@@ -427,7 +416,7 @@
   pointer-events: auto !important;
 }
 
-.dropdown-text-1 {
+.dropdown-text {
   color: #ffffff;
   font-weight: 400;
   margin-bottom: 1rem !important;
@@ -497,9 +486,7 @@
 
 
 
-/* ===========================
-   MOBILE RESPONSIVE STYLES
-   =========================== */
+
 
 @media (max-width: 1024px) {
   .navbar-container {
@@ -524,6 +511,7 @@
   .navbar-divider {
     margin: 0 1rem;
   }
+  
 }
 
 /* Mobile-specific styles removed; handled in MobileNavbar.css */
@@ -536,13 +524,20 @@
   transform-origin: right center;
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.35s ease, opacity 0.35s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .search-bar-integrated.visible {
   transform: scaleX(1);
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Smooth closing animation for search suggestions */
+.search-suggestions-dropdown {
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-center {
