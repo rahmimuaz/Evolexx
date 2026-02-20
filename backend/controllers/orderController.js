@@ -389,10 +389,10 @@ export const createOrder = asyncHandler(async (req, res) => {
         variationText = Object.entries(attrs).map(([k, v]) => `${k}: ${v}`).join(', ');
       }
       return `
-        <tr>
-          <td style="padding:14px 20px;border-bottom:1px solid #eee;font-size:15px;font-weight:600;">${itemName}${variationText ? `<br><span style="font-size:12px;color:#888;font-weight:400;">${variationText}</span>` : ''}</td>
-          <td style="padding:14px 20px;border-bottom:1px solid #eee;text-align:center;font-size:14px;">${itemQty}</td>
-          <td style="padding:14px 20px;border-bottom:1px solid #eee;text-align:right;font-size:14px;font-weight:600;">Rs. ${itemTotal}</td>
+        <tr style="background:#ffffff;">
+          <td style="padding:14px 20px;border-bottom:1px solid #e8e8e8;font-size:15px;font-weight:600;color:#1a1a1a;">${itemName}${variationText ? `<br><span style="font-size:12px;color:#555;font-weight:400;">${variationText}</span>` : ''}</td>
+          <td style="padding:14px 20px;border-bottom:1px solid #e8e8e8;text-align:center;font-size:14px;color:#1a1a1a;">${itemQty}</td>
+          <td style="padding:14px 20px;border-bottom:1px solid #e8e8e8;text-align:right;font-size:14px;font-weight:600;color:#1a1a1a;">Rs. ${itemTotal}</td>
         </tr>`;
     }).join('');
 
@@ -410,41 +410,40 @@ export const createOrder = asyncHandler(async (req, res) => {
       sendEmail(
         adminEmail,
         `${productSummary} — Rs. ${totalFormatted} (#${orderNumber})`,
-        `<div style="font-family:'Segoe UI',Arial,sans-serif;color:#1a1a1a;max-width:560px;margin:auto;background:#fff;">
-          <div style="background:linear-gradient(135deg,#111 0%,#333 100%);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0;">
-            <h1 style="color:#fff;margin:0;font-size:24px;letter-spacing:3px;font-weight:600;">EVOLEXX</h1>
-            <p style="color:rgba(255,255,255,0.8);margin:8px 0 0;font-size:13px;">ORDER INVOICE</p>
+        `<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:560px;margin:auto;background:#ffffff;color:#1a1a1a;">
+          <div style="padding:24px 24px 16px;border-bottom:2px solid #1a1a1a;">
+            <h1 style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1a1a1a;">EVOLEXX</h1>
+            <p style="margin:0;font-size:14px;color:#1a1a1a;">INVOICE</p>
+            <p style="margin:12px 0 0;font-size:13px;color:#444;">No. ${orderNumber} · Date: ${orderDate}</p>
           </div>
-          <div style="border:1px solid #e8e8e8;border-top:none;padding:0;border-radius:0 0 12px 12px;overflow:hidden;">
-            <div style="background:linear-gradient(180deg,#fafafa 0%,#fff 100%);padding:20px 24px;border-bottom:2px solid #111;">
-              <p style="margin:0 0 6px;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Products Ordered</p>
-              <h2 style="margin:0;font-size:20px;font-weight:700;color:#111;">${productSummary}</h2>
-              <p style="margin:8px 0 0;font-size:15px;font-weight:600;color:#111;">Rs. ${totalFormatted}</p>
-            </div>
+          <div style="padding:20px 24px;background:#ffffff;">
+            <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#333;text-transform:uppercase;">Products Ordered</p>
+            <h2 style="margin:0 0 4px;font-size:18px;font-weight:700;color:#1a1a1a;">${productSummary}</h2>
+            <p style="margin:0;font-size:16px;font-weight:600;color:#1a1a1a;">Rs. ${totalFormatted}</p>
+          </div>
+          <table style="width:100%;border-collapse:collapse;background:#ffffff;">
+            <thead><tr style="background:#f0f0f0;">
+              <th style="padding:12px 20px;text-align:left;font-size:12px;color:#1a1a1a;text-transform:uppercase;font-weight:600;">Product</th>
+              <th style="padding:12px 20px;text-align:center;font-size:12px;color:#1a1a1a;text-transform:uppercase;font-weight:600;">Qty</th>
+              <th style="padding:12px 20px;text-align:right;font-size:12px;color:#1a1a1a;text-transform:uppercase;font-weight:600;">Amount</th>
+            </tr></thead>
+            <tbody>${orderItemsHtml}</tbody>
+            <tfoot><tr style="background:#f0f0f0;">
+              <td colspan="2" style="padding:14px 20px;font-weight:700;color:#1a1a1a;font-size:14px;">Total</td>
+              <td style="padding:14px 20px;text-align:right;font-weight:700;color:#1a1a1a;font-size:18px;">Rs. ${totalFormatted}</td>
+            </tr></tfoot>
+          </table>
+          <div style="padding:20px 24px;background:#ffffff;border-top:1px solid #e0e0e0;">
+            <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:#1a1a1a;text-transform:uppercase;">Customer Details</p>
             <table style="width:100%;border-collapse:collapse;">
-              <thead><tr style="background:#f5f5f5;">
-                <th style="padding:14px 20px;text-align:left;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Product</th>
-                <th style="padding:14px 20px;text-align:center;font-size:12px;color:#666;text-transform:uppercase;">Qty</th>
-                <th style="padding:14px 20px;text-align:right;font-size:12px;color:#666;text-transform:uppercase;">Amount</th>
-              </tr></thead>
-              <tbody>${orderItemsHtml}</tbody>
-              <tfoot><tr style="background:#111;">
-                <td colspan="2" style="padding:16px 20px;font-weight:700;color:#fff;font-size:14px;">TOTAL</td>
-                <td style="padding:16px 20px;text-align:right;font-weight:700;color:#fff;font-size:18px;">Rs. ${totalFormatted}</td>
-              </tr></tfoot>
+              <tr><td style="padding:6px 0;color:#444;width:100px;font-size:14px;">Order ID</td><td style="padding:6px 0;font-weight:600;font-size:14px;color:#1a1a1a;">${orderNumber}</td></tr>
+              <tr><td style="padding:6px 0;color:#444;font-size:14px;">Date</td><td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${orderDate}</td></tr>
+              <tr><td style="padding:6px 0;color:#444;font-size:14px;">Customer</td><td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${shippingAddress.fullName}</td></tr>
+              <tr><td style="padding:6px 0;color:#444;font-size:14px;">Email</td><td style="padding:6px 0;font-size:14px;"><a href="mailto:${shippingAddress.email}" style="color:#1a1a1a;">${shippingAddress.email}</a></td></tr>
+              <tr><td style="padding:6px 0;color:#444;font-size:14px;">Phone</td><td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${shippingAddress.phone}</td></tr>
+              <tr><td style="padding:6px 0;color:#444;font-size:14px;">Address</td><td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${shippingAddress.address}, ${shippingAddress.city} ${shippingAddress.postalCode}</td></tr>
+              <tr><td style="padding:6px 0;color:#444;font-size:14px;">Payment</td><td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${paymentMethod.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td></tr>
             </table>
-            <div style="padding:20px 24px;background:#fafafa;border-top:1px solid #eee;">
-              <p style="margin:0 0 12px;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Customer Details</p>
-              <table style="width:100%;border-collapse:collapse;">
-                <tr><td style="padding:6px 0;color:#666;width:100px;font-size:14px;">Order ID</td><td style="padding:6px 0;font-weight:600;font-size:14px;">${orderNumber}</td></tr>
-                <tr><td style="padding:6px 0;color:#666;font-size:14px;">Date</td><td style="padding:6px 0;font-size:14px;">${orderDate}</td></tr>
-                <tr><td style="padding:6px 0;color:#666;font-size:14px;">Customer</td><td style="padding:6px 0;font-size:14px;">${shippingAddress.fullName}</td></tr>
-                <tr><td style="padding:6px 0;color:#666;font-size:14px;">Email</td><td style="padding:6px 0;font-size:14px;"><a href="mailto:${shippingAddress.email}" style="color:#111;">${shippingAddress.email}</a></td></tr>
-                <tr><td style="padding:6px 0;color:#666;font-size:14px;">Phone</td><td style="padding:6px 0;font-size:14px;">${shippingAddress.phone}</td></tr>
-                <tr><td style="padding:6px 0;color:#666;font-size:14px;">Address</td><td style="padding:6px 0;font-size:14px;">${shippingAddress.address}, ${shippingAddress.city} ${shippingAddress.postalCode}</td></tr>
-                <tr><td style="padding:6px 0;color:#666;font-size:14px;">Payment</td><td style="padding:6px 0;font-size:14px;">${paymentMethod.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td></tr>
-              </table>
-            </div>
           </div>
         </div>`
       ).catch(err => console.error('Failed to send admin notification email:', err));
@@ -454,47 +453,47 @@ export const createOrder = asyncHandler(async (req, res) => {
     sendEmail(
       order.shippingAddress.email,
       `Order Confirmed — #${orderNumber}`,
-      `<div style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:auto;">
-        <div style="background:#111;padding:24px;border-radius:8px 8px 0 0;text-align:center;">
-          <h1 style="color:#fff;margin:0;font-size:22px;letter-spacing:2px;">EVOLEXX</h1>
+      `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#ffffff;color:#1a1a1a;">
+        <div style="padding:24px;border-bottom:2px solid #1a1a1a;">
+          <h1 style="color:#1a1a1a;margin:0;font-size:22px;letter-spacing:2px;font-weight:700;">EVOLEXX</h1>
         </div>
-        <div style="border:1px solid #e5e5e5;border-top:none;padding:28px 24px;border-radius:0 0 8px 8px;">
-          <h2 style="margin:0 0 8px;font-size:20px;">Thank you for your order!</h2>
-          <p style="color:#666;margin:0 0 20px;">Hi ${shippingAddress.fullName}, your order has been placed successfully and is being processed.</p>
+        <div style="padding:28px 24px;">
+          <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a;">Thank you for your order!</h2>
+          <p style="color:#444;margin:0 0 20px;">Hi ${shippingAddress.fullName}, your order has been placed successfully and is being processed.</p>
 
-          <div style="background:#f9f9f9;padding:16px;border-radius:6px;margin-bottom:20px;">
+          <div style="background:#f5f5f5;padding:16px;border-radius:6px;margin-bottom:20px;">
             <table style="width:100%;border-collapse:collapse;">
-              <tr><td style="padding:4px 0;color:#888;width:130px;">Order Number</td><td style="padding:4px 0;font-weight:600;">${orderNumber}</td></tr>
-              <tr><td style="padding:4px 0;color:#888;">Date</td><td style="padding:4px 0;">${orderDate}</td></tr>
-              <tr><td style="padding:4px 0;color:#888;">Payment Method</td><td style="padding:4px 0;">${paymentMethod.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td></tr>
+              <tr><td style="padding:4px 0;color:#444;width:130px;">Order Number</td><td style="padding:4px 0;font-weight:600;color:#1a1a1a;">${orderNumber}</td></tr>
+              <tr><td style="padding:4px 0;color:#444;">Date</td><td style="padding:4px 0;color:#1a1a1a;">${orderDate}</td></tr>
+              <tr><td style="padding:4px 0;color:#444;">Payment Method</td><td style="padding:4px 0;color:#1a1a1a;">${paymentMethod.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td></tr>
             </table>
           </div>
 
           <table style="width:100%;border-collapse:collapse;margin-bottom:4px;">
-            <thead><tr style="background:#f8f8f8;">
-              <th style="padding:10px 12px;text-align:left;font-size:13px;color:#555;">Item</th>
-              <th style="padding:10px 12px;text-align:center;font-size:13px;color:#555;">Qty</th>
-              <th style="padding:10px 12px;text-align:right;font-size:13px;color:#555;">Price</th>
+            <thead><tr style="background:#f0f0f0;">
+              <th style="padding:12px 20px;text-align:left;font-size:12px;color:#1a1a1a;font-weight:600;">Item</th>
+              <th style="padding:12px 20px;text-align:center;font-size:12px;color:#1a1a1a;font-weight:600;">Qty</th>
+              <th style="padding:12px 20px;text-align:right;font-size:12px;color:#1a1a1a;font-weight:600;">Price</th>
             </tr></thead>
             <tbody>${orderItemsHtml}</tbody>
-            <tfoot><tr style="background:#f8f8f8;">
-              <td colspan="2" style="padding:12px;font-weight:700;">Total</td>
-              <td style="padding:12px;text-align:right;font-weight:700;font-size:16px;">Rs. ${totalFormatted}</td>
+            <tfoot><tr style="background:#f0f0f0;">
+              <td colspan="2" style="padding:14px 20px;font-weight:700;color:#1a1a1a;">Total</td>
+              <td style="padding:14px 20px;text-align:right;font-weight:700;font-size:16px;color:#1a1a1a;">Rs. ${totalFormatted}</td>
             </tr></tfoot>
           </table>
 
-          <div style="background:#f9f9f9;padding:16px;border-radius:6px;margin:20px 0;">
-            <p style="margin:0 0 4px;font-weight:600;font-size:14px;">Shipping To</p>
-            <p style="margin:0;color:#555;font-size:14px;line-height:1.6;">${shippingAddress.fullName}<br>${shippingAddress.address}<br>${shippingAddress.city}, ${shippingAddress.postalCode}<br>${shippingAddress.phone}</p>
+          <div style="background:#f5f5f5;padding:16px;border-radius:6px;margin:20px 0;">
+            <p style="margin:0 0 4px;font-weight:600;font-size:14px;color:#1a1a1a;">Shipping To</p>
+            <p style="margin:0;color:#444;font-size:14px;line-height:1.6;">${shippingAddress.fullName}<br>${shippingAddress.address}<br>${shippingAddress.city}, ${shippingAddress.postalCode}<br>${shippingAddress.phone}</p>
           </div>
 
           <div style="text-align:center;margin:24px 0 16px;">
-            <a href="${siteUrl}/order/${order._id}" style="display:inline-block;padding:14px 32px;background:#111;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">Track My Order</a>
+            <a href="${siteUrl}/order/${order._id}" style="display:inline-block;padding:14px 32px;background:#1a1a1a;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">Track My Order</a>
           </div>
 
-          <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
-          <p style="font-size:13px;color:#999;text-align:center;margin:0;">If you have any questions, reply to this email or contact us at ${adminEmail || 'support@evolexx.lk'}.</p>
-          <p style="font-size:13px;color:#999;text-align:center;margin:8px 0 0;">Thank you for shopping with <strong>Evolexx</strong>!</p>
+          <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;" />
+          <p style="font-size:13px;color:#555;text-align:center;margin:0;">If you have any questions, reply to this email or contact us at ${adminEmail || 'support@evolexx.lk'}.</p>
+          <p style="font-size:13px;color:#555;text-align:center;margin:8px 0 0;">Thank you for shopping with <strong>Evolexx</strong>!</p>
         </div>
       </div>`
     ).catch(err => console.error('Failed to send order confirmation email:', err));
