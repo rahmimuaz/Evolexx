@@ -61,9 +61,36 @@ const OrderDetails = () => {
     return (
       <div className="order-details-page-container">
         <div className="order-details-max-width-wrapper">
-          <p style={{ textAlign: 'center', padding: '50px 0', fontSize: '1.1rem', color: '#555' }}>
-            Loading order details...
-          </p>
+          <div className="order-details-card" style={{ padding: '24px' }}>
+            <div className="skeleton skeleton-title" style={{ width: '60%', height: '24px', marginBottom: '16px' }} />
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
+              <div className="skeleton skeleton-badge" />
+              <div className="skeleton skeleton-badge" style={{ width: '120px' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+              <div>
+                <div className="skeleton skeleton-text" style={{ marginBottom: '10px' }} />
+                <div className="skeleton skeleton-text" style={{ width: '80%', marginBottom: '8px' }} />
+                <div className="skeleton skeleton-text" style={{ width: '70%', marginBottom: '8px' }} />
+                <div className="skeleton skeleton-text" style={{ width: '60%' }} />
+              </div>
+              <div>
+                <div className="skeleton skeleton-text" style={{ marginBottom: '10px' }} />
+                <div className="skeleton skeleton-text" style={{ width: '50%', marginBottom: '8px' }} />
+                <div className="skeleton skeleton-text" style={{ width: '40%' }} />
+              </div>
+            </div>
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderTop: '1px solid #f0f0f0' }}>
+                <div className="skeleton" style={{ width: '80px', height: '80px', borderRadius: '8px', flexShrink: 0 }} />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div className="skeleton skeleton-title" />
+                  <div className="skeleton skeleton-text-short" />
+                </div>
+                <div className="skeleton skeleton-price" style={{ width: '100px' }} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

@@ -667,10 +667,61 @@ export const deleteProduct = async (req, res) => {
 
 
 // Get products by category
+// Handles both new products (saved with subcategory) and legacy products (saved with parent category)
 export const getProductsByCategory = async (req, res) => {
   try {
-    const products = await Product.find({ category: req.params.category });
-    // Serialize variations for JSON response
+    const requestedCategory = req.params.category;
+
+    const categoryHierarchy = {
+      'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches'],
+      'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables', 'Headphones', 'Earbuds', 'Other Accessories'],
+      'Pre-owned Devices': ['Preowned Phones', 'Preowned Laptops', 'Preowned Tablets'],
+    };
+
+    // Detect subcategory from product details (for legacy products saved under parent category)
+    const subcategoryDetectors = {
+      'Mobile Phone': (d) => d && (d.camera || d.batteryCapacity || d.screenSize),
+      'Laptops': (d) => d && (d.graphics || d.display),
+      'Smartwatches': (d) => d && (d.caseMaterial || d.bandMaterial),
+      'Tablets': (d) => d && d.screenSize && !d.camera && !d.graphics,
+      'Preowned Phones': (d) => d && d.batteryHealth,
+      'Preowned Laptops': (d) => d && d.condition && d.graphics,
+      'Preowned Tablets': (d) => d && d.condition && !d.graphics && !d.batteryHealth,
+      'Chargers': (d) => d && d.wattage,
+      'Phone Covers': (d) => d && d.material && d.compatibility && !d.wattage && !d.length,
+      'Screen Protectors': (d) => d && d.features && d.compatibility,
+      'Cables': (d) => d && d.length && d.compatibility,
+      'Headphones': (d) => d && d.driverSize,
+      'Earbuds': (d) => d && d.noiseCancellation && !d.driverSize,
+      'Other Accessories': (d) => d && d.type,
+    };
+
+    // Find parent category if requested category is a subcategory
+    let parentCategory = null;
+    for (const [parent, subs] of Object.entries(categoryHierarchy)) {
+      if (subs.includes(requestedCategory)) {
+        parentCategory = parent;
+        break;
+      }
+    }
+
+    // Query for exact category match
+    let products = await Product.find({ category: requestedCategory });
+
+    // Also check parent category for legacy products saved with the parent instead of subcategory
+    if (parentCategory) {
+      const parentProducts = await Product.find({ category: parentCategory }).lean();
+      const detector = subcategoryDetectors[requestedCategory];
+
+      if (detector && parentProducts.length > 0) {
+        const existingIds = new Set(products.map(p => p._id.toString()));
+        const legacyMatches = parentProducts.filter(
+          p => detector(p.details) && !existingIds.has(p._id.toString())
+        );
+        products = [...products, ...legacyMatches];
+      }
+    }
+
     const serializedProducts = products.map(product => serializeProduct(product));
     res.status(200).json(serializedProducts);
   } catch (error) {

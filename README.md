@@ -89,29 +89,150 @@ A full-stack e-commerce platform for mobile devices and accessories built with t
 ## Features
 
 ### Admin Dashboard
-- Product Management
-  - Add new products with category-specific fields
-  - Edit existing products
-  - Delete products
-  - View all products
-- Order Management
-  - View incoming orders
-  - Approve/deny orders
-  - Track order status
 
-### Product Features
-- Unique Product ID (PID-XXXXX)
-- Category-specific product details
-- Multiple image upload (1-5 images)
-- Automatic product creation date
+- **Dashboard & Analytics**
+  - Overview stats: total products, orders, pending orders, low stock, revenue
+  - Orders line chart (last 7 days) with Chart.js
+  - Clickable stat cards for quick navigation
+  - Real-time notification bell with unread count (low stock, out of stock, new orders)
+
+- **Product Management (Inventory)**
+  - Multi-step product creation form (info, specs, pricing, media, review)
+  - Category-specific fields and specifications (Electronics, Mobile Accessories, Pre-owned, etc.)
+  - Product variations system (storage, color, RAM) with per-variation pricing, stock, and images
+  - Markdown long description editor (SimpleMDE)
+  - Drag-and-drop image upload (1-5 images per product)
+  - Edit and delete products with confirmation modals
+  - Search by name/ID and filter by category
+  - Low stock and out of stock product views with alert banners
+  - New Arrivals management with drag-and-drop ordering
+  - Product display order management with drag-and-drop
+  - KOKO Pay (3-installment) toggle per product
+  - Warranty period selection
+
+- **Order Management**
+  - View all orders with expandable details (items, shipping, payment)
+  - Advanced filtering: search by order ID, customer, product, or address
+  - Filter by order status, payment status, and payment method
+  - Sort by date, total, or status
+  - Accept/decline orders with status tracking
+  - Shipments view for accepted orders ready to ship
+  - PDF shipping label generation with customer and order details
+
+- **Local Sales (POS)**
+  - Create in-store sales with customer info and item selection
+  - Variation-aware product selection with editable pricing
+  - Auto-calculated totals with tax and discount fields
+  - Payment method selection (cash, card, bank transfer, other)
+  - PDF invoice generation and download
+  - QR code generation for invoice URLs
+  - Local sales history list
+
+- **User Management**
+  - View all registered customers and admins
+  - Customer/admin count stats
+  - Search users by name or email
+  - Delete users with confirmation
+  - Register new admin accounts
+
+- **Settings**
+  - Hero video manager (upload/delete desktop and mobile videos)
+  - Enable/disable hero video toggle
+  - Cloudinary integration for video storage
+
+- **Authentication**
+  - Admin login with JWT token-based auth
+  - Admin registration
+  - Auto-redirect and session management
+
+### Client Application
+
+- **Product Browsing**
+  - Homepage with hero video section (configurable desktop/mobile videos)
+  - Product grid with pagination (12 per page)
+  - New Arrivals carousel with swipe/touch support
+  - Category pages with dedicated product listings
+  - Sorting: default, price (low/high), newest, oldest
+  - Filters: price range slider, brand dropdown, in-stock toggle
+  - Real-time search with debounced suggestions and product previews
+
+- **Product Details**
+  - Image gallery with thumbnail navigation and arrow controls
+  - Product variation selector (color swatches, storage/RAM buttons)
+  - Variation-specific pricing, stock, and images
+  - KOKO Pay installment display (3x payment breakdown)
+  - Star ratings and review count
+  - Quantity selector with stock validation
+  - Add to Cart and Buy Now buttons
+  - Tabbed content: Description (markdown), Details (specs table), Comments (reviews)
+  - Review submission (purchase-verified users only)
+  - Related products section
+  - Policy accordions (Security, Delivery, Return)
+  - SEO structured data (JSON-LD)
+  - Breadcrumb navigation
+
+- **Shopping Cart**
+  - Persistent cart synced with backend
+  - Cart item display with variation details and images
+  - Quantity update and item removal
+  - Auto-calculated totals
+  - Cart icon badge with item count
+
+- **Checkout & Payments**
+  - Shipping address form with Sri Lankan city autocomplete
+  - Payment methods: Cash on Delivery, Bank Transfer (with proof upload), Card Payment
+  - Bank transfer modal with account details and file upload (PDF/image, max 5MB)
+  - Order summary with item images and variation details
+  - Form validation and error handling
+
+- **User Authentication**
+  - Email/password registration with strength validation (8+ chars, number, special char)
+  - Email/password login
+  - Google OAuth integration
+  - Modal and standalone page versions
+  - Persistent sessions with token management
+  - Session expiration handling
+
+- **Order Tracking**
+  - My Orders page with all order history
+  - Order status tracking: Pending, Approved, Shipped, Delivered, Declined
+  - Payment status display
+  - Color-coded status badges with icons
+  - Detailed order view (shipping info, payment info, all items)
+  - Track shipment link for shipped orders
+
+- **Invoice**
+  - Invoice view with full customer and item details
+  - PDF invoice download (generated with jsPDF)
+
+- **UI/UX**
+  - Fully responsive design (desktop and mobile)
+  - Auto-hide/show navbar on scroll
+  - Dynamic theme switching (dark on hero, light when scrolled)
+  - Loading spinners and skeleton screens
+  - Toast notifications for user feedback
+  - Reusable modals (click outside or ESC to close)
+  - Floating WhatsApp chat button
+  - Lazy loading and code splitting
+
+- **Information Pages**
+  - Contact page with business info and contact form
+  - Terms & Conditions
+  - Privacy Policy
+  - Refund Policy
+  - Footer with newsletter subscription, social media links, and navigation
 
 ## Technologies Used
 
 - Frontend: React.js, Tailwind CSS
 - Backend: Node.js, Express.js
 - Database: MongoDB
-- Authentication: JWT
-- File Upload: Multer
+- Authentication: JWT, Google OAuth
+- File Upload: Multer, Cloudinary
+- PDF Generation: jsPDF
+- Charts: Chart.js
+- Markdown Editor: SimpleMDE
+- QR Codes: QR code generation for invoices
 
 ## Recent Security Fixes
 

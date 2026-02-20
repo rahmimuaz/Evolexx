@@ -658,8 +658,7 @@ const EditProduct = () => {
 
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
-      // Use main category for filtering (subcategory is not necessary for category filtering)
-      formDataToSend.append('category', formData.category);
+      formDataToSend.append('category', formData.subcategory || formData.category);
       formDataToSend.append('price', formData.price.toString());
       formDataToSend.append('description', formData.description);
       formDataToSend.append('longDescription', formData.longDescription || '');

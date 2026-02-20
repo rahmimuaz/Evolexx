@@ -40,3 +40,192 @@ html, body, #root {
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* ========== Skeleton Screen Utilities ========== */
+.skeleton {
+  background: #e0e0e0;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: skeleton-shimmer 1.5s infinite;
+}
+@keyframes skeleton-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.skeleton-image {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #e0e0e0;
+  border-radius: 0;
+}
+.skeleton-card-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.skeleton-title {
+  height: 16px;
+  width: 75%;
+}
+.skeleton-text {
+  height: 12px;
+  width: 100%;
+}
+.skeleton-text-short {
+  height: 12px;
+  width: 50%;
+}
+.skeleton-stars {
+  height: 14px;
+  width: 90px;
+}
+.skeleton-price {
+  height: 18px;
+  width: 40%;
+  margin-top: 4px;
+}
+.skeleton-badge {
+  height: 24px;
+  width: 80px;
+  border-radius: 12px;
+}
+.skeleton-btn {
+  height: 40px;
+  width: 100%;
+  border-radius: 8px;
+}
+.skeleton-circle {
+  border-radius: 50%;
+}
+.skeleton-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+/* Product detail skeleton */
+.skeleton-pd-container {
+  max-width: 1200px;
+  margin: 90px auto 40px;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+.skeleton-pd-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.skeleton-pd-main-img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+}
+.skeleton-pd-thumbs {
+  display: flex;
+  gap: 8px;
+}
+.skeleton-pd-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+}
+.skeleton-pd-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 10px;
+}
+.skeleton-pd-title {
+  height: 28px;
+  width: 80%;
+}
+.skeleton-pd-price {
+  height: 24px;
+  width: 35%;
+}
+.skeleton-pd-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.skeleton-pd-line {
+  height: 14px;
+}
+.skeleton-pd-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.skeleton-pd-btn {
+  height: 48px;
+  flex: 1;
+  border-radius: 8px;
+}
+@media (max-width: 768px) {
+  .skeleton-pd-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 70px;
+  }
+  .skeleton-pd-thumb {
+    width: 48px;
+    height: 48px;
+  }
+}
+/* Order skeleton */
+.skeleton-order-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.skeleton-order-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.skeleton-order-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* Suspense fallback */
+.skeleton-page {
+  min-height: 100vh;
+  padding-top: 70px;
+}
+.skeleton-page-bar {
+  height: 56px;
+  width: 100%;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+}
+.skeleton-page-content {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}

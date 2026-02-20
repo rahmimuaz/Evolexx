@@ -115,21 +115,24 @@ const Homepage = () => {
   }, []);
 
   const fetchHeroVideoSettings = async () => {
-    // Check if API_BASE_URL is defined
-    if (!API_BASE_URL) {
-      return; // Keep default values
-    }
+    if (!API_BASE_URL) return;
+
+    // Check sessionStorage cache first (avoids API call on repeat visits)
+    try {
+      const cached = sessionStorage.getItem('heroVideoSettings');
+      if (cached) {
+        setHeroVideo(JSON.parse(cached));
+        return;
+      }
+    } catch (e) { /* sessionStorage unavailable */ }
 
     try {
       const response = await axios.get(`${API_BASE_URL}/api/settings/hero-video`, {
         timeout: 5000,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       
       if (response.data) {
-        // Handle both response formats: { value: {...} } or direct settings object
         let settings = null;
         if (response.data.value) {
           settings = response.data.value;
@@ -137,7 +140,6 @@ const Homepage = () => {
           settings = response.data;
         }
         
-        // Always update if we have settings, even if URLs are empty (enabled might have changed)
         if (settings) {
           const newVideoSettings = {
             videoUrl: settings.videoUrl || '',
@@ -145,10 +147,11 @@ const Homepage = () => {
             enabled: settings.enabled !== false
           };
           setHeroVideo(newVideoSettings);
+          try { sessionStorage.setItem('heroVideoSettings', JSON.stringify(newVideoSettings)); } catch (e) { /* ignore */ }
         }
       }
     } catch (error) {
-      // Use default values if API fails - silent fail
+      // Use default values if API fails
     }
   };
 
@@ -253,16 +256,23 @@ const Homepage = () => {
 
   const fetchProducts = async () => {
     try {
-      // Fetch products first (required)
-      const productsRes = await axios.get(`${API_BASE_URL}/api/products`);
+      const [productsRes, newArrivalsRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/products`),
+        axios.get(`${API_BASE_URL}/api/products/new-arrivals`).catch(() => null)
+      ]);
+
       setProducts(productsRes.data);
-      
-      // Use newest products as new arrivals (sorted by creation date)
-      const sortedByDate = [...productsRes.data].sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setNewArrivals(sortedByDate.slice(0, 7));
-      
+
+      if (newArrivalsRes && newArrivalsRes.data && newArrivalsRes.data.length > 0) {
+        setNewArrivals(newArrivalsRes.data);
+      } else {
+        // Fallback: use newest products if no admin-selected new arrivals
+        const sortedByDate = [...productsRes.data].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setNewArrivals(sortedByDate.slice(0, 7));
+      }
+
       setLoading(false);
     } catch (error) {
       setError('Error fetching products. Please try again later.');
@@ -641,8 +651,19 @@ const Homepage = () => {
 
         <div className={`product-grid-container ${animationDirection}`}>
           {loading && products.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-              Loading products...
+            <div className="product-grid">
+              {Array.from({ length: productsPerPage }).map((_, i) => (
+                <div className="skeleton-card" key={i}>
+                  <div className="skeleton skeleton-image" />
+                  <div className="skeleton-card-body">
+                    <div className="skeleton skeleton-title" />
+                    <div className="skeleton skeleton-text" />
+                    <div className="skeleton skeleton-text-short" />
+                    <div className="skeleton skeleton-stars" />
+                    <div className="skeleton skeleton-price" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
           <div className="product-grid">

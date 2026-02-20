@@ -54,7 +54,27 @@ const MyOrders = () => {
   }, [user]);
 
   if (!user) return <div className="orders-message">Please log in to view your orders.</div>;
-  if (loading) return <div className="orders-message">Loading your orders...</div>;
+  if (loading) return (
+    <div className="orders-container">
+      <div className="orders-header">
+        <div className="skeleton skeleton-title" style={{ width: '180px', height: '24px' }} />
+        <div className="skeleton skeleton-text" style={{ width: '240px', height: '14px', marginTop: '8px' }} />
+      </div>
+      <div className="orders-grid">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div className="skeleton-order-card" key={i}>
+            <div className="skeleton skeleton-order-img" />
+            <div className="skeleton-order-body">
+              <div className="skeleton skeleton-title" />
+              <div className="skeleton skeleton-text" />
+              <div className="skeleton skeleton-text-short" />
+              <div className="skeleton skeleton-badge" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
   if (error) return <div className="orders-message error">{error}</div>;
 
   const getImageUrl = (imagePath) => {

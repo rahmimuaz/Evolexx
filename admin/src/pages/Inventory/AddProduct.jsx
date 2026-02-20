@@ -547,9 +547,7 @@ const AddProduct = () => {
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
       
-      // Use main category for filtering (subcategory is not necessary for category filtering)
-      // Save the main category as the category value
-      const categoryValue = formData.category;
+      const categoryValue = formData.subcategory || formData.category;
       formDataToSend.append('category', categoryValue);
       
       formDataToSend.append('price', formData.price);

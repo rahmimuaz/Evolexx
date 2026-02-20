@@ -154,7 +154,7 @@ const Navbar = () => {
         <div className="navbar-center">
           <div className="navbar-links">
             <Link to="/" className={`navbar-link ${location.pathname === '/' ? 'active-link' : ''}`}>Home</Link>
-            <Link to="/category/preowned-phones" className={`navbar-link ${location.pathname === '/category/preowned-phones' ? 'active-link' : ''}`}>Pre Owned</Link>
+            <Link to="/category/mobile-phones" className={`navbar-link ${location.pathname === '/category/mobile-phones' ? 'active-link' : ''}`}>Brand New</Link>
             <Link to="/category/mobile-accessories" className={`navbar-link ${location.pathname === '/category/mobile-accessories' ? 'active-link' : ''}`}>Accessories</Link>
           </div>
         </div>

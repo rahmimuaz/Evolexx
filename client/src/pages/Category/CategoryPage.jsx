@@ -154,7 +154,6 @@ const CategoryPage = () => {
     setCurrentPage(1);
   };
 
-  if (loading) return <div className="loader">Loading products...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!categoryName) return null; // Will redirect via useEffect
 
@@ -221,7 +220,24 @@ const CategoryPage = () => {
         </div>
       )}
 
-      {currentProducts.length === 0 ? (
+      {loading ? (
+        <div className="product-grid-container">
+          <div className="product-grid">
+            {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
+              <div className="skeleton-card" key={i}>
+                <div className="skeleton skeleton-image" />
+                <div className="skeleton-card-body">
+                  <div className="skeleton skeleton-title" />
+                  <div className="skeleton skeleton-text" />
+                  <div className="skeleton skeleton-text-short" />
+                  <div className="skeleton skeleton-stars" />
+                  <div className="skeleton skeleton-price" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : currentProducts.length === 0 ? (
         <div className="no-products">
           <p>No products found in this category.</p>
           <Link to="/" className="back-home-link">← Back to Home</Link>

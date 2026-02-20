@@ -1063,7 +1063,32 @@ const ProductDetail = () => {
     };
   }, [product, reviews, API_BASE_URL]);
 
-  if (loading) return <div className="pd-loading"><div className="pd-spinner"></div></div>;
+  if (loading) return (
+    <div className="skeleton-pd-container">
+      <div className="skeleton-pd-gallery">
+        <div className="skeleton skeleton-pd-main-img" />
+        <div className="skeleton-pd-thumbs">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div className="skeleton skeleton-pd-thumb" key={i} />
+          ))}
+        </div>
+      </div>
+      <div className="skeleton-pd-info">
+        <div className="skeleton skeleton-pd-title" />
+        <div className="skeleton skeleton-pd-price" />
+        <div className="skeleton skeleton-pd-desc">
+          <div className="skeleton skeleton-pd-line" style={{ width: '100%' }} />
+          <div className="skeleton skeleton-pd-line" style={{ width: '90%' }} />
+          <div className="skeleton skeleton-pd-line" style={{ width: '75%' }} />
+        </div>
+        <div className="skeleton skeleton-badge" />
+        <div className="skeleton-pd-actions">
+          <div className="skeleton skeleton-pd-btn" />
+          <div className="skeleton skeleton-pd-btn" />
+        </div>
+      </div>
+    </div>
+  );
   if (error) return <div className="pd-error">{error}</div>;
   if (!product) return <div className="pd-not-found">Product not found.</div>;
 

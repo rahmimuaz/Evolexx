@@ -31,6 +31,39 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
+// Browser cache headers for API responses
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+
+  const path = req.path;
+
+  // No caching for private/user-specific data
+  if (path.startsWith('/api/users') || path.startsWith('/api/orders') || path.startsWith('/api/tobeshipped') || path.startsWith('/api/admin') || path.startsWith('/api/upload') || path.startsWith('/api/local-sales')) {
+    res.set('Cache-Control', 'no-store');
+    return next();
+  }
+
+  // 5 min cache for settings (rarely changes)
+  if (path.startsWith('/api/settings')) {
+    res.set('Cache-Control', 'public, max-age=300');
+    return next();
+  }
+
+  // 1 min cache for search results
+  if (path === '/api/products/search') {
+    res.set('Cache-Control', 'public, max-age=60');
+    return next();
+  }
+
+  // 2 min cache for product data
+  if (path.startsWith('/api/products')) {
+    res.set('Cache-Control', 'public, max-age=120');
+    return next();
+  }
+
+  next();
+});
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => {

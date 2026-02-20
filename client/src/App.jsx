@@ -25,10 +25,23 @@ const PrivacyPolicy = lazy(() => import('./pages/Legal/PrivacyPolicy'));
 const TermsConditions = lazy(() => import('./pages/Legal/TermsConditions'));
 const InvoiceView = lazy(() => import('./pages/Invoice/InvoiceView'));
 
-// Loading fallback component
 const LoadingFallback = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-    <div>Loading...</div>
+  <div className="skeleton-page">
+    <div className="skeleton-page-content">
+      <div className="skeleton skeleton-title" style={{ width: '40%', height: '24px' }} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div className="skeleton-card" key={i}>
+            <div className="skeleton skeleton-image" />
+            <div className="skeleton-card-body">
+              <div className="skeleton skeleton-title" />
+              <div className="skeleton skeleton-text" />
+              <div className="skeleton skeleton-price" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   </div>
 );
 
