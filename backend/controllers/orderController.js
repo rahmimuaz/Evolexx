@@ -330,17 +330,21 @@ export const createOrder = asyncHandler(async (req, res) => {
   
   const updatedProducts = await Promise.all(stockUpdatePromises);
   
-  // Check for low stock and send emails asynchronously (don't block order creation)
+  // Check for low stock and send alert emails asynchronously
+  const alertEmail = process.env.ALERT_EMAIL_USER || process.env.EMAIL_USER;
   updatedProducts.forEach((updatedProduct) => {
-    if (updatedProduct.stock > 0 && updatedProduct.stock < 5) {
-      // Send email asynchronously without awaiting (only if EMAIL_USER is configured)
-      if (process.env.EMAIL_USER) {
-        sendEmail(
-          process.env.EMAIL_USER,
-          'Low Stock Alert',
-          `Product "${updatedProduct.name}" is low on stock. Only ${updatedProduct.stock} left.`
-        ).catch(err => console.error('Failed to send low stock alert email:', err));
-      }
+    if (updatedProduct && updatedProduct.stock > 0 && updatedProduct.stock < 5 && alertEmail) {
+      sendEmail(
+        alertEmail,
+        `⚠️ Low Stock Alert — ${updatedProduct.name}`,
+        `<div style="font-family:Arial,sans-serif;max-width:500px;margin:auto;border:1px solid #fbbf24;border-radius:8px;overflow:hidden;">
+          <div style="background:#fbbf24;padding:14px 20px;"><h3 style="margin:0;color:#333;">Low Stock Alert</h3></div>
+          <div style="padding:20px;">
+            <p style="margin:0 0 8px;"><strong>${updatedProduct.name}</strong></p>
+            <p style="margin:0;color:#dc2626;font-size:18px;font-weight:700;">Only ${updatedProduct.stock} left in stock</p>
+          </div>
+        </div>`
+      ).catch(err => console.error('Failed to send low stock alert email:', err));
     }
   });
 
@@ -371,45 +375,115 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     const order = await Order.create(orderData);
 
-    // Send emails asynchronously without blocking order creation (fire-and-forget)
-    // Admin notification email (only if EMAIL_USER is configured)
-    if (process.env.EMAIL_USER) {
+    // Build order items HTML for emails
+    const orderItemsHtml = finalOrderItems.map(item => {
+      const itemName = item.name || 'Product';
+      const itemQty = item.quantity;
+      const itemPrice = item.price;
+      const itemTotal = (itemPrice * itemQty).toLocaleString('en-LK', { minimumFractionDigits: 2 });
+      let variationText = '';
+      if (item.selectedVariation && item.selectedVariation.attributes) {
+        const attrs = item.selectedVariation.attributes instanceof Map
+          ? Object.fromEntries(item.selectedVariation.attributes.entries())
+          : item.selectedVariation.attributes;
+        variationText = Object.entries(attrs).map(([k, v]) => `${k}: ${v}`).join(', ');
+      }
+      return `
+        <tr>
+          <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;">${itemName}${variationText ? `<br><span style="font-size:12px;color:#888;">${variationText}</span>` : ''}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">${itemQty}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:right;">Rs. ${itemTotal}</td>
+        </tr>`;
+    }).join('');
+
+    const siteUrl = process.env.SITE_URL || 'https://www.evolexx.lk';
+    const adminEmail = process.env.ALERT_EMAIL_USER || process.env.EMAIL_USER;
+    const orderDate = new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const totalFormatted = finalTotalPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 });
+
+    // --- Admin notification email ---
+    if (adminEmail) {
       sendEmail(
-        process.env.EMAIL_USER,
-        'New Order Received',
-        `Evolexx Store\nNew Order Received\nA new order has been placed. Order ID: ${order._id}\n\nView Order: http://localhost:3000/admin/orders/${order._id}`
+        adminEmail,
+        `New Order #${orderNumber} — Rs. ${totalFormatted}`,
+        `<div style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:auto;">
+          <div style="background:#111;padding:20px 24px;border-radius:8px 8px 0 0;">
+            <h2 style="color:#fff;margin:0;font-size:18px;">New Order Received</h2>
+          </div>
+          <div style="border:1px solid #e5e5e5;border-top:none;padding:24px;border-radius:0 0 8px 8px;">
+            <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+              <tr><td style="padding:4px 0;color:#888;width:140px;">Order Number</td><td style="padding:4px 0;font-weight:600;">${orderNumber}</td></tr>
+              <tr><td style="padding:4px 0;color:#888;">Date</td><td style="padding:4px 0;">${orderDate}</td></tr>
+              <tr><td style="padding:4px 0;color:#888;">Customer</td><td style="padding:4px 0;">${shippingAddress.fullName}</td></tr>
+              <tr><td style="padding:4px 0;color:#888;">Email</td><td style="padding:4px 0;">${shippingAddress.email}</td></tr>
+              <tr><td style="padding:4px 0;color:#888;">Phone</td><td style="padding:4px 0;">${shippingAddress.phone}</td></tr>
+              <tr><td style="padding:4px 0;color:#888;">Address</td><td style="padding:4px 0;">${shippingAddress.address}, ${shippingAddress.city} ${shippingAddress.postalCode}</td></tr>
+              <tr><td style="padding:4px 0;color:#888;">Payment</td><td style="padding:4px 0;">${paymentMethod.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td></tr>
+            </table>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr style="background:#f8f8f8;">
+                <th style="padding:10px 12px;text-align:left;font-size:13px;color:#555;">Item</th>
+                <th style="padding:10px 12px;text-align:center;font-size:13px;color:#555;">Qty</th>
+                <th style="padding:10px 12px;text-align:right;font-size:13px;color:#555;">Price</th>
+              </tr></thead>
+              <tbody>${orderItemsHtml}</tbody>
+              <tfoot><tr style="background:#f8f8f8;">
+                <td colspan="2" style="padding:12px;font-weight:700;">Total</td>
+                <td style="padding:12px;text-align:right;font-weight:700;font-size:16px;">Rs. ${totalFormatted}</td>
+              </tr></tfoot>
+            </table>
+          </div>
+        </div>`
       ).catch(err => console.error('Failed to send admin notification email:', err));
     }
 
-    // User confirmation email
+    // --- Customer confirmation email ---
     sendEmail(
       order.shippingAddress.email,
-      'Your Order Confirmation - Evolexx',
-      `
-      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 8px;">
-        <h2 style="color: #4CAF50;">✅ Thank you for your order!</h2>
-        <p>Hi there,</p>
-        <p>We've received your order and it's currently being processed.</p>
-        
-        <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #4CAF50;">
-          <strong>Order ID:</strong> ${order._id}<br>
-          <strong>Placed on:</strong> ${new Date(order.createdAt).toLocaleDateString()}
+      `Order Confirmed — #${orderNumber}`,
+      `<div style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:auto;">
+        <div style="background:#111;padding:24px;border-radius:8px 8px 0 0;text-align:center;">
+          <h1 style="color:#fff;margin:0;font-size:22px;letter-spacing:2px;">EVOLEXX</h1>
         </div>
+        <div style="border:1px solid #e5e5e5;border-top:none;padding:28px 24px;border-radius:0 0 8px 8px;">
+          <h2 style="margin:0 0 8px;font-size:20px;">Thank you for your order!</h2>
+          <p style="color:#666;margin:0 0 20px;">Hi ${shippingAddress.fullName}, your order has been placed successfully and is being processed.</p>
 
-        <p>You'll receive another email once your order is shipped.</p>
-        <p>You can track your order status using the link below:</p>
+          <div style="background:#f9f9f9;padding:16px;border-radius:6px;margin-bottom:20px;">
+            <table style="width:100%;border-collapse:collapse;">
+              <tr><td style="padding:4px 0;color:#888;width:130px;">Order Number</td><td style="padding:4px 0;font-weight:600;">${orderNumber}</td></tr>
+              <tr><td style="padding:4px 0;color:#888;">Date</td><td style="padding:4px 0;">${orderDate}</td></tr>
+              <tr><td style="padding:4px 0;color:#888;">Payment Method</td><td style="padding:4px 0;">${paymentMethod.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td></tr>
+            </table>
+          </div>
 
-        <a href="https://evolexx.vercel.app/order/${order._id}" 
-           style="display: inline-block; padding: 12px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; margin: 10px 0;">
-           View My Order
-        </a>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:4px;">
+            <thead><tr style="background:#f8f8f8;">
+              <th style="padding:10px 12px;text-align:left;font-size:13px;color:#555;">Item</th>
+              <th style="padding:10px 12px;text-align:center;font-size:13px;color:#555;">Qty</th>
+              <th style="padding:10px 12px;text-align:right;font-size:13px;color:#555;">Price</th>
+            </tr></thead>
+            <tbody>${orderItemsHtml}</tbody>
+            <tfoot><tr style="background:#f8f8f8;">
+              <td colspan="2" style="padding:12px;font-weight:700;">Total</td>
+              <td style="padding:12px;text-align:right;font-weight:700;font-size:16px;">Rs. ${totalFormatted}</td>
+            </tr></tfoot>
+          </table>
 
-        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;" />
+          <div style="background:#f9f9f9;padding:16px;border-radius:6px;margin:20px 0;">
+            <p style="margin:0 0 4px;font-weight:600;font-size:14px;">Shipping To</p>
+            <p style="margin:0;color:#555;font-size:14px;line-height:1.6;">${shippingAddress.fullName}<br>${shippingAddress.address}<br>${shippingAddress.city}, ${shippingAddress.postalCode}<br>${shippingAddress.phone}</p>
+          </div>
 
-        <p style="font-size: 14px;">If you have any questions, feel free to reply to this email or contact our support.</p>
-        <p style="font-size: 14px;">Thank you for shopping with <strong>Evolexx Store</strong>!</p>
-      </div>
-      `
+          <div style="text-align:center;margin:24px 0 16px;">
+            <a href="${siteUrl}/order/${order._id}" style="display:inline-block;padding:14px 32px;background:#111;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">Track My Order</a>
+          </div>
+
+          <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
+          <p style="font-size:13px;color:#999;text-align:center;margin:0;">If you have any questions, reply to this email or contact us at ${adminEmail || 'support@evolexx.lk'}.</p>
+          <p style="font-size:13px;color:#999;text-align:center;margin:8px 0 0;">Thank you for shopping with <strong>Evolexx</strong>!</p>
+        </div>
+      </div>`
     ).catch(err => console.error('Failed to send order confirmation email:', err));
 
 
