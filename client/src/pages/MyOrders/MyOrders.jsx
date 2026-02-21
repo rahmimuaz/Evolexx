@@ -53,6 +53,7 @@ const MyOrders = () => {
       }
     };
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on user change; selectedOrder used to avoid overwriting initial selection
   }, [user]);
 
   useEffect(() => {
