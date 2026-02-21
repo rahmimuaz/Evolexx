@@ -44,6 +44,7 @@ const Homepage = () => {
     mobileWebmUrl: '',
     enabled: true
   });
+  const [heroLoading, setHeroLoading] = useState(true);
 
   const productsPerPage = 12;
   const productSectionRef = useRef(null);
@@ -115,13 +116,17 @@ const Homepage = () => {
   }, []);
 
   const fetchHeroVideoSettings = async () => {
-    if (!API_BASE_URL) return;
+    if (!API_BASE_URL) {
+      setHeroLoading(false);
+      return;
+    }
 
     // Check sessionStorage cache first (avoids API call on repeat visits)
     try {
       const cached = sessionStorage.getItem('heroVideoSettings');
       if (cached) {
         setHeroVideo(JSON.parse(cached));
+        setHeroLoading(false);
         return;
       }
     } catch (e) { /* sessionStorage unavailable */ }
@@ -152,6 +157,8 @@ const Homepage = () => {
       }
     } catch (error) {
       // Use default values if API fails
+    } finally {
+      setHeroLoading(false);
     }
   };
 
@@ -411,75 +418,89 @@ const Homepage = () => {
     <div className="home">
       {/* Hero Section with Video Background */}
       <section className="banner">
-        {/* Video Background - Only show if enabled and at least one video URL exists */}
-        {heroVideo.enabled && (heroVideo.videoUrl || heroVideo.mobileVideoUrl) && (
-          <div className="hero-video-container">
-            {/* Desktop Video - Hidden on mobile */}
-            {heroVideo.videoUrl && (
-              <video 
-                className="hero-video hero-video-desktop" 
-                autoPlay 
-                muted 
-                loop 
-                playsInline
-                preload="metadata"
-              >
-                <source src={heroVideo.videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+        {heroLoading ? (
+          <div className="hero-skeleton">
+            <div className="hero-skeleton-content">
+              <div className="skeleton skeleton-hero-logo" />
+              <div className="skeleton skeleton-hero-title1" />
+              <div className="skeleton skeleton-hero-title2" />
+              <div className="skeleton skeleton-hero-subtitle" />
+              <div className="skeleton skeleton-hero-btn" />
+              <div className="skeleton skeleton-hero-product" />
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Video Background - Only show if enabled and at least one video URL exists */}
+            {heroVideo.enabled && (heroVideo.videoUrl || heroVideo.mobileVideoUrl) && (
+              <div className="hero-video-container">
+                {/* Desktop Video - Hidden on mobile */}
+                {heroVideo.videoUrl && (
+                  <video 
+                    className="hero-video hero-video-desktop" 
+                    autoPlay 
+                    muted 
+                    loop 
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src={heroVideo.videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                
+                {/* Mobile Video - Hidden on desktop */}
+                {heroVideo.mobileVideoUrl ? (
+                  <video 
+                    className="hero-video hero-video-mobile" 
+                    autoPlay 
+                    muted 
+                    loop 
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src={heroVideo.mobileVideoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : heroVideo.videoUrl ? (
+                  <video 
+                    className="hero-video hero-video-mobile" 
+                    autoPlay 
+                    muted 
+                    loop 
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src={heroVideo.videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : null}
+                
+                <div className="hero-video-overlay"></div>
+              </div>
             )}
             
-            {/* Mobile Video - Hidden on desktop */}
-            {heroVideo.mobileVideoUrl ? (
-              <video 
-                className="hero-video hero-video-mobile" 
-                autoPlay 
-                muted 
-                loop 
-                playsInline
-                preload="metadata"
-              >
-                <source src={heroVideo.mobileVideoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            ) : heroVideo.videoUrl ? (
-              // Fallback: Use desktop video on mobile if no mobile video is set
-              <video 
-                className="hero-video hero-video-mobile" 
-                autoPlay 
-                muted 
-                loop 
-                playsInline
-                preload="metadata"
-              >
-                <source src={heroVideo.videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            ) : null}
-            
-            <div className="hero-video-overlay"></div>
-          </div>
-        )}
-        
-        <div className="hero-content">
-          <div className="hero-text">
-            <div className="brand-logo-container">
-              <svg className="hero-apple-logo" viewBox="0 0 24 24" fill="white">
-                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-              </svg>
+            <div className="hero-content">
+              <div className="hero-text">
+                <div className="brand-logo-container">
+                  <svg className="hero-apple-logo" viewBox="0 0 24 24" fill="white">
+                    <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                  </svg>
+                </div>
+                <h1 className="hero-title-line1">The Future of Design.</h1>
+                <h1 className="hero-title-line2">In Your Hands</h1>
+                <p className="hero-subtitle">New iPhone Series - Sleeker. Smarter. Stronger.</p>
+                <button className="hero-cta-button">
+                  <span className="cta-text">BUY NOW</span>
+                  <span className="cta-arrow">→</span>
+                </button>
+              </div>
+              <div className="hero-product-display">
+                <img src="/iPhone17ProMax.jpg" alt="iPhone 17 Pro" className="hero-product-image" />
+              </div>
             </div>
-            <h1 className="hero-title-line1">The Future of Design.</h1>
-            <h1 className="hero-title-line2">In Your Hands</h1>
-            <p className="hero-subtitle">New iPhone Series - Sleeker. Smarter. Stronger.</p>
-            <button className="hero-cta-button">
-              <span className="cta-text">BUY NOW</span>
-              <span className="cta-arrow">→</span>
-            </button>
-          </div>
-          <div className="hero-product-display">
-            <img src="/iPhone17ProMax.jpg" alt="iPhone 17 Pro" className="hero-product-image" />
-          </div>
-        </div>
+          </>
+        )}
       </section>
 
       <section className="category-section" ref={categorySectionRef}>

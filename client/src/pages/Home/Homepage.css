@@ -158,6 +158,74 @@
   font-size: 1.2rem;
 }
 
+/* HERO SKELETON */
+.hero-skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-skeleton-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 600px;
+  width: 90%;
+}
+.skeleton-hero-logo {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15) !important;
+}
+.skeleton-hero-logo::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent) !important;
+}
+.skeleton-hero-title1 {
+  height: 48px;
+  width: 280px;
+  background: rgba(255,255,255,0.15) !important;
+  border-radius: 8px;
+}
+.skeleton-hero-title2 {
+  height: 40px;
+  width: 220px;
+  background: rgba(255,255,255,0.12) !important;
+  border-radius: 8px;
+}
+.skeleton-hero-subtitle {
+  height: 20px;
+  width: 320px;
+  background: rgba(255,255,255,0.1) !important;
+  border-radius: 6px;
+}
+.skeleton-hero-btn {
+  height: 48px;
+  width: 140px;
+  background: rgba(255,255,255,0.15) !important;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+.skeleton-hero-product {
+  width: 300px;
+  height: 200px;
+  max-width: 90%;
+  background: rgba(255,255,255,0.1) !important;
+  border-radius: 12px;
+  margin-top: 24px;
+}
+@media (max-width: 768px) {
+  .skeleton-hero-logo { width: 50px; height: 50px; }
+  .skeleton-hero-title1 { height: 36px; width: 200px; }
+  .skeleton-hero-title2 { height: 28px; width: 160px; }
+  .skeleton-hero-subtitle { width: 240px; }
+  .skeleton-hero-product { width: 220px; height: 150px; }
+}
+
 /* HERO SECTION - VIDEO BACKGROUND */
 .banner {
   position: relative;
