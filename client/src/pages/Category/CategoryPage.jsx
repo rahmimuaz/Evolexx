@@ -125,10 +125,10 @@ const CategoryPage = () => {
       setTimeout(() => {
         setCurrentPage(pageNumber);
         setAnimationDirection('');
-        if (headingRef.current) {
-          const topPos = headingRef.current.getBoundingClientRect().top + window.pageYOffset;
-          window.scrollTo({ top: topPos - 80, behavior: 'smooth' });
-        }
+        // Scroll to top so products show at top (works on mobile and desktop)
+        setTimeout(() => {
+          headingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
       }, 400);
     }
   };

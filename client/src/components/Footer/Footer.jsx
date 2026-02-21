@@ -143,14 +143,14 @@ const Footer = ({ showBrands = false }) => {
           <span className="footer-logo-text">EVOLEXX</span>
         </div>
 
-        {/* Navigation Links */}
+        {/* Navigation Links - onClick scrolls to top when navigating from footer (e.g. mobile) */}
         <nav className="footer-nav">
-          <Link to="/category/mobile-phones" className="footer-nav-link">Mobiles</Link>
-          <Link to="/category/mobile-accessories" className="footer-nav-link">Accessories</Link>
-          <Link to="/contact" className="footer-nav-link">Contact</Link>
-          <Link to="/refund-policy" className="footer-nav-link">Refund Policy</Link>
-          <Link to="/privacy-policy" className="footer-nav-link">Privacy Policy</Link>
-          <Link to="/terms" className="footer-nav-link">Terms & Conditions</Link>
+          <Link to="/category/mobile-phones" className="footer-nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}>Mobiles</Link>
+          <Link to="/category/mobile-accessories" className="footer-nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}>Accessories</Link>
+          <Link to="/contact" className="footer-nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}>Contact</Link>
+          <Link to="/refund-policy" className="footer-nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}>Refund Policy</Link>
+          <Link to="/privacy-policy" className="footer-nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}>Privacy Policy</Link>
+          <Link to="/terms" className="footer-nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}>Terms & Conditions</Link>
         </nav>
 
         {/* Social Icons */}

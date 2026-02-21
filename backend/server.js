@@ -130,6 +130,19 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ message: err.message });
   }
 
+  // Auth errors (expired token, invalid token, not authorized) - return 401
+  const isAuthError =
+    err.message?.includes('Not authorized') ||
+    err.message?.includes('session') ||
+    err.message?.includes('expired') ||
+    err.message?.includes('token') ||
+    err.message?.includes('log in again');
+  if (isAuthError) {
+    return res.status(401).json({
+      message: err.message || 'Session expired. Please log in again.',
+    });
+  }
+
   res.status(500).json({
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined // Only show full error in development

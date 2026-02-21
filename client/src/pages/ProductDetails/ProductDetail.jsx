@@ -42,8 +42,24 @@ const ProductDetail = () => {
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+  // Close image preview on Escape and prevent body scroll
+  useEffect(() => {
+    if (!imagePreviewOpen) return;
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') setImagePreviewOpen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [imagePreviewOpen]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -1064,27 +1080,66 @@ const ProductDetail = () => {
   }, [product, reviews, API_BASE_URL]);
 
   if (loading) return (
-    <div className="skeleton-pd-container">
-      <div className="skeleton-pd-gallery">
-        <div className="skeleton skeleton-pd-main-img" />
-        <div className="skeleton-pd-thumbs">
+    <div className="pd-page">
+      <div className="pd-breadcrumb">
+        <span className="skeleton skeleton-pd-breadcrumb" />
+      </div>
+      <div className="pd-main">
+        <div className="pd-thumbnails">
           {Array.from({ length: 4 }).map((_, i) => (
             <div className="skeleton skeleton-pd-thumb" key={i} />
           ))}
         </div>
-      </div>
-      <div className="skeleton-pd-info">
-        <div className="skeleton skeleton-pd-title" />
-        <div className="skeleton skeleton-pd-price" />
-        <div className="skeleton skeleton-pd-desc">
-          <div className="skeleton skeleton-pd-line" style={{ width: '100%' }} />
-          <div className="skeleton skeleton-pd-line" style={{ width: '90%' }} />
-          <div className="skeleton skeleton-pd-line" style={{ width: '75%' }} />
+        <div className="pd-main-image">
+          <div className="skeleton skeleton-pd-main-img" />
         </div>
-        <div className="skeleton skeleton-badge" />
-        <div className="skeleton-pd-actions">
-          <div className="skeleton skeleton-pd-btn" />
-          <div className="skeleton skeleton-pd-btn" />
+        <div className="pd-info">
+          <div className="skeleton skeleton-pd-brand" />
+          <div className="skeleton skeleton-pd-title" />
+          <div className="pd-price-row">
+            <div className="skeleton skeleton-pd-price" />
+            <div className="skeleton skeleton-pd-old-price" />
+          </div>
+          <div className="pd-rating-row">
+            <div className="skeleton skeleton-pd-stars" />
+            <div className="skeleton skeleton-pd-rating-text" />
+          </div>
+          <div className="skeleton-pd-desc">
+            <div className="skeleton skeleton-pd-line" style={{ width: '100%' }} />
+            <div className="skeleton skeleton-pd-line" style={{ width: '90%' }} />
+            <div className="skeleton skeleton-pd-line" style={{ width: '75%' }} />
+          </div>
+          <div className="pd-option-section">
+            <div className="skeleton skeleton-pd-option-label" />
+            <div className="pd-variant-thumbnails" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div className="skeleton skeleton-pd-variant-thumb" key={i} />
+              ))}
+            </div>
+          </div>
+          <div className="pd-quantity-row">
+            <div className="skeleton skeleton-pd-qty" />
+            <div className="skeleton skeleton-pd-wishlist" />
+          </div>
+          <div className="pd-actions">
+            <div className="skeleton skeleton-pd-btn" />
+            <div className="skeleton skeleton-pd-btn" />
+          </div>
+          <div className="pd-policy-accordion">
+            <div className="skeleton skeleton-pd-policy" />
+          </div>
+        </div>
+      </div>
+      <div className="pd-tabs">
+        <div className="skeleton skeleton-pd-tab" />
+        <div className="skeleton skeleton-pd-tab" />
+        <div className="skeleton skeleton-pd-tab" />
+      </div>
+      <div className="pd-tab-content">
+        <div className="skeleton-pd-tab-lines">
+          <div className="skeleton skeleton-pd-line" style={{ width: '100%' }} />
+          <div className="skeleton skeleton-pd-line" style={{ width: '95%' }} />
+          <div className="skeleton skeleton-pd-line" style={{ width: '85%' }} />
         </div>
       </div>
     </div>
@@ -1141,15 +1196,77 @@ const ProductDetail = () => {
             </>
           )}
           {currentMainImageUrl ? (
-            <img 
-              src={currentMainImageUrl} 
-              alt={product.name} 
-              onError={(e) => (e.target.src = '/logo192.png')}
-            />
+            <div 
+              className="pd-image-slider-wrapper"
+              onClick={() => setImagePreviewOpen(true)}
+            >
+              <div 
+                className="pd-image-slider-track"
+                style={{
+                  transform: `translateX(-${(getCurrentImages().findIndex(img => mainImage === img) || 0) * 100}%)`,
+                }}
+              >
+                {getCurrentImages().map((img, i) => (
+                  <div key={i} className="pd-image-slider-item">
+                    <img 
+                      src={cleanImagePath(img)} 
+                      alt={`${product.name} ${i + 1}`} 
+                      onError={(e) => (e.target.src = '/logo192.png')}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <div className="pd-no-image">No Image Available</div>
           )}
         </div>
+
+        {/* Image Preview Lightbox */}
+        {imagePreviewOpen && currentMainImageUrl && (
+          <div 
+            className="pd-image-preview-overlay"
+            onClick={() => setImagePreviewOpen(false)}
+            aria-label="Close image preview"
+          >
+            <div className="pd-image-preview-content" onClick={(e) => e.stopPropagation()}>
+              {getCurrentImages().length > 1 && (
+                <>
+                  <button 
+                    className="pd-image-preview-nav pd-image-preview-nav-left"
+                    onClick={() => navigateImage('prev')}
+                    aria-label="Previous image"
+                    type="button"
+                  >
+                    <FaChevronLeft />
+                  </button>
+                  <button 
+                    className="pd-image-preview-nav pd-image-preview-nav-right"
+                    onClick={() => navigateImage('next')}
+                    aria-label="Next image"
+                    type="button"
+                  >
+                    <FaChevronRight />
+                  </button>
+                </>
+              )}
+              <img 
+                src={currentMainImageUrl} 
+                alt={product.name}
+                onClick={(e) => e.stopPropagation()}
+                onError={(e) => (e.target.src = '/logo192.png')}
+              />
+              <button 
+                className="pd-image-preview-close"
+                onClick={() => setImagePreviewOpen(false)}
+                aria-label="Close"
+                type="button"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Product Info */}
         <div className="pd-info">

@@ -19,35 +19,30 @@ export const UserProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Set up axios interceptor to handle expired tokens
+  // Set up axios interceptor to handle session expiration (401 Unauthorized)
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
-        // Check if error is 401 (Unauthorized) and message indicates expired session
-        if (
-          error.response?.status === 401 &&
-          (error.response?.data?.message?.includes('expired') ||
-            error.response?.data?.message?.includes('session') ||
-            error.response?.data?.message?.includes('log in again'))
-        ) {
-          // Clear user data silently (don't show logout success message)
+        // 401 = session expired, invalid token, or not authorized
+        if (error.response?.status === 401) {
+          const hadUser = !!localStorage.getItem('userInfo');
+          // Clear user data
           localStorage.removeItem('userInfo');
           setUser(null);
-          
-          // Show message to user
-          toast.error('Your session has expired. Please log in again.', {
-            autoClose: 5000,
-          });
+
+          // Only show alert if user was logged in (avoids duplicate toasts on login failure)
+          if (hadUser) {
+            toast.error('Session expired. Please log in again.', {
+              autoClose: 5000,
+            });
+          }
         }
         return Promise.reject(error);
       }
     );
 
-    // Cleanup interceptor on unmount
-    return () => {
-      axios.interceptors.response.eject(interceptor);
-    };
+    return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
   const login = async (email, password) => {

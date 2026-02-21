@@ -62,13 +62,23 @@ const MyOrders = () => {
       </div>
       <div className="orders-grid">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div className="skeleton-order-card" key={i}>
-            <div className="skeleton skeleton-order-img" />
-            <div className="skeleton-order-body">
-              <div className="skeleton skeleton-title" />
-              <div className="skeleton skeleton-text" />
-              <div className="skeleton skeleton-text-short" />
-              <div className="skeleton skeleton-badge" />
+          <div className="order-card" key={i}>
+            <div className="order-image">
+              <div className="skeleton skeleton-order-img" />
+            </div>
+            <div className="order-card-header">
+              <div className="order-info">
+                <div className="skeleton skeleton-order-number" />
+                <div className="skeleton skeleton-order-badge" />
+              </div>
+              <div className="skeleton skeleton-order-date" />
+            </div>
+            <div className="order-card-body">
+              <div className="skeleton skeleton-order-status" />
+              <div className="skeleton skeleton-order-total" />
+            </div>
+            <div className="order-card-footer">
+              <div className="skeleton skeleton-order-btn" />
             </div>
           </div>
         ))}

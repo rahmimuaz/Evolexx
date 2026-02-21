@@ -117,47 +117,47 @@ html, body, #root {
   gap: 12px;
   align-items: center;
 }
-/* Product detail skeleton */
-.skeleton-pd-container {
-  max-width: 1200px;
-  margin: 90px auto 40px;
-  padding: 0 20px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+/* Product detail skeleton - uses pd-* layout from ProductDetail.css */
+.skeleton-pd-breadcrumb {
+  width: 200px;
+  height: 14px;
+  display: block;
 }
-.skeleton-pd-gallery {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.skeleton-pd-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
 }
 .skeleton-pd-main-img {
   width: 100%;
-  aspect-ratio: 1;
-  border-radius: 12px;
+  min-height: 540px;
+  border-radius: 4px;
 }
-.skeleton-pd-thumbs {
-  display: flex;
-  gap: 8px;
-}
-.skeleton-pd-thumb {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-}
-.skeleton-pd-info {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding-top: 10px;
+.skeleton-pd-brand {
+  width: 80px;
+  height: 12px;
+  margin-bottom: 8px;
 }
 .skeleton-pd-title {
   height: 28px;
   width: 80%;
+  margin-bottom: 8px;
 }
 .skeleton-pd-price {
   height: 24px;
-  width: 35%;
+  width: 120px;
+}
+.skeleton-pd-old-price {
+  height: 16px;
+  width: 80px;
+}
+.skeleton-pd-stars {
+  width: 100px;
+  height: 20px;
+}
+.skeleton-pd-rating-text {
+  width: 80px;
+  height: 14px;
 }
 .skeleton-pd-desc {
   display: flex;
@@ -167,47 +167,93 @@ html, body, #root {
 .skeleton-pd-line {
   height: 14px;
 }
-.skeleton-pd-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
+.skeleton-pd-option-label {
+  width: 120px;
+  height: 16px;
+  margin-bottom: 8px;
+}
+.skeleton-pd-variant-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+}
+.skeleton-pd-qty {
+  width: 120px;
+  height: 44px;
+  border-radius: 8px;
+}
+.skeleton-pd-wishlist {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
 }
 .skeleton-pd-btn {
   height: 48px;
   flex: 1;
   border-radius: 8px;
 }
-@media (max-width: 768px) {
-  .skeleton-pd-container {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    margin-top: 70px;
-  }
-  .skeleton-pd-thumb {
-    width: 48px;
-    height: 48px;
-  }
-}
-/* Order skeleton */
-.skeleton-order-card {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.skeleton-order-img {
-  width: 80px;
-  height: 80px;
+.skeleton-pd-policy {
+  width: 100%;
+  height: 48px;
   border-radius: 8px;
-  flex-shrink: 0;
 }
-.skeleton-order-body {
-  flex: 1;
+.skeleton-pd-tab {
+  width: 100px;
+  height: 20px;
+  border-radius: 4px;
+}
+.skeleton-pd-tab-lines {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+}
+@media (max-width: 900px) {
+  .skeleton-pd-main-img {
+    min-height: 400px;
+  }
+}
+@media (max-width: 600px) {
+  .skeleton-pd-main-img {
+    min-height: 280px;
+  }
+  .skeleton-pd-thumb {
+    width: 60px;
+    height: 60px;
+  }
+}
+/* Order skeleton - uses order-card layout from MyOrders.css */
+.skeleton-order-img {
+  width: 100%;
+  height: 180px;
+  border-radius: 0;
+}
+.skeleton-order-number {
+  width: 140px;
+  height: 20px;
+  margin-bottom: 8px;
+}
+.skeleton-order-badge {
+  width: 80px;
+  height: 24px;
+  border-radius: 20px;
+}
+.skeleton-order-date {
+  width: 90px;
+  height: 14px;
+}
+.skeleton-order-status {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+}
+.skeleton-order-total {
+  width: 80px;
+  height: 20px;
+}
+.skeleton-order-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 8px;
 }
 /* Suspense fallback */
 .skeleton-page {

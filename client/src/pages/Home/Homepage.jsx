@@ -373,11 +373,10 @@ const Homepage = () => {
         setCurrentPage(pageNumber);
         setAnimationDirection('');
 
-        if (headingRef.current) {
-          const topPos = headingRef.current.getBoundingClientRect().top + window.pageYOffset;
-          const offset = 80;
-          window.scrollTo({ top: topPos - offset, behavior: 'smooth' });
-        }
+        // Scroll products section to top of viewport (works on mobile and desktop)
+        setTimeout(() => {
+          productSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
       }, 400);
     }
   };

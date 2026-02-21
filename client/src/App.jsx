@@ -1,5 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import ScrollToTop from './components/ScrollToTop/ScrollToTop';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css';
 import ResponsiveNavbar from './components/Navbar/ResponsiveNavbar';
@@ -48,6 +50,7 @@ const LoadingFallback = () => (
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <UserProvider>
         <CartProvider>
           <div className="app">
@@ -77,6 +80,7 @@ function App() {
               </Routes>
             </Suspense>
             <WhatsAppButton />
+            <ToastContainer position="top-right" autoClose={5000} />
           </div>
         </CartProvider>
       </UserProvider>

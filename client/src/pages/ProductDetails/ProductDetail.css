@@ -105,6 +105,124 @@
   height: auto;
 }
 
+/* Image Slider - sliding animation */
+.pd-image-slider-wrapper {
+  width: 100%;
+  min-height: 540px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pd-image-slider-track {
+  display: flex;
+  width: 100%;
+  min-height: 540px;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.pd-image-slider-item {
+  flex: 0 0 100%;
+  width: 100%;
+  min-height: 540px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pd-image-slider-item img {
+  max-width: 100%;
+  max-height: 540px;
+  object-fit: contain;
+  width: 100%;
+  height: auto;
+}
+
+/* Image Preview Lightbox */
+.pd-image-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  cursor: pointer;
+  overflow: auto;
+}
+
+.pd-image-preview-content {
+  position: relative;
+  max-width: 95vw;
+  max-height: 95vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.pd-image-preview-content img {
+  max-width: 95vw;
+  max-height: 95vh;
+  object-fit: contain;
+}
+
+.pd-image-preview-close {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 2001;
+}
+
+.pd-image-preview-close:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.pd-image-preview-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.pd-image-preview-nav:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.pd-image-preview-nav-left {
+  left: -60px;
+}
+
+.pd-image-preview-nav-right {
+  right: -60px;
+}
+
 /* Image Navigation Arrows */
 .pd-image-nav {
   position: absolute;
@@ -725,9 +843,9 @@
 }
 
 .pd-description-content {
-  white-space: pre-wrap; /* Preserve line breaks and whitespace */
+  width: 100%;
+  white-space: normal; /* Let text flow to fill full width */
   word-wrap: break-word; /* Break long words */
-  max-width: 100%;
   line-height: 1.6;
   color: #555;
 }
@@ -768,12 +886,16 @@
   padding-left: 24px;
   margin: 8px 0;
   list-style-type: disc;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pd-description-content ol {
   padding-left: 24px;
   margin: 8px 0;
   list-style-type: decimal;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pd-description-content li {
@@ -862,6 +984,8 @@
 .pd-description-content p {
   margin-top: 0;
   margin-bottom: 1em;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pd-description-content p:last-child {
@@ -1277,6 +1401,32 @@
     min-height: 400px;
   }
 
+  .pd-image-slider-wrapper,
+  .pd-image-slider-track {
+    min-height: 400px;
+  }
+
+  .pd-image-slider-item {
+    min-height: 400px;
+  }
+
+  .pd-image-slider-item img {
+    max-height: 400px;
+  }
+
+  .pd-image-preview-nav-left {
+    left: 10px;
+  }
+
+  .pd-image-preview-nav-right {
+    right: 10px;
+  }
+
+  .pd-image-preview-close {
+    top: 16px;
+    right: 16px;
+  }
+
   .pd-info {
     order: 3;
   }
@@ -1350,6 +1500,44 @@
   
   .pd-main-image img {
     max-height: 300px;
+  }
+
+  .pd-image-slider-wrapper {
+    min-height: 280px;
+  }
+
+  .pd-image-slider-track {
+    min-height: 280px;
+  }
+
+  .pd-image-slider-item {
+    min-height: 280px;
+  }
+
+  .pd-image-slider-item img {
+    max-height: 300px;
+  }
+
+  .pd-image-preview-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .pd-image-preview-nav-left {
+    left: 5px;
+  }
+
+  .pd-image-preview-nav-right {
+    right: 5px;
+  }
+
+  .pd-image-preview-close {
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.5rem;
   }
 
   /* Image Navigation Arrows - Mobile */
