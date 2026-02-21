@@ -9,6 +9,41 @@ import { sendEmail } from '../utils/sendEmail.js';
 // @desc    Get all orders (Admin)
 // @route   GET /api/orders
 // @access  Private/Admin
+// Helper: Restore inventory when order is declined or deleted
+const restoreOrderStock = async (orderItems) => {
+  if (!orderItems || !Array.isArray(orderItems)) return;
+  for (const item of orderItems) {
+    const productId = item.product?._id || item.product;
+    if (!productId) continue;
+    const product = await Product.findById(productId);
+    if (!product) continue;
+    const qty = item.quantity || 0;
+    if (qty <= 0) continue;
+
+    if (item.selectedVariation && product.hasVariations && product.variations) {
+      const variationIndex = product.variations.findIndex(v => {
+        if (!v.attributes) return false;
+        const vAttrs = v.attributes instanceof Map ? Object.fromEntries(v.attributes.entries()) : v.attributes;
+        const itemAttrs = item.selectedVariation?.attributes instanceof Map
+          ? Object.fromEntries(item.selectedVariation.attributes.entries())
+          : item.selectedVariation?.attributes || {};
+        return Object.keys(vAttrs).every(key => vAttrs[key] === itemAttrs[key]);
+      });
+      if (variationIndex !== -1) {
+        product.variations[variationIndex].stock = (product.variations[variationIndex].stock || 0) + qty;
+        product.stock = product.variations.reduce((sum, v) => sum + (v.stock || 0), 0);
+        await product.save();
+      }
+    } else {
+      await Product.findByIdAndUpdate(
+        productId,
+        { $inc: { stock: qty } },
+        { new: true }
+      );
+    }
+  }
+};
+
 // Helper function to serialize order items (convert Map to object)
 const serializeOrderItems = (items) => {
   if (!items || !Array.isArray(items)) return [];
@@ -703,6 +738,11 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   */
   else {
     // Other status updates (pending, declined, denied, shipped, delivered)
+    // When declined or denied, restore inventory
+    if (status === 'declined' || status === 'denied') {
+      await restoreOrderStock(order.orderItems);
+    }
+
     order.status = status;
     await order.save();
 
@@ -774,16 +814,17 @@ export const updatePaymentStatus = asyncHandler(async (req, res) => {
 // @route   DELETE /api/orders/:id
 // @access  Private/Admin
 export const deleteOrder = asyncHandler(async (req, res) => {
-  const order = await Order.findByIdAndDelete(req.params.id);
+  const order = await Order.findById(req.params.id).populate('orderItems.product');
 
   if (!order) {
     res.status(404);
     throw new Error('Order not found');
   }
 
-  // If you decide not to delete the Order from OrderList when accepted,
-  // but instead update its status to 'moved' or 'archived',
-  // then ensure you also delete the corresponding ToBeShipped entry if it exists.
+  // Restore inventory before deleting
+  await restoreOrderStock(order.orderItems);
+
+  await Order.findByIdAndDelete(req.params.id);
   await ToBeShipped.deleteOne({ orderId: req.params.id });
 
   res.status(200).json({ message: 'Order deleted successfully' });
