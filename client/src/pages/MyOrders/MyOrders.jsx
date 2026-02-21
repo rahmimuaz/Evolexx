@@ -107,7 +107,17 @@ const MyOrders = () => {
       (o.orderNumber || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getStatusColor = (status) => {
+  const getReturnForOrder = (orderId, orderType) => {
+    const id = orderId?.toString?.() || orderId;
+    return existingReturns.find((r) => {
+      const rid = (orderType === 'Order' ? r.orderId : r.toBeShippedId)?.toString?.();
+      return rid === id;
+    });
+  };
+
+  const getStatusColor = (status, order) => {
+    const ret = order && getReturnForOrder(order._id, order.type);
+    if (ret && ['approved', 'received', 'refunded'].includes(ret.status)) return '#ef4444';
     switch ((status || '').toLowerCase()) {
       case 'delivered': return '#22c55e';
       case 'shipped': return '#f97316';
@@ -120,7 +130,9 @@ const MyOrders = () => {
     }
   };
 
-  const getStatusLabel = (status) => {
+  const getStatusLabel = (status, order) => {
+    const ret = order && getReturnForOrder(order._id, order.type);
+    if (ret && ['approved', 'received', 'refunded'].includes(ret.status)) return 'Returned';
     switch ((status || '').toLowerCase()) {
       case 'delivered': return 'Delivered';
       case 'shipped': return 'In Transit';
@@ -176,6 +188,8 @@ const MyOrders = () => {
 
   const getOrderTrackingStatus = (order) => {
     if (!order) return 'Select an order';
+    const ret = getReturnForOrder(order._id, order.type);
+    if (ret && ['approved', 'received', 'refunded'].includes(ret.status)) return 'Returned';
     const status = (order.status || '').toLowerCase();
     if (status === 'delivered') return 'Delivered';
     if (status === 'shipped') return 'Product in Transit';
@@ -197,7 +211,7 @@ const MyOrders = () => {
     const id = orderId?.toString?.() || orderId;
     return existingReturns.some((r) => {
       const rid = (orderType === 'Order' ? r.orderId : r.toBeShippedId)?.toString?.();
-      return rid === id && ['pending', 'approved', 'received'].includes(r.status);
+      return rid === id && ['pending', 'approved', 'received', 'refunded'].includes(r.status);
     });
   };
 
@@ -396,9 +410,9 @@ const MyOrders = () => {
                     <div className="parcel-status">
                       <span
                         className="status-dot"
-                        style={{ backgroundColor: getStatusColor(order.status) }}
+                        style={{ backgroundColor: getStatusColor(order.status, order) }}
                       />
-                      {getStatusLabel(order.status)}
+                      {getStatusLabel(order.status, order)}
                     </div>
                     <div className="parcel-price">
                       Rs. {order.totalPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
