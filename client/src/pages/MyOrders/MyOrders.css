@@ -874,9 +874,77 @@
   }
 
   .orders-banner {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .order-tracking-card {
+    gap: 1rem;
+  }
+
+  .order-tracking-header {
     flex-direction: column;
-    text-align: center;
-    padding: 1.25rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .order-tracking-title {
+    font-size: 1.1rem;
+  }
+
+  .order-tracking-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .order-tracking-est {
+    font-size: 0.8rem;
+  }
+
+  .order-tracking-timeline {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    margin: 0 -0.25rem;
+  }
+
+  .order-tracking-timeline::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .order-tracking-step {
+    min-width: 72px;
+    flex: 1 1 72px;
+  }
+
+  .order-tracking-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 0.35rem;
+  }
+
+  .order-tracking-icon.done svg {
+    font-size: 0.6rem;
+  }
+
+  .order-tracking-step-content {
+    max-width: 100%;
+  }
+
+  .order-tracking-step-content strong {
+    font-size: 0.75rem;
+    word-break: break-word;
+    line-height: 1.2;
+  }
+
+  .order-tracking-step-date {
+    font-size: 0.65rem;
+  }
+
+  .order-tracking-line {
+    min-width: 10px;
+    flex-shrink: 0;
+    margin: 11px 0.1rem 0;
   }
 
   .section-header {
@@ -887,5 +955,28 @@
   .search-input {
     width: 100%;
   }
+}
 
+@media (max-width: 400px) {
+  .orders-banner {
+    margin: 0.75rem;
+    padding: 0.875rem;
+  }
+
+  .order-tracking-step {
+    min-width: 58px;
+    flex: 1 1 58px;
+  }
+
+  .order-tracking-step-content strong {
+    font-size: 0.7rem;
+  }
+
+  .order-tracking-step-date {
+    font-size: 0.6rem;
+  }
+
+  .order-tracking-line {
+    min-width: 8px;
+  }
 }
