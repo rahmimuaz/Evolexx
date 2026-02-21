@@ -7,107 +7,96 @@ import asyncHandler from 'express-async-handler';
 // @route   POST /api/returns
 // @access  Private (user)
 export const createReturnRequest = asyncHandler(async (req, res) => {
-  if (req.userType === 'admin') {
-    res.status(403);
-    throw new Error('Admins cannot create return requests.');
-  }
-
-  const { orderId, toBeShippedId, orderType, items, reason, description } = req.body;
-
-  if (!orderType || !items || !Array.isArray(items) || items.length === 0 || !reason) {
-    res.status(400);
-    throw new Error('Order type, items, and reason are required.');
-  }
-
-  let order;
-  let orderNumber;
-
-  if (orderType === 'Order') {
-    if (!orderId) {
-      res.status(400);
-      throw new Error('Order ID is required.');
-    }
-    order = await Order.findOne({ _id: orderId, user: req.user._id }).populate('orderItems.product');
-    if (!order) {
-      res.status(404);
-      throw new Error('Order not found.');
-    }
-    if (order.status !== 'delivered') {
-      res.status(400);
-      throw new Error('Only delivered orders can be returned.');
-    }
-    orderNumber = order.orderNumber;
-  } else {
-    if (!toBeShippedId) {
-      res.status(400);
-      throw new Error('Order ID is required.');
-    }
-    order = await ToBeShipped.findOne({ _id: toBeShippedId, user: req.user._id }).populate('orderItems.product');
-    if (!order) {
-      res.status(404);
-      throw new Error('Order not found.');
-    }
-    if (order.status !== 'delivered') {
-      res.status(400);
-      throw new Error('Only delivered orders can be returned.');
-    }
-    orderNumber = order.orderNumber;
-  }
-
-  // Check if return already exists for this order
-  const existingReturnFilter = orderType === 'Order'
-    ? { orderId, status: { $in: ['pending', 'approved', 'received'] } }
-    : { toBeShippedId, status: { $in: ['pending', 'approved', 'received'] } };
-  const existingReturn = await ReturnRequest.findOne(existingReturnFilter);
-  if (existingReturn) {
-    res.status(400);
-    throw new Error('A return request already exists for this order.');
-  }
-
-  const validReasons = ['defective', 'wrong_item', 'changed_mind', 'not_as_described', 'other'];
-  if (!validReasons.includes(reason)) {
-    res.status(400);
-    throw new Error('Invalid return reason.');
-  }
-
-  const orderItems = order.orderItems || [];
-  if (orderItems.length === 0) {
-    res.status(400);
-    throw new Error('Order has no items.');
-  }
-
-  const returnItems = [];
-  let totalRefundAmount = 0;
-
-  for (const item of items) {
-    const idx = item.orderItemIndex;
-    const requestedQty = item.quantity || 1;
-    if (idx == null || idx < 0 || idx >= orderItems.length) {
-      res.status(400);
-      throw new Error('Invalid order item index.');
-    }
-    const oi = orderItems[idx];
-    const productId = oi.product?._id || oi.product;
-    if (!productId) {
-      res.status(400);
-      throw new Error(`Order item at index ${idx} has no product.`);
-    }
-    const qty = Math.min(requestedQty, oi.quantity || 1);
-    const price = oi.price || oi.selectedVariation?.price || 0;
-    const name = oi.name || oi.product?.name || 'Product';
-    returnItems.push({
-      product: productId,
-      name: name || 'Product',
-      quantity: qty,
-      price: price || 0,
-    });
-    totalRefundAmount += price * qty;
-  }
-
   try {
-    const returnRequest = await ReturnRequest.create({
-      orderId: orderType === 'Order' ? orderId : undefined,
-      toBeShippedId: orderType === 'ToBeShipped' ? toBeShippedId : undefined,
+    if (req.userType === 'admin') {
+      return res.status(403).json({ message: 'Admins cannot create return requests.' });
+    }
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: 'Authentication required.' });
+    }
+
+    const { orderId, toBeShippedId, orderType, items, reason, description } = req.body || {};
+
+    if (!orderType || !items || !Array.isArray(items) || items.length === 0 || !reason) {
+      return res.status(400).json({ message: 'Order type, items, and reason are required.' });
+    }
+
+    let order;
+    let orderNumber;
+
+    if (orderType === 'Order') {
+      if (!orderId) {
+        return res.status(400).json({ message: 'Order ID is required.' });
+      }
+      order = await Order.findOne({ _id: orderId, user: req.user._id }).populate('orderItems.product');
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found.' });
+      }
+      if (order.status !== 'delivered') {
+        return res.status(400).json({ message: 'Only delivered orders can be returned.' });
+      }
+      orderNumber = order.orderNumber;
+    } else {
+      if (!toBeShippedId) {
+        return res.status(400).json({ message: 'Order ID is required.' });
+      }
+      order = await ToBeShipped.findOne({ _id: toBeShippedId, user: req.user._id }).populate('orderItems.product');
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found.' });
+      }
+      if (order.status !== 'delivered') {
+        return res.status(400).json({ message: 'Only delivered orders can be returned.' });
+      }
+      orderNumber = order.orderNumber;
+    }
+
+    // Check if return already exists for this order
+    const existingReturnFilter = orderType === 'Order'
+      ? { orderId, status: { $in: ['pending', 'approved', 'received'] } }
+      : { toBeShippedId, status: { $in: ['pending', 'approved', 'received'] } };
+    const existingReturn = await ReturnRequest.findOne(existingReturnFilter);
+    if (existingReturn) {
+      return res.status(400).json({ message: 'A return request already exists for this order.' });
+    }
+
+    const validReasons = ['defective', 'wrong_item', 'changed_mind', 'not_as_described', 'other'];
+    if (!validReasons.includes(reason)) {
+      return res.status(400).json({ message: 'Invalid return reason.' });
+    }
+
+    const orderItems = order.orderItems || [];
+    if (orderItems.length === 0) {
+      return res.status(400).json({ message: 'Order has no items.' });
+    }
+
+    const returnItems = [];
+    let totalRefundAmount = 0;
+
+    for (const item of items) {
+      const idx = item.orderItemIndex;
+      const requestedQty = item.quantity || 1;
+      if (idx == null || idx < 0 || idx >= orderItems.length) {
+        return res.status(400).json({ message: 'Invalid order item index.' });
+      }
+      const oi = orderItems[idx];
+      const productId = oi.product?._id || oi.product;
+      if (!productId) {
+        return res.status(400).json({ message: `Order item at index ${idx} has no product.` });
+      }
+      const qty = Math.min(requestedQty, oi.quantity || 1);
+      const price = oi.price || oi.selectedVariation?.price || 0;
+      const name = oi.name || oi.product?.name || 'Product';
+      returnItems.push({
+        product: productId,
+        name: name || 'Product',
+        quantity: qty,
+        price: price || 0,
+      });
+      totalRefundAmount += price * qty;
+    }
+
+    const createData = {
       orderType,
       user: req.user._id,
       orderNumber,
@@ -115,16 +104,26 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
       reason,
       description: description || '',
       totalRefundAmount,
-    });
+    };
+    if (orderType === 'Order') {
+      createData.orderId = orderId;
+    } else {
+      createData.toBeShippedId = toBeShippedId;
+    }
+
+    const returnRequest = await ReturnRequest.create(createData);
 
     const populated = await ReturnRequest.findById(returnRequest._id).populate('items.product', 'name images');
-    res.status(201).json(populated);
-  } catch (createErr) {
-    console.error('[createReturnRequest] Error:', createErr?.message || createErr, createErr?.stack);
-    if (createErr.name === 'ValidationError') {
-      return res.status(400).json({ message: createErr.message || 'Validation failed.' });
+    return res.status(201).json(populated);
+  } catch (err) {
+    console.error('[createReturnRequest] Error:', err?.message || err, err?.stack);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ message: err.message || 'Validation failed.' });
     }
-    return res.status(500).json({ message: createErr.message || 'Failed to create return request.' });
+    return res.status(500).json({
+      message: err.message || 'Failed to create return request.',
+      ...(process.env.NODE_ENV === 'development' && { stack: err?.stack }),
+    });
   }
 });
 

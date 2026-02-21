@@ -84,13 +84,13 @@ const MyOrders = () => {
             `${API_BASE_URL}/api/tobeshipped/order/${selectedOrder}`,
             { headers: { Authorization: `Bearer ${user.token}` } }
           );
-          setSelectedOrderDetails(data);
+          setSelectedOrderDetails({ ...data, type: 'ToBeShipped' });
         } else {
           const { data } = await axios.get(
             `${API_BASE_URL}/api/orders/${selectedOrder}`,
             { headers: { Authorization: `Bearer ${user.token}` } }
           );
-          setSelectedOrderDetails(data);
+          setSelectedOrderDetails({ ...data, type: 'Order' });
         }
       } catch {
         setSelectedOrderDetails(null);
@@ -228,16 +228,18 @@ const MyOrders = () => {
     setReturnSubmitting(true);
     setReturnError(null);
     try {
+      const payload = {
+        orderType,
+        items,
+        reason: form.reason?.value || 'other',
+        description: form.description?.value || '',
+      };
+      if (orderType === 'Order') payload.orderId = orderId;
+      else payload.toBeShippedId = orderId;
+
       await axios.post(
         `${API_BASE_URL}/api/returns`,
-        {
-          orderId: orderType === 'Order' ? orderId : undefined,
-          toBeShippedId: orderType === 'ToBeShipped' ? orderId : undefined,
-          orderType,
-          items,
-          reason: form.reason?.value || 'other',
-          description: form.description?.value || '',
-        },
+        payload,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       setReturnModalOpen(false);
