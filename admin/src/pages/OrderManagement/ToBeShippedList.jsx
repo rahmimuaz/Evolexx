@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -35,7 +36,7 @@ const ToBeShippedList = () => {
       setError('');
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/tobeshipped/list`, {
+        const response = await fetch(`${API_BASE_URL}/api/tobeshipped/list?status=accepted`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -260,6 +261,28 @@ const ToBeShippedList = () => {
     return badges[status] || 'badge badge-gray';
   };
 
+  const handleMarkShipped = async (orderId) => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tobeshipped/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: 'shipped' }),
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Failed to update status.');
+      }
+      setOrders(prev => prev.filter(o => o._id !== orderId));
+      toast.success('Order marked as shipped and moved to Transit.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to mark as shipped.');
+    }
+  };
+
   const toggleExpand = (orderId) => {
     setExpandedOrders(prev => ({
       ...prev,
@@ -278,7 +301,7 @@ const ToBeShippedList = () => {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <p className="loading-text">Loading Shipments...</p>
+        <p className="loading-text">Loading Ready to ship...</p>
       </div>
     );
   }
@@ -295,7 +318,7 @@ const ToBeShippedList = () => {
     <div>
       {/* Page Header */}
       <div style={{ marginBottom: '1.5rem' }}>
-        <h1 className="page-title">Shipments</h1>
+        <h1 className="page-title">Ready to ship</h1>
         <p className="page-subtitle">{orders.length} orders ready for shipment</p>
       </div>
 
@@ -310,6 +333,7 @@ const ToBeShippedList = () => {
         </div>
       ) : (
         <div className="admin-table-container">
+          <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
@@ -355,44 +379,9 @@ const ToBeShippedList = () => {
                     </td>
                     <td>
                       <div className="table-actions" style={{ justifyContent: 'flex-end', gap: '0.625rem' }}>
-                        <button
-                          onClick={() => downloadPdf(order)}
-                          style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            borderRadius: '0.375rem',
-                            border: 'none',
-                            background: '#10b981',
-                            color: 'white',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseOver={(e) => e.target.style.background = '#059669'}
-                          onMouseOut={(e) => e.target.style.background = '#10b981'}
-                          title="Download Shipping Label"
-                        >
-                          PDF
-                        </button>
-                        <button
-                          onClick={() => toggleExpand(order._id)}
-                          style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            borderRadius: '0.375rem',
-                            border: 'none',
-                            background: '#3b82f6',
-                            color: 'white',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseOver={(e) => e.target.style.background = '#2563eb'}
-                          onMouseOut={(e) => e.target.style.background = '#3b82f6'}
-                          title={expandedOrders[order._id] ? 'Hide Items' : 'View Items'}
-                        >
-                          {expandedOrders[order._id] ? 'Hide' : 'View'}
-                        </button>
+                        <button onClick={() => handleMarkShipped(order._id)} className="admin-btn" title="Mark as Shipped (move to Transit)">Mark as Shipped</button>
+                        <button onClick={() => toggleExpand(order._id)} className="admin-btn" title={expandedOrders[order._id] ? 'Hide Items' : 'View Items'}>{expandedOrders[order._id] ? 'Hide' : 'View'}</button>
+                        <button onClick={() => downloadPdf(order)} className="admin-btn" title="Download Shipping Label">PDF</button>
                       </div>
                     </td>
                   </tr>
@@ -401,7 +390,7 @@ const ToBeShippedList = () => {
                     <tr>
                       <td colSpan="7" style={{ backgroundColor: '#f8fafc', padding: '1.5rem' }}>
                         <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: '#0f172a', fontSize: '0.9375rem' }}>
-                          Products in this Shipment:
+                          Products in this order:
                         </h4>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
                           {order.orderItems.map((item, index) => {
@@ -509,6 +498,7 @@ const ToBeShippedList = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

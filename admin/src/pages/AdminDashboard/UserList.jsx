@@ -126,6 +126,7 @@ const UserList = () => {
 
       {/* Users Table */}
       <div className="admin-table-container">
+        <div className="admin-table-scroll">
         <table className="admin-table">
           <thead>
             <tr>
@@ -189,6 +190,7 @@ const UserList = () => {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Footer Info */}

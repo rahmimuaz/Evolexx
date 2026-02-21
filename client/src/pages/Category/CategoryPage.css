@@ -144,3 +144,258 @@
   line-height: 1.4;
   max-height: calc(1.5em * 2); /* 2 lines max */
 }
+
+/* Product grid & cards - match Homepage layout (Image 1) */
+.product-section2 .product-grid-container {
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+  padding: 0 0.8rem;
+}
+
+.product-section2 .product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem 2.3rem;
+  transform: translateX(0);
+  transition: transform 0.4s ease;
+}
+
+.product-section2 .product-grid-container.slide-left .product-grid {
+  transform: translateX(-100%);
+}
+
+.product-section2 .product-grid-container.slide-right .product-grid {
+  transform: translateX(100%);
+}
+
+/* Product cards - match All Products (Homepage) design */
+.product-section2 .product-card {
+  background-color: #ffffff;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px;
+  padding-bottom: 10px;
+  overflow: hidden;
+}
+
+.product-section2 .product-card:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Only style the product image, not the KOKO logo inside card-footer */
+.product-section2 .product-card > img {
+  width: 100%;
+  height: 300px;
+  object-fit: fill;
+  background-color: none;
+  border-radius: 8px;
+}
+
+.product-section2 .product-card-content {
+  padding: 0;
+  min-width: 0;
+}
+
+/* Product name - bold black */
+.product-section2 .product-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  text-align: left;
+  padding: 0.5rem 0.5rem;
+  margin: 0 0 0 10px;
+}
+
+/* Description - smaller lighter grey */
+.product-section2 .product-description {
+  font-size: 0.9rem;
+  color: #6b7280;
+  text-align: left;
+  padding: 0.2rem 0.5rem;
+  margin: 0 0 0 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  max-height: calc(1.4em * 2);
+}
+
+/* Star rating - gold */
+.product-section2 .star-rating {
+  color: #f7c948;
+  font-size: 1rem;
+  margin: 5px 0;
+  text-align: left;
+  margin-left: 15px;
+}
+
+.product-section2 .card-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Price - current bold black, old struck through */
+.product-section2 .price {
+  font-size: 1rem;
+  font-weight: 450;
+  color: #080808;
+  text-align: left;
+  margin: 20px 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.product-section2 .price-current {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.product-section2 .price-old {
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+/* Koko installment - light grey */
+.product-section2 .koko-pay {
+  font-size: 0.7rem;
+  color: #a9afb9;
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  margin-left: 10px;
+  white-space: nowrap;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.product-section2 .koko-logo {
+  height: 16px;
+  width: auto;
+  max-height: 16px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.25rem;
+}
+
+/* Mobile: horizontal card layout - match Homepage All Products */
+@media (max-width: 768px) {
+  .product-section2 .product-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .product-section2 .product-card {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #fff;
+    border-bottom: 0.5px solid #d1d5db;
+    border-radius: 0;
+  }
+
+  .product-section2 .product-card > img {
+    width: 40%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .product-section2 .product-card-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    width: 60%;
+    text-align: left;
+    overflow: hidden;
+  }
+
+  .product-section2 .product-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: #111827;
+    padding: 0;
+  }
+
+  .product-section2 .product-description {
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin: 0;
+    padding: 0;
+    -webkit-line-clamp: 2;
+    line-height: 1.4;
+    max-height: calc(1.5em * 2);
+  }
+
+  .product-section2 .star-rating {
+    font-size: 0.85rem;
+    color: #f59e0b;
+    margin: 5px 0;
+    margin-left: 0;
+  }
+
+  .product-section2 .card-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+    margin-top: 5px;
+  }
+
+  .product-section2 .price {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin-top: 5px;
+    margin-left: 0;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .product-section2 .price-current {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+  }
+
+  .product-section2 .price-old {
+    font-size: 0.6rem !important;
+    margin-right: 0 !important;
+  }
+
+  .product-section2 .koko-pay {
+    font-size: 0.6rem;
+    color: #6b7280;
+    flex-wrap: wrap;
+    white-space: normal;
+    word-break: break-word;
+    margin-left: 0;
+    margin-bottom: 0;
+  }
+
+  .product-section2 .koko-logo {
+    height: 12px;
+    max-height: 12px;
+  }
+}

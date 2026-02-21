@@ -50,6 +50,7 @@ const LowStockProducts = () => {
 
       {/* Products Table */}
       <div className="admin-table-container">
+        <div className="admin-table-scroll">
         <table className="admin-table">
           <thead>
             <tr>
@@ -119,6 +120,7 @@ const LowStockProducts = () => {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

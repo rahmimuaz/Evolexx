@@ -1,5 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from './components/Sidebar/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './index.css';
@@ -12,6 +14,8 @@ const EditProduct = lazy(() => import('./pages/Inventory/EditProduct'));
 const Products = lazy(() => import('./pages/Inventory/Products'));
 const OrderList = lazy(() => import('./pages/OrderManagement/OrderList'));
 const ToBeShippedList = lazy(() => import('./pages/OrderManagement/ToBeShippedList'));
+const TransitList = lazy(() => import('./pages/OrderManagement/TransitList'));
+const DeliveredList = lazy(() => import('./pages/OrderManagement/DeliveredList'));
 const LoginForm = lazy(() => import('./pages/AdminLogin/LoginForm'));
 const RegisterForm = lazy(() => import('./pages/AdminLogin/RegisterForm'));
 const LowStockProducts = lazy(() => import('./pages/Inventory/LowStockProducts'));
@@ -55,6 +59,8 @@ function AppContent() {
               <Route path="/Products" element={<Products />} />
               <Route path="/OrderList" element={<OrderList />} />
               <Route path="/ToBeShippedList" element={<ToBeShippedList />} />
+              <Route path="/admin/transit" element={<TransitList />} />
+              <Route path="/admin/delivered" element={<DeliveredList />} />
               <Route path="/admin/low-stock" element={<LowStockProducts />} />
               <Route path="/admin/out-of-stock" element={<OutOfStockProducts />} />
               <Route path="/admin/users" element={<UserList />} />
@@ -84,6 +90,7 @@ function App() {
     <Router>
       <AuthProvider>
         <AppContent />
+        <ToastContainer position="top-right" autoClose={3000} />
       </AuthProvider>
     </Router>
   );

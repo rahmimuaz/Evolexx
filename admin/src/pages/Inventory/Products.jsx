@@ -124,6 +124,7 @@ const Products = () => {
 
       {/* Products Table */}
       <div className="admin-table-container">
+        <div className="admin-table-scroll">
         <table className="admin-table">
           <thead>
             <tr>
@@ -255,6 +256,7 @@ const Products = () => {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Footer Info */}

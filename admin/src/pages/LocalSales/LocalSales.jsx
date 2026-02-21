@@ -589,6 +589,7 @@ const LocalSales = () => {
           </div>
         ) : (
           <div className="sales-table-container">
+            <div className="admin-table-scroll">
             <table className="admin-table">
               <thead>
                 <tr>
@@ -644,6 +645,7 @@ const LocalSales = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

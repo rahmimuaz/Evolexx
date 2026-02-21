@@ -269,10 +269,8 @@ const CategoryPage = () => {
                   <div className="card-footer">
                     {originalPrice ? (
                       <p className="price">
-                        <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.875rem', marginRight: '0.5rem' }}>
-                          Rs. {originalPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                        </span>
-                        <span>Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+                        <span className="price-current">Rs. {fullPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+                        <span className="price-old">Rs. {originalPrice.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
                       </p>
                     ) : (
                       <p className="price">

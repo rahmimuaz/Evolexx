@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faChartBar, 
   faBox, 
+  faBoxesStacked,
   faPlus, 
   faExclamationTriangle, 
   faTimesCircle, 
@@ -13,6 +14,7 @@ import {
   faClipboardList,
   faShoppingCart, 
   faTruck, 
+  faCircleCheck,
   faUsers, 
   faUser, 
   faSignOutAlt, 
@@ -203,10 +205,28 @@ const Sidebar = ({ children }) => {
           <NavLink
             to="/ToBeShippedList"
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-            title="Shipments"
+            title="Ready to ship"
+          >
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faBoxesStacked} /></span>
+            {isSidebarOpen && <span className="sidebar-text">Ready to ship</span>}
+          </NavLink>
+
+          <NavLink
+            to="/admin/transit"
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            title="Transit"
           >
             <span className="sidebar-icon"><FontAwesomeIcon icon={faTruck} /></span>
-            {isSidebarOpen && <span className="sidebar-text">Shipments</span>}
+            {isSidebarOpen && <span className="sidebar-text">Transit</span>}
+          </NavLink>
+
+          <NavLink
+            to="/admin/delivered"
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            title="Delivered"
+          >
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faCircleCheck} /></span>
+            {isSidebarOpen && <span className="sidebar-text">Delivered</span>}
           </NavLink>
 
           <NavLink

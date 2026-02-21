@@ -27,13 +27,46 @@ const serializeToBeShippedItems = (items) => {
   });
 };
 
-// @desc    Get all ToBeShipped orders (for admin)
-// @route   GET /api/tobeshipped/list
+// @desc    Update ToBeShipped order status (shipped, delivered)
+// @route   PATCH /api/tobeshipped/:id/status
+// @access  Private/Admin
+router.patch('/:id/status', protect, admin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['shipped', 'delivered'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Use "shipped" or "delivered".' });
+    }
+    const order = await ToBeShipped.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+    if (status === 'shipped' && order.status !== 'accepted') {
+      return res.status(400).json({ message: 'Only accepted orders can be marked as shipped.' });
+    }
+    if (status === 'delivered' && order.status !== 'shipped') {
+      return res.status(400).json({ message: 'Only shipped orders can be marked as delivered.' });
+    }
+    order.status = status;
+    if (status === 'shipped') order.shippedAt = new Date();
+    if (status === 'delivered') order.deliveredAt = new Date();
+    await order.save();
+    const serialized = { ...order.toObject(), orderItems: serializeToBeShippedItems(order.orderItems) };
+    res.status(200).json(serialized);
+  } catch (error) {
+    console.error('[toBeShippedRoutes] Error updating status:', error);
+    res.status(500).json({ message: 'Error updating order status: ' + error.message });
+  }
+});
+
+// @desc    Get all ToBeShipped orders (for admin), optionally filtered by status
+// @route   GET /api/tobeshipped/list?status=accepted|shipped|delivered
 // @access  Private/Admin
 router.get('/list', protect, admin, async (req, res) => {
   try {
-    console.log('[toBeShippedRoutes] Fetching to-be-shipped list...');
-    const list = await ToBeShipped.find()
+    const { status } = req.query;
+    const filter = status && ['accepted', 'shipped', 'delivered'].includes(status) ? { status } : {};
+    console.log('[toBeShippedRoutes] Fetching to-be-shipped list...', filter);
+    const list = await ToBeShipped.find(filter)
       .sort({ createdAt: -1 })
       // Populate orderId just for its _id. The other data (orderNumber, totalPrice, paymentMethod)
       // is now directly on the ToBeShipped document.

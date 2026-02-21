@@ -249,38 +249,13 @@ const OrderList = () => {
             <p className="page-subtitle">{orders.length} total orders</p>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button 
-              onClick={() => setShowFilters(!showFilters)} 
-              style={{
-                padding: '0.625rem 1.25rem',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                borderRadius: '0.375rem',
-                border: 'none',
-                background: '#64748b',
-                color: 'white',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseOver={(e) => e.target.style.background = '#475569'}
-              onMouseOut={(e) => e.target.style.background = '#64748b'}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="admin-btn"
             >
               {showFilters ? 'Hide Filters' : 'Show Filters'}
             </button>
-            <button 
-              onClick={fetchOrders}
-              style={{
-                padding: '0.625rem 1.25rem',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                borderRadius: '0.375rem',
-                border: 'none',
-                background: '#0f172a',
-                color: 'white',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
+            <button onClick={fetchOrders} className="admin-btn">
               Refresh
             </button>
           </div>
@@ -370,6 +345,7 @@ const OrderList = () => {
         </div>
       ) : (
         <div className="admin-table-container">
+          <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
@@ -451,38 +427,14 @@ const OrderList = () => {
                       <div className="table-actions" style={{ justifyContent: 'flex-end', gap: '0.625rem' }}>
                         <button
                           onClick={() => toggleExpand(order._id)}
-                          style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            borderRadius: '0.375rem',
-                            border: 'none',
-                            background: '#3b82f6',
-                            color: 'white',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseOver={(e) => e.target.style.background = '#2563eb'}
-                          onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+                          className="admin-btn"
                           title={expandedOrders[order._id] ? 'Hide Details' : 'View Details'}
                         >
                           {expandedOrders[order._id] ? 'Hide' : 'View'}
                         </button>
                         <button
                           onClick={() => handleDeleteOrder(order._id)}
-                          style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            borderRadius: '0.375rem',
-                            border: 'none',
-                            background: '#ef4444',
-                            color: 'white',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseOver={(e) => e.target.style.background = '#dc2626'}
-                          onMouseOut={(e) => e.target.style.background = '#ef4444'}
+                          className="admin-btn admin-btn-delete"
                           title="Delete Order"
                         >
                           Delete
@@ -600,6 +552,7 @@ const OrderList = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
