@@ -7,6 +7,7 @@ import {
   faChartBar, 
   faBox, 
   faBoxesStacked,
+  faUndo,
   faPlus, 
   faExclamationTriangle, 
   faTimesCircle, 
@@ -227,6 +228,15 @@ const Sidebar = ({ children }) => {
           >
             <span className="sidebar-icon"><FontAwesomeIcon icon={faCircleCheck} /></span>
             {isSidebarOpen && <span className="sidebar-text">Delivered</span>}
+          </NavLink>
+
+          <NavLink
+            to="/admin/returns"
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            title="Returns"
+          >
+            <span className="sidebar-icon"><FontAwesomeIcon icon={faUndo} /></span>
+            {isSidebarOpen && <span className="sidebar-text">Returns</span>}
           </NavLink>
 
           <NavLink

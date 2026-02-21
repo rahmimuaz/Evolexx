@@ -16,6 +16,7 @@ const OrderList = lazy(() => import('./pages/OrderManagement/OrderList'));
 const ToBeShippedList = lazy(() => import('./pages/OrderManagement/ToBeShippedList'));
 const TransitList = lazy(() => import('./pages/OrderManagement/TransitList'));
 const DeliveredList = lazy(() => import('./pages/OrderManagement/DeliveredList'));
+const ReturnList = lazy(() => import('./pages/OrderManagement/ReturnList'));
 const LoginForm = lazy(() => import('./pages/AdminLogin/LoginForm'));
 const RegisterForm = lazy(() => import('./pages/AdminLogin/RegisterForm'));
 const LowStockProducts = lazy(() => import('./pages/Inventory/LowStockProducts'));
@@ -61,6 +62,7 @@ function AppContent() {
               <Route path="/ToBeShippedList" element={<ToBeShippedList />} />
               <Route path="/admin/transit" element={<TransitList />} />
               <Route path="/admin/delivered" element={<DeliveredList />} />
+              <Route path="/admin/returns" element={<ReturnList />} />
               <Route path="/admin/low-stock" element={<LowStockProducts />} />
               <Route path="/admin/out-of-stock" element={<OutOfStockProducts />} />
               <Route path="/admin/users" element={<UserList />} />

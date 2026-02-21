@@ -148,12 +148,13 @@ const ProductDetail = () => {
         ]);
 
         const allOrders = [...ordersRes.data, ...shippedOrdersRes.data];
-        
-        // Check if any order contains this product
-        const hasPurchased = allOrders.some(order => {
+
+        // Only allow review after product is delivered
+        const isDelivered = (order) => (order.status || '').toLowerCase() === 'delivered';
+        const hasDelivered = allOrders.some(order => {
+          if (!isDelivered(order)) return false;
           if (order.orderItems && Array.isArray(order.orderItems)) {
             return order.orderItems.some(item => {
-              // Handle both populated and non-populated product references
               const itemProductId = item.product?._id || item.product;
               return itemProductId && itemProductId.toString() === productId.toString();
             });
@@ -161,7 +162,7 @@ const ProductDetail = () => {
           return false;
         });
 
-        setHasPurchasedProduct(hasPurchased);
+        setHasPurchasedProduct(hasDelivered);
       } catch (error) {
         setHasPurchasedProduct(false);
       } finally {
@@ -1914,10 +1915,10 @@ const ProductDetail = () => {
                 ) : !hasPurchasedProduct ? (
                   <div className="pd-purchase-required">
                     <p className="pd-purchase-message">
-                      You must purchase this product before you can write a review.
+                      You can review this product after it has been delivered.
                     </p>
                     <p className="pd-purchase-hint">
-                      Only customers who have purchased this product can submit reviews.
+                      Only customers who have received this product can submit reviews.
                     </p>
                   </div>
                 ) : (

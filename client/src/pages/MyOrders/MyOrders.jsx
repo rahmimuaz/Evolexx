@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useUser } from '../../context/UserContext';
 import { Link } from 'react-router-dom';
-import { FaBox, FaTruck, FaSearch, FaCalendarAlt } from 'react-icons/fa';
+import { FaBox, FaTruck, FaSearch, FaCalendarAlt, FaCheck, FaUndo } from 'react-icons/fa';
 import './MyOrders.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -16,6 +16,10 @@ const MyOrders = () => {
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [returnModalOpen, setReturnModalOpen] = useState(false);
+  const [returnSubmitting, setReturnSubmitting] = useState(false);
+  const [returnError, setReturnError] = useState(null);
+  const [existingReturns, setExistingReturns] = useState([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -49,6 +53,21 @@ const MyOrders = () => {
       }
     };
     fetchOrders();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchReturns = async () => {
+      if (!user) return;
+      try {
+        const { data } = await axios.get(`${API_BASE_URL}/api/returns/my`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        setExistingReturns(data || []);
+      } catch {
+        setExistingReturns([]);
+      }
+    };
+    fetchReturns();
   }, [user]);
 
   useEffect(() => {
@@ -89,10 +108,10 @@ const MyOrders = () => {
 
   const getStatusColor = (status) => {
     switch ((status || '').toLowerCase()) {
-      case 'delivered': return '#374151';
-      case 'shipped': return '#4b5563';
+      case 'delivered': return '#22c55e';
+      case 'shipped': return '#f97316';
       case 'accepted':
-      case 'approved': return '#6b7280';
+      case 'approved': return '#eab308';
       case 'pending': return '#9ca3af';
       case 'declined':
       case 'denied': return '#6b7280';
@@ -125,30 +144,111 @@ const MyOrders = () => {
 
   const getRouteText = (order) => {
     const addr = order?.shippingAddress;
-    if (!addr) return '—';
-    const city = addr.city || '';
-    return city ? `Store → ${city}` : (addr.address || '—');
+    const city = addr?.city || order?.city || '';
+    const location = city || addr?.address || order?.address || '—';
+    return `Store → ${location}`;
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+    if (imagePath.startsWith('/uploads/')) return `${API_BASE_URL}${imagePath}`;
+    if (imagePath.startsWith('uploads/')) return `${API_BASE_URL}/${imagePath}`;
+    return `${API_BASE_URL}/uploads/${imagePath}`;
   };
 
   const getTimelineSteps = (order) => {
     if (!order) return [];
     const status = (order.status || '').toLowerCase();
     const createdAt = order.createdAt ? new Date(order.createdAt) : null;
-    const city = order.shippingAddress?.city || 'Destination';
-    const steps = [];
+    const shippedAt = order.shippedAt || order.updatedAt || createdAt;
+    const deliveredAt = order.deliveredAt || order.updatedAt || createdAt;
 
-    if (status === 'delivered') {
-      steps.push({ label: 'Delivered', location: city, date: createdAt, active: true });
-      steps.push({ label: 'In Transit', location: 'On the way', date: createdAt, active: false });
-      steps.push({ label: 'Approved', location: 'Order approved', date: createdAt, active: false });
-    } else if (status === 'shipped') {
-      steps.push({ label: 'In Transit', location: 'On the way', date: createdAt, active: true });
-      steps.push({ label: 'Approved', location: 'Order approved', date: createdAt, active: false });
-    } else {
-      const label = status === 'pending' ? 'New' : 'Approved';
-      steps.push({ label, location: 'Order placed', date: createdAt, active: true });
-    }
+    const steps = [
+      { label: 'Packaged', done: true, date: createdAt },
+      { label: 'Ready to ship', done: ['accepted', 'approved', 'shipped', 'delivered'].includes(status), date: status !== 'pending' ? createdAt : null },
+      { label: 'In Transit', done: ['shipped', 'delivered'].includes(status), date: ['shipped', 'delivered'].includes(status) ? shippedAt : null },
+      { label: 'Delivered', done: status === 'delivered', date: status === 'delivered' ? deliveredAt : null }
+    ];
     return steps;
+  };
+
+  const getOrderTrackingStatus = (order) => {
+    if (!order) return 'Select an order';
+    const status = (order.status || '').toLowerCase();
+    if (status === 'delivered') return 'Delivered';
+    if (status === 'shipped') return 'Product in Transit';
+    if (status === 'accepted' || status === 'approved') return 'Ready to Ship';
+    return 'Processing';
+  };
+
+  const getEstDays = (order) => {
+    if (!order) return null;
+    const status = (order.status || '').toLowerCase();
+    if (status === 'delivered') return null;
+    if (status === 'shipped') return 3;
+    return 3;
+  };
+
+  const isOrderDelivered = (order) => (order?.status || '').toLowerCase() === 'delivered';
+
+  const hasReturnForOrder = (orderId, orderType) => {
+    const id = orderId?.toString?.() || orderId;
+    return existingReturns.some((r) => {
+      const rid = (orderType === 'Order' ? r.orderId : r.toBeShippedId)?.toString?.();
+      return rid === id && ['pending', 'approved', 'received'].includes(r.status);
+    });
+  };
+
+  const handleRequestReturn = () => setReturnModalOpen(true);
+
+  const handleReturnSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedOrderDetails || !user) return;
+    const form = e.target;
+    const items = [];
+    const orderType = selectedOrderDetails.type === 'ToBeShipped' ? 'ToBeShipped' : 'Order';
+    const orderId = selectedOrderDetails._id;
+
+    selectedOrderDetails.orderItems?.forEach((item, idx) => {
+      const cb = form.querySelector(`input[name="return-item-${idx}"]`);
+      if (cb?.checked) {
+        const qtyInput = form.querySelector(`input[name="return-qty-${idx}"]`);
+        const qty = Math.min(parseInt(qtyInput?.value || 1, 10) || 1, item.quantity || 1);
+        items.push({ orderItemIndex: idx, quantity: qty });
+      }
+    });
+
+    if (items.length === 0) {
+      setReturnError('Please select at least one item to return.');
+      return;
+    }
+
+    setReturnSubmitting(true);
+    setReturnError(null);
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/returns`,
+        {
+          orderId: orderType === 'Order' ? orderId : undefined,
+          toBeShippedId: orderType === 'ToBeShipped' ? orderId : undefined,
+          orderType,
+          items,
+          reason: form.reason?.value || 'other',
+          description: form.description?.value || '',
+        },
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      setReturnModalOpen(false);
+      const { data } = await axios.get(`${API_BASE_URL}/api/returns/my`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setExistingReturns(data || []);
+    } catch (err) {
+      setReturnError(err.response?.data?.message || 'Failed to submit return request.');
+    } finally {
+      setReturnSubmitting(false);
+    }
   };
 
   if (!user) {
@@ -191,14 +291,48 @@ const MyOrders = () => {
       <div className="my-orders-layout">
         {/* Main content card */}
         <div className="my-orders-main">
-          <div className="orders-banner">
-            <div className="banner-content">
-              <h3>Track your orders</h3>
-              <p>View status and delivery details for all your purchases.</p>
-              <Link to="/" className="banner-btn">Start Shopping</Link>
+          <div className="orders-banner order-tracking-card">
+            <div className="order-tracking-header">
+              <div>
+                <h3 className="order-tracking-title">Order Tracking</h3>
+                <p className="order-tracking-subtitle">
+                  {selectedOrderDetails ? getOrderTrackingStatus(selectedOrderDetails) : 'Select an order to track'}
+                </p>
+              </div>
+              {selectedOrderDetails && getEstDays(selectedOrderDetails) && (
+                <span className="order-tracking-est">EST: {getEstDays(selectedOrderDetails)} days</span>
+              )}
             </div>
-            <div className="banner-illustration">
-              <div className="delivery-truck-icon">📦</div>
+            <div className="order-tracking-timeline">
+              {selectedOrderDetails ? (
+                getTimelineSteps(selectedOrderDetails).map((step, i) => (
+                  <React.Fragment key={i}>
+                    <div className={`order-tracking-step ${step.done ? 'done' : ''}`}>
+                      <div className={`order-tracking-icon ${step.done ? 'done' : ''}`}>
+                        {step.done ? <FaCheck /> : null}
+                      </div>
+                      <div className="order-tracking-step-content">
+                        <strong>{step.label}</strong>
+                        <span className="order-tracking-step-date">
+                          {step.done && step.date
+                            ? new Date(step.date).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit'
+                              })
+                            : 'Waiting...'}
+                        </span>
+                      </div>
+                    </div>
+                    {i < getTimelineSteps(selectedOrderDetails).length - 1 && (
+                      <div className={`order-tracking-line ${step.done ? 'done' : ''}`} />
+                    )}
+                  </React.Fragment>
+                ))
+              ) : (
+                <p className="order-tracking-empty">Select an order from the list to view tracking.</p>
+              )}
             </div>
           </div>
 
@@ -299,26 +433,16 @@ const MyOrders = () => {
                   </div>
                 </div>
 
-                <div className="sidebar-map">
-                  <div className="map-placeholder">
-                    <div className="map-route">
-                      <span className="map-point sender">SENDER</span>
-                      <div className="map-line" />
-                      <span className="map-point receiver">RECEIVER</span>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="sidebar-addresses">
-                  <div className="addr-row sender">
-                    <span className="addr-dot green" />
+                  <div className="addr-row-h sender">
+                    <span className="addr-dot-h green" />
                     <div>
                       <strong>EVOLEXX Store</strong>
                       <p>Colombo, Sri Lanka</p>
                     </div>
                   </div>
-                  <div className="addr-row receiver">
-                    <span className="addr-dot orange" />
+                  <div className="addr-row-h receiver">
+                    <span className="addr-dot-h orange" />
                     <div>
                       <strong>{selectedOrderDetails.shippingAddress?.fullName || 'Customer'}</strong>
                       <p>
@@ -333,47 +457,56 @@ const MyOrders = () => {
                   </div>
                 </div>
 
-                <div className="sidebar-timeline">
-                  {getTimelineSteps(selectedOrderDetails).map((step, i) => (
-                    <div key={i} className={`timeline-step ${step.active ? 'active' : ''}`}>
-                      <div className="timeline-dot" />
-                      <div className="timeline-content">
-                        <strong>{step.label}</strong>
-                        <span>{step.location}</span>
-                        {step.date && (
-                          <span className="timeline-date">
-                            {new Date(step.date).toLocaleDateString('en-GB', {
-                              day: 'numeric',
-                              month: 'short',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        )}
-                      </div>
+                {/* Order details - products always visible */}
+                <div className="sidebar-order-details">
+                  <h4 className="sidebar-details-title">Products in this order</h4>
+                  {selectedOrderDetails.orderItems && selectedOrderDetails.orderItems.length > 0 ? (
+                    <div className="sidebar-products-list">
+                      {selectedOrderDetails.orderItems.map((item, idx) => {
+                        const img = item.selectedVariation?.images?.[0] || item.image || item.product?.images?.[0];
+                        const name = item.name || item.product?.name || 'Product';
+                        return (
+                          <div key={item._id || idx} className="sidebar-product-row">
+                            <div className="sidebar-product-img-wrap">
+                              {img ? (
+                                <>
+                                  <img src={getImageUrl(img)} alt={name} className="sidebar-product-img" onError={(e) => { e.target.style.display = 'none'; if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; }} />
+                                  <div className="sidebar-product-placeholder" style={{ display: 'none' }}>📦</div>
+                                </>
+                              ) : (
+                                <div className="sidebar-product-placeholder">📦</div>
+                              )}
+                            </div>
+                            <div className="sidebar-product-info">
+                              <strong>{name}</strong>
+                              {item.selectedVariation?.attributes && (
+                                <div className="sidebar-product-variation">
+                                  {Object.entries(item.selectedVariation.attributes).map(([k, v]) => (
+                                    <span key={k}>{k}: {v}</span>
+                                  ))}
+                                </div>
+                              )}
+                              <span className="sidebar-product-qty">Qty: {item.quantity}</span>
+                            </div>
+                            <div className="sidebar-product-price">
+                              Rs. {(item.price * item.quantity).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
-
-                <div className="sidebar-footer">
-                  <div className="total-row">
-                    <span>Total cost:</span>
+                  ) : (
+                    <p className="sidebar-no-products">No products in this order.</p>
+                  )}
+                  <div className="sidebar-total-row">
+                    <span>Total:</span>
                     <strong>Rs. {selectedOrderDetails.totalPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</strong>
                   </div>
-                  {selectedOrderDetails.type === 'Order' ? (
-                    <Link
-                      to={`/order/${selectedOrderDetails._id}`}
-                      className="sidebar-payment-btn"
-                    >
-                      View Details
-                    </Link>
-                  ) : (
-                    <Link
-                      to={`/tobeshipped/order/${selectedOrderDetails._id}`}
-                      className="sidebar-payment-btn"
-                    >
-                      Track Shipment
-                    </Link>
+
+                  {isOrderDelivered(selectedOrderDetails) && !hasReturnForOrder(selectedOrderDetails._id, selectedOrderDetails.type) && (
+                    <button type="button" className="sidebar-return-btn" onClick={handleRequestReturn}>
+                      <FaUndo /> Request Return
+                    </button>
                   )}
                 </div>
               </>
@@ -389,6 +522,64 @@ const MyOrders = () => {
           )}
         </aside>
       </div>
+
+      {/* Return Request Modal */}
+      {returnModalOpen && selectedOrderDetails && (
+        <div className="return-modal-overlay" onClick={() => !returnSubmitting && setReturnModalOpen(false)}>
+          <div className="return-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="return-modal-header">
+              <h3>Request Return</h3>
+              <button type="button" className="return-modal-close" onClick={() => !returnSubmitting && setReturnModalOpen(false)} aria-label="Close">&times;</button>
+            </div>
+            <form onSubmit={handleReturnSubmit} className="return-modal-body">
+              <p className="return-modal-hint">Select items you want to return and provide a reason.</p>
+
+              <div className="return-items-section">
+                <label className="return-label">Items to return</label>
+                {selectedOrderDetails.orderItems?.map((item, idx) => {
+                  const name = item.name || item.product?.name || 'Product';
+                  return (
+                    <div key={idx} className="return-item-row">
+                      <label className="return-item-check">
+                        <input type="checkbox" name={`return-item-${idx}`} />
+                        <span>{name} × {item.quantity}</span>
+                      </label>
+                      <input type="number" name={`return-qty-${idx}`} min={1} max={item.quantity || 1} defaultValue={item.quantity || 1} className="return-qty-input" />
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="return-field">
+                <label className="return-label" htmlFor="return-reason">Reason *</label>
+                <select id="return-reason" name="reason" required className="return-select">
+                  <option value="defective">Defective</option>
+                  <option value="wrong_item">Wrong Item</option>
+                  <option value="not_as_described">Not as Described</option>
+                  <option value="changed_mind">Changed Mind</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div className="return-field">
+                <label className="return-label" htmlFor="return-desc">Additional details (optional)</label>
+                <textarea id="return-desc" name="description" rows={3} className="return-textarea" placeholder="Describe the issue..." />
+              </div>
+
+              {returnError && <p className="return-error">{returnError}</p>}
+
+              <div className="return-modal-actions">
+                <button type="button" className="return-btn-cancel" onClick={() => !returnSubmitting && setReturnModalOpen(false)} disabled={returnSubmitting}>
+                  Cancel
+                </button>
+                <button type="submit" className="return-btn-submit" disabled={returnSubmitting}>
+                  {returnSubmitting ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -10,7 +10,8 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import toBeShippedRoutes from './routes/toBeShippedRoutes.js'; // <--- NEW: Import the ToBeShipped routes
 import settingsRoutes from './routes/settingsRoutes.js'; // Import settings routes
-import localSaleRoutes from './routes/localSaleRoutes.js'; // Import local sales routes
+import localSaleRoutes from './routes/localSaleRoutes.js';
+import returnRoutes from './routes/returnRoutes.js'; // Import local sales routes
 import { generateSitemap } from './controllers/sitemapController.js';
 
 
@@ -38,7 +39,7 @@ app.use((req, res, next) => {
   const path = req.path;
 
   // No caching for private/user-specific data
-  if (path.startsWith('/api/users') || path.startsWith('/api/orders') || path.startsWith('/api/tobeshipped') || path.startsWith('/api/admin') || path.startsWith('/api/upload') || path.startsWith('/api/local-sales')) {
+  if (path.startsWith('/api/users') || path.startsWith('/api/orders') || path.startsWith('/api/tobeshipped') || path.startsWith('/api/returns') || path.startsWith('/api/admin') || path.startsWith('/api/upload') || path.startsWith('/api/local-sales')) {
     res.set('Cache-Control', 'no-store');
     return next();
   }
@@ -81,6 +82,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/tobeshipped', toBeShippedRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/local-sales', localSaleRoutes);
+app.use('/api/returns', returnRoutes);
 
 
 

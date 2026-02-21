@@ -756,9 +756,15 @@ export const addReview = async (req, res) => {
     ]);
 
     const allOrders = [...userOrders, ...userShippedOrders];
-    
-    // Check if any order contains this product
-    const hasPurchased = allOrders.some(order => {
+
+    // Check if any DELIVERED order contains this product (reviews only after delivery)
+    const isDelivered = (order) => {
+      const status = (order.status || '').toLowerCase();
+      return status === 'delivered';
+    };
+
+    const hasDeliveredProduct = allOrders.some(order => {
+      if (!isDelivered(order)) return false;
       if (order.orderItems && Array.isArray(order.orderItems)) {
         return order.orderItems.some(item => {
           const itemProductId = item.product?._id || item.product;
@@ -768,8 +774,8 @@ export const addReview = async (req, res) => {
       return false;
     });
 
-    if (!hasPurchased) {
-      return res.status(403).json({ message: 'You can only review products you have purchased.' });
+    if (!hasDeliveredProduct) {
+      return res.status(403).json({ message: 'You can only review products after they have been delivered.' });
     }
 
     // Check if the user has already reviewed this product
