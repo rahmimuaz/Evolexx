@@ -490,10 +490,10 @@ const Homepage = () => {
                 <h1 className="hero-title-line1">The Future of Design.</h1>
                 <h1 className="hero-title-line2">In Your Hands</h1>
                 <p className="hero-subtitle">New iPhone Series - Sleeker. Smarter. Stronger.</p>
-                <button className="hero-cta-button">
+                <Link to="/product/apple-iphone-17-pro-max" className="hero-cta-button">
                   <span className="cta-text">BUY NOW</span>
                   <span className="cta-arrow">→</span>
-                </button>
+                </Link>
               </div>
               <div className="hero-product-display">
                 <img src="/iPhone17ProMax.jpg" alt="iPhone 17 Pro" className="hero-product-image" />
