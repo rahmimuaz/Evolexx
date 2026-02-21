@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -29,7 +29,7 @@ const ReturnList = () => {
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
 
-  const fetchReturns = async () => {
+  const fetchReturns = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     setError('');
@@ -51,11 +51,11 @@ const ReturnList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, statusFilter, API_BASE_URL]);
 
   useEffect(() => {
     fetchReturns();
-  }, [token, statusFilter, API_BASE_URL]);
+  }, [fetchReturns]);
 
   const updateStatus = async (id, status) => {
     try {
