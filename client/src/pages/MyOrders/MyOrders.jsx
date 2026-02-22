@@ -306,7 +306,9 @@ const MyOrders = () => {
 
   return (
     <div className="my-orders-page">
-      <div className="my-orders-layout">
+      <div className="my-orders-wrapper">
+        <h1 className="my-orders-title">My Orders & Tracking</h1>
+        <div className="my-orders-layout">
         {/* Main content card */}
         <div className="my-orders-main">
           <div
@@ -542,6 +544,7 @@ const MyOrders = () => {
             </div>
           )}
         </aside>
+      </div>
       </div>
 
       {/* Return Request Modal */}
