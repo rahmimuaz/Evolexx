@@ -504,7 +504,7 @@ const Homepage = () => {
 
       <section className="category-section" ref={categorySectionRef}>
         <div className={`category-heading ${categoryVisible ? 'visible' : ''}`}>
-          <h2>Categories</h2>
+          <h2>CATEGORIES</h2>
         </div>
         <div className={`category-grid-custom ${categoryVisible ? 'visible' : ''}`}>
           <Link to="/category/mobile-phones" className="category-card tall">
@@ -534,7 +534,7 @@ const Homepage = () => {
       {newArrivals.length > 0 && (
         <section className="new-arrivals-section" ref={newArrivalsSectionRef}>
           <div className={`new-arrivals-heading ${newArrivalsVisible ? 'visible' : ''}`}>
-            <h2>New Arrivals</h2>
+            <h2>NEW ARRIVALS</h2>
             <p className="new-arrivals-subtitle desktop-subtitle">Check out our latest products, where style meets quality and innovation to bring you exclusive <br /> new arrivals that elevate your shopping experience</p>
             <p className="new-arrivals-subtitle mobile-subtitle">Check out our latest products, combining style, quality, and innovation to deliver exclusive new arrivals.</p>
           </div>
@@ -614,7 +614,7 @@ const Homepage = () => {
 
       <section className="product-section" ref={productSectionRef}>
         <div className="heading-with-icon">
-          <h2 ref={headingRef}>All Products</h2>
+          <h2 ref={headingRef}>ALL PRODUCTS</h2>
           <FaSlidersH
             className="filter-toggle-icon"
             onClick={() => setShowFilters(!showFilters)}

@@ -995,8 +995,9 @@
 /* Specs Table */
 .pd-specs-table {
   width: 100%;
-  max-width: 50%;
+  max-width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .pd-specs-table tr {
@@ -1006,16 +1007,21 @@
 .pd-specs-table td {
   padding: 14px 0;
   font-size: 0.9rem;
+  vertical-align: top;
 }
 
 .pd-spec-key {
   color: #666;
-  width: 40%;
+  width: 45%;
+  min-width: 120px;
+  padding-right: 1.5rem;
 }
 
 .pd-spec-value {
   color: #222;
   font-weight: 500;
+  width: 55%;
+  text-align: left;
 }
 
 /* Comments Section */
@@ -1246,7 +1252,7 @@
 
 .pd-related-title {
   text-align: center;
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: 500;
   letter-spacing: 2px;
   color: #222;
@@ -1816,7 +1822,7 @@
   }
 
   .pd-related-title {
-    font-size: 0.875rem;
+    font-size: 1.3125rem;
     letter-spacing: 1.5px;
     margin-bottom: 16px;
   }

@@ -310,6 +310,10 @@
     border-radius: 0;
   }
 
+  .product-section2 .product-card:hover {
+    box-shadow: none;
+  }
+
   .product-section2 .product-card > img {
     width: 40%;
     height: auto;

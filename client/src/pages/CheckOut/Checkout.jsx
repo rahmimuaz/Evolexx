@@ -4,6 +4,7 @@ import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { FaMoneyBillWave, FaCreditCard, FaUniversity, FaCheck } from 'react-icons/fa';
 import BankTransferModal from '../Payment/BankTransferModal';
 import './Checkout.css';
 import Footer from '../../components/Footer/Footer';
@@ -316,107 +317,184 @@ const Checkout = () => {
         <h1 className="checkout-title">Checkout</h1>
         <div className="checkout-grid">
           <div className="shipping-info-section">
-            <div className="checkout-card">
-              <h2 className="section-heading">Shipping Information</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="form-grid">
-                  {/* Render fields except city */}
-                  {['fullName', 'email', 'phone', 'address', 'postalCode'].map((field) => {
-                    const placeholders = {
-                      fullName: 'Enter your full name',
-                      email: 'your.email@example.com',
-                      phone: '07X XXX XXXX',
-                      address: '123 Main Street, Apartment 4B',
-                      postalCode: '10100'
-                    };
-                    
-                    return (
-                    <div className="form-group" key={field}>
-                      <label htmlFor={field} className="form-label">
-                        {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')}
-                      </label>
+            <form onSubmit={handleSubmit} className="checkout-form">
+              <div className="checkout-form-cards">
+                <div className="checkout-info-card">
+                  <div className="checkout-card-header">
+                    <h2 className="section-heading">Customer Info</h2>
+                    {!(formData.email?.trim() && formData.phone?.trim()) && (
+                      <span className="required-indicator">* Required</span>
+                    )}
+                  </div>
+                  <div className="form-grid form-grid-mobile">
+                    <div className="form-group">
+                      <label htmlFor="email" className="form-label">Email *</label>
                       <input
-                        type={field === 'email' ? 'email' : 'text'}
-                        id={field}
-                        name={field}
-                        value={formData[field]}
-                        onChange={field === 'phone' ? handlePhoneChange : handleInputChange}
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
                         className="form-input"
-                          placeholder={placeholders[field]}
+                        placeholder="your.email@example.com"
                         required
                       />
                     </div>
-                    );
-                  })}
+                    <div className="form-group">
+                      <label htmlFor="phone" className="form-label">Phone *</label>
+                      <input
+                        type="text"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handlePhoneChange}
+                        className="form-input"
+                        placeholder="07X XXX XXXX"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
 
-                  {/* City input with autocomplete */}
-                  <div className="form-group" ref={cityRef} style={{ position: 'relative' }}>
-                    <label htmlFor="city" className="form-label">City</label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={cityInput}
-                      onChange={handleCityChange}
-                      className="form-input"
-                      placeholder="Start typing city name (e.g., Colombo, Kandy)"
-                      autoComplete="off"
-                      required
-                    />
-                    {citySuggestions.length > 0 && (
-                      <ul className="autocomplete-suggestions">
-                        {citySuggestions.map((city) => (
-                          <li
-                            key={city}
-                            onClick={() => handleCitySelect(city)}
-                            className="autocomplete-suggestion"
-                          >
-                            {city}
-                          </li>
-                        ))}
-                      </ul>
+                <div className="checkout-info-card">
+                  <div className="checkout-card-header">
+                    <h2 className="section-heading">Shipping Address</h2>
+                    {!(formData.fullName?.trim() && formData.address?.trim() && cityInput?.trim() && formData.postalCode?.trim()) && (
+                      <span className="required-indicator">* Required</span>
                     )}
                   </div>
-                </div>
-
-                <div className="payment-method-section">
-                  <h2 className="section-heading">Payment Method</h2>
-                  <div className="payment-options-group">
-                    {[
-                      { id: 'cod', label: 'Cash on Delivery' },
-                      { id: 'card', label: 'Card Payment', disabled: true },
-                      { id: 'bank_transfer', label: 'Bank Transfer' }
-                    ].map((method) => (
-                      <div className="radio-option" key={method.id}>
+                  <div className="form-grid form-grid-mobile">
+                    <div className="form-group">
+                      <label htmlFor="fullName" className="form-label">Full Name *</label>
+                      <input
+                        type="text"
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        className="form-input"
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="address" className="form-label">Street Address *</label>
+                      <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        className="form-input"
+                        placeholder="123 Main Street, Apartment 4B"
+                        required
+                      />
+                    </div>
+                    <div className="form-group form-group-city-row">
+                      <label htmlFor="city" className="form-label">City *</label>
+                      <div ref={cityRef} style={{ position: 'relative' }}>
                         <input
-                          type="radio"
-                          id={method.id}
-                          name="paymentMethod"
-                          value={method.id}
-                          checked={formData.paymentMethod === method.id}
-                          onChange={handlePaymentMethodChange}
-                          className="radio-input"
-                          disabled={method.disabled}
+                          type="text"
+                          id="city"
+                          name="city"
+                          value={cityInput}
+                          onChange={handleCityChange}
+                          className="form-input"
+                          placeholder="Start typing city name (e.g., Colombo, Kandy)"
+                          autoComplete="off"
+                          required
                         />
-                        <label htmlFor={method.id} className={`radio-label ${method.disabled ? 'disabled-label' : ''}`}>
-                          {method.label}
-                        </label>
+                        {citySuggestions.length > 0 && (
+                          <ul className="autocomplete-suggestions">
+                            {citySuggestions.map((city) => (
+                              <li
+                                key={city}
+                                onClick={() => handleCitySelect(city)}
+                                className="autocomplete-suggestion"
+                              >
+                                {city}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
-                    ))}
+                    </div>
+                    <div className="form-group form-group-zip">
+                      <label htmlFor="postalCode" className="form-label">Zip/Postal Code *</label>
+                      <input
+                        type="text"
+                        id="postalCode"
+                        name="postalCode"
+                        value={formData.postalCode}
+                        onChange={handleInputChange}
+                        className="form-input"
+                        placeholder="10100"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="place-order-button-container">
-                  <button
-                    type="submit"
-                    className="place-order-button"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? <div className="spinner-button" /> : 'Place Order'}
-                  </button>
+                <div className="checkout-info-card">
+                  <div className="checkout-card-header">
+                    <h2 className="section-heading">Payment Method</h2>
+                  </div>
+                  <div className="payment-method-section">
+                    <div className="payment-options-list">
+                      {[
+                        { id: 'cod', label: 'Cash on Delivery', subtext: 'Pay when your order arrives', icon: FaMoneyBillWave },
+                        { id: 'card', label: 'Card Payment', subtext: 'Coming soon', icon: FaCreditCard, disabled: true },
+                        { id: 'bank_transfer', label: 'Bank Transfer', subtext: 'Transfer to our bank account', icon: FaUniversity }
+                      ].map((method) => {
+                        const isSelected = formData.paymentMethod === method.id;
+                        const IconComponent = method.icon;
+                        return (
+                          <label
+                            key={method.id}
+                            htmlFor={method.id}
+                            className={`payment-option-row ${method.disabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
+                          >
+                            <div className="payment-option-icon">
+                              <IconComponent size={24} />
+                            </div>
+                            <div className="payment-option-content">
+                              <span className="payment-option-label">{method.label}</span>
+                              {method.subtext && (
+                                <span className="payment-option-subtext">{method.subtext}</span>
+                              )}
+                            </div>
+                            <div className="payment-option-radio">
+                              <input
+                                type="radio"
+                                id={method.id}
+                                name="paymentMethod"
+                                value={method.id}
+                                checked={isSelected}
+                                onChange={handlePaymentMethodChange}
+                                className="payment-radio-input"
+                                disabled={method.disabled}
+                              />
+                              <span className={`payment-radio-custom ${isSelected ? 'selected' : ''}`}>
+                                {isSelected && <FaCheck size={12} />}
+                              </span>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="place-order-button-container">
+                      <button
+                        type="submit"
+                        className="place-order-button"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? <div className="spinner-button" /> : 'Place Order'}
+                      </button>
+                    </div>
                 </div>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
 
           <div className="order-summary-section">

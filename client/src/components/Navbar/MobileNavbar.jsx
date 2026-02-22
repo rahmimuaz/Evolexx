@@ -192,6 +192,9 @@ const MobileNavbar = () => {
 
         <div ref={menuRef} className={`mnav-center ${menuOpen ? 'open' : ''}`}>
           <div className="mnav-links">
+            <Link to="/" className={`mnav-link ${location.pathname === '/' ? 'is-active' : ''}`} onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link to="/category/mobile-phones" className={`mnav-link ${location.pathname === '/category/mobile-phones' ? 'is-active' : ''}`} onClick={() => setMenuOpen(false)}>Brand New</Link>
+            <Link to="/category/mobile-accessories" className={`mnav-link ${location.pathname === '/category/mobile-accessories' ? 'is-active' : ''}`} onClick={() => setMenuOpen(false)}>Accessories</Link>
             <button
               className="mnav-link mnav-link-button"
               onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
@@ -239,9 +242,6 @@ const MobileNavbar = () => {
                 )}
               </div>
             )}
-            <Link to="/" className={`mnav-link ${location.pathname === '/' ? 'is-active' : ''}`} onClick={() => setMenuOpen(false)}>Home</Link>
-            <Link to="/category/mobile-phones" className={`mnav-link ${location.pathname === '/category/mobile-phones' ? 'is-active' : ''}`} onClick={() => setMenuOpen(false)}>Brand New</Link>
-            <Link to="/category/mobile-accessories" className={`mnav-link ${location.pathname === '/category/mobile-accessories' ? 'is-active' : ''}`} onClick={() => setMenuOpen(false)}>Accessories</Link>
           </div>
         </div>
 
