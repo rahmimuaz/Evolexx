@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useUser } from '../../context/UserContext';
 import { Link } from 'react-router-dom';
 import { FaBox, FaTruck, FaSearch, FaCalendarAlt, FaCheck, FaUndo } from 'react-icons/fa';
+import mapBg from '../../assets/map.png';
 import './MyOrders.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -178,7 +179,7 @@ const MyOrders = () => {
     const deliveredAt = order.deliveredAt || order.updatedAt || createdAt;
 
     const steps = [
-      { label: 'Packaged', done: true, date: createdAt },
+      { label: 'Placed', done: true, date: createdAt },
       { label: 'Ready to ship', done: ['accepted', 'approved', 'shipped', 'delivered'].includes(status), date: status !== 'pending' ? createdAt : null },
       { label: 'In Transit', done: ['shipped', 'delivered'].includes(status), date: ['shipped', 'delivered'].includes(status) ? shippedAt : null },
       { label: 'Delivered', done: status === 'delivered', date: status === 'delivered' ? deliveredAt : null }
@@ -201,8 +202,8 @@ const MyOrders = () => {
     if (!order) return null;
     const status = (order.status || '').toLowerCase();
     if (status === 'delivered') return null;
-    if (status === 'shipped') return 3;
-    return 3;
+    if (status === 'shipped') return 4;
+    return 4;
   };
 
   const isOrderDelivered = (order) => (order?.status || '').toLowerCase() === 'delivered';
@@ -308,7 +309,10 @@ const MyOrders = () => {
       <div className="my-orders-layout">
         {/* Main content card */}
         <div className="my-orders-main">
-          <div className="orders-banner order-tracking-card">
+          <div
+            className="orders-banner order-tracking-card"
+            style={{ backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.65) 100%), url(${mapBg})` }}
+          >
             <div className="order-tracking-header">
               <div>
                 <h3 className="order-tracking-title">Order Tracking</h3>
@@ -357,16 +361,6 @@ const MyOrders = () => {
             <div className="section-header">
               <h4>Your orders</h4>
               <div className="section-actions">
-                <div className="search-wrap">
-                  <FaSearch className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search by order number"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="search-input"
-                  />
-                </div>
                 <div className="date-range">
                   <FaCalendarAlt />
                   <span>
@@ -375,6 +369,16 @@ const MyOrders = () => {
                       : '—'}
                   </span>
                 </div>
+                <div className="search-wrap">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by order number"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-input"
+                />
+              </div>
               </div>
             </div>
 
