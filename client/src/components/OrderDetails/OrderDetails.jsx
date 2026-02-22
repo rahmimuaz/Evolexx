@@ -125,19 +125,21 @@ const OrderDetails = () => {
 
         {/* Order Details Row */}
         <div className="od-details-row">
-          <div className="od-detail-item">
-            <span className="od-detail-label">Order Date</span>
-            <span className="od-detail-value">
-              {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
-            </span>
-          </div>
-          <div className="od-detail-item">
-            <span className="od-detail-label">Delivery Date</span>
-            <span className="od-detail-value">
-              {order.status === 'delivered' && order.updatedAt
-                ? new Date(order.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                : '3-7 days'}
-            </span>
+          <div className="od-dates-group">
+            <div className="od-detail-item">
+              <span className="od-detail-label">Order Date</span>
+              <span className="od-detail-value">
+                {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+              </span>
+            </div>
+            <div className="od-detail-item">
+              <span className="od-detail-label">Delivery Date</span>
+              <span className="od-detail-value">
+                {order.status === 'delivered' && order.updatedAt
+                  ? new Date(order.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                  : '3-7 days'}
+              </span>
+            </div>
           </div>
           <div className="od-detail-item">
             <span className="od-detail-label">Courier</span>
@@ -217,7 +219,7 @@ const OrderDetails = () => {
             })}
           </div>
           <button className="od-view-details-btn" onClick={() => navigate('/my-orders')}>
-            View details <FaChevronRight />
+            View My Orders <FaChevronRight />
           </button>
         </div>
       </div>

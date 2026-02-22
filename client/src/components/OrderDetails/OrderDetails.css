@@ -115,6 +115,18 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.od-dates-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  grid-column: 1 / -1;
+}
+
+.od-dates-group .od-detail-item {
+  flex: 1;
+  min-width: 120px;
+}
+
 .od-detail-item {
   display: flex;
   flex-direction: column;
