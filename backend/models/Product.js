@@ -77,7 +77,7 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Electronics', 'Mobile Accessories', 'Pre-owned Devices', 'Other', 'Mobile Phone', 'Preowned Phones', 'Laptops', 'Phone Covers', 'Chargers', 'Headphones', 'Earbuds', 'Smartwatches', 'Tablets', 'Screen Protectors', 'Cables', 'Other Accessories', 'Preowned Laptops', 'Preowned Tablets']
+    enum: ['Electronics', 'Mobile Accessories', 'Pre-owned Devices', 'Other', 'Mobile Phone', 'Preowned Phones', 'Laptops', 'Phone Covers', 'Chargers', 'Headphones', 'Earbuds', 'Smartwatches', 'Tablets', 'Power Banks', 'Speakers', 'Screen Protectors', 'Cables', 'Other Accessories', 'Preowned Laptops', 'Preowned Tablets']
   },
   price: {
     type: Number,

@@ -673,7 +673,7 @@ export const getProductsByCategory = async (req, res) => {
     const requestedCategory = req.params.category;
 
     const categoryHierarchy = {
-      'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches'],
+      'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches', 'Power Banks', 'Speakers'],
       'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables', 'Headphones', 'Earbuds', 'Other Accessories'],
       'Pre-owned Devices': ['Preowned Phones', 'Preowned Laptops', 'Preowned Tablets'],
     };
@@ -684,6 +684,8 @@ export const getProductsByCategory = async (req, res) => {
       'Laptops': (d) => d && (d.graphics || d.display),
       'Smartwatches': (d) => d && (d.caseMaterial || d.bandMaterial),
       'Tablets': (d) => d && d.screenSize && !d.camera && !d.graphics,
+      'Power Banks': (d) => d && (d.capacity || d.modelNumber || d.maximumOutputPower),
+      'Speakers': (d) => d && (d.driverSize || d.connectivity || d.batteryLife),
       'Preowned Phones': (d) => d && d.batteryHealth,
       'Preowned Laptops': (d) => d && d.condition && d.graphics,
       'Preowned Tablets': (d) => d && d.condition && !d.graphics && !d.batteryHealth,

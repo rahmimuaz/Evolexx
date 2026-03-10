@@ -7,7 +7,7 @@ import './EditProduct.css';
 
 // Hierarchical categories structure - moved outside component to prevent recreation
 const categoryHierarchy = {
-  'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches'],
+  'Electronics': ['Mobile Phone', 'Laptops', 'Tablets', 'Smartwatches', 'Power Banks', 'Speakers'],
   'Mobile Accessories': ['Chargers', 'Phone Covers', 'Screen Protectors', 'Cables', 'Headphones', 'Earbuds', 'Other Accessories'],
   'Pre-owned Devices': ['Preowned Phones', 'Preowned Laptops', 'Preowned Tablets'],
   'Other': []
@@ -30,7 +30,9 @@ const categoryVariationAttributes = {
   'Cables': ['type', 'length', 'color'],
   'Headphones': ['color', 'type', 'connectivity'],
   'Earbuds': ['color', 'type', 'connectivity'],
-  'Other Accessories': ['color', 'type', 'compatibility']
+  'Other Accessories': ['color', 'type', 'compatibility'],
+  'Power Banks': ['capacity', 'color', 'connectors'],
+  'Speakers': ['color', 'type', 'connectivity']
 };
 
 const EditProduct = () => {
@@ -113,6 +115,21 @@ const EditProduct = () => {
       { name: 'display', label: 'Display', type: 'text', placeholder: 'e.g., 15.6" FHD' },
       { name: 'graphics', label: 'Graphics', type: 'text', placeholder: 'e.g., NVIDIA RTX 3060' },
       { name: 'operatingSystem', label: 'Operating System', type: 'select', options: ['Windows 11', 'macOS', 'Linux', 'Chrome OS'] }
+    ],
+    'Power Banks': [
+      { name: 'modelNumber', label: 'Model Number', type: 'text', placeholder: 'e.g., P1008210C213-00' },
+      { name: 'capacity', label: 'Capacity', type: 'text', placeholder: 'e.g., 10,000 mAh' },
+      { name: 'maximumOutputPower', label: 'Maximum Output Power', type: 'text', placeholder: 'e.g., Up to ~15 W' },
+      { name: 'connectors', label: 'Connectors', type: 'text', placeholder: 'e.g., Type-C (input/output)' },
+      { name: 'includedCable', label: 'Included Cable', type: 'text', placeholder: 'e.g., Type-C to Type-C 20 V/3 A, 30 cm Black' },
+      { name: 'colour', label: 'Colour', type: 'text', placeholder: 'e.g., Moon White' }
+    ],
+    'Speakers': [
+      { name: 'model', label: 'Model', type: 'text' },
+      { name: 'type', label: 'Type', type: 'select', options: ['Portable', 'Bluetooth', 'Smart Speaker', 'Soundbar', 'Bookshelf'] },
+      { name: 'connectivity', label: 'Connectivity', type: 'select', options: ['Bluetooth', 'Wi-Fi', 'Aux', 'USB', 'Wireless'] },
+      { name: 'batteryLife', label: 'Battery Life', type: 'text', placeholder: 'e.g., 12 hours' },
+      { name: 'driverSize', label: 'Driver Size', type: 'text', placeholder: 'e.g., 40mm' }
     ]
   };
 
@@ -129,6 +146,8 @@ const EditProduct = () => {
     'Cables': ['Anker', 'Belkin', 'Apple', 'Samsung', 'Baseus', 'Ugreen', 'Native Union', 'Other'],
     'Other Accessories': ['Anker', 'Belkin', 'Spigen', 'PopSockets', 'Other'],
     'Tablets': ['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'Amazon', 'Huawei', 'Other'],
+    'Power Banks': ['Anker', 'Samsung', 'Xiaomi', 'RAVPower', 'Baseus', 'Ugreen', 'Belkin', 'Mophie', 'EcoFlow', 'Other'],
+    'Speakers': ['JBL', 'Sony', 'Bose', 'Anker', 'Marshall', 'Bang & Olufsen', 'UE', 'Tribit', 'Other'],
     'Preowned Laptops': ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MSI', 'Other'],
     'Preowned Tablets': ['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'Other']
   };
@@ -142,7 +161,8 @@ const EditProduct = () => {
       'processor', 'camera', 'operatingSystem', 'type', 'compatibility', 'material',
       'condition', 'batteryHealth', 'warranty', 'display', 'graphics', 'screenType',
       'caseMaterial', 'heartRateMonitor', 'waterResistance', 'batteryLife', 'wattage',
-      'cableLength'
+      'cableLength', 'modelNumber', 'capacity', 'maximumOutputPower', 'connectors',
+      'includedCable', 'colour', 'connectivity', 'driverSize'
     ]);
 
     const customSpecsList = [];

@@ -17,6 +17,8 @@ export const SLUG_TO_CATEGORY = {
   'earbuds': 'Earbuds',
   'smartwatches': 'Smartwatches',
   'tablets': 'Tablets',
+  'power-banks': 'Power Banks',
+  'speakers': 'Speakers',
   'screen-protectors': 'Screen Protectors',
   'cables': 'Cables',
   'other-accessories': 'Other Accessories',
@@ -45,6 +47,8 @@ export const CATEGORY_LABELS = {
   'earbuds': 'Earbuds & TWS',
   'smartwatches': 'Smart Watches',
   'tablets': 'Tablets',
+  'power-banks': 'Power Banks',
+  'speakers': 'Speakers',
   'screen-protectors': 'Screen Protectors',
   'cables': 'Cables & Connectors',
   'other-accessories': 'Other Accessories',
@@ -64,7 +68,7 @@ export const CATEGORY_GROUPS = {
   },
   'accessories': {
     label: 'Accessories',
-    categories: ['mobile-accessories', 'phone-covers', 'chargers', 'headphones', 'earbuds', 'smartwatches', 'screen-protectors', 'cables', 'other-accessories']
+    categories: ['mobile-accessories', 'phone-covers', 'chargers', 'headphones', 'earbuds', 'smartwatches', 'screen-protectors', 'cables', 'other-accessories', 'power-banks', 'speakers']
   }
 };
 
